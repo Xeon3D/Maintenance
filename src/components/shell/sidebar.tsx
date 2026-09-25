@@ -1,0 +1,183 @@
+"use client";
+
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { useState, useTransition } from "react";
+import { useTranslations } from "next-intl";
+import {
+  Building2,
+  CalendarClock,
+  ChartColumn,
+  ChevronsUpDown,
+  ClipboardList,
+  Cpu,
+  Gauge,
+  House,
+  Inbox,
+  LayoutDashboard,
+  ListChecks,
+  LogOut,
+  Menu,
+  MessagesSquare,
+  Package,
+  ShoppingCart,
+  Truck,
+  UserCog,
+  Users,
+  UsersRound,
+  X,
+  type LucideIcon,
+} from "lucide-react";
+import { LocaleSwitcher } from "@/components/locale-switcher";
+import { signOutAction, switchOrgAction } from "@/app/(auth)/actions";
+import { cn } from "@/lib/utils";
+import type { NavGroup } from "./nav";
+
+const ICONS: Record<string, LucideIcon> = {
+  Building2,
+  CalendarClock,
+  ChartColumn,
+  ClipboardList,
+  Cpu,
+  Gauge,
+  House,
+  Inbox,
+  LayoutDashboard,
+  ListChecks,
+  MessagesSquare,
+  Package,
+  ShoppingCart,
+  Truck,
+  UserCog,
+  Users,
+  UsersRound,
+};
+
+type Props = {
+  groups: NavGroup[]; // already filtered by permission/readiness on the server
+  user: { name: string; email: string; role: string };
+  org: { id: string; name: string };
+  orgs: { id: string; name: string }[];
+};
+
+export function Sidebar({ groups, user, org, orgs }: Props) {
+  const t = useTranslations();
+  const pathname = usePathname();
+  const [open, setOpen] = useState(false);
+  const [orgMenu, setOrgMenu] = useState(false);
+  const [pending, start] = useTransition();
+
+  const content = (
+    <div className="flex h-full flex-col">
+      <div className="border-b border-border p-3">
+        <button
+          type="button"
+          onClick={() => orgs.length > 1 && setOrgMenu((v) => !v)}
+          className="flex w-full items-center justify-between rounded-md px-2 py-2 text-left hover:bg-gray-100"
+        >
+          <span className="min-w-0">
+            <span className="block text-xs font-semibold uppercase tracking-wide text-brand">{t("common.appName")}</span>
+            <span className="block truncate text-sm font-medium">{org.name}</span>
+          </span>
+          {orgs.length > 1 && <ChevronsUpDown className="size-4 text-muted" />}
+        </button>
+        {orgMenu && (
+          <div className="mt-1 space-y-0.5">
+            {orgs
+              .filter((o) => o.id !== org.id)
+              .map((o) => (
+                <button
+                  key={o.id}
+                  type="button"
+                  disabled={pending}
+                  onClick={() => start(() => switchOrgAction(o.id))}
+                  className="block w-full truncate rounded-md px-2 py-1.5 text-left text-sm text-muted hover:bg-gray-100 hover:text-foreground"
+                >
+                  {o.name}
+                </button>
+              ))}
+          </div>
+        )}
+      </div>
+
+      <nav className="flex-1 space-y-5 overflow-y-auto p-3">
+        {groups.map((g, i) => (
+          <div key={g.labelKey ?? i}>
+            {g.labelKey && (
+              <div className="mb-1 px-2 text-xs font-medium uppercase tracking-wide text-muted">{t(`nav.${g.labelKey}`)}</div>
+            )}
+            <ul className="space-y-0.5">
+              {g.items.map((item) => {
+                const Icon = ICONS[item.icon];
+                const active = pathname === item.href || pathname.startsWith(item.href + "/");
+                return (
+                  <li key={item.href}>
+                    <Link
+                      href={item.href}
+                      onClick={() => setOpen(false)}
+                      className={cn(
+                        "flex items-center gap-2.5 rounded-md px-2 py-1.5 text-sm",
+                        active ? "bg-brand/10 font-medium text-brand" : "text-gray-700 hover:bg-gray-100",
+                      )}
+                    >
+                      {Icon && <Icon className="size-4 shrink-0" />}
+                      {t(`nav.${item.labelKey}`)}
+                    </Link>
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
+        ))}
+      </nav>
+
+      <div className="space-y-3 border-t border-border p-3">
+        <LocaleSwitcher />
+        <div className="flex items-center justify-between gap-2 px-1">
+          <div className="min-w-0">
+            <div className="truncate text-sm font-medium">{user.name}</div>
+            <div className="truncate text-xs text-muted">{t(`roles.${user.role}`)}</div>
+          </div>
+          <form action={signOutAction}>
+            <button title={t("common.signOut")} className="rounded-md p-2 text-muted hover:bg-gray-100 hover:text-foreground">
+              <LogOut className="size-4" />
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+  );
+
+  return (
+    <>
+      {/* Mobile top bar */}
+      <div className="sticky top-0 z-30 flex h-14 items-center gap-3 border-b border-border bg-surface px-4 lg:hidden">
+        <button type="button" onClick={() => setOpen(true)} aria-label="Menu" className="-ml-2 rounded-md p-2 hover:bg-gray-100">
+          <Menu className="size-5" />
+        </button>
+        <span className="truncate font-medium">{org.name}</span>
+      </div>
+
+      {/* Mobile drawer */}
+      {open && (
+        <div className="fixed inset-0 z-40 lg:hidden">
+          <div className="absolute inset-0 bg-black/30" onClick={() => setOpen(false)} />
+          <aside className="absolute inset-y-0 left-0 w-72 bg-surface shadow-xl">
+            <button
+              type="button"
+              onClick={() => setOpen(false)}
+              aria-label="Close"
+              className="absolute right-2 top-3 rounded-md p-2 hover:bg-gray-100"
+            >
+              <X className="size-4" />
+            </button>
+            {content}
+          </aside>
+        </div>
+      )}
+
+      {/* Desktop */}
+      <aside className="fixed inset-y-0 left-0 hidden w-64 border-r border-border bg-surface lg:block">{content}</aside>
+    </>
+  );
+}
