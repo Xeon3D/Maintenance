@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useActionState } from "react";
+import { useActionForm } from "@/lib/use-action-form";
 import { useTranslations } from "next-intl";
 import { Button, Card, Field, FormError, Input } from "@/components/ui";
 import { loginAction, signupAction, type FormState } from "./actions";
@@ -14,12 +14,12 @@ function useErrorText(state: FormState) {
 
 export function LoginForm({ next }: { next?: string }) {
   const t = useTranslations("auth");
-  const [state, action, pending] = useActionState(loginAction, undefined);
+  const [state, action, pending] = useActionForm(loginAction);
   const error = useErrorText(state);
   return (
     <Card className="p-6">
       <h1 className="mb-5 text-lg font-semibold">{t("signInTitle")}</h1>
-      <form action={action} className="space-y-4">
+      <form onSubmit={action} className="space-y-4">
         <input type="hidden" name="next" value={next ?? ""} />
         <Field label={t("email")}>
           <Input name="email" type="email" autoComplete="email" required autoFocus />
@@ -45,12 +45,12 @@ export function LoginForm({ next }: { next?: string }) {
 /** `withCompany` = owner sign-up; false when joining through an invitation. */
 export function SignupForm({ next, withCompany, email }: { next?: string; withCompany: boolean; email?: string }) {
   const t = useTranslations("auth");
-  const [state, action, pending] = useActionState(signupAction, undefined);
+  const [state, action, pending] = useActionForm(signupAction);
   const error = useErrorText(state);
   return (
     <Card className="p-6">
       <h1 className="mb-5 text-lg font-semibold">{withCompany ? t("signUpTitle") : t("signUp")}</h1>
-      <form action={action} className="space-y-4">
+      <form onSubmit={action} className="space-y-4">
         <input type="hidden" name="next" value={next ?? ""} />
         {withCompany && (
           <Field label={t("companyName")}>

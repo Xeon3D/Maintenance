@@ -151,7 +151,7 @@ export function Sidebar({ groups, user, org, orgs }: Props) {
   return (
     <>
       {/* Mobile top bar */}
-      <div className="sticky top-0 z-30 flex h-14 items-center gap-3 border-b border-border bg-surface px-4 lg:hidden">
+      <div className="sticky top-0 z-30 flex h-14 items-center gap-3 border-b border-border bg-surface px-4 lg:hidden print:hidden">
         <button type="button" onClick={() => setOpen(true)} aria-label="Menu" className="-ml-2 rounded-md p-2 hover:bg-gray-100">
           <Menu className="size-5" />
         </button>
@@ -177,7 +177,7 @@ export function Sidebar({ groups, user, org, orgs }: Props) {
       )}
 
       {/* Desktop */}
-      <aside className="fixed inset-y-0 left-0 hidden w-64 border-r border-border bg-surface lg:block">{content}</aside>
+      <aside className="fixed inset-y-0 left-0 hidden w-64 border-r border-border bg-surface lg:block print:hidden">{content}</aside>
     </>
   );
 }

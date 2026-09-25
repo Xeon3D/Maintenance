@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionForm } from "@/lib/use-action-form";
 import { useTranslations } from "next-intl";
 import { Button, Field, FormError, Input, Select } from "@/components/ui";
 import { updateOrgAction } from "../actions";
@@ -20,9 +20,9 @@ const TIMEZONES = [
 
 export function OrgForm({ org }: { org: { name: string; timezone: string; currency: string; defaultLocale: string } }) {
   const t = useTranslations();
-  const [state, action, pending] = useActionState(updateOrgAction, undefined);
+  const [state, action, pending] = useActionForm(updateOrgAction);
   return (
-    <form action={action} className="space-y-4">
+    <form onSubmit={action} className="space-y-4">
       <Field label={t("common.name")}>
         <Input name="name" defaultValue={org.name} required />
       </Field>

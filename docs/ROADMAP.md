@@ -48,7 +48,7 @@ visible only to assigned staff, and every view is logged.
 ## Phases
 
 1. ✅ **Foundation**: repo, Prisma schema, auth, orgs/invites, RBAC, i18n, app shell, tenant guard.
-2. **Assets & Locations**: clients, villas, areas, asset hierarchy, system categories, QR labels, import from CSV.
+2. ✅ **Assets & Locations**: clients, villas, areas, asset hierarchy, system categories, QR labels, import from CSV.
 3. **Work Orders**: CRUD, statuses, priorities, assignment, checklists, photos, time, signatures, PDF service report, calendar/board/list views.
 4. **Preventive Maintenance & Procedures**: schedules, auto-generation job, procedure templates, meters & meter-triggered PMs.
 5. **Requests & Client Portal**: request form, QR scan-to-report, client login to see their villa's history.

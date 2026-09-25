@@ -1,6 +1,7 @@
 "use client";
 
-import { useActionState, useEffect, useRef, useTransition } from "react";
+import { useEffect, useRef, useTransition } from "react";
+import { useActionForm } from "@/lib/use-action-form";
 import { useTranslations } from "next-intl";
 import { Trash2, X } from "lucide-react";
 import { Button, Field, FormError, Input, Select } from "@/components/ui";
@@ -9,14 +10,14 @@ import { addTeamMemberAction, createTeamAction, deleteTeamAction, removeTeamMemb
 
 export function NewTeamForm() {
   const t = useTranslations();
-  const [state, action, pending] = useActionState(createTeamAction, undefined);
+  const [state, action, pending] = useActionForm(createTeamAction);
   const ref = useRef<HTMLFormElement>(null);
   useEffect(() => {
     if (state?.ok) ref.current?.reset();
   }, [state]);
 
   return (
-    <form ref={ref} action={action} className="grid gap-3 sm:grid-cols-[1fr_200px_80px_auto] sm:items-end">
+    <form ref={ref} onSubmit={action} className="grid gap-3 sm:grid-cols-[1fr_200px_80px_auto] sm:items-end">
       <Field label={t("common.name")}>
         <Input name="name" required />
       </Field>

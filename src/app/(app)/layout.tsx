@@ -18,8 +18,8 @@ export default async function AppLayout({ children }: { children: React.ReactNod
         org={{ id: ctx.organization.id, name: ctx.organization.name }}
         orgs={ctx.memberships.map((m) => ({ id: m.organization.id, name: m.organization.name }))}
       />
-      <main className="lg:pl-64">
-        <div className="mx-auto max-w-6xl px-4 py-6 sm:px-6 lg:py-8">{children}</div>
+      <main className="lg:pl-64 print:pl-0">
+        <div className="mx-auto max-w-6xl px-4 py-6 sm:px-6 lg:py-8 print:max-w-none print:p-0">{children}</div>
       </main>
     </div>
   );

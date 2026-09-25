@@ -1,6 +1,7 @@
 "use client";
 
-import { useActionState, useState, useTransition } from "react";
+import { useState, useTransition } from "react";
+import { useActionForm } from "@/lib/use-action-form";
 import { useTranslations } from "next-intl";
 import { Button, Field, FormError, Input, Select } from "@/components/ui";
 import { ASSIGNABLE_ROLES } from "@/lib/rbac";
@@ -9,14 +10,14 @@ import { inviteUserAction, revokeInviteAction, updateMemberAction } from "../act
 
 export function InviteForm({ clients }: { clients: { id: string; name: string }[] }) {
   const t = useTranslations();
-  const [state, action, pending] = useActionState(inviteUserAction, undefined);
+  const [state, action, pending] = useActionForm(inviteUserAction);
   const [role, setRole] = useState<Role>("TECHNICIAN");
   const [copied, setCopied] = useState(false);
   const fullUrl = state?.inviteUrl && typeof window !== "undefined" ? window.location.origin + state.inviteUrl : null;
 
   return (
     <div className="space-y-4">
-      <form action={action} className="grid gap-3 sm:grid-cols-[1fr_200px_auto] sm:items-end">
+      <form onSubmit={action} className="grid gap-3 sm:grid-cols-[1fr_200px_auto] sm:items-end">
         <Field label={t("common.email")}>
           <Input name="email" type="email" required />
         </Field>
