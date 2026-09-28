@@ -6,6 +6,7 @@ export type NavItem = {
   icon: string; // lucide icon name, resolved in sidebar.tsx
   permission?: Permission;
   ready: boolean; // false = module not built yet (hidden)
+  badge?: number; // filled in by the layout (e.g. pending requests)
 };
 
 export type NavGroup = { labelKey?: string; items: NavItem[] };
@@ -18,7 +19,7 @@ export const NAV: NavGroup[] = [
     labelKey: "operations",
     items: [
       { href: "/work-orders", labelKey: "workOrders", icon: "ClipboardList", permission: "internal.view", ready: true },
-      { href: "/requests", labelKey: "requests", icon: "Inbox", ready: false },
+      { href: "/requests", labelKey: "requests", icon: "Inbox", permission: "internal.view", ready: true },
       { href: "/preventive", labelKey: "preventive", icon: "CalendarClock", permission: "internal.view", ready: true },
       { href: "/procedures", labelKey: "procedures", icon: "ListChecks", permission: "internal.view", ready: true },
       { href: "/messages", labelKey: "messages", icon: "MessagesSquare", permission: "internal.view", ready: false },

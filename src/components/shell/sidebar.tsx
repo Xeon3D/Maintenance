@@ -121,7 +121,10 @@ export function Sidebar({ groups, user, org, orgs }: Props) {
                       )}
                     >
                       {Icon && <Icon className="size-4 shrink-0" />}
-                      {t(`nav.${item.labelKey}`)}
+                      <span className="flex-1">{t(`nav.${item.labelKey}`)}</span>
+                      {item.badge ? (
+                        <span className="rounded-full bg-amber-500 px-1.5 text-xs font-semibold text-white tabular-nums">{item.badge}</span>
+                      ) : null}
                     </Link>
                   </li>
                 );

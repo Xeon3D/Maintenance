@@ -51,7 +51,7 @@ visible only to assigned staff, and every view is logged.
 2. ✅ **Assets & Locations**: clients, villas, areas, asset hierarchy, system categories, QR labels, import from CSV.
 3. ✅ **Work Orders**: CRUD, statuses, priorities, assignment, checklists, photos, time, signatures, PDF service report, calendar/board/list views.
 4. ✅ **Preventive Maintenance & Procedures**: schedules, auto-generation job, procedure templates, meters & meter-triggered PMs.
-5. **Requests & Client Portal**: request form, QR scan-to-report, client login to see their villa's history.
+5. ✅ **Requests & Client Portal**: request form, QR scan-to-report, client login to see their villa's history.
 6. **Inventory & Purchasing**: parts, stock per van/warehouse, reorder points, vendors, POs, parts consumption on WOs.
 7. **Messaging & Notifications**: WO threads, @mentions, email + web push.
 8. **Reporting & Dashboards**: MTTR, SLA compliance, PM compliance, cost per villa/system, technician utilisation, CSV export.

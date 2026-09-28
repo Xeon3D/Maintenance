@@ -159,7 +159,8 @@
     "invalid_value": "Invalid value.",
     "invalid_mac": "Use the format AA:BB:CC:DD:EE:FF.",
     "invalid_ip": "Not a valid IP address.",
-    "invalid_parent": "An asset can't be placed inside itself or one of its children."
+    "invalid_parent": "An asset can't be placed inside itself or one of its children.",
+    "contactRequired": "Leave a phone number or an email so we can reach you."
   },
   "clients": {
     "description": "Villa owners, family offices and property managers you work for.",
@@ -294,7 +295,13 @@
     "CRITICAL": "Critical"
   },
   "qr": {
-    "landing": "This equipment is maintained by the team above. Service requests from this code are coming soon."
+    "landing": "This equipment is maintained by the team above. Service requests from this code are coming soon.",
+    "intro": "Something not working? Tell us and our team will take care of it.",
+    "yourName": "Your name",
+    "thanks": "Thank you! Your request has been sent to the maintenance team.",
+    "reference": "Reference {number}",
+    "haveAccount": "Have a client account?",
+    "tooMany": "Too many requests were sent from this label recently. Please call us instead."
   },
   "import": {
     "title": "Import assets",
@@ -367,7 +374,9 @@
     "invalidRef": "The selected asset doesn't belong to the selected villa.",
     "invalidAssignee": "One of the selected people can't be assigned.",
     "locked": "This work order is closed. Reopen it to make changes.",
-    "procedureHint": "Copies the procedure's steps into this work order's checklist."
+    "procedureHint": "Copies the procedure's steps into this work order's checklist.",
+    "clientVisible": "Visible to the client in their portal",
+    "clientVisibleHint": "Untick for internal work the client shouldn't see."
   },
   "woStatus": {
     "OPEN": "Open",
@@ -580,5 +589,83 @@
     "saved": "Saved",
     "outOfRangeSaved": "Saved — out of range",
     "woCreated": "{count, plural, one {# work order created} other {# work orders created}}"
+  },
+  "requestStatus": {
+    "PENDING": "Pending",
+    "APPROVED": "Approved",
+    "DECLINED": "Declined"
+  },
+  "requests": {
+    "description": "Problems reported by clients in their portal or by scanning a QR label. Approve them into work orders.",
+    "all": "All",
+    "searchPlaceholder": "Title, description, name or R-number…",
+    "nonePending": "No pending requests.",
+    "howTo": "Clients report problems from their portal, or anyone can scan an equipment QR label.",
+    "from": "From",
+    "received": "Received",
+    "viaQr": "via QR label",
+    "noDescription": "No description.",
+    "approvedAs": "Approved as work order",
+    "declined": "Declined",
+    "approveTitle": "Approve as work order",
+    "approve": "Create work order",
+    "declineTitle": "Decline",
+    "decline": "Decline request",
+    "declinePlaceholder": "Reason, shown to the client (optional)",
+    "notPending": "This request has already been handled."
+  },
+  "portal": {
+    "title": "Client portal",
+    "subtitle": "Report a problem and follow the work on your properties.",
+    "newRequest": "Report a problem",
+    "newRequestHint": "Tell us what's wrong. Photos help our technicians arrive prepared.",
+    "noVillas": "Your account isn't linked to any property yet. Please contact us.",
+    "yourVillas": "Your properties",
+    "inProgress": "{count, plural, one {# job in progress} other {# jobs in progress}}",
+    "allGood": "No open work",
+    "yourRequests": "Your requests",
+    "noRequests": "You haven't reported anything yet.",
+    "recentWork": "Recently completed",
+    "report": "Report",
+    "whereInHouse": "Where in the house?",
+    "whichEquipment": "Which equipment?",
+    "notSure": "Not sure",
+    "whatsWrong": "What's the problem?",
+    "titlePlaceholder": "e.g. No sound in the cinema room",
+    "details": "Details",
+    "detailsPlaceholder": "When did it start? Any error message or lights?",
+    "urgency": "How urgent is it?",
+    "urgencyLevels": {
+      "LOW": {
+        "label": "Whenever",
+        "hint": "Next routine visit"
+      },
+      "MEDIUM": {
+        "label": "Soon",
+        "hint": "Within a few days"
+      },
+      "HIGH": {
+        "label": "Important",
+        "hint": "Affects daily use"
+      },
+      "URGENT": {
+        "label": "Urgent",
+        "hint": "Security or safety"
+      }
+    },
+    "photos": "Photos (optional)",
+    "addPhoto": "Add",
+    "removePhoto": "Remove photo",
+    "send": "Send request",
+    "sending": "Sending…",
+    "stepReceived": "Request received",
+    "stepScheduled": "Scheduled",
+    "stepDeclined": "Not scheduled",
+    "plannedFor": "Planned for {date}",
+    "stepInProgress": "Technician on it",
+    "stepDone": "Completed",
+    "downloadReport": "Download service report",
+    "workHistory": "Work history",
+    "installedSystems": "Installed systems"
   }
 }

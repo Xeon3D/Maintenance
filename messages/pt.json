@@ -159,7 +159,8 @@
     "invalid_value": "Valor inválido.",
     "invalid_mac": "Use o formato AA:BB:CC:DD:EE:FF.",
     "invalid_ip": "Endereço IP inválido.",
-    "invalid_parent": "Um equipamento não pode ficar dentro de si próprio ou de um dos seus filhos."
+    "invalid_parent": "Um equipamento não pode ficar dentro de si próprio ou de um dos seus filhos.",
+    "contactRequired": "Deixe um telefone ou um email para o podermos contactar."
   },
   "clients": {
     "description": "Proprietários, family offices e gestores de propriedades para quem trabalha.",
@@ -294,7 +295,13 @@
     "CRITICAL": "Crítica"
   },
   "qr": {
-    "landing": "Este equipamento é mantido pela equipa acima. Em breve será possível pedir assistência através deste código."
+    "landing": "Este equipamento é mantido pela equipa acima. Em breve será possível pedir assistência através deste código.",
+    "intro": "Algo não está a funcionar? Diga-nos e a nossa equipa trata do assunto.",
+    "yourName": "O seu nome",
+    "thanks": "Obrigado! O seu pedido foi enviado à equipa de manutenção.",
+    "reference": "Referência {number}",
+    "haveAccount": "Tem conta de cliente?",
+    "tooMany": "Foram enviados demasiados pedidos a partir desta etiqueta recentemente. Por favor contacte-nos por telefone."
   },
   "import": {
     "title": "Importar equipamentos",
@@ -367,7 +374,9 @@
     "invalidRef": "O equipamento selecionado não pertence à moradia selecionada.",
     "invalidAssignee": "Uma das pessoas selecionadas não pode ser atribuída.",
     "locked": "Esta ordem de trabalho está fechada. Reabra-a para fazer alterações.",
-    "procedureHint": "Copia os passos do procedimento para a checklist desta ordem de trabalho."
+    "procedureHint": "Copia os passos do procedimento para a checklist desta ordem de trabalho.",
+    "clientVisible": "Visível para o cliente no portal",
+    "clientVisibleHint": "Desmarque para trabalho interno que o cliente não deve ver."
   },
   "woStatus": {
     "OPEN": "Aberta",
@@ -580,5 +589,83 @@
     "saved": "Guardado",
     "outOfRangeSaved": "Guardado — fora dos limites",
     "woCreated": "{count, plural, one {# ordem de trabalho criada} other {# ordens de trabalho criadas}}"
+  },
+  "requestStatus": {
+    "PENDING": "Pendente",
+    "APPROVED": "Aprovado",
+    "DECLINED": "Recusado"
+  },
+  "requests": {
+    "description": "Problemas reportados pelos clientes no portal ou através das etiquetas QR. Aprove-os como ordens de trabalho.",
+    "all": "Todos",
+    "searchPlaceholder": "Título, descrição, nome ou número R…",
+    "nonePending": "Não há pedidos pendentes.",
+    "howTo": "Os clientes reportam problemas no portal, ou qualquer pessoa pode digitalizar a etiqueta QR de um equipamento.",
+    "from": "De",
+    "received": "Recebido",
+    "viaQr": "via etiqueta QR",
+    "noDescription": "Sem descrição.",
+    "approvedAs": "Aprovado como ordem de trabalho",
+    "declined": "Recusado",
+    "approveTitle": "Aprovar como ordem de trabalho",
+    "approve": "Criar ordem de trabalho",
+    "declineTitle": "Recusar",
+    "decline": "Recusar pedido",
+    "declinePlaceholder": "Motivo, mostrado ao cliente (opcional)",
+    "notPending": "Este pedido já foi tratado."
+  },
+  "portal": {
+    "title": "Portal do cliente",
+    "subtitle": "Reporte um problema e acompanhe os trabalhos nas suas propriedades.",
+    "newRequest": "Reportar um problema",
+    "newRequestHint": "Diga-nos o que se passa. As fotografias ajudam os técnicos a chegar preparados.",
+    "noVillas": "A sua conta ainda não está associada a nenhuma propriedade. Por favor contacte-nos.",
+    "yourVillas": "As suas propriedades",
+    "inProgress": "{count, plural, one {# trabalho em curso} other {# trabalhos em curso}}",
+    "allGood": "Sem trabalhos em aberto",
+    "yourRequests": "Os seus pedidos",
+    "noRequests": "Ainda não reportou nada.",
+    "recentWork": "Concluídos recentemente",
+    "report": "Relatório",
+    "whereInHouse": "Onde na casa?",
+    "whichEquipment": "Que equipamento?",
+    "notSure": "Não sei",
+    "whatsWrong": "Qual é o problema?",
+    "titlePlaceholder": "ex.: Sem som na sala de cinema",
+    "details": "Detalhes",
+    "detailsPlaceholder": "Quando começou? Aparece alguma mensagem de erro ou luz?",
+    "urgency": "Qual a urgência?",
+    "urgencyLevels": {
+      "LOW": {
+        "label": "Sem pressa",
+        "hint": "Na próxima visita"
+      },
+      "MEDIUM": {
+        "label": "Em breve",
+        "hint": "Dentro de alguns dias"
+      },
+      "HIGH": {
+        "label": "Importante",
+        "hint": "Afeta o dia a dia"
+      },
+      "URGENT": {
+        "label": "Urgente",
+        "hint": "Segurança"
+      }
+    },
+    "photos": "Fotografias (opcional)",
+    "addPhoto": "Adicionar",
+    "removePhoto": "Remover fotografia",
+    "send": "Enviar pedido",
+    "sending": "A enviar…",
+    "stepReceived": "Pedido recebido",
+    "stepScheduled": "Agendado",
+    "stepDeclined": "Não agendado",
+    "plannedFor": "Previsto para {date}",
+    "stepInProgress": "Técnico a tratar",
+    "stepDone": "Concluído",
+    "downloadReport": "Descarregar relatório de serviço",
+    "workHistory": "Histórico de trabalhos",
+    "installedSystems": "Sistemas instalados"
   }
 }

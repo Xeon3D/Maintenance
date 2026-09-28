@@ -53,6 +53,11 @@ export function ActionForm({
   );
 }
 
+/** For custom forms (not ActionForm) that still want <FieldError> messages. */
+export function FieldErrorsProvider({ errors, children }: { errors?: Record<string, string>; children: ReactNode }) {
+  return <FieldErrorsContext.Provider value={errors}>{children}</FieldErrorsContext.Provider>;
+}
+
 export function FieldError({ name }: { name: string }) {
   const t = useTranslations("validation");
   const errors = useContext(FieldErrorsContext);

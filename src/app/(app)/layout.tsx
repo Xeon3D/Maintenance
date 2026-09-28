@@ -1,13 +1,19 @@
+import { redirect } from "next/navigation";
 import { Sidebar } from "@/components/shell/sidebar";
 import { NAV } from "@/components/shell/nav";
 import { getContext } from "@/lib/context";
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const ctx = await getContext();
+  // Client users live in the portal.
+  if (ctx.role === "REQUESTER") redirect("/portal");
 
+  const pendingRequests = ctx.can("requests.approve") ? await ctx.db.request.count({ where: { status: "PENDING" } }) : 0;
   const groups = NAV.map((g) => ({
     ...g,
-    items: g.items.filter((i) => i.ready && (!i.permission || ctx.can(i.permission))),
+    items: g.items
+      .filter((i) => i.ready && (!i.permission || ctx.can(i.permission)))
+      .map((i) => (i.href === "/requests" && pendingRequests ? { ...i, badge: pendingRequests } : i)),
   })).filter((g) => g.items.length > 0);
 
   return (

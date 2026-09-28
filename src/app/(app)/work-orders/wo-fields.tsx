@@ -25,6 +25,7 @@ export type WODefaults = {
   startDate?: string | null;
   estimatedMinutes?: number | null;
   assigneeIds?: string[];
+  clientVisible?: boolean;
 };
 
 export function WorkOrderFields({
@@ -210,6 +211,14 @@ export function WorkOrderFields({
           ))}
         </Select>
       </Field>
+
+      <label className="flex items-start gap-2 text-sm">
+        <input type="checkbox" name="clientVisible" defaultChecked={wo.clientVisible ?? true} className="mt-0.5" />
+        <span>
+          {t("wo.clientVisible")}
+          <span className="block text-xs text-muted">{t("wo.clientVisibleHint")}</span>
+        </span>
+      </label>
 
       <fieldset>
         <legend className="mb-1.5 text-sm font-medium">{t("wo.assignees")}</legend>

@@ -48,6 +48,7 @@ const woSchema = z.object({
   assetId: optId(),
   teamId: optId(),
   procedureId: optId(), // create only: copies the procedure's steps
+  clientVisible: z.preprocess((v) => v === "on" || v === "true", z.boolean()),
   dueDate: z.preprocess((v) => (v ? v : undefined), z.coerce.date().optional()).transform((v) => v ?? null),
   startDate: z.preprocess((v) => (v ? v : undefined), z.coerce.date().optional()).transform((v) => v ?? null),
   estimatedHours: optNumber().refine((v) => v === null || (v >= 0 && v <= 1000)),

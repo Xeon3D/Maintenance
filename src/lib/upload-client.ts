@@ -6,7 +6,7 @@ export type Uploaded = { id: string; url: string; filename: string; mimeType: st
 const MAX_EDGE = 2000;
 
 /** Downscale phone photos to ≤2000px JPEG before upload (keeps reports and storage small). */
-async function shrinkImage(file: File): Promise<File> {
+export async function shrinkImage(file: File): Promise<File> {
   if (!file.type.startsWith("image/") || file.type === "image/png") return file;
   try {
     const bitmap = await createImageBitmap(file);
