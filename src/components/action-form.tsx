@@ -29,16 +29,12 @@ export function ActionForm({
   successMessage?: string;
   footer?: ReactNode;
 }) {
-  const t = useTranslations("common");
+  const t = useTranslations();
   const [state, formAction, pending] = useActionForm(action);
-  const generic =
-    state?.error && state.error !== "validation"
-      ? t.has(state.error as never)
-        ? t(state.error as never)
-        : state.error
-      : state?.error === "validation"
-        ? t("checkFields")
-        : null;
+  // Error codes are message keys: "somethingWrong" (under common) or namespaced like "wo.invalidRef".
+  const errorText = (code: string) =>
+    t.has(`common.${code}` as never) ? t(`common.${code}` as never) : t.has(code as never) ? t(code as never) : t("common.somethingWrong");
+  const generic = !state?.error ? null : state.error === "validation" ? t("common.checkFields") : errorText(state.error);
 
   return (
     <FieldErrorsContext.Provider value={state?.fieldErrors}>
@@ -48,7 +44,7 @@ export function ActionForm({
         </fieldset>
         <FormError message={generic} />
         <div className="flex items-center gap-3">
-          <Button disabled={pending}>{submitLabel ?? t("save")}</Button>
+          <Button disabled={pending}>{submitLabel ?? t("common.save")}</Button>
           {state?.ok && successMessage && <span className="text-sm text-green-700">{successMessage}</span>}
           {footer}
         </div>

@@ -1,0 +1,106 @@
+import Link from "next/link";
+import { getFormatter, getTranslations } from "next-intl/server";
+import { ChevronLeft, ChevronRight } from "lucide-react";
+import { Card } from "@/components/ui";
+import { WO_STATUS_TONE } from "@/components/badges";
+import type { AppContext } from "@/lib/context";
+import { sp } from "@/lib/list";
+import { cn } from "@/lib/utils";
+import { woFilter } from "./filter";
+
+/** yyyy-mm-dd of `d` in the given time zone. */
+function dayKey(d: Date, timeZone: string) {
+  return new Intl.DateTimeFormat("en-CA", { timeZone, year: "numeric", month: "2-digit", day: "2-digit" }).format(d);
+}
+
+/** Month grid (Monday first) of work orders by due date, in the organization's time zone. */
+export async function CalendarView({ ctx, params }: { ctx: AppContext; params: Record<string, string | string[] | undefined> }) {
+  const t = await getTranslations();
+  const format = await getFormatter();
+  const tz = ctx.organization.timezone;
+  const today = dayKey(new Date(), tz);
+  const monthParam = sp(params, "month");
+  const [y, m] = (monthParam && /^\d{4}-\d{2}$/.test(monthParam) ? monthParam : today.slice(0, 7)).split("-").map(Number);
+
+  // Grid covers whole weeks around the month; query with a day of slack for time zones.
+  const first = new Date(Date.UTC(y, m - 1, 1));
+  const offset = (first.getUTCDay() + 6) % 7;
+  const gridStart = new Date(Date.UTC(y, m - 1, 1 - offset));
+  const days = Array.from({ length: 42 }, (_, i) => new Date(gridStart.getTime() + i * 86_400_000));
+  const rangeStart = new Date(gridStart.getTime() - 86_400_000);
+  const rangeEnd = new Date(gridStart.getTime() + 43 * 86_400_000);
+
+  const wos = await ctx.db.workOrder.findMany({
+    where: { ...woFilter(params, ctx.user.id, { ignoreStatus: true }), status: { not: "CANCELLED" }, dueDate: { gte: rangeStart, lt: rangeEnd } },
+    select: { id: true, number: true, title: true, status: true, dueDate: true },
+    orderBy: { dueDate: "asc" },
+    take: 1000,
+  });
+  const byDay = new Map<string, typeof wos>();
+  for (const w of wos) {
+    const k = dayKey(w.dueDate!, tz);
+    byDay.set(k, [...(byDay.get(k) ?? []), w]);
+  }
+
+  const monthHref = (delta: number) => {
+    const d = new Date(Date.UTC(y, m - 1 + delta, 1));
+    const q = new URLSearchParams(Object.entries(params).filter(([, v]) => typeof v === "string") as [string, string][]);
+    q.set("view", "calendar");
+    q.set("month", `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, "0")}`);
+    return `/work-orders?${q}`;
+  };
+  const weekdays = days.slice(0, 7).map((d) => format.dateTime(d, { weekday: "short", timeZone: "UTC" }));
+
+  return (
+    <Card className="overflow-hidden">
+      <div className="flex items-center justify-between border-b border-border px-4 py-3">
+        <Link href={monthHref(-1)} className="rounded-md p-1.5 hover:bg-gray-100" aria-label={t("common.previous")}>
+          <ChevronLeft className="size-4" />
+        </Link>
+        <h2 className="font-medium capitalize">{format.dateTime(first, { month: "long", year: "numeric", timeZone: "UTC" })}</h2>
+        <Link href={monthHref(1)} className="rounded-md p-1.5 hover:bg-gray-100" aria-label={t("common.next")}>
+          <ChevronRight className="size-4" />
+        </Link>
+      </div>
+      <div className="grid grid-cols-7 border-b border-border text-center text-xs font-medium uppercase text-muted">
+        {weekdays.map((w) => (
+          <div key={w} className="py-2">
+            {w}
+          </div>
+        ))}
+      </div>
+      <div className="grid grid-cols-7">
+        {days.map((d) => {
+          const key = d.toISOString().slice(0, 10);
+          const inMonth = d.getUTCMonth() === m - 1;
+          const list = byDay.get(key) ?? [];
+          return (
+            <div key={key} className={cn("min-h-24 border-b border-r border-border p-1 text-xs", !inMonth && "bg-gray-50/70")}>
+              <div
+                className={cn(
+                  "mb-1 inline-flex size-6 items-center justify-center rounded-full",
+                  key === today ? "bg-brand text-brand-foreground" : inMonth ? "" : "text-muted",
+                )}
+              >
+                {d.getUTCDate()}
+              </div>
+              <div className="space-y-0.5">
+                {list.slice(0, 4).map((w) => (
+                  <Link
+                    key={w.id}
+                    href={`/work-orders/${w.id}`}
+                    title={w.title}
+                    className={cn("block truncate rounded px-1 py-0.5", WO_STATUS_TONE[w.status], w.status === "DONE" && "line-through opacity-70")}
+                  >
+                    #{w.number} {w.title}
+                  </Link>
+                ))}
+                {list.length > 4 && <div className="px-1 text-muted">+{list.length - 4}</div>}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </Card>
+  );
+}

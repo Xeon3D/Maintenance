@@ -17,7 +17,7 @@ export const NAV: NavGroup[] = [
   {
     labelKey: "operations",
     items: [
-      { href: "/work-orders", labelKey: "workOrders", icon: "ClipboardList", permission: "internal.view", ready: false },
+      { href: "/work-orders", labelKey: "workOrders", icon: "ClipboardList", permission: "internal.view", ready: true },
       { href: "/requests", labelKey: "requests", icon: "Inbox", ready: false },
       { href: "/preventive", labelKey: "preventive", icon: "CalendarClock", permission: "internal.view", ready: false },
       { href: "/procedures", labelKey: "procedures", icon: "ListChecks", permission: "internal.view", ready: false },

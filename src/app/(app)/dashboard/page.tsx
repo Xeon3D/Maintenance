@@ -3,6 +3,8 @@ import { getTranslations } from "next-intl/server";
 import { CircleCheck, Circle } from "lucide-react";
 import { Card, PageHeader } from "@/components/ui";
 import { getContext } from "@/lib/context";
+import { RecentWorkOrders } from "@/components/recent-work-orders";
+import { ACTIVE_STATUSES } from "@/lib/work-orders";
 
 export const metadata = { title: "Dashboard" };
 
@@ -52,6 +54,25 @@ export default async function DashboardPage() {
             <div className={`mt-1 text-2xl font-semibold tabular-nums ${s.alert ? "text-danger" : ""}`}>{s.value}</div>
           </Card>
         ))}
+      </div>
+
+      <div className="mt-6 grid gap-6 lg:grid-cols-2">
+        <RecentWorkOrders
+          ctx={ctx}
+          title={t("myWorkOrders")}
+          where={{ status: { in: ACTIVE_STATUSES }, assignees: { some: { userId: ctx.user.id } } }}
+          orderBy={[{ dueDate: { sort: "asc", nulls: "last" } }, { priority: "desc" }]}
+          newHref="/work-orders/new"
+          viewAllHref="/work-orders?assignee=me"
+        />
+        <RecentWorkOrders
+          ctx={ctx}
+          title={t("overdueWorkOrders")}
+          where={{ status: { in: ACTIVE_STATUSES }, dueDate: { lt: now } }}
+          orderBy={{ dueDate: "asc" }}
+          newHref="/work-orders/new"
+          viewAllHref="/work-orders?overdue=1"
+        />
       </div>
 
       {steps.some((s) => !s.done) && (

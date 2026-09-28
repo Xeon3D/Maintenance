@@ -12,6 +12,7 @@ import { assetQrUrl, qrSvg } from "@/lib/qr";
 import { daysFromNow } from "@/lib/dates";
 import { setAssetArchivedAction } from "../actions";
 import { StatusControl } from "./status-control";
+import { RecentWorkOrders } from "@/components/recent-work-orders";
 
 const WARRANTY_SOON_DAYS = 60;
 
@@ -149,6 +150,8 @@ export default async function AssetPage({ params }: PageProps<"/assets/[id]">) {
               </dl>
             </Card>
           )}
+
+          <RecentWorkOrders ctx={ctx} where={{ assetId: asset.id }} newHref={`/work-orders/new?assetId=${asset.id}`} viewAllHref={`/work-orders?assetId=${asset.id}&status=all`} />
 
           <Card>
             <div className="flex items-center justify-between border-b border-border px-5 py-3">

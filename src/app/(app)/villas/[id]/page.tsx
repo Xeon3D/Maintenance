@@ -11,6 +11,7 @@ import { getContext } from "@/lib/context";
 import { flattenTree } from "@/lib/tree";
 import { setVillaArchivedAction } from "../actions";
 import { AreasManager } from "./areas";
+import { RecentWorkOrders } from "@/components/recent-work-orders";
 import type { SystemType } from "@/generated/prisma/enums";
 
 export default async function VillaPage({ params }: PageProps<"/villas/[id]">) {
@@ -143,6 +144,8 @@ export default async function VillaPage({ params }: PageProps<"/villas/[id]">) {
               </div>
             )}
           </Card>
+
+          <RecentWorkOrders ctx={ctx} where={{ villaId: villa.id }} newHref={`/work-orders/new?villaId=${villa.id}`} viewAllHref={`/work-orders?villaId=${villa.id}&status=all`} />
 
           <Card>
             <div className="border-b border-border px-5 py-3">

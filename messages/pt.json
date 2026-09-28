@@ -119,7 +119,9 @@
     "step1": "Convide os seus técnicos e gestores",
     "step2": "Adicione os seus clientes e as respetivas moradias",
     "step3": "Registe os sistemas e equipamentos instalados",
-    "step4": "Configure os planos de manutenção preventiva"
+    "step4": "Configure os planos de manutenção preventiva",
+    "myWorkOrders": "As minhas ordens abertas",
+    "overdueWorkOrders": "Em atraso"
   },
   "settings": {
     "orgTitle": "Organização",
@@ -321,5 +323,152 @@
       "invalidField": "{field} inválido \"{value}\".",
       "unknownParent": "equipamento pai \"{value}\" não encontrado nesta moradia."
     }
+  },
+  "wo": {
+    "new": "Nova ordem de trabalho",
+    "title": "Título",
+    "titlePlaceholder": "ex.: Projetor do cinema não liga",
+    "descriptionLabel": "Descrição",
+    "asset": "Equipamento",
+    "type": "Tipo",
+    "priority": "Prioridade",
+    "startDate": "Início",
+    "dueDate": "Prazo",
+    "estimatedHours": "Horas estimadas",
+    "team": "Equipa",
+    "assignees": "Atribuída a",
+    "technicians": "Técnicos",
+    "createdBy": "Criada por",
+    "createdAt": "Criada",
+    "completedBy": "Concluída por",
+    "completedAt": "Concluída",
+    "fromRequest": "Do pedido",
+    "empty": "Nenhuma ordem de trabalho corresponde aos filtros.",
+    "noneHere": "Ainda não há ordens de trabalho.",
+    "viewList": "Lista",
+    "viewBoard": "Quadro",
+    "viewCalendar": "Calendário",
+    "searchPlaceholder": "Título, descrição ou #número…",
+    "statusActive": "Abertas e em curso",
+    "statusAll": "Todos os estados",
+    "anyone": "Qualquer pessoa",
+    "assignedToMe": "Atribuídas a mim",
+    "unassigned": "Sem atribuição",
+    "anyPriority": "Qualquer prioridade",
+    "anyDue": "Qualquer prazo",
+    "overdueOnly": "Só em atraso",
+    "overdue": "Em atraso",
+    "report": "Relatório de serviço",
+    "deleteConfirm": "Eliminar definitivamente esta ordem de trabalho, incluindo fotografias e registos de tempo?",
+    "holdReason": "Porque está em espera? (ex.: a aguardar material)",
+    "cancelConfirm": "Cancelar esta ordem de trabalho?",
+    "cancelWo": "Cancelar ordem de trabalho",
+    "requiredItems": "Conclua todos os pontos obrigatórios da checklist antes de a marcar como concluída.",
+    "invalidRef": "O equipamento selecionado não pertence à moradia selecionada.",
+    "invalidAssignee": "Uma das pessoas selecionadas não pode ser atribuída.",
+    "locked": "Esta ordem de trabalho está fechada. Reabra-a para fazer alterações."
+  },
+  "woStatus": {
+    "OPEN": "Aberta",
+    "IN_PROGRESS": "Em curso",
+    "ON_HOLD": "Em espera",
+    "DONE": "Concluída",
+    "CANCELLED": "Cancelada"
+  },
+  "priority": {
+    "NONE": "Nenhuma",
+    "LOW": "Baixa",
+    "MEDIUM": "Média",
+    "HIGH": "Alta",
+    "URGENT": "Urgente"
+  },
+  "woType": {
+    "REACTIVE": "Reativa",
+    "PREVENTIVE": "Preventiva",
+    "INSPECTION": "Inspeção",
+    "INSTALLATION": "Instalação",
+    "CORRECTIVE": "Corretiva",
+    "EMERGENCY": "Emergência"
+  },
+  "checklist": {
+    "title": "Checklist",
+    "edit": "Editar",
+    "doneEditing": "Concluir",
+    "empty": "Sem checklist. Adicione passos em Editar.",
+    "answeredBy": "por {name}",
+    "saveFailed": "Não foi possível guardar. Verifique a ligação e tente novamente.",
+    "uploading": "A carregar…",
+    "takePhoto": "Adicionar fotografia",
+    "sign": "Assinar",
+    "saveSignature": "Guardar assinatura",
+    "clear": "Limpar",
+    "labelPlaceholder": "Passo, ex.: Verificar estado da bateria da UPS",
+    "unit": "Unidade",
+    "optionsPlaceholder": "Opções, separadas por vírgulas: OK, Substituir, N/A",
+    "required": "Obrigatório",
+    "yes": "Sim",
+    "pf": {
+      "PASS": "OK",
+      "FLAG": "Alerta",
+      "FAIL": "Falha"
+    },
+    "types": {
+      "HEADING": "Título de secção",
+      "CHECKBOX": "Caixa de verificação",
+      "PASS_FAIL": "OK / alerta / falha",
+      "TEXT": "Texto",
+      "NUMBER": "Número",
+      "MULTIPLE_CHOICE": "Escolha múltipla",
+      "METER_READING": "Leitura de contador",
+      "PHOTO": "Fotografia",
+      "SIGNATURE": "Assinatura"
+    }
+  },
+  "time": {
+    "title": "Tempo",
+    "start": "Iniciar cronómetro",
+    "stop": "Parar",
+    "addManual": "Registar tempo",
+    "date": "Data",
+    "minutes": "Minutos",
+    "notePlaceholder": "Nota (opcional)",
+    "running": "a decorrer",
+    "total": "Total"
+  },
+  "costs": {
+    "title": "Custos",
+    "labor": "Mão de obra",
+    "total": "Total",
+    "add": "Adicionar custo",
+    "descriptionPlaceholder": "ex.: Aluguer de grua, estacionamento"
+  },
+  "files": {
+    "title": "Fotografias e ficheiros",
+    "add": "Adicionar fotografias ou ficheiros",
+    "failed": "Alguns ficheiros não foram carregados (JPEG, PNG, WebP ou PDF até 15 MB)."
+  },
+  "activity": {
+    "title": "Atividade",
+    "placeholder": "Adicione uma atualização ou nota…",
+    "attach": "Fotografia",
+    "send": "Publicar",
+    "changedStatus": "alterou o estado para",
+    "created": "criou esta ordem de trabalho"
+  },
+  "signoff": {
+    "title": "Aprovação do cliente",
+    "signature": "Assinatura",
+    "collect": "Recolher assinatura",
+    "hint": "Peça ao cliente ou ao governante para assinar abaixo.",
+    "namePlaceholder": "Nome completo de quem assina",
+    "confirm": "Confirmar aprovação",
+    "clear": "Limpar",
+    "clearConfirm": "Remover esta assinatura?",
+    "notSigned": "Ainda não assinado."
+  },
+  "report": {
+    "title": "Relatório de serviço",
+    "photos": "Fotografias",
+    "seePhotos": "Ver fotografias"
   }
 }

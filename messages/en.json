@@ -119,7 +119,9 @@
     "step1": "Invite your technicians and managers",
     "step2": "Add your clients and their villas",
     "step3": "Register the installed systems and equipment",
-    "step4": "Set up preventive maintenance schedules"
+    "step4": "Set up preventive maintenance schedules",
+    "myWorkOrders": "My open work orders",
+    "overdueWorkOrders": "Overdue"
   },
   "settings": {
     "orgTitle": "Organization",
@@ -321,5 +323,152 @@
       "invalidField": "invalid {field} \"{value}\".",
       "unknownParent": "parent \"{value}\" not found in this villa."
     }
+  },
+  "wo": {
+    "new": "New work order",
+    "title": "Title",
+    "titlePlaceholder": "e.g. Cinema projector not powering on",
+    "descriptionLabel": "Description",
+    "asset": "Asset",
+    "type": "Type",
+    "priority": "Priority",
+    "startDate": "Start",
+    "dueDate": "Due",
+    "estimatedHours": "Estimated hours",
+    "team": "Team",
+    "assignees": "Assigned to",
+    "technicians": "Technicians",
+    "createdBy": "Created by",
+    "createdAt": "Created",
+    "completedBy": "Completed by",
+    "completedAt": "Completed",
+    "fromRequest": "From request",
+    "empty": "No work orders match these filters.",
+    "noneHere": "No work orders yet.",
+    "viewList": "List",
+    "viewBoard": "Board",
+    "viewCalendar": "Calendar",
+    "searchPlaceholder": "Title, description or #number…",
+    "statusActive": "Open & in progress",
+    "statusAll": "All statuses",
+    "anyone": "Anyone",
+    "assignedToMe": "Assigned to me",
+    "unassigned": "Unassigned",
+    "anyPriority": "Any priority",
+    "anyDue": "Any due date",
+    "overdueOnly": "Overdue only",
+    "overdue": "Overdue",
+    "report": "Service report",
+    "deleteConfirm": "Delete this work order permanently, including its photos and time entries?",
+    "holdReason": "Why is it on hold? (e.g. waiting for parts)",
+    "cancelConfirm": "Cancel this work order?",
+    "cancelWo": "Cancel work order",
+    "requiredItems": "Complete all required checklist items before marking it done.",
+    "invalidRef": "The selected asset doesn't belong to the selected villa.",
+    "invalidAssignee": "One of the selected people can't be assigned.",
+    "locked": "This work order is closed. Reopen it to make changes."
+  },
+  "woStatus": {
+    "OPEN": "Open",
+    "IN_PROGRESS": "In progress",
+    "ON_HOLD": "On hold",
+    "DONE": "Done",
+    "CANCELLED": "Cancelled"
+  },
+  "priority": {
+    "NONE": "None",
+    "LOW": "Low",
+    "MEDIUM": "Medium",
+    "HIGH": "High",
+    "URGENT": "Urgent"
+  },
+  "woType": {
+    "REACTIVE": "Reactive",
+    "PREVENTIVE": "Preventive",
+    "INSPECTION": "Inspection",
+    "INSTALLATION": "Installation",
+    "CORRECTIVE": "Corrective",
+    "EMERGENCY": "Emergency"
+  },
+  "checklist": {
+    "title": "Checklist",
+    "edit": "Edit",
+    "doneEditing": "Done",
+    "empty": "No checklist. Add steps with Edit.",
+    "answeredBy": "by {name}",
+    "saveFailed": "Couldn't save. Check your connection and try again.",
+    "uploading": "Uploading…",
+    "takePhoto": "Add photo",
+    "sign": "Sign",
+    "saveSignature": "Save signature",
+    "clear": "Clear",
+    "labelPlaceholder": "Step, e.g. Check UPS battery status",
+    "unit": "Unit",
+    "optionsPlaceholder": "Options, comma separated: OK, Replace, N/A",
+    "required": "Required",
+    "yes": "Yes",
+    "pf": {
+      "PASS": "Pass",
+      "FLAG": "Flag",
+      "FAIL": "Fail"
+    },
+    "types": {
+      "HEADING": "Section heading",
+      "CHECKBOX": "Checkbox",
+      "PASS_FAIL": "Pass / flag / fail",
+      "TEXT": "Text",
+      "NUMBER": "Number",
+      "MULTIPLE_CHOICE": "Multiple choice",
+      "METER_READING": "Meter reading",
+      "PHOTO": "Photo",
+      "SIGNATURE": "Signature"
+    }
+  },
+  "time": {
+    "title": "Time",
+    "start": "Start timer",
+    "stop": "Stop",
+    "addManual": "Log time",
+    "date": "Date",
+    "minutes": "Minutes",
+    "notePlaceholder": "Note (optional)",
+    "running": "running",
+    "total": "Total"
+  },
+  "costs": {
+    "title": "Costs",
+    "labor": "Labour",
+    "total": "Total",
+    "add": "Add cost",
+    "descriptionPlaceholder": "e.g. Crane hire, parking"
+  },
+  "files": {
+    "title": "Photos & files",
+    "add": "Add photos or files",
+    "failed": "Some files couldn't be uploaded (JPEG, PNG, WebP or PDF up to 15 MB)."
+  },
+  "activity": {
+    "title": "Activity",
+    "placeholder": "Add an update or note…",
+    "attach": "Photo",
+    "send": "Post",
+    "changedStatus": "changed status to",
+    "created": "created this work order"
+  },
+  "signoff": {
+    "title": "Client sign-off",
+    "signature": "Signature",
+    "collect": "Collect signature",
+    "hint": "Ask the client or house manager to sign below.",
+    "namePlaceholder": "Full name of the person signing",
+    "confirm": "Confirm sign-off",
+    "clear": "Clear",
+    "clearConfirm": "Remove this signature?",
+    "notSigned": "Not signed yet."
+  },
+  "report": {
+    "title": "Service report",
+    "photos": "Photos",
+    "seePhotos": "See photos"
   }
 }

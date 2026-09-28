@@ -1,6 +1,6 @@
 import { useTranslations } from "next-intl";
-import { Cable, Camera, Cpu, Lightbulb, Network, ShieldCheck, Speaker, Wrench, Zap, type LucideIcon } from "lucide-react";
-import type { AssetStatus, Criticality, SystemType } from "@/generated/prisma/enums";
+import { Cable, Camera, Cpu, Lightbulb, Network, ShieldCheck, Speaker, Wrench, Zap, ChevronsUp, ChevronUp, Equal, ChevronDown, type LucideIcon } from "lucide-react";
+import type { AssetStatus, Criticality, Priority, SystemType, WorkOrderStatus } from "@/generated/prisma/enums";
 import { cn } from "@/lib/utils";
 
 export const SYSTEM_STYLE: Record<SystemType, { icon: LucideIcon; className: string }> = {
@@ -52,4 +52,42 @@ const CRIT_TONE: Record<Criticality, string> = {
 export function CriticalityText({ value }: { value: Criticality }) {
   const t = useTranslations("criticality");
   return <span className={cn("text-xs", CRIT_TONE[value])}>{t(value)}</span>;
+}
+
+export const WO_STATUS_TONE: Record<WorkOrderStatus, string> = {
+  OPEN: "bg-sky-50 text-sky-800",
+  IN_PROGRESS: "bg-indigo-50 text-indigo-800",
+  ON_HOLD: "bg-amber-50 text-amber-800",
+  DONE: "bg-green-50 text-green-700",
+  CANCELLED: "bg-gray-100 text-gray-600",
+};
+
+export function WorkOrderStatusBadge({ status, className }: { status: WorkOrderStatus; className?: string }) {
+  const t = useTranslations("woStatus");
+  return (
+    <span className={cn("inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-xs font-medium", WO_STATUS_TONE[status], className)}>
+      <span className="size-1.5 rounded-full bg-current" />
+      {t(status)}
+    </span>
+  );
+}
+
+const PRIORITY_STYLE: Record<Priority, { icon: LucideIcon | null; className: string }> = {
+  NONE: { icon: null, className: "text-gray-400" },
+  LOW: { icon: ChevronDown, className: "text-gray-500" },
+  MEDIUM: { icon: Equal, className: "text-amber-600" },
+  HIGH: { icon: ChevronUp, className: "text-orange-600" },
+  URGENT: { icon: ChevronsUp, className: "text-red-600 font-semibold" },
+};
+
+export function PriorityText({ priority }: { priority: Priority }) {
+  const t = useTranslations("priority");
+  if (priority === "NONE") return null;
+  const { icon: Icon, className } = PRIORITY_STYLE[priority];
+  return (
+    <span className={cn("inline-flex items-center gap-0.5 text-xs", className)}>
+      {Icon && <Icon className="size-3.5" />}
+      {t(priority)}
+    </span>
+  );
 }
