@@ -3,6 +3,7 @@
 # VillaOps CMMS — project conventions
 
 Multi-tenant CMMS for villa systems integrators. Roadmap: `docs/ROADMAP.md`.
+**Continuing the work? Read `docs/HANDOFF.md` first** (status, environment gotchas, verification techniques, next-phase plans).
 
 - **Next.js 16**: `proxy.ts` (not middleware), async `params`/`searchParams`/`cookies()`. Check `node_modules/next/dist/docs/` before using an API.
 - **Prisma 7**: client generated to `src/generated/prisma` (import from `@/generated/prisma/client` or `/enums`); config in `prisma.config.ts`; driver adapter `@prisma/adapter-pg`.
