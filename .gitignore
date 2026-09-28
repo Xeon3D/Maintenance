@@ -47,3 +47,6 @@ next-env.d.ts
 
 # local uploads
 /uploads/
+
+# dev email outbox
+/.mail/

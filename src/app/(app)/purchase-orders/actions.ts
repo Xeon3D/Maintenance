@@ -9,6 +9,7 @@ import { optDate, optId, optNumber, optStr, parseForm, str, type FormResult } fr
 import { deleteObject } from "@/lib/storage";
 import { addLowStockLines, InventoryError, receivePurchaseOrder } from "@/lib/inventory";
 import { poActions, type PoAction } from "@/lib/inventory-math";
+import { membersWith, notify } from "@/lib/notify";
 import type { PurchaseOrderStatus } from "@/generated/prisma/enums";
 
 const path = (id: string) => `/purchase-orders/${id}`;
@@ -157,6 +158,12 @@ export async function poTransitionAction(poId: string, action: PoAction): Promis
       ...(action === "order" ? { orderDate: new Date() } : {}),
     },
   });
+  // Approvers hear about submissions; the author hears what happened to their order.
+  const vendor = await ctx.db.vendor.findUnique({ where: { id: po.vendorId }, select: { name: true } });
+  const data = { number: po.number, vendor: vendor?.name ?? "", status: NEXT[action], actor: ctx.user.name };
+  if (action === "submit") await notify(ctx, await membersWith(ctx.db, "purchasing.approve"), { type: "PO_APPROVAL", data, link: path(poId) });
+  if (action === "approve" || action === "reject" || action === "cancel") await notify(ctx, [po.createdById], { type: "PO_UPDATE", data, link: path(poId) });
+
   revalidatePath(path(poId));
   revalidatePath("/purchase-orders");
   return {};

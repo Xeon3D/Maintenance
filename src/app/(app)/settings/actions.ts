@@ -9,6 +9,13 @@ import { assertOwned } from "@/lib/db/tenant";
 import { ASSIGNABLE_ROLES } from "@/lib/rbac";
 import { LOCALES } from "@/i18n/config";
 import { Role, SystemType } from "@/generated/prisma/enums";
+import { getLocale } from "next-intl/server";
+import { createTranslator } from "next-intl";
+import en from "../../../../messages/en.json";
+import pt from "../../../../messages/pt.json";
+import { appOrigin } from "@/lib/qr";
+import { emailLayout, sendEmail } from "@/lib/email";
+import { background } from "@/lib/notify";
 
 export type ActionState = { ok?: boolean; error?: string; inviteUrl?: string; inviteEmail?: string } | undefined;
 
@@ -60,7 +67,19 @@ export async function inviteUserAction(_: ActionState, form: FormData): Promise<
     },
   });
   revalidatePath("/settings/users");
-  // Email delivery lands with the notifications module; for now the link is shown to copy.
+
+  // Emailed in the inviter's current language; the link is also shown so it can be shared directly.
+  const locale = await getLocale();
+  const t = createTranslator({ locale, messages: locale === "pt" ? pt : en });
+  const url = `${await appOrigin()}/invite/${token}`;
+  const vars = { inviter: ctx.user.name, org: ctx.organization.name, role: t(`roles.${role}`) };
+  const mail = emailLayout({
+    org: ctx.organization.name,
+    heading: t("email.inviteSubject", vars),
+    paragraphs: [t("email.inviteBody", vars)],
+    cta: { label: t("email.inviteCta"), url },
+  });
+  background(() => sendEmail({ to: email, subject: t("email.inviteSubject", vars), ...mail }));
   return { ok: true, inviteUrl: `/invite/${token}`, inviteEmail: email };
 }
 

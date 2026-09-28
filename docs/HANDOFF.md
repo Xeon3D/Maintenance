@@ -1,6 +1,6 @@
 # Handoff — VillaOps CMMS
 
-State as of **2026-09-28**, phase 6 of 10 done (see `git log` for the commit). Read this, then
+State as of **2026-09-28**, phase 7 of 10 done (see `git log` for the commit). Read this, then
 `CLAUDE.md` (conventions) and `docs/ROADMAP.md` (phase list), before touching code.
 
 ---
@@ -36,8 +36,8 @@ and lighting. The user chose, and does not want re-litigated:
 | 4 | Preventive maintenance, procedures library, meters, scheduler | ✅ `944bb4c` |
 | 5 | Requests (portal + anonymous QR) and client portal | ✅ `82554bc` |
 | 6 | Inventory & purchasing: parts, stock locations, WO parts, vendors, POs | ✅ |
-| 7 | **Messaging & notifications** (email + web push) | ⏭ next |
-| 8 | Reporting & dashboards | |
+| 7 | Messaging & notifications: in-app, email, web push, chat, password reset | ✅ |
+| 8 | **Reporting & dashboards** | ⏭ next |
 | 9 | Offline mobile PWA | |
 | 10 | SaaS layer: Stripe billing, limits, super-admin | |
 
@@ -54,8 +54,8 @@ are mostly UI and logic plus small additive migrations.
     `$env:Path = [System.Environment]::GetEnvironmentVariable("Path","Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path","User");`
   - Bash tool: `export PATH="/c/Program Files/nodejs:$PATH"`.
 - **Dev server:** preview config `web` in `.claude/launch.json`, which runs
-  `node.exe node_modules/next/dist/bin/next dev` on port 3000. Restart it after
-  `prisma generate`: the Prisma client is cached on `globalThis`.
+  `node.exe node_modules/next/dist/bin/next dev` on port 3000. The dev Prisma client is cached on `globalThis` keyed by the generated
+  `PrismaClient` class, so `prisma generate` no longer needs a dev-server restart.
 - **Database:** Neon Postgres (eu-west-2). The connection string lives **only** in the gitignored
   `.env`. Never print or commit it. The user was advised to rotate the password, because it was
   pasted in chat. If it changes, only `DATABASE_URL` in `.env` needs updating.
@@ -67,7 +67,11 @@ are mostly UI and logic plus small additive migrations.
   - `UPLOAD_DIR` (`./uploads`).
   - `CRON_SECRET`.
   - `SCHEDULER_INTERVAL_MINUTES` (`15`).
-  - Optional `APP_URL`, used for QR label links.
+  - Optional `APP_URL`, used for QR label links and email/push links (else the request host).
+  - `VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`, `VAPID_SUBJECT`: web push (generated 2026-09-28; rotating
+    them invalidates every browser subscription). Without them push is simply off.
+  - `RESEND_API_KEY` + `EMAIL_FROM` (commented out): real email via Resend's HTTP API. Without them,
+    dev writes each email to `.mail/*.html` (gitignored) and production logs a warning.
 - **Prisma:** `prisma@latest` resolves to an 8.0 RC. **Keep `prisma` and `@prisma/client` pinned to 7.x.**
 - `prisma init` added agent-skill folders (`.agents/`, `.claude/skills/prisma-*`, `.windsurf/`,
   `skills-lock.json`). These are harmless reference docs and are committed.
@@ -206,8 +210,8 @@ are mostly UI and logic plus small additive migrations.
 
 ## 5. Data model notes
 
-All models are in `prisma/schema.prisma`, with 2 migrations (`init`, `pm_meters`). Add changes
-with `npx prisma migrate dev --name <x>`, then `npx prisma generate`, then restart the dev server.
+All models are in `prisma/schema.prisma`, with 3 migrations (`init`, `pm_meters`, `notifications`). Add changes
+with `npx prisma migrate dev --name <x>`, then `npx prisma generate` (Prisma 7 doesn't auto-generate).
 
 **Built out:** Organization, User, Membership, Invitation, Counter, Team, Client, ClientContact,
 Villa, Area, Asset, AssetStatusLog, Procedure(+Item), WorkOrder(+Assignee/Item/Comment/StatusLog/
@@ -217,20 +221,29 @@ Cost), TimeEntry, Attachment, AuditLog, PMSchedule(+Assignee), Meter, MeterReadi
 WorkOrderPart, Vendor(+Contact), PurchaseOrder(+Line), `Asset.parts` (compatible parts, M2M). Each org
 gets a "Main warehouse" at sign-up; the seed adds two vans, two vendors and four stocked spares.
 
+**Built in phase 7:** Notification (+`data` JSON for re-rendering in the reader's language),
+`User.notificationPrefs` (JSON), `PushSubscription` (new; per user, not org-scoped), Conversation
+(DIRECT/GROUP/TEAM; WORK_ORDER is unused, WO comments are the WO thread), ConversationMember (read
+markers), Message, VerificationToken (password reset).
+
 **Exist but have no UI yet (the remaining phases):**
-- **Phase 7:** `Conversation` (DIRECT/GROUP/TEAM/WORK_ORDER), `ConversationMember`, `Message`, `Notification`.
 - **Phase 10:** `Subscription` (a trial is created at sign-up).
 - **Not on any phase yet** (mention to the user): `ServiceContract` (SLA response/resolution
   hours, included visits; `WorkOrder.contractId`, `firstResponseAt` is already stamped),
-  `Category` (WO categories), and `VerificationToken` (for password reset / email verification).
+  and `Category` (WO categories). Email verification at sign-up isn't done either.
 
 ---
 
 ## 6. How to verify (proven techniques)
 
-- **Checks:** `npm run typecheck`, `npm run lint` (`npx eslint src tests`), `npm test` (vitest, 28 tests).
+- **Checks:** `npm run typecheck`, `npm run lint` (`npx eslint src tests`), `npm test` (vitest, 59 tests).
 - **Only one `next dev` per folder:** if another session's server already runs on :3000, attach with
   `preview_start({url: "http://localhost:3000"})` instead of starting a second one (it serves the same code).
+- **Library-level checks against the real DB:** a temporary `tests/_x.test.ts` with
+  `vi.mock("server-only")` + `import "dotenv/config"` can call `src/lib` functions directly (tsx can't:
+  `server-only` throws, and `--conditions=react-server` breaks React). Delete it afterwards.
+- **Emails in dev:** open the newest file in `.mail/`. Push can't be tested in the preview pane
+  (notifications are blocked there); use a normal browser on localhost.
 - **PDF text check:** inflate `FlateDecode` streams with `DecompressionStream("deflate")` in the page and
   hex-decode the `<…>` text operands (react-pdf's built-in fonts write text as hex).
 - **Browser pane:**
@@ -258,6 +271,9 @@ gets a "Main warehouse" at sign-up; the seed adds two vans, two vendors and four
   - WOs #1–#6. #2 is a meter alert, now internal. #5 is a deliberate overdue catch-up.
   - 2 PM schedules, a UPS battery meter with readings, and 7 starter procedures.
   - Requests R1 (approved → WO #6) and R2 (declined).
+  - Phase 7: a DM Miguel↔Rui, a group "Pool house job" (Miguel, Rui, Daniel), a comment on WO #7
+    mentioning Daniel (who is now assigned to #7, which is In progress), PO-2 awaiting approval,
+    and assorted notifications. Test emails are in `.mail/`.
   - Phase 6: vendor "Redes Lusas Distribuição", part "Ubiquiti U6-Pro access point" (8 on hand,
     linked to "Pool house AP", van-Rui minimum 3 so it shows as low), WO #7 with one AP used, and PO-1
     (received in two receipts). The live DB predates the seed's new inventory block.
@@ -271,10 +287,10 @@ gets a "Main warehouse" at sign-up; the seed adds two vans, two vendors and four
    Serverless hosts don't persist files.
 2. **Scheduler on the host:** configure a 15-minute cron calling `/api/cron/pm`.
    `SCHEDULER_INTERVAL_MINUTES` is only for self-hosting.
-3. **No email delivery at all.** Invitations display a copyable link. Phase 7 should add a
-   provider (e.g. Resend/Postmark) and use it for invitations too.
-4. **No password reset / change-password / profile page** (the `VerificationToken` model exists).
-   Worth adding in phase 7 alongside email.
+3. **Email provider not configured.** Set `RESEND_API_KEY` + `EMAIL_FROM` (a verified sending domain).
+   Until then nothing is emailed in production (invites still show a copyable link).
+4. **Web push needs HTTPS** in production (localhost is exempt) and `VAPID_SUBJECT` set to a real
+   contact address.
 5. **The user should rotate the Neon password.** `.env` then needs the new URL.
 
 **Smaller**
@@ -324,7 +340,35 @@ gets a "Main warehouse" at sign-up; the seed adds two vans, two vendors and four
 
 </details>
 
-### Phase 7 — Messaging & notifications
+### Phase 7 — Messaging & notifications (✅ done; notes for later)
+- **`src/lib/notify.ts`**: `notify(actor, userIds, {type, data, link})`. Never notifies the actor; only
+  active org members. Writes an in-app row (title/body rendered in the recipient's `User.locale`,
+  plus `data` so the list re-renders in the viewer's current language), then email/push per
+  `prefsOf()` (`src/lib/notification-types.ts`: types, defaults, portal subset). Delivery runs in
+  `after()` when there's a request, inline otherwise (scheduler). `notifyExternal()` emails people
+  without accounts (QR requesters). `membersWith(db, permission)` picks recipients by role.
+- Text lives in `messages/*.json` under `notify.<TYPE>.title/body` (ICU `select` for statuses) and
+  `email.*`. Precompute optional fragments in code (`place`, `detail`) rather than branching in ICU.
+  `tests/notifications.test.ts` renders every type in both languages.
+- Hooks: `createWorkOrder`/`notifyAssigned` (also WO edit), `changeStatus` (+ requester when a
+  client-visible WO from a request is done), WO comments (MENTION / WO_COMMENT), `createRequest`,
+  `notifyRequester` (approve/decline), `recordReading` (METER_ALERT), `watchLowStock` in inventory
+  (fires on the transition into low stock only), PO submit/approve/reject/cancel, chat messages.
+- **Chat** (`src/lib/conversations.ts`, `/messages`): DMs (one per pair), named groups, a channel per
+  team (created lazily; access = current team membership). Live updates = `router.refresh()` every
+  4 s while visible; read markers via `markReadAction`. Plain messages are push-only (no in-app row;
+  the Messages nav badge counts unread conversations); @mentions in groups/channels notify in-app.
+- `<MentionTextarea>` powers @mentions in chat and WO comments; `findMentions()` matches full names,
+  or first names when unambiguous.
+- Bell (`components/notifications/bell.tsx`) polls `/api/badges` every 30 s; `/api/notifications/[id]`
+  marks read and redirects (in-app paths only). Profile at `/settings/profile` and `/portal/profile`:
+  details, password change, per-type email/push toggles, push opt-in per device (`public/sw.js`).
+- Password reset: `/forgot-password` → emailed link (SHA-256-hashed token, 1 h, max 3 live) →
+  `/reset-password/[token]`. Existing JWT sessions aren't revoked on reset (Auth.js JWT strategy).
+- Not done: email digests, quiet hours, SSE/websockets, chat attachments, editing/deleting messages.
+
+<details><summary>Original phase 7 plan</summary>
+
 - `src/lib/notify.ts`: `notify(ctx, userIds, type, {title, body, link})` → a `Notification`
   row, plus email/web push according to user preferences (a new model or JSON field is needed).
 - **Hook points:**
@@ -340,6 +384,8 @@ gets a "Main warehouse" at sign-up; the seed adds two vans, two vendors and four
 - **Messages:** per-WO thread (`Conversation.workOrderId`, can replace or augment WO comments),
   team channels (`Conversation.teamId`) and DMs; poll or use SSE for live updates.
 - **Email:** also use for invitations and password reset (§7.3–4).
+
+</details>
 
 ### Phase 8 — Reporting
 MTTR, first-response and SLA compliance (needs a ServiceContract UI; ask the user), PM compliance

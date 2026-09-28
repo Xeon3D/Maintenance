@@ -6,7 +6,8 @@ import { useEffect, useRef, useState, useTransition } from "react";
 import { useTranslations } from "next-intl";
 import { FileDown, ImagePlus, Paperclip, Pencil, Play, Send, Square, Trash2, X } from "lucide-react";
 import { ActionForm, FieldError } from "@/components/action-form";
-import { Button, Field, Input, Textarea } from "@/components/ui";
+import { Button, Field, Input } from "@/components/ui";
+import { MentionTextarea, type MentionMember } from "@/components/mention-textarea";
 import { SignaturePad, type SignaturePadHandle } from "@/components/signature-pad";
 import { uploadFile, type Uploaded } from "@/lib/upload-client";
 import {
@@ -268,7 +269,7 @@ export function Gallery({ woId, files, canExecute, canDeleteAny }: { woId: strin
 
 // ── Comment composer
 
-export function CommentBox({ woId }: { woId: string }) {
+export function CommentBox({ woId, members }: { woId: string; members: MentionMember[] }) {
   const t = useTranslations();
   const [body, setBody] = useState("");
   const [files, setFiles] = useState<Uploaded[]>([]);
@@ -288,7 +289,7 @@ export function CommentBox({ woId }: { woId: string }) {
         });
       }}
     >
-      <Textarea value={body} onChange={(e) => setBody(e.target.value)} placeholder={t("activity.placeholder")} className="min-h-20" />
+      <MentionTextarea value={body} onValueChange={setBody} members={members} placeholder={t("activity.placeholder")} className="min-h-20" />
       {files.length > 0 && (
         <div className="flex flex-wrap gap-2">
           {files.map((f) => (

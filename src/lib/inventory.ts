@@ -2,7 +2,8 @@ import "server-only";
 import type { StockMovementType } from "@/generated/prisma/enums";
 import { nextNumber, type TenantDb } from "@/lib/db/tenant";
 import type { WoCtx } from "@/lib/work-orders";
-import { isLowStock, PO_OPEN_STATUSES, PO_RECEIVABLE, remainingQty, reorderQuantity, roundQty, statusAfterReceipt } from "@/lib/inventory-math";
+import { membersWith, notify } from "@/lib/notify";
+import { isLowStock, onHand, PO_OPEN_STATUSES, PO_RECEIVABLE, remainingQty, reorderQuantity, roundQty, statusAfterReceipt } from "@/lib/inventory-math";
 
 export class InventoryError extends Error {
   constructor(
@@ -84,11 +85,11 @@ export async function setStockLevel(ctx: WoCtx, partId: string, locationId: stri
   if (!Number.isFinite(quantity) || quantity < 0) throw new InventoryError("invalidQuantity");
   await activePart(ctx, partId);
   await activeLocation(ctx, locationId);
-  await ctx.db.$transaction(async (tx) => {
+  await watchLowStock(ctx, partId, () => ctx.db.$transaction(async (tx) => {
     const row = await tx.partStock.findUnique({ where: { partId_locationId: { partId, locationId } } });
     const delta = roundQty(quantity - Number(row?.quantity ?? 0));
     await move(tx, ctx, { partId, locationId, delta, type: "ADJUSTMENT", note });
-  });
+  }));
 }
 
 export async function transferStock(ctx: WoCtx, partId: string, fromId: string, toId: string, quantity: number, note?: string | null) {
@@ -97,10 +98,10 @@ export async function transferStock(ctx: WoCtx, partId: string, fromId: string, 
   await activePart(ctx, partId);
   await activeLocation(ctx, fromId);
   await activeLocation(ctx, toId);
-  await ctx.db.$transaction(async (tx) => {
+  await watchLowStock(ctx, partId, () => ctx.db.$transaction(async (tx) => {
     await move(tx, ctx, { partId, locationId: fromId, delta: -q, type: "TRANSFER_OUT", note });
     await move(tx, ctx, { partId, locationId: toId, delta: q, type: "TRANSFER_IN", note });
-  });
+  }));
 }
 
 /** Per-location reorder point (null clears the override). */
@@ -115,6 +116,28 @@ export async function setLocationMin(ctx: WoCtx, partId: string, locationId: str
   });
 }
 
+// ── Low-stock alerts
+
+async function stockState(ctx: WoCtx, partId: string) {
+  return ctx.db.part.findUnique({
+    where: { id: partId },
+    select: { id: true, name: true, unit: true, minQuantity: true, stock: { where: { location: { archivedAt: null } }, select: { quantity: true, minQuantity: true } } },
+  });
+}
+
+/** Runs a stock change and sends LOW_STOCK when it tips the part below a reorder point (once, not on every take). */
+async function watchLowStock(ctx: WoCtx, partId: string, change: () => Promise<unknown>) {
+  const before = await stockState(ctx, partId);
+  await change();
+  const after = await stockState(ctx, partId);
+  if (!before || !after || isLowStock(before) || !isLowStock(after)) return;
+  await notify(ctx, await membersWith(ctx.db, "inventory.manage"), {
+    type: "LOW_STOCK",
+    data: { part: after.name, qty: onHand(after.stock), unit: after.unit },
+    link: `/parts/${after.id}`,
+  });
+}
+
 // ── Work orders
 
 /** Takes parts out of a location for a work order, at the part's current unit cost. */
@@ -124,10 +147,10 @@ export async function consumePart(ctx: WoCtx, workOrderId: string, partId: strin
   if (!wo) throw new InventoryError("invalidRef");
   const part = await activePart(ctx, partId);
   await activeLocation(ctx, locationId);
-  await ctx.db.$transaction(async (tx) => {
+  await watchLowStock(ctx, partId, () => ctx.db.$transaction(async (tx) => {
     await move(tx, ctx, { partId, locationId, delta: -q, type: "CONSUMPTION", unitCost: Number(part.unitCost), workOrderId });
     await tx.workOrderPart.create({ data: { workOrderId, partId, stockLocationId: locationId, quantity: q, unitCost: part.unitCost } });
-  });
+  }));
 }
 
 /** Undoes a consumption: the quantity goes back to the location it came from. */

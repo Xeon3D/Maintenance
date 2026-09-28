@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState, useTransition } from "react";
 import { useTranslations } from "next-intl";
+import { NotificationBell } from "@/components/notifications/bell";
 import {
   Building2,
   CalendarClock,
@@ -23,6 +24,7 @@ import {
   ShoppingCart,
   Truck,
   UserCog,
+  UserRound,
   Users,
   UsersRound,
   X,
@@ -49,6 +51,7 @@ const ICONS: Record<string, LucideIcon> = {
   ShoppingCart,
   Truck,
   UserCog,
+  UserRound,
   Users,
   UsersRound,
 };
@@ -58,9 +61,10 @@ type Props = {
   user: { name: string; email: string; role: string };
   org: { id: string; name: string };
   orgs: { id: string; name: string }[];
+  unreadNotifications: number;
 };
 
-export function Sidebar({ groups, user, org, orgs }: Props) {
+export function Sidebar({ groups, user, org, orgs, unreadNotifications }: Props) {
   const t = useTranslations();
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
@@ -137,10 +141,11 @@ export function Sidebar({ groups, user, org, orgs }: Props) {
       <div className="space-y-3 border-t border-border p-3">
         <LocaleSwitcher />
         <div className="flex items-center justify-between gap-2 px-1">
-          <div className="min-w-0">
+          <Link href="/settings/profile" onClick={() => setOpen(false)} className="min-w-0 flex-1 rounded-md hover:text-brand">
             <div className="truncate text-sm font-medium">{user.name}</div>
             <div className="truncate text-xs text-muted">{t(`roles.${user.role}`)}</div>
-          </div>
+          </Link>
+          <NotificationBell key={unreadNotifications} initial={unreadNotifications} href="/notifications" />
           <form action={signOutAction}>
             <button title={t("common.signOut")} className="rounded-md p-2 text-muted hover:bg-gray-100 hover:text-foreground">
               <LogOut className="size-4" />
@@ -158,7 +163,8 @@ export function Sidebar({ groups, user, org, orgs }: Props) {
         <button type="button" onClick={() => setOpen(true)} aria-label="Menu" className="-ml-2 rounded-md p-2 hover:bg-gray-100">
           <Menu className="size-5" />
         </button>
-        <span className="truncate font-medium">{org.name}</span>
+        <span className="flex-1 truncate font-medium">{org.name}</span>
+        <NotificationBell key={unreadNotifications} initial={unreadNotifications} href="/notifications" />
       </div>
 
       {/* Mobile drawer */}

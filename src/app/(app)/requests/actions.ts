@@ -5,7 +5,7 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 import { requirePermission } from "@/lib/context";
 import { enumOf, optEnumOf, optId, parseForm, str, type FormResult } from "@/lib/forms";
-import { approveRequest, declineRequest } from "@/lib/requests";
+import { approveRequest, declineRequest, notifyRequester } from "@/lib/requests";
 import { WorkOrderError } from "@/lib/work-orders";
 import { Priority, SystemType, WorkOrderType } from "@/generated/prisma/enums";
 
@@ -43,6 +43,8 @@ export async function declineRequestAction(id: string, _: FormResult, form: Form
   } catch {
     return { error: "requests.notPending" };
   }
+  const req = await ctx.db.request.findUnique({ where: { id } });
+  if (req) await notifyRequester(ctx, req, "DECLINED", reason);
   revalidatePath("/requests");
   revalidatePath(`/requests/${id}`);
   return { ok: true };

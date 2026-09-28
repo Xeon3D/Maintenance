@@ -1,6 +1,8 @@
 import "server-only";
 import { randomBytes } from "node:crypto";
 import { nextNumber, type TenantDb } from "@/lib/db/tenant";
+import { prisma } from "@/lib/db/client";
+import { membersWith, notify, notifyExternal, type NotifyActor } from "@/lib/notify";
 import { putObject } from "@/lib/storage";
 import { createWorkOrder, type WoCtx, type WorkOrderInput } from "@/lib/work-orders";
 import type { Priority, SystemType } from "@/generated/prisma/enums";
@@ -64,7 +66,29 @@ export async function createRequest(db: TenantDb, organizationId: string, input:
       },
     });
   }
+
+  const [org, villa] = await Promise.all([
+    prisma.organization.findUniqueOrThrow({ where: { id: organizationId }, select: { id: true, name: true } }),
+    req.villaId ? db.villa.findUnique({ where: { id: req.villaId }, select: { name: true } }) : null,
+  ]);
+  await notify({ organization: org, user: input.requesterId ? { id: input.requesterId } : null }, await membersWith(db, "requests.approve"), {
+    type: "REQUEST_NEW",
+    data: { number: req.number, title: req.title, place: [villa?.name, input.requesterName].filter(Boolean).join(" · ") },
+    link: `/requests/${req.id}`,
+  });
   return req;
+}
+
+/** REQUEST_UPDATE to whoever asked: in-app for portal users, by email for QR-form requesters. */
+export async function notifyRequester(
+  ctx: NotifyActor & { organization: { defaultLocale: string } },
+  req: { id: string; number: number; title: string; requesterId: string | null; requesterEmail: string | null },
+  status: "APPROVED" | "DECLINED",
+  reason: string | null = null,
+) {
+  const data = { number: req.number, title: req.title, status, detail: reason ? `${req.title} — ${reason}` : req.title };
+  if (req.requesterId) await notify(ctx, [req.requesterId], { type: "REQUEST_UPDATE", data, link: `/portal/requests/${req.id}` });
+  else notifyExternal(ctx.organization, req.requesterEmail, ctx.organization.defaultLocale, "REQUEST_UPDATE", data);
 }
 
 /** Turns a pending request into a work order (with overrides) and links the request's photos to it. */
@@ -91,6 +115,7 @@ export async function approveRequest(ctx: WoCtx, requestId: string, overrides: P
     throw new Error("Request is not pending");
   }
   await ctx.db.attachment.updateMany({ where: { requestId }, data: { workOrderId: wo.id } });
+  await notifyRequester(ctx, req, "APPROVED");
   return wo;
 }
 

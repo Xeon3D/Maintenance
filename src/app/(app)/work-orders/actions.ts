@@ -8,9 +8,12 @@ import { enumOf, optEnumOf, optId, optNumber, optStr, parseForm, str, type FormR
 import { deleteObject } from "@/lib/storage";
 import { recordReading } from "@/lib/meters";
 import { consumePart, InventoryError, returnPart } from "@/lib/inventory";
+import { notify } from "@/lib/notify";
+import { excerpt, findMentions } from "@/lib/mentions";
 import {
   changeStatus,
   createWorkOrder,
+  notifyAssigned,
   resolveRefs,
   stopRunningTimers,
   validateAssignees,
@@ -67,13 +70,15 @@ export async function saveWorkOrderAction(id: string | null, _: FormResult, form
   let woId = id;
   try {
     if (id) {
-      await editableWorkOrder(ctx, id);
+      const before = await editableWorkOrder(ctx, id);
       const refs = await resolveRefs(ctx, input);
       const ids = await validateAssignees(ctx, assigneeIds);
-      await ctx.db.workOrder.update({
+      const wo = await ctx.db.workOrder.update({
         where: { id },
         data: { ...fields, procedureId: undefined, ...refs, assignees: { deleteMany: {}, create: ids.map((userId) => ({ userId })) } },
       });
+      const had = new Set(before.assignees.map((a) => a.userId));
+      await notifyAssigned(ctx, wo, ids.filter((u) => !had.has(u)));
     } else {
       woId = (await createWorkOrder(ctx, input)).id;
     }
@@ -279,7 +284,21 @@ export async function addCommentAction(woId: string, body: string, attachmentIds
       data: { commentId: comment.id },
     });
   }
+  await notifyComment(ctx, woId, text);
   revalidatePath(path(woId));
+}
+
+/** @mentioned staff get MENTION; the WO's creator and assignees get WO_COMMENT. */
+async function notifyComment(ctx: AppContext, woId: string, text: string) {
+  const wo = await ctx.db.workOrder.findUnique({ where: { id: woId }, select: { number: true, title: true, createdById: true, assignees: { select: { userId: true } } } });
+  if (!wo) return;
+  const staff = await ctx.db.membership.findMany({ where: { active: true, role: { not: "REQUESTER" } }, select: { user: { select: { id: true, name: true } } } });
+  const mentioned = findMentions(text, staff.map((m) => m.user));
+  const data = { number: wo.number, title: wo.title, actor: ctx.user.name, excerpt: excerpt(text), where: `#${wo.number}` };
+  const link = path(woId);
+  await notify(ctx, mentioned, { type: "MENTION", data, link });
+  const involved = [wo.createdById, ...wo.assignees.map((a) => a.userId)].filter((u) => !mentioned.includes(u));
+  await notify(ctx, involved, { type: "WO_COMMENT", data, link });
 }
 
 export async function deleteAttachmentAction(woId: string, attachmentId: string) {

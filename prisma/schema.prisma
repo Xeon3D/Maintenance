@@ -171,16 +171,18 @@ enum SubscriptionStatus {
 // ─────────────────────────────────────────────────────────────── Identity & tenancy
 
 model User {
-  id           String   @id @default(cuid())
-  email        String   @unique
-  name         String
-  passwordHash String?
-  phone        String?
-  image        String?
-  locale       String   @default("en")
-  isSuperAdmin Boolean  @default(false)
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  id                String   @id @default(cuid())
+  email             String   @unique
+  name              String
+  passwordHash      String?
+  phone             String?
+  image             String?
+  locale            String   @default("en")
+  isSuperAdmin      Boolean  @default(false)
+  // { [notificationType]: { email?: boolean, push?: boolean } }; missing keys use the defaults in lib/notify.
+  notificationPrefs Json?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
 
   memberships        Membership[]
   teamMemberships    TeamMember[]
@@ -206,6 +208,7 @@ model User {
   attachments        Attachment[]
   assetStatusLogs    AssetStatusLog[]
   invitationsSent    Invitation[]
+  pushSubscriptions  PushSubscription[]
 }
 
 model Organization {
@@ -1076,6 +1079,7 @@ model Notification {
   title          String
   body           String?
   link           String?
+  data           Json? // params for rendering title/body in the reader's language
   readAt         DateTime?
   createdAt      DateTime  @default(now())
 
@@ -1159,6 +1163,21 @@ model Subscription {
 }
 
 // Password reset / email verification tokens.
+// A browser/device that accepted web push for a user (not org-scoped: one device, every org).
+model PushSubscription {
+  id        String   @id @default(cuid())
+  userId    String
+  endpoint  String   @unique
+  p256dh    String
+  auth      String
+  userAgent String?
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
 model VerificationToken {
   identifier String
   token      String   @unique

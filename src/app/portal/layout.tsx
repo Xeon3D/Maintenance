@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { getTranslations } from "next-intl/server";
-import { LogOut, Plus } from "lucide-react";
+import { LogOut, Plus, UserRound } from "lucide-react";
+import { NotificationBell } from "@/components/notifications/bell";
 import { LocaleSwitcher } from "@/components/locale-switcher";
 import { Button } from "@/components/ui";
 import { getPortalContext } from "@/lib/portal";
@@ -9,6 +10,7 @@ import { signOutAction } from "@/app/(auth)/actions";
 export default async function PortalLayout({ children }: { children: React.ReactNode }) {
   const ctx = await getPortalContext();
   const t = await getTranslations();
+  const unread = await ctx.db.notification.count({ where: { userId: ctx.user.id, readAt: null } });
   return (
     <div className="min-h-screen">
       <header className="sticky top-0 z-30 border-b border-border bg-surface">
@@ -25,6 +27,10 @@ export default async function PortalLayout({ children }: { children: React.React
               </Button>
             </Link>
             <LocaleSwitcher className="hidden sm:inline-flex" />
+            <NotificationBell key={unread} initial={unread} href="/portal/notifications" />
+            <Link href="/portal/profile" title={t("nav.profile")} className="rounded-md p-2 text-muted hover:bg-gray-100">
+              <UserRound className="size-4" />
+            </Link>
             <form action={signOutAction}>
               <button title={t("common.signOut")} className="rounded-md p-2 text-muted hover:bg-gray-100">
                 <LogOut className="size-4" />

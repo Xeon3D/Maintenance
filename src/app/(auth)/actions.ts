@@ -11,6 +11,13 @@ import { prisma } from "@/lib/db/client";
 import { createOrganization } from "@/lib/org";
 import { ACTIVE_ORG_COOKIE, requireUser } from "@/lib/context";
 import { isLocale, LOCALE_COOKIE } from "@/i18n/config";
+import { createTranslator } from "next-intl";
+import en from "../../../messages/en.json";
+import pt from "../../../messages/pt.json";
+import { appOrigin } from "@/lib/qr";
+import { emailLayout, sendEmail } from "@/lib/email";
+import { background } from "@/lib/notify";
+import { clearResetTokens, createResetToken, userForResetToken } from "@/lib/password-reset";
 
 export type FormState = { error?: string } | undefined;
 
@@ -68,6 +75,38 @@ export async function createOrgAction(_: FormState, form: FormData): Promise<For
   const org = await createOrganization(user.id, name.data, isLocale(user.locale) ? user.locale : "en");
   (await cookies()).set(ACTIVE_ORG_COOKIE, org.id, { path: "/", httpOnly: true, sameSite: "lax" });
   redirect("/dashboard");
+}
+
+// ── Password reset
+
+/** Always answers the same way, so it can't be used to find out which emails have accounts. */
+export async function requestResetAction(_: FormState, form: FormData): Promise<FormState & { sent?: boolean }> {
+  const email = z.email().safeParse(String(form.get("email") ?? "").toLowerCase().trim());
+  if (!email.success) return { error: "invalidEmail" };
+  const user = await prisma.user.findUnique({ where: { email: email.data } });
+  if (user) {
+    const raw = await createResetToken(user.id);
+    if (raw) {
+      const url = `${await appOrigin()}/reset-password/${raw}`;
+      const t = createTranslator({ locale: user.locale, messages: user.locale === "pt" ? pt : en, namespace: "email" });
+      const mail = emailLayout({ org: en.common.appName, heading: t("resetSubject"), paragraphs: [t("resetBody")], cta: { label: t("resetCta"), url } });
+      background(() => sendEmail({ to: user.email, subject: t("resetSubject"), ...mail }));
+    }
+  }
+  return { sent: true };
+}
+
+const resetSchema = z.object({ token: z.string().min(10).max(100), password: z.string().min(8).max(200), confirm: z.string() });
+
+export async function resetPasswordAction(_: FormState, form: FormData): Promise<FormState> {
+  const parsed = resetSchema.safeParse(Object.fromEntries(form));
+  if (!parsed.success) return { error: "passwordRule" };
+  if (parsed.data.password !== parsed.data.confirm) return { error: "passwordMismatch" };
+  const user = await userForResetToken(parsed.data.token);
+  if (!user) return { error: "resetExpired" };
+  await prisma.user.update({ where: { id: user.id }, data: { passwordHash: await bcrypt.hash(parsed.data.password, 12) } });
+  await clearResetTokens(user.id);
+  redirect("/login?reset=1");
 }
 
 export async function signOutAction() {

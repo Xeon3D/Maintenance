@@ -51,7 +51,21 @@
     "invalidCredentials": "Email ou palavra-passe inválidos.",
     "emailTaken": "Já existe uma conta com este email.",
     "passwordRule": "Pelo menos 8 caracteres.",
-    "tagline": "Manutenção de sistemas elétricos, domótica, rede, segurança, CCTV, áudio/vídeo e iluminação em moradias."
+    "tagline": "Manutenção de sistemas elétricos, domótica, rede, segurança, CCTV, áudio/vídeo e iluminação em moradias.",
+    "forgot": "Esqueceu-se da palavra-passe?",
+    "forgotTitle": "Redefinir a palavra-passe",
+    "forgotHint": "Introduza o email da sua conta e enviamos-lhe um link para escolher uma nova palavra-passe.",
+    "sendReset": "Enviar link de redefinição",
+    "resetSent": "Se existir uma conta com esse endereço, o link de redefinição está a caminho. É válido durante uma hora.",
+    "backToSignIn": "Voltar ao início de sessão",
+    "resetTitle": "Escolha uma nova palavra-passe",
+    "newPassword": "Nova palavra-passe",
+    "confirmPassword": "Repita a nova palavra-passe",
+    "resetSubmit": "Guardar nova palavra-passe",
+    "resetDone": "A palavra-passe foi alterada. Inicie sessão com a nova.",
+    "resetExpired": "Este link de redefinição expirou ou já foi usado.",
+    "invalidEmail": "Introduza um endereço de email válido.",
+    "passwordMismatch": "As palavras-passe não coincidem."
   },
   "onboarding": {
     "title": "Crie a sua organização",
@@ -87,7 +101,8 @@
     "operations": "Operações",
     "sites": "Locais e equipamentos",
     "supply": "Aprovisionamento",
-    "insights": "Análise"
+    "insights": "Análise",
+    "profile": "O meu perfil"
   },
   "roles": {
     "OWNER": "Proprietário",
@@ -135,7 +150,7 @@
     "usersDescription": "Pessoas que podem entrar nesta organização.",
     "invite": "Convidar utilizador",
     "inviteSend": "Criar convite",
-    "inviteLink": "Partilhe este link com {email}. Expira em 7 dias.",
+    "inviteLink": "Enviámos um convite por email para {email}. Também pode partilhar este link diretamente; expira dentro de 7 dias.",
     "pendingInvites": "Convites pendentes",
     "expires": "Expira",
     "revoke": "Revogar",
@@ -163,7 +178,9 @@
     "invalid_ip": "Endereço IP inválido.",
     "invalid_parent": "Um equipamento não pode ficar dentro de si próprio ou de um dos seus filhos.",
     "contactRequired": "Deixe um telefone ou um email para o podermos contactar.",
-    "invalid_url": "Introduza um endereço web completo, a começar por https://."
+    "invalid_url": "Introduza um endereço web completo, a começar por https://.",
+    "passwordMismatch": "As palavras-passe não coincidem.",
+    "wrongPassword": "Essa não é a sua palavra-passe atual."
   },
   "clients": {
     "description": "Proprietários, family offices e gestores de propriedades para quem trabalha.",
@@ -862,5 +879,134 @@
     "noParts": "Ainda não há peças no catálogo.",
     "return": "Devolver ao stock",
     "returnConfirm": "Retirar esta peça da ordem de trabalho e devolvê-la ao stock?"
+  },
+  "notify": {
+    "WO_ASSIGNED": {
+      "title": "Ordem de trabalho #{number} atribuída a si",
+      "body": "{title} · por {actor}"
+    },
+    "WO_STATUS": {
+      "title": "Ordem de trabalho #{number} {status, select, OPEN {foi reaberta} IN_PROGRESS {está em curso} ON_HOLD {está em espera} DONE {está concluída} CANCELLED {foi cancelada} other {foi atualizada}}",
+      "body": "{title} · {actor} {note}"
+    },
+    "WO_COMMENT": {
+      "title": "{actor} comentou na #{number}",
+      "body": "{excerpt}"
+    },
+    "MENTION": {
+      "title": "{actor} fez uma menção a si em {where}",
+      "body": "{excerpt}"
+    },
+    "MESSAGE": {
+      "title": "{where}",
+      "body": "{actor}: {excerpt}"
+    },
+    "REQUEST_NEW": {
+      "title": "Novo pedido R{number}: {title}",
+      "body": "{place}"
+    },
+    "REQUEST_UPDATE": {
+      "title": "{status, select, APPROVED {O seu pedido R{number} foi aceite} other {O seu pedido R{number} foi recusado}}",
+      "body": "{detail}"
+    },
+    "METER_ALERT": {
+      "title": "{asset}: {meter} fora dos limites",
+      "body": "Leitura {value} {unit} · aberta a ordem de trabalho #{number}"
+    },
+    "LOW_STOCK": {
+      "title": "Stock baixo: {part}",
+      "body": "{qty} {unit} em stock"
+    },
+    "PO_APPROVAL": {
+      "title": "A nota de encomenda PO-{number} precisa da sua aprovação",
+      "body": "{vendor} · submetida por {actor}"
+    },
+    "PO_UPDATE": {
+      "title": "A nota de encomenda PO-{number} {status, select, APPROVED {foi aprovada} DRAFT {foi devolvida a rascunho} CANCELLED {foi cancelada} other {foi atualizada}}",
+      "body": "{vendor} · {actor}"
+    }
+  },
+  "email": {
+    "open": "Abrir",
+    "footer": "Escolha que emails recebe nas definições de notificações: {url}",
+    "externalFooter": "Recebe este email porque este endereço foi indicado ao comunicar um problema.",
+    "inviteSubject": "{inviter} enviou-lhe um convite para {org}",
+    "inviteBody": "{inviter} enviou-lhe um convite para se juntar a {org} com o perfil {role}. O link expira dentro de 7 dias.",
+    "inviteCta": "Aceitar convite",
+    "resetSubject": "Redefinir a palavra-passe",
+    "resetBody": "Foi pedida a redefinição da palavra-passe desta conta. Se foi você, use o botão abaixo dentro de uma hora. Caso contrário, pode ignorar este email.",
+    "resetCta": "Escolher nova palavra-passe"
+  },
+  "notifications": {
+    "title": "Notificações",
+    "description": "Atribuições, mudanças de estado, menções, pedidos e alertas de stock.",
+    "empty": "Está tudo em dia.",
+    "emptyHint": "As notificações sobre as suas ordens de trabalho, menções e aprovações aparecem aqui.",
+    "markAllRead": "Marcar todas como lidas",
+    "unreadCount": "{count, plural, one {# notificação por ler} other {# notificações por ler}}"
+  },
+  "messages": {
+    "description": "Mensagens diretas, conversas de grupo e um canal por equipa.",
+    "conversations": "Conversas",
+    "new": "Nova mensagem",
+    "newHint": "Escolha uma pessoa para uma mensagem direta, ou várias para uma conversa de grupo. Os canais das equipas aparecem automaticamente.",
+    "people": "Pessoas",
+    "groupName": "Nome do grupo",
+    "groupNameHint": "Opcional. Com um nome é sempre criado um grupo, mesmo só com uma pessoa.",
+    "start": "Iniciar conversa",
+    "empty": "Ainda não há conversas.",
+    "noMessagesYet": "Ainda sem mensagens",
+    "unread": "Por ler",
+    "pick": "Escolha uma conversa",
+    "pickHint": "Ou inicie uma nova. Escreva @ para mencionar alguém; essa pessoa recebe uma notificação.",
+    "placeholder": "Escreva uma mensagem… (@ para mencionar)",
+    "composerHint": "Enter para enviar · Shift+Enter para mudar de linha",
+    "firstMessage": "Ainda não há mensagens. Diga olá!",
+    "olderHidden": "A mostrar as últimas 200 mensagens.",
+    "leave": "Sair do grupo",
+    "leaveConfirm": "Sair deste grupo? Deixa de ver as novas mensagens.",
+    "notFound": "Esta conversa não está disponível."
+  },
+  "profile": {
+    "title": "O meu perfil",
+    "description": "Os seus dados, a palavra-passe e as notificações que recebe.",
+    "details": "Dados",
+    "emailHint": "Usado para iniciar sessão. Peça a um administrador se precisar de o alterar.",
+    "password": "Palavra-passe",
+    "currentPassword": "Palavra-passe atual",
+    "changePassword": "Alterar palavra-passe",
+    "passwordChanged": "Palavra-passe alterada.",
+    "pushTitle": "Notificações push neste dispositivo",
+    "pushHint": "Receba alertas neste telemóvel ou computador mesmo com a aplicação fechada. Ative em cada dispositivo.",
+    "pushEnable": "Ativar",
+    "pushDisable": "Desativar",
+    "pushOn": "Ativas neste dispositivo",
+    "pushTest": "Enviar um teste",
+    "pushFailed": "Não foi possível ativar as notificações push. Tente novamente ou verifique as definições do site no navegador.",
+    "pushUnsupported": "Este navegador não suporta notificações push. No iPhone, adicione primeiro a aplicação ao ecrã principal.",
+    "pushBlocked": "As notificações estão bloqueadas para este site. Permita-as nas definições do site no navegador e recarregue a página.",
+    "testTitle": "As notificações push funcionam",
+    "testBody": "Vai receber alertas como este neste dispositivo.",
+    "notifications": "Notificações que quero receber",
+    "notificationsHint": "Tudo aparece também no sino dentro da aplicação.",
+    "event": "Evento",
+    "email": "Email",
+    "push": "Push",
+    "saving": "A guardar…",
+    "saved": "Guardado.",
+    "inAppAlways": "As alterações são guardadas automaticamente.",
+    "types": {
+      "WO_ASSIGNED": "Uma ordem de trabalho é-me atribuída",
+      "WO_STATUS": "Mudanças de estado nas minhas ordens de trabalho",
+      "WO_COMMENT": "Comentários nas minhas ordens de trabalho",
+      "MENTION": "Alguém me menciona com @",
+      "MESSAGE": "Novas mensagens de conversa",
+      "REQUEST_NEW": "Novos pedidos de manutenção",
+      "REQUEST_UPDATE": "Os meus pedidos são aceites ou recusados",
+      "METER_ALERT": "Leituras de contadores fora dos limites",
+      "LOW_STOCK": "Peças a esgotar",
+      "PO_APPROVAL": "Notas de encomenda a aguardar aprovação",
+      "PO_UPDATE": "Atualizações das minhas notas de encomenda"
+    }
   }
 }

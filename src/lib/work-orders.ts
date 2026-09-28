@@ -4,6 +4,7 @@ import type { AppContext } from "@/lib/context";
 /** What work-order logic needs; the PM scheduler builds one without a signed-in request. */
 export type WoCtx = Pick<AppContext, "db" | "organization" | "user">;
 import { assertOwned, nextNumber } from "@/lib/db/tenant";
+import { notify, notifyExternal } from "@/lib/notify";
 import type { ChecklistItemType, Priority, SystemType, WorkOrderStatus, WorkOrderType } from "@/generated/prisma/enums";
 
 export const ACTIVE_STATUSES: WorkOrderStatus[] = ["OPEN", "IN_PROGRESS", "ON_HOLD"];
@@ -87,7 +88,7 @@ export async function createWorkOrder(ctx: WoCtx, input: WorkOrderInput) {
   items = await linkMeterItems(ctx, input.assetId ?? null, items);
 
   const number = await nextNumber(ctx.organization.id, "workOrder");
-  return ctx.db.workOrder.create({
+  const wo = await ctx.db.workOrder.create({
     data: {
       organizationId: ctx.organization.id,
       number,
@@ -123,6 +124,13 @@ export async function createWorkOrder(ctx: WoCtx, input: WorkOrderInput) {
       statusLogs: { create: { toStatus: "OPEN", userId: ctx.user.id } },
     },
   });
+  await notifyAssigned(ctx, wo, assigneeIds);
+  return wo;
+}
+
+/** WO_ASSIGNED to people newly put on a work order. */
+export async function notifyAssigned(ctx: WoCtx, wo: { id: string; number: number; title: string }, userIds: string[]) {
+  await notify(ctx, userIds, { type: "WO_ASSIGNED", data: { number: wo.number, title: wo.title, actor: ctx.user.name }, link: `/work-orders/${wo.id}` });
 }
 
 /**
@@ -161,7 +169,7 @@ export async function changeStatus(ctx: WoCtx, workOrderId: string, to: WorkOrde
   const now = new Date();
   if (to === "DONE" || to === "CANCELLED") await stopRunningTimers(ctx, workOrderId, now);
 
-  return ctx.db.workOrder.update({
+  const updated = await ctx.db.workOrder.update({
     where: { id: workOrderId },
     data: {
       status: to,
@@ -171,6 +179,22 @@ export async function changeStatus(ctx: WoCtx, workOrderId: string, to: WorkOrde
       statusLogs: { create: { fromStatus: wo.status, toStatus: to, userId: ctx.user.id, note: note || null } },
     },
   });
+  await notifyStatus(ctx, updated, note);
+  return updated;
+}
+
+/** WO_STATUS to the creator and assignees; when a client-visible job from a request is done, the requester too. */
+async function notifyStatus(ctx: WoCtx, wo: { id: string; number: number; title: string; status: WorkOrderStatus; createdById: string; clientVisible: boolean }, note?: string | null) {
+  const assignees = await ctx.db.workOrderAssignee.findMany({ where: { workOrderId: wo.id }, select: { userId: true } });
+  const data = { number: wo.number, title: wo.title, status: wo.status, actor: ctx.user.name, note: note ?? "" };
+  await notify(ctx, [wo.createdById, ...assignees.map((a) => a.userId)], { type: "WO_STATUS", data, link: `/work-orders/${wo.id}` });
+
+  if (wo.status !== "DONE" || !wo.clientVisible) return;
+  const req = await ctx.db.request.findFirst({ where: { workOrderId: wo.id }, select: { id: true, number: true, requesterId: true, requesterEmail: true } });
+  if (!req) return;
+  const clientData = { ...data, note: "", request: req.number };
+  if (req.requesterId) await notify(ctx, [req.requesterId], { type: "WO_STATUS", data: clientData, link: `/portal/requests/${req.id}` });
+  else notifyExternal(ctx.organization, req.requesterEmail, ctx.organization.defaultLocale, "WO_STATUS", clientData);
 }
 
 export async function stopRunningTimers(ctx: WoCtx, workOrderId: string, at = new Date(), userId?: string) {

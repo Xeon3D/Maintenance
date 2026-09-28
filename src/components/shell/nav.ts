@@ -22,7 +22,7 @@ export const NAV: NavGroup[] = [
       { href: "/requests", labelKey: "requests", icon: "Inbox", permission: "internal.view", ready: true },
       { href: "/preventive", labelKey: "preventive", icon: "CalendarClock", permission: "internal.view", ready: true },
       { href: "/procedures", labelKey: "procedures", icon: "ListChecks", permission: "internal.view", ready: true },
-      { href: "/messages", labelKey: "messages", icon: "MessagesSquare", permission: "internal.view", ready: false },
+      { href: "/messages", labelKey: "messages", icon: "MessagesSquare", permission: "internal.view", ready: true },
     ],
   },
   {
@@ -49,6 +49,7 @@ export const NAV: NavGroup[] = [
   {
     labelKey: "settings",
     items: [
+      { href: "/settings/profile", labelKey: "profile", icon: "UserRound", ready: true },
       { href: "/settings/organization", labelKey: "organization", icon: "Building2", permission: "org.manage", ready: true },
       { href: "/settings/users", labelKey: "users", icon: "UserCog", permission: "users.manage", ready: true },
       { href: "/settings/teams", labelKey: "teams", icon: "UsersRound", permission: "teams.manage", ready: true },

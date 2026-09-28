@@ -45,7 +45,7 @@ export default async function WorkOrderPage({ params }: PageProps<"/work-orders/
 
   const canExecute = ctx.can("workOrders.execute");
   const canUseParts = canExecute && ctx.can("inventory.use");
-  const [meters, procedures, partOptions, locations] = await Promise.all([
+  const [meters, procedures, partOptions, locations, staff] = await Promise.all([
     wo.assetId ? ctx.db.meter.findMany({ where: { assetId: wo.assetId }, select: { id: true, name: true, unit: true }, orderBy: { name: "asc" } }) : [],
     ctx.db.procedure.findMany({ where: { archivedAt: null }, select: { id: true, name: true }, orderBy: { name: "asc" } }),
     canUseParts
@@ -65,6 +65,9 @@ export default async function WorkOrderPage({ params }: PageProps<"/work-orders/
       : [],
     canUseParts
       ? ctx.db.stockLocation.findMany({ where: { archivedAt: null }, select: { id: true, name: true, type: true, userId: true }, orderBy: [{ type: "asc" }, { name: "asc" }] })
+      : [],
+    canExecute
+      ? ctx.db.membership.findMany({ where: { active: true, role: { not: "REQUESTER" } }, select: { user: { select: { id: true, name: true } } }, orderBy: { user: { name: "asc" } } })
       : [],
   ]);
   // Parts come out of my van by default, else the first warehouse.
@@ -197,7 +200,7 @@ export default async function WorkOrderPage({ params }: PageProps<"/work-orders/
                 ),
               )}
             </ol>
-            {canExecute && <CommentBox woId={wo.id} />}
+            {canExecute && <CommentBox woId={wo.id} members={staff.map((m) => m.user).filter((u) => u.id !== ctx.user.id)} />}
           </Card>
         </div>
 
