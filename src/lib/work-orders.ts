@@ -1,5 +1,8 @@
 import "server-only";
 import type { AppContext } from "@/lib/context";
+
+/** What work-order logic needs; the PM scheduler builds one without a signed-in request. */
+export type WoCtx = Pick<AppContext, "db" | "organization" | "user">;
 import { assertOwned, nextNumber } from "@/lib/db/tenant";
 import type { ChecklistItemType, Priority, SystemType, WorkOrderStatus, WorkOrderType } from "@/generated/prisma/enums";
 
@@ -18,6 +21,7 @@ export type ChecklistItemInput = {
   required?: boolean;
   options?: string[];
   unit?: string | null;
+  meterId?: string | null;
 };
 
 export type WorkOrderInput = {
@@ -33,6 +37,7 @@ export type WorkOrderInput = {
   procedureId?: string | null;
   pmScheduleId?: string | null;
   contractId?: string | null;
+  alertMeterId?: string | null;
   dueDate?: Date | null;
   startDate?: Date | null;
   estimatedMinutes?: number | null;
@@ -42,7 +47,7 @@ export type WorkOrderInput = {
 };
 
 /** Validates villa/area/asset/team consistency and fills villa/area/system from the asset. */
-export async function resolveRefs(ctx: AppContext, input: WorkOrderInput) {
+export async function resolveRefs(ctx: WoCtx, input: WorkOrderInput) {
   await assertOwned(ctx.db, "team", [input.teamId]);
   await assertOwned(ctx.db, "procedure", [input.procedureId]);
   let { villaId = null, areaId = null, system = null } = input;
@@ -62,7 +67,7 @@ export async function resolveRefs(ctx: AppContext, input: WorkOrderInput) {
 }
 
 /** Assignees must be active, non-client members of the org. */
-export async function validateAssignees(ctx: AppContext, ids: string[] = []) {
+export async function validateAssignees(ctx: WoCtx, ids: string[] = []) {
   const unique = [...new Set(ids)];
   if (unique.length === 0) return unique;
   const n = await ctx.db.membership.count({ where: { userId: { in: unique }, active: true, role: { not: "REQUESTER" } } });
@@ -70,7 +75,7 @@ export async function validateAssignees(ctx: AppContext, ids: string[] = []) {
   return unique;
 }
 
-export async function createWorkOrder(ctx: AppContext, input: WorkOrderInput) {
+export async function createWorkOrder(ctx: WoCtx, input: WorkOrderInput) {
   const refs = await resolveRefs(ctx, input);
   const assigneeIds = await validateAssignees(ctx, input.assigneeIds);
 
@@ -79,6 +84,7 @@ export async function createWorkOrder(ctx: AppContext, input: WorkOrderInput) {
     const proc = await ctx.db.procedure.findUnique({ where: { id: input.procedureId }, include: { items: { orderBy: { sortOrder: "asc" } } } });
     items = proc?.items ?? [];
   }
+  items = await linkMeterItems(ctx, input.assetId ?? null, items);
 
   const number = await nextNumber(ctx.organization.id, "workOrder");
   return ctx.db.workOrder.create({
@@ -95,6 +101,7 @@ export async function createWorkOrder(ctx: AppContext, input: WorkOrderInput) {
       procedureId: input.procedureId ?? null,
       pmScheduleId: input.pmScheduleId ?? null,
       contractId: input.contractId ?? null,
+      alertMeterId: input.alertMeterId ?? null,
       dueDate: input.dueDate ?? null,
       startDate: input.startDate ?? null,
       estimatedMinutes: input.estimatedMinutes ?? null,
@@ -110,10 +117,25 @@ export async function createWorkOrder(ctx: AppContext, input: WorkOrderInput) {
           required: it.required ?? false,
           options: it.options ?? [],
           unit: it.unit ?? null,
+          meterId: it.meterId ?? null,
         })),
       },
       statusLogs: { create: { toStatus: "OPEN", userId: ctx.user.id } },
     },
+  });
+}
+
+/**
+ * Meter-reading steps without a meter get linked to the asset's meter when exactly one
+ * meter on that asset has the same unit (e.g. a "%" step and the UPS "Battery" meter).
+ */
+async function linkMeterItems(ctx: WoCtx, assetId: string | null, items: ChecklistItemInput[]) {
+  if (!assetId || !items.some((i) => i.type === "METER_READING" && !i.meterId)) return items;
+  const meters = await ctx.db.meter.findMany({ where: { assetId }, select: { id: true, unit: true } });
+  return items.map((i) => {
+    if (i.type !== "METER_READING" || i.meterId) return i;
+    const matches = meters.filter((m) => !i.unit || m.unit.toLowerCase() === i.unit.toLowerCase());
+    return matches.length === 1 ? { ...i, meterId: matches[0].id, unit: i.unit ?? matches[0].unit } : i;
   });
 }
 
@@ -124,7 +146,7 @@ export function isItemComplete(item: { type: ChecklistItemType; value: string | 
 }
 
 /** Applies a status transition with its side effects (completion stamps, timers, SLA response). */
-export async function changeStatus(ctx: AppContext, workOrderId: string, to: WorkOrderStatus, note?: string | null) {
+export async function changeStatus(ctx: WoCtx, workOrderId: string, to: WorkOrderStatus, note?: string | null) {
   const wo = await ctx.db.workOrder.findUnique({
     where: { id: workOrderId },
     include: { items: { select: { type: true, value: true, required: true } } },
@@ -151,7 +173,7 @@ export async function changeStatus(ctx: AppContext, workOrderId: string, to: Wor
   });
 }
 
-export async function stopRunningTimers(ctx: AppContext, workOrderId: string, at = new Date(), userId?: string) {
+export async function stopRunningTimers(ctx: WoCtx, workOrderId: string, at = new Date(), userId?: string) {
   const running = await ctx.db.timeEntry.findMany({ where: { workOrderId, endedAt: null, ...(userId ? { userId } : {}) } });
   for (const e of running) {
     await ctx.db.timeEntry.update({

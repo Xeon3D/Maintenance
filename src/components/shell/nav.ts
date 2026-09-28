@@ -19,8 +19,8 @@ export const NAV: NavGroup[] = [
     items: [
       { href: "/work-orders", labelKey: "workOrders", icon: "ClipboardList", permission: "internal.view", ready: true },
       { href: "/requests", labelKey: "requests", icon: "Inbox", ready: false },
-      { href: "/preventive", labelKey: "preventive", icon: "CalendarClock", permission: "internal.view", ready: false },
-      { href: "/procedures", labelKey: "procedures", icon: "ListChecks", permission: "internal.view", ready: false },
+      { href: "/preventive", labelKey: "preventive", icon: "CalendarClock", permission: "internal.view", ready: true },
+      { href: "/procedures", labelKey: "procedures", icon: "ListChecks", permission: "internal.view", ready: true },
       { href: "/messages", labelKey: "messages", icon: "MessagesSquare", permission: "internal.view", ready: false },
     ],
   },
@@ -30,7 +30,7 @@ export const NAV: NavGroup[] = [
       { href: "/clients", labelKey: "clients", icon: "Users", permission: "internal.view", ready: true },
       { href: "/villas", labelKey: "villas", icon: "House", permission: "internal.view", ready: true },
       { href: "/assets", labelKey: "assets", icon: "Cpu", permission: "internal.view", ready: true },
-      { href: "/meters", labelKey: "meters", icon: "Gauge", permission: "internal.view", ready: false },
+      { href: "/meters", labelKey: "meters", icon: "Gauge", permission: "internal.view", ready: true },
     ],
   },
   {

@@ -8,7 +8,10 @@ import { SignaturePad, type SignaturePadHandle } from "@/components/signature-pa
 import { uploadFile } from "@/lib/upload-client";
 import { cn } from "@/lib/utils";
 import { ChecklistItemType } from "@/generated/prisma/enums";
-import { addItemAction, answerItemAction, deleteItemAction, moveItemAction } from "../actions";
+import { addItemAction, answerItemAction, applyProcedureAction, deleteItemAction, moveItemAction } from "../actions";
+
+type MeterOpt = { id: string; name: string; unit: string };
+type ProcOpt = { id: string; name: string };
 
 export type ChecklistItem = {
   id: string;
@@ -30,9 +33,13 @@ export function Checklist({
   items,
   locked,
   canEdit,
+  meters = [],
+  procedures = [],
 }: {
   woId: string;
   items: ChecklistItem[];
+  meters?: MeterOpt[]; // meters on the WO's asset
+  procedures?: ProcOpt[];
   locked: boolean; // WO closed or user can't execute
   canEdit: boolean; // may change the checklist's structure
 }) {
@@ -79,7 +86,8 @@ export function Checklist({
           </li>
         ))}
       </ul>
-      {editing && <AddItemForm woId={woId} />}
+      {editing && <AddItemForm woId={woId} meters={meters} />}
+      {editing && procedures.length > 0 && <ApplyProcedure woId={woId} procedures={procedures} />}
     </div>
   );
 }
@@ -328,13 +336,14 @@ function ItemEditControls({ woId, itemId, first, last }: { woId: string; itemId:
   );
 }
 
-function AddItemForm({ woId }: { woId: string }) {
+function AddItemForm({ woId, meters }: { woId: string; meters: MeterOpt[] }) {
   const t = useTranslations();
   const [type, setType] = useState<ChecklistItemType>("CHECKBOX");
   const [label, setLabel] = useState("");
   const [required, setRequired] = useState(false);
   const [options, setOptions] = useState("");
   const [unit, setUnit] = useState("");
+  const [meterId, setMeterId] = useState("");
   const [pending, start] = useTransition();
 
   return (
@@ -349,7 +358,8 @@ function AddItemForm({ woId }: { woId: string }) {
             label,
             required: type === "HEADING" ? false : required,
             options: type === "MULTIPLE_CHOICE" ? options.split(",").map((o) => o.trim()).filter(Boolean) : [],
-            unit: unit.trim() || null,
+            unit: (type === "METER_READING" && meters.find((m) => m.id === meterId)?.unit) || unit.trim() || null,
+            meterId: type === "METER_READING" && meterId ? meterId : null,
           });
           setLabel("");
           setOptions("");
@@ -365,7 +375,17 @@ function AddItemForm({ woId }: { woId: string }) {
           ))}
         </Select>
         <Input value={label} onChange={(e) => setLabel(e.target.value)} placeholder={t("checklist.labelPlaceholder")} className="h-9 min-w-48 flex-1" />
-        {(type === "NUMBER" || type === "METER_READING") && (
+        {type === "METER_READING" && meters.length > 0 && (
+          <Select value={meterId} onChange={(e) => setMeterId(e.target.value)} className="h-9 w-auto">
+            <option value="">{t("checklist.noMeter")}</option>
+            {meters.map((m) => (
+              <option key={m.id} value={m.id}>
+                {m.name} ({m.unit})
+              </option>
+            ))}
+          </Select>
+        )}
+        {(type === "NUMBER" || (type === "METER_READING" && !meterId)) && (
           <Input value={unit} onChange={(e) => setUnit(e.target.value)} placeholder={t("checklist.unit")} className="h-9 w-24" />
         )}
       </div>
@@ -387,5 +407,28 @@ function AddItemForm({ woId }: { woId: string }) {
         </Button>
       </div>
     </form>
+  );
+}
+
+function ApplyProcedure({ woId, procedures }: { woId: string; procedures: ProcOpt[] }) {
+  const t = useTranslations("checklist");
+  const [pending, start] = useTransition();
+  return (
+    <div className="flex items-center gap-2 border-t border-border bg-gray-50/60 px-4 py-3 text-sm">
+      <span className="text-muted">{t("fromProcedure")}</span>
+      <Select
+        value=""
+        disabled={pending}
+        onChange={(e) => e.target.value && start(() => applyProcedureAction(woId, e.target.value))}
+        className="h-9 w-auto flex-1"
+      >
+        <option value="">—</option>
+        {procedures.map((p) => (
+          <option key={p.id} value={p.id}>
+            {p.name}
+          </option>
+        ))}
+      </Select>
+    </div>
   );
 }

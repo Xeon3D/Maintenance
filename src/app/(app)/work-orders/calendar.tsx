@@ -7,6 +7,9 @@ import type { AppContext } from "@/lib/context";
 import { sp } from "@/lib/list";
 import { cn } from "@/lib/utils";
 import { woFilter } from "./filter";
+import { recurrenceOf } from "@/lib/pm";
+import { occurrencesBetween } from "@/lib/pm-schedule";
+import { SystemType } from "@/generated/prisma/enums";
 
 /** yyyy-mm-dd of `d` in the given time zone. */
 function dayKey(d: Date, timeZone: string) {
@@ -36,6 +39,29 @@ export async function CalendarView({ ctx, params }: { ctx: AppContext; params: R
     orderBy: { dueDate: "asc" },
     take: 1000,
   });
+  // Forecast: future occurrences of active time-based PM schedules (not yet generated).
+  const system = sp(params, "system");
+  const schedules = await ctx.db.pMSchedule.findMany({
+    where: {
+      active: true,
+      trigger: "TIME",
+      nextDueAt: { not: null, lt: rangeEnd },
+      ...(sp(params, "villaId") ? { villaId: sp(params, "villaId") } : {}),
+      ...(system && system in SystemType ? { system: system as SystemType } : {}),
+      ...(sp(params, "assignee") === "me" ? { assignees: { some: { userId: ctx.user.id } } } : {}),
+    },
+  });
+  const planned = new Map<string, { id: string; title: string }[]>();
+  for (const s of schedules) {
+    const r = recurrenceOf(s, tz);
+    if (!r) continue;
+    const from = s.nextDueAt! > rangeStart ? s.nextDueAt! : rangeStart;
+    for (const d of occurrencesBetween(r, from, rangeEnd, 45)) {
+      const k = dayKey(d, tz);
+      planned.set(k, [...(planned.get(k) ?? []), { id: s.id, title: s.title }]);
+    }
+  }
+
   const byDay = new Map<string, typeof wos>();
   for (const w of wos) {
     const k = dayKey(w.dueDate!, tz);
@@ -74,6 +100,7 @@ export async function CalendarView({ ctx, params }: { ctx: AppContext; params: R
           const key = d.toISOString().slice(0, 10);
           const inMonth = d.getUTCMonth() === m - 1;
           const list = byDay.get(key) ?? [];
+          const plan = planned.get(key) ?? [];
           return (
             <div key={key} className={cn("min-h-24 border-b border-r border-border p-1 text-xs", !inMonth && "bg-gray-50/70")}>
               <div
@@ -96,6 +123,17 @@ export async function CalendarView({ ctx, params }: { ctx: AppContext; params: R
                   </Link>
                 ))}
                 {list.length > 4 && <div className="px-1 text-muted">+{list.length - 4}</div>}
+                {plan.slice(0, 3).map((p, i) => (
+                  <Link
+                    key={`${p.id}-${i}`}
+                    href={`/preventive/${p.id}`}
+                    title={`${t("pm.planned")}: ${p.title}`}
+                    className="block truncate rounded border border-dashed border-gray-300 px-1 py-0.5 text-muted"
+                  >
+                    {p.title}
+                  </Link>
+                ))}
+                {plan.length > 3 && <div className="px-1 text-muted">+{plan.length - 3}</div>}
               </div>
             </div>
           );

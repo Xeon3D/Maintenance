@@ -13,6 +13,7 @@ import { daysFromNow } from "@/lib/dates";
 import { setAssetArchivedAction } from "../actions";
 import { StatusControl } from "./status-control";
 import { RecentWorkOrders } from "@/components/recent-work-orders";
+import { MetersPanel } from "../../meters/meters-panel";
 
 const WARRANTY_SOON_DAYS = 60;
 
@@ -150,6 +151,8 @@ export default async function AssetPage({ params }: PageProps<"/assets/[id]">) {
               </dl>
             </Card>
           )}
+
+          <MetersPanel ctx={ctx} assetId={asset.id} />
 
           <RecentWorkOrders ctx={ctx} where={{ assetId: asset.id }} newHref={`/work-orders/new?assetId=${asset.id}`} viewAllHref={`/work-orders?assetId=${asset.id}&status=all`} />
 

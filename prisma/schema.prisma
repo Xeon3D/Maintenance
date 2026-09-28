@@ -182,29 +182,30 @@ model User {
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
-  memberships       Membership[]
-  teamMemberships   TeamMember[]
-  assignedWOs       WorkOrderAssignee[]
-  createdWOs        WorkOrder[]          @relation("WOCreatedBy")
-  completedWOs      WorkOrder[]          @relation("WOCompletedBy")
-  woComments        WorkOrderComment[]
-  timeEntries       TimeEntry[]
-  statusLogs        WorkOrderStatusLog[]
-  checklistAnswers  WorkOrderItem[]
-  requests          Request[]
-  pmAssignments     PMAssignee[]
-  meterReadings     MeterReading[]
-  stockMovements    StockMovement[]
-  vans              StockLocation[]
-  posCreated        PurchaseOrder[]      @relation("POCreatedBy")
-  posApproved       PurchaseOrder[]      @relation("POApprovedBy")
-  conversationSeats ConversationMember[]
-  messages          Message[]
-  notifications     Notification[]
-  auditLogs         AuditLog[]
-  attachments       Attachment[]
-  assetStatusLogs   AssetStatusLog[]
-  invitationsSent   Invitation[]
+  memberships        Membership[]
+  teamMemberships    TeamMember[]
+  assignedWOs        WorkOrderAssignee[]
+  createdWOs         WorkOrder[]          @relation("WOCreatedBy")
+  completedWOs       WorkOrder[]          @relation("WOCompletedBy")
+  woComments         WorkOrderComment[]
+  timeEntries        TimeEntry[]
+  statusLogs         WorkOrderStatusLog[]
+  checklistAnswers   WorkOrderItem[]
+  requests           Request[]
+  pmAssignments      PMAssignee[]
+  pmSchedulesCreated PMSchedule[]         @relation("PMCreatedBy")
+  meterReadings      MeterReading[]
+  stockMovements     StockMovement[]
+  vans               StockLocation[]
+  posCreated         PurchaseOrder[]      @relation("POCreatedBy")
+  posApproved        PurchaseOrder[]      @relation("POApprovedBy")
+  conversationSeats  ConversationMember[]
+  messages           Message[]
+  notifications      Notification[]
+  auditLogs          AuditLog[]
+  attachments        Attachment[]
+  assetStatusLogs    AssetStatusLog[]
+  invitationsSent    Invitation[]
 }
 
 model Organization {
@@ -565,6 +566,7 @@ model WorkOrder {
   procedureId      String?
   pmScheduleId     String?
   contractId       String?
+  alertMeterId     String? // opened automatically by an out-of-range meter reading
   createdById      String
   completedById    String?
   dueDate          DateTime?
@@ -588,6 +590,7 @@ model WorkOrder {
   procedure      Procedure?           @relation(fields: [procedureId], references: [id], onDelete: SetNull)
   pmSchedule     PMSchedule?          @relation(fields: [pmScheduleId], references: [id], onDelete: SetNull)
   contract       ServiceContract?     @relation(fields: [contractId], references: [id], onDelete: SetNull)
+  alertMeter     Meter?               @relation("MeterAlerts", fields: [alertMeterId], references: [id], onDelete: SetNull)
   createdBy      User                 @relation("WOCreatedBy", fields: [createdById], references: [id])
   completedBy    User?                @relation("WOCompletedBy", fields: [completedById], references: [id])
   assignees      WorkOrderAssignee[]
@@ -633,7 +636,8 @@ model WorkOrderItem {
   required      Boolean           @default(false)
   options       String[]
   unit          String?
-  // Answer: "true"/"false", "PASS"/"FAIL"/"FLAG", text, number, choice, or attachment URL.
+  meterId       String? // METER_READING items record their answer as a reading on this meter
+  // Answer: "true"/"false", "PASS"/"FAIL"/"FLAG", text, number, choice, or attachment id.
   value         String?
   note          String?
   completedById String?
@@ -641,6 +645,7 @@ model WorkOrderItem {
 
   workOrder   WorkOrder    @relation(fields: [workOrderId], references: [id], onDelete: Cascade)
   completedBy User?        @relation(fields: [completedById], references: [id], onDelete: SetNull)
+  meter       Meter?       @relation(fields: [meterId], references: [id], onDelete: SetNull)
   attachments Attachment[]
 
   @@index([workOrderId, sortOrder])
@@ -779,6 +784,7 @@ model PMSchedule {
   teamId           String?
   estimatedMinutes Int?
   lastGeneratedAt  DateTime?
+  createdById      String?
   createdAt        DateTime    @default(now())
   updatedAt        DateTime    @updatedAt
 
@@ -788,6 +794,7 @@ model PMSchedule {
   asset        Asset?       @relation(fields: [assetId], references: [id], onDelete: SetNull)
   procedure    Procedure?   @relation(fields: [procedureId], references: [id], onDelete: SetNull)
   team         Team?        @relation(fields: [teamId], references: [id], onDelete: SetNull)
+  createdBy    User?        @relation("PMCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
   assignees    PMAssignee[]
   workOrders   WorkOrder[]
 
@@ -811,16 +818,19 @@ model Meter {
   assetId        String
   name           String
   unit           String
-  lowerLimit     Float? // reading outside limits raises a WO/notification
+  lowerLimit     Float? // a reading outside the limits is flagged…
   upperLimit     Float?
+  alertWorkOrder Boolean   @default(false) // …and, if set, opens a corrective WO (one at a time)
   lastValue      Float?
   lastReadAt     DateTime?
   createdAt      DateTime  @default(now())
 
-  organization Organization   @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-  asset        Asset          @relation(fields: [assetId], references: [id], onDelete: Cascade)
-  readings     MeterReading[]
-  pmSchedules  PMSchedule[]
+  organization    Organization    @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  asset           Asset           @relation(fields: [assetId], references: [id], onDelete: Cascade)
+  readings        MeterReading[]
+  pmSchedules     PMSchedule[]
+  alertWorkOrders WorkOrder[]     @relation("MeterAlerts")
+  checklistItems  WorkOrderItem[]
 
   @@index([organizationId, assetId])
 }

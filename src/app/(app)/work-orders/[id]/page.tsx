@@ -41,6 +41,10 @@ export default async function WorkOrderPage({ params }: PageProps<"/work-orders/
   });
   if (!wo) notFound();
 
+  const [meters, procedures] = await Promise.all([
+    wo.assetId ? ctx.db.meter.findMany({ where: { assetId: wo.assetId }, select: { id: true, name: true, unit: true }, orderBy: { name: "asc" } }) : [],
+    ctx.db.procedure.findMany({ where: { archivedAt: null }, select: { id: true, name: true }, orderBy: { name: "asc" } }),
+  ]);
   const canExecute = ctx.can("workOrders.execute");
   const involved = wo.createdById === ctx.user.id || wo.assignees.some((a) => a.user.id === ctx.user.id);
   const canEdit = ctx.can("workOrders.manage") || (ctx.can("workOrders.create") && involved);
@@ -119,6 +123,8 @@ export default async function WorkOrderPage({ params }: PageProps<"/work-orders/
               woId={wo.id}
               locked={closed || !canExecute}
               canEdit={canEdit && !closed}
+              meters={meters}
+              procedures={procedures}
               items={wo.items.map((i) => ({
                 id: i.id,
                 type: i.type,

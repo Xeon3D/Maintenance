@@ -6,6 +6,7 @@ import { z } from "zod";
 import { getContext, requirePermission, type AppContext } from "@/lib/context";
 import { enumOf, optEnumOf, optId, optNumber, optStr, parseForm, str, type FormResult } from "@/lib/forms";
 import { deleteObject } from "@/lib/storage";
+import { recordReading } from "@/lib/meters";
 import {
   changeStatus,
   createWorkOrder,
@@ -46,6 +47,7 @@ const woSchema = z.object({
   areaId: optId(),
   assetId: optId(),
   teamId: optId(),
+  procedureId: optId(), // create only: copies the procedure's steps
   dueDate: z.preprocess((v) => (v ? v : undefined), z.coerce.date().optional()).transform((v) => v ?? null),
   startDate: z.preprocess((v) => (v ? v : undefined), z.coerce.date().optional()).transform((v) => v ?? null),
   estimatedHours: optNumber().refine((v) => v === null || (v >= 0 && v <= 1000)),
@@ -68,7 +70,7 @@ export async function saveWorkOrderAction(id: string | null, _: FormResult, form
       const ids = await validateAssignees(ctx, assigneeIds);
       await ctx.db.workOrder.update({
         where: { id },
-        data: { ...fields, ...refs, assignees: { deleteMany: {}, create: ids.map((userId) => ({ userId })) } },
+        data: { ...fields, procedureId: undefined, ...refs, assignees: { deleteMany: {}, create: ids.map((userId) => ({ userId })) } },
       });
     } else {
       woId = (await createWorkOrder(ctx, input)).id;
@@ -113,14 +115,49 @@ const itemSchema = z.object({
   required: z.boolean().default(false),
   options: z.array(z.string().trim().min(1).max(100)).max(20).default([]),
   unit: z.string().trim().max(20).nullable().default(null),
+  meterId: z.string().max(40).nullable().default(null),
 });
 
 export async function addItemAction(woId: string, input: z.input<typeof itemSchema>) {
   const ctx = await getContext();
-  await editableWorkOrder(ctx, woId);
+  const wo = await editableWorkOrder(ctx, woId);
   const item = itemSchema.parse(input);
+  if (item.meterId) {
+    // Only meters on this work order's asset.
+    const ok = wo.assetId && (await ctx.db.meter.count({ where: { id: item.meterId, assetId: wo.assetId } }));
+    if (!ok || item.type !== "METER_READING") item.meterId = null;
+  }
   const last = await ctx.db.workOrderItem.findFirst({ where: { workOrderId: woId }, orderBy: { sortOrder: "desc" } });
   await ctx.db.workOrderItem.create({ data: { ...item, workOrderId: woId, sortOrder: (last?.sortOrder ?? -1) + 1 } });
+  revalidatePath(path(woId));
+}
+
+/** Appends a procedure's steps to an existing work order's checklist. */
+export async function applyProcedureAction(woId: string, procedureId: string) {
+  const ctx = await getContext();
+  const wo = await editableWorkOrder(ctx, woId);
+  const proc = await ctx.db.procedure.findUnique({ where: { id: procedureId }, include: { items: { orderBy: { sortOrder: "asc" } } } });
+  if (!proc) throw new Error("Not found");
+  const last = await ctx.db.workOrderItem.findFirst({ where: { workOrderId: woId }, orderBy: { sortOrder: "desc" } });
+  const meters = wo.assetId ? await ctx.db.meter.findMany({ where: { assetId: wo.assetId }, select: { id: true, unit: true } }) : [];
+  const base = (last?.sortOrder ?? -1) + 1;
+  await ctx.db.workOrderItem.createMany({
+    data: proc.items.map((it, i) => {
+      const match = it.type === "METER_READING" ? meters.filter((m) => !it.unit || m.unit.toLowerCase() === it.unit.toLowerCase()) : [];
+      return {
+        workOrderId: woId,
+        sortOrder: base + i,
+        type: it.type,
+        label: it.label,
+        description: it.description,
+        required: it.required,
+        options: it.options,
+        unit: it.unit,
+        meterId: match.length === 1 ? match[0].id : null,
+      };
+    }),
+  });
+  if (!wo.procedureId) await ctx.db.workOrder.update({ where: { id: woId }, data: { procedureId } });
   revalidatePath(path(woId));
 }
 
@@ -165,6 +202,10 @@ export async function answerItemAction(woId: string, itemId: string, value: stri
       completedAt: v ? new Date() : null,
     },
   });
+  // Meter-reading steps also log the reading on the meter (limits, meter-based PMs, alerts).
+  if (v !== null && item.type === "METER_READING" && item.meterId && v !== item.value) {
+    await recordReading(ctx, item.meterId, Number(v), woId);
+  }
   // Starting the checklist on an open WO counts as starting work.
   if (v && wo.status === "OPEN") await changeStatus(ctx, woId, "IN_PROGRESS");
   revalidatePath(path(woId));

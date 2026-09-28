@@ -34,6 +34,7 @@ export function WorkOrderFields({
   assets,
   teams,
   people,
+  procedures,
 }: {
   wo: WODefaults;
   villas: { id: string; name: string; code: string | null }[];
@@ -41,12 +42,14 @@ export function WorkOrderFields({
   assets: (Ref & { system: SystemType })[];
   teams: { id: string; name: string; memberIds: string[] }[];
   people: { id: string; name: string }[];
+  procedures?: { id: string; name: string }[]; // offered when creating
 }) {
   const t = useTranslations();
   const [villaId, setVillaId] = useState(wo.villaId ?? "");
   const [assetId, setAssetId] = useState(wo.assetId ?? "");
   const [system, setSystem] = useState<string>(wo.system ?? "");
   const [assignees, setAssignees] = useState<Set<string>>(new Set(wo.assigneeIds ?? []));
+  const [title, setTitle] = useState(wo.title ?? "");
 
   const villaAreas = useMemo(() => flattenTree(areas.filter((a) => a.villaId === villaId)), [areas, villaId]);
   const villaAssets = useMemo(() => flattenTree(assets.filter((a) => a.villaId === villaId)), [assets, villaId]);
@@ -62,9 +65,28 @@ export function WorkOrderFields({
   return (
     <>
       <Field label={t("wo.title")}>
-        <Input name="title" defaultValue={wo.title} required autoFocus placeholder={t("wo.titlePlaceholder")} />
+        <Input name="title" value={title} onChange={(e) => setTitle(e.target.value)} required autoFocus placeholder={t("wo.titlePlaceholder")} />
         <FieldError name="title" />
       </Field>
+      {procedures && procedures.length > 0 && (
+        <Field label={t("pm.procedure")} hint={t("wo.procedureHint")}>
+          <Select
+            name="procedureId"
+            defaultValue=""
+            onChange={(e) => {
+              const p = procedures.find((x) => x.id === e.target.value);
+              if (p && !title.trim()) setTitle(p.name);
+            }}
+          >
+            <option value="">—</option>
+            {procedures.map((p) => (
+              <option key={p.id} value={p.id}>
+                {p.name}
+              </option>
+            ))}
+          </Select>
+        </Field>
+      )}
       <Field label={t("wo.descriptionLabel")}>
         <Textarea name="description" defaultValue={wo.description ?? ""} />
       </Field>

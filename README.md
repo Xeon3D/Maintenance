@@ -12,7 +12,19 @@ npm run db:seed        # demo org — sign in as owner@demo.test / demo1234
 npm run dev            # http://localhost:3000
 ```
 
-`.env` needs `DATABASE_URL`, `AUTH_SECRET`, `AUTH_TRUST_HOST`, `FIELD_ENCRYPTION_KEY` (32 random bytes, base64) and `UPLOAD_DIR`.
+`.env` needs `DATABASE_URL`, `AUTH_SECRET`, `AUTH_TRUST_HOST`, `FIELD_ENCRYPTION_KEY` (32 random bytes, base64), `UPLOAD_DIR` and `CRON_SECRET`.
+
+## Preventive maintenance scheduler
+
+Time-based schedules generate work orders when they come due (minus their lead days).
+Run the scheduler one of two ways:
+
+- **Serverless / managed hosting:** call `GET /api/cron/pm` every 15 minutes with
+  `Authorization: Bearer $CRON_SECRET` (e.g. Vercel Cron).
+- **Self-hosted / dev:** set `SCHEDULER_INTERVAL_MINUTES=15` and the Next.js server runs it in-process.
+
+Admins can also press "Run scheduler" on the Preventive maintenance page. Meter-based
+schedules and meter alerts run immediately when a reading is recorded.
 
 Demo users (password `demo1234`): `owner@`, `manager@`, `tech.network@`, `tech.electrical@`, `viewer@`, `client@` — all `@demo.test`.
 
