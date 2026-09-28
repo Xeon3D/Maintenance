@@ -8,6 +8,7 @@ import { ActionForm, FieldError } from "@/components/action-form";
 import { Field, Input } from "@/components/ui";
 import { ArchiveButton } from "@/components/archive-button";
 import { DeleteContactButton } from "./client";
+import { ContractStatusBadge } from "../../contracts/status-badge";
 import { getContext } from "@/lib/context";
 import { addContactAction, setClientArchivedAction } from "../actions";
 
@@ -21,6 +22,7 @@ export default async function ClientPage({ params }: PageProps<"/clients/[id]">)
     where: { id },
     include: {
       contacts: { orderBy: [{ isPrimary: "desc" }, { name: "asc" }] },
+      contracts: { orderBy: { startDate: "desc" }, include: { villa: { select: { name: true } } } },
       villas: {
         where: { archivedAt: null },
         orderBy: { name: "asc" },
@@ -80,6 +82,41 @@ export default async function ClientPage({ params }: PageProps<"/clients/[id]">)
                         <span className="block text-xs text-muted">{[v.city, v.country].filter(Boolean).join(", ")}</span>
                       </span>
                       <span className="text-sm text-muted">{t("assets.count", { count: v._count.assets })}</span>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </Card>
+
+          <Card>
+            <div className="flex items-center justify-between border-b border-border px-5 py-3">
+              <h2 className="font-medium">{t("nav.contracts")}</h2>
+              {ctx.can("contracts.manage") && (
+                <Link href={`/contracts/new?clientId=${client.id}`}>
+                  <Button size="sm" variant="secondary">
+                    <Plus className="size-4" />
+                    {t("contracts.new")}
+                  </Button>
+                </Link>
+              )}
+            </div>
+            {client.contracts.length === 0 ? (
+              <p className="px-5 py-4 text-sm text-muted">{t("contracts.noneForClient")}</p>
+            ) : (
+              <ul className="divide-y divide-border">
+                {client.contracts.map((c) => (
+                  <li key={c.id}>
+                    <Link href={`/contracts/${c.id}`} className="flex items-center justify-between gap-2 px-5 py-3 hover:bg-gray-50">
+                      <span className="min-w-0">
+                        <span className="block font-medium">{c.name}</span>
+                        <span className="block text-xs text-muted">
+                          {c.villa?.name ?? t("contracts.allVillas")}
+                          {(c.responseTimeHours || c.resolutionTimeHours) &&
+                            ` · ${t("contracts.slaShort", { response: c.responseTimeHours ?? "—", resolution: c.resolutionTimeHours ?? "—" })}`}
+                        </span>
+                      </span>
+                      <ContractStatusBadge status={c.status} endDate={c.endDate} />
                     </Link>
                   </li>
                 ))}

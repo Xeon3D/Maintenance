@@ -5,6 +5,7 @@ import type { AppContext } from "@/lib/context";
 export type WoCtx = Pick<AppContext, "db" | "organization" | "user">;
 import { assertOwned, nextNumber } from "@/lib/db/tenant";
 import { notify, notifyExternal } from "@/lib/notify";
+import { contractFor } from "@/lib/contracts";
 import type { ChecklistItemType, Priority, SystemType, WorkOrderStatus, WorkOrderType } from "@/generated/prisma/enums";
 
 export const ACTIVE_STATUSES: WorkOrderStatus[] = ["OPEN", "IN_PROGRESS", "ON_HOLD"];
@@ -101,7 +102,7 @@ export async function createWorkOrder(ctx: WoCtx, input: WorkOrderInput) {
       teamId: input.teamId ?? null,
       procedureId: input.procedureId ?? null,
       pmScheduleId: input.pmScheduleId ?? null,
-      contractId: input.contractId ?? null,
+      contractId: input.contractId ?? (await contractFor(ctx.db, refs.villaId, refs.system)),
       alertMeterId: input.alertMeterId ?? null,
       dueDate: input.dueDate ?? null,
       startDate: input.startDate ?? null,

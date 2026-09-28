@@ -1,6 +1,6 @@
 # Handoff — VillaOps CMMS
 
-State as of **2026-09-28**, phase 7 of 10 done (see `git log` for the commit). Read this, then
+State as of **2026-09-28**, phase 8 of 10 done (see `git log` for the commit). Read this, then
 `CLAUDE.md` (conventions) and `docs/ROADMAP.md` (phase list), before touching code.
 
 ---
@@ -37,8 +37,8 @@ and lighting. The user chose, and does not want re-litigated:
 | 5 | Requests (portal + anonymous QR) and client portal | ✅ `82554bc` |
 | 6 | Inventory & purchasing: parts, stock locations, WO parts, vendors, POs | ✅ |
 | 7 | Messaging & notifications: in-app, email, web push, chat, password reset | ✅ |
-| 8 | **Reporting & dashboards** | ⏭ next |
-| 9 | Offline mobile PWA | |
+| 8 | Reporting & dashboards + service contracts (SLA) | ✅ |
+| 9 | **Offline mobile PWA** | ⏭ next |
 | 10 | SaaS layer: Stripe billing, limits, super-admin | |
 
 The **full data
@@ -228,15 +228,16 @@ markers), Message, VerificationToken (password reset).
 
 **Exist but have no UI yet (the remaining phases):**
 - **Phase 10:** `Subscription` (a trial is created at sign-up).
-- **Not on any phase yet** (mention to the user): `ServiceContract` (SLA response/resolution
-  hours, included visits; `WorkOrder.contractId`, `firstResponseAt` is already stamped),
-  and `Category` (WO categories). Email verification at sign-up isn't done either.
+- **Not on any phase yet** (mention to the user): `Category` (WO categories). Email verification
+  at sign-up isn't done either.
+
+**Built in phase 8 (no migration):** `ServiceContract` UI; `WorkOrder.contractId` is now set automatically.
 
 ---
 
 ## 6. How to verify (proven techniques)
 
-- **Checks:** `npm run typecheck`, `npm run lint` (`npx eslint src tests`), `npm test` (vitest, 59 tests).
+- **Checks:** `npm run typecheck`, `npm run lint` (`npx eslint src tests`), `npm test` (vitest, 72 tests).
 - **Only one `next dev` per folder:** if another session's server already runs on :3000, attach with
   `preview_start({url: "http://localhost:3000"})` instead of starting a second one (it serves the same code).
 - **Library-level checks against the real DB:** a temporary `tests/_x.test.ts` with
@@ -271,6 +272,8 @@ markers), Message, VerificationToken (password reset).
   - WOs #1–#6. #2 is a meter alert, now internal. #5 is a deliberate overdue catch-up.
   - 2 PM schedules, a UPS battery meter with readings, and 7 starter procedures.
   - Requests R1 (approved → WO #6) and R2 (declined).
+  - Phase 8: contract "Premium maintenance 2026" (Whitmore, all villas, 4 h / 48 h, 4 visits,
+    €450/month) linked to WOs #1–#7.
   - Phase 7: a DM Miguel↔Rui, a group "Pool house job" (Miguel, Rui, Daniel), a comment on WO #7
     mentioning Daniel (who is now assigned to #7, which is In progress), PO-2 awaiting approval,
     and assorted notifications. Test emails are in `.mail/`.
@@ -387,11 +390,35 @@ markers), Message, VerificationToken (password reset).
 
 </details>
 
-### Phase 8 — Reporting
-MTTR, first-response and SLA compliance (needs a ServiceContract UI; ask the user), PM compliance
-(already on `/preventive`, generalise it), cost per villa/system/client (labour + parts + other),
-technician utilisation (TimeEntry), asset downtime (AssetStatusLog), CSV export everywhere. Read
-the `dataviz` skill before building charts.
+### Phase 8 — Reporting & service contracts (✅ done; notes for later)
+- **Contracts** (`/contracts`, permission `contracts.manage` = owner/admin/manager; view = internal.view):
+  client, optional villa (else client-wide), status, dates (end day inclusive), response/resolution
+  hours, included visits/year, monthly fee, systems (none = all). Shown on the client page.
+- **Auto-linking** (`src/lib/contracts.ts`, rules in `src/lib/sla.ts` → `covers`/`pickContract`):
+  `createWorkOrder` and WO edits pick the covering contract (villa-specific beats client-wide, then
+  latest start; only ACTIVE/EXPIRED apply). Saving/deleting a contract runs
+  `relinkClientWorkOrders`, so earlier jobs are (re)attributed.
+- **SLA** (`slaStates`): calendar hours from WO creation. Response = `firstResponseAt` (or completion);
+  resolution = completion. States met/breached/pending/na; compliance counts only decided ones.
+  **No business-hours calendar or pause-on-hold** — likely the next thing a real client asks for.
+  The WO page shows respond-by / resolve-by with `<SlaBadge>` (icon + word).
+- **Reports** (`/reports/*`, `reports.view` = owner/admin/manager/viewer): one URL-driven filter row
+  (`src/lib/report-filters.ts`: 30d/90d/12m/ytd/custom ≤3y, client, villa, system) scopes every tab
+  and CSV. Loaders in `src/lib/reports.ts`; pure maths in `src/lib/report-math.ts` (tested).
+  Conventions shown on the pages: counts/costs/SLA by WO *opened* in the period, MTTR by WO
+  *completed* (reactive/corrective/emergency only), PM by *due* date. Utilisation = logged hours vs
+  8 h × working days. Downtime = time in DOWN from `AssetStatusLog`. Fees = contract fee pro rata;
+  with a villa filter only villa-specific contracts count; hidden with a system filter.
+- **Charts** (`src/components/charts/`): followed the `dataviz` skill. Palette = its categorical slots
+  1–3 (`SERIES` in `bars.tsx`), validated on #ffffff (aqua is <3:1 → every chart has a legend and a
+  table). `TrendChart` (client SVG, crosshair + keyboard), `BarList`, `StackedBars` (2px gaps,
+  per-segment tooltip), `StatTile`. Light theme only, like the app.
+- **CSV**: `src/lib/csv.ts` (BOM, formula-injection guard). Report exports at
+  `/reports/export/[kind]` (work-orders, sla, costs, technicians, assets); list exports at
+  `/api/export/assets` (no credentials) and `/api/export/parts`. Download routes live under `/api` or
+  use `<a>`: the Next lint rule treats `/assets/export` as a page link.
+- Timezone: report windows are UTC days (dates display in UTC to match); fine for Europe, revisit for
+  orgs far from UTC.
 
 ### Phase 9 — Offline PWA
 Manifest, service worker, IndexedDB queue for checklist answers, time, photos and comments on

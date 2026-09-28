@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getFormatter, getTranslations } from "next-intl/server";
-import { Plus, Warehouse } from "lucide-react";
+import { Download, Plus, Warehouse } from "lucide-react";
 import { Button, Card, PageHeader, Select, Table } from "@/components/ui";
 import { FilterBar, Pagination } from "@/components/list-controls";
 import { EmptyState } from "@/components/empty-state";
@@ -64,6 +64,12 @@ export default async function PartsPage({ searchParams }: PageProps<"/parts">) {
         actions={
           <>
             {ctx.can("purchasing.manage") && <ReorderButton count={low.length} />}
+            <a href="/api/export/parts">
+              <Button variant="secondary" title={t("reports.exportCsv")}>
+                <Download className="size-4" />
+                CSV
+              </Button>
+            </a>
             <Link href="/parts/locations">
               <Button variant="secondary">
                 <Warehouse className="size-4" />

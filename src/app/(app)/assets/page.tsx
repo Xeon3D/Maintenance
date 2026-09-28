@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
-import { Plus, QrCode, Upload } from "lucide-react";
+import { Plus, QrCode, Download, Upload } from "lucide-react";
 import { Button, Card, PageHeader, Select, Table } from "@/components/ui";
 import { FilterBar, Pagination } from "@/components/list-controls";
 import { EmptyState } from "@/components/empty-state";
@@ -49,6 +49,14 @@ export default async function AssetsPage({ searchParams }: PageProps<"/assets">)
                   {t("assets.printLabels")}
                 </Button>
               </Link>
+            )}
+            {total > 0 && (
+              <a href="/api/export/assets">
+                <Button variant="secondary" title={t("reports.exportCsv")}>
+                  <Download className="size-4" />
+                  CSV
+                </Button>
+              </a>
             )}
             {canManage && (
               <Link href="/assets/import">

@@ -9,6 +9,7 @@ import { deleteObject } from "@/lib/storage";
 import { recordReading } from "@/lib/meters";
 import { consumePart, InventoryError, returnPart } from "@/lib/inventory";
 import { notify } from "@/lib/notify";
+import { contractFor } from "@/lib/contracts";
 import { excerpt, findMentions } from "@/lib/mentions";
 import {
   changeStatus,
@@ -75,7 +76,13 @@ export async function saveWorkOrderAction(id: string | null, _: FormResult, form
       const ids = await validateAssignees(ctx, assigneeIds);
       const wo = await ctx.db.workOrder.update({
         where: { id },
-        data: { ...fields, procedureId: undefined, ...refs, assignees: { deleteMany: {}, create: ids.map((userId) => ({ userId })) } },
+        data: {
+          ...fields,
+          procedureId: undefined,
+          ...refs,
+          // Villa or system may have changed: re-pick the covering contract (as of when the job was opened).
+          contractId: await contractFor(ctx.db, refs.villaId, refs.system, before.createdAt),
+          assignees: { deleteMany: {}, create: ids.map((userId) => ({ userId })) } },
       });
       const had = new Set(before.assignees.map((a) => a.userId));
       await notifyAssigned(ctx, wo, ids.filter((u) => !had.has(u)));

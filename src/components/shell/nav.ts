@@ -29,6 +29,7 @@ export const NAV: NavGroup[] = [
     labelKey: "sites",
     items: [
       { href: "/clients", labelKey: "clients", icon: "Users", permission: "internal.view", ready: true },
+      { href: "/contracts", labelKey: "contracts", icon: "FileSignature", permission: "internal.view", ready: true },
       { href: "/villas", labelKey: "villas", icon: "House", permission: "internal.view", ready: true },
       { href: "/assets", labelKey: "assets", icon: "Cpu", permission: "internal.view", ready: true },
       { href: "/meters", labelKey: "meters", icon: "Gauge", permission: "internal.view", ready: true },
@@ -44,7 +45,7 @@ export const NAV: NavGroup[] = [
   },
   {
     labelKey: "insights",
-    items: [{ href: "/reports", labelKey: "reports", icon: "ChartColumn", permission: "reports.view", ready: false }],
+    items: [{ href: "/reports", labelKey: "reports", icon: "ChartColumn", permission: "reports.view", ready: true }],
   },
   {
     labelKey: "settings",

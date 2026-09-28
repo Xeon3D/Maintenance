@@ -7,6 +7,7 @@ export const PERMISSIONS = {
   "users.manage": ["OWNER", "ADMIN"],
   "teams.manage": ["OWNER", "ADMIN", "MANAGER"],
   "clients.manage": ["OWNER", "ADMIN", "MANAGER"],
+  "contracts.manage": ["OWNER", "ADMIN", "MANAGER"],
   "assets.manage": ["OWNER", "ADMIN", "MANAGER", "TECHNICIAN"],
   "secrets.view": ["OWNER", "ADMIN", "MANAGER", "TECHNICIAN"],
   "workOrders.create": ["OWNER", "ADMIN", "MANAGER", "TECHNICIAN"],

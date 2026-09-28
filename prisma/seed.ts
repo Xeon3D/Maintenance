@@ -113,6 +113,19 @@ async function main() {
     ],
   });
 
+  await prisma.serviceContract.create({
+    data: {
+      organizationId: org.id,
+      clientId: client.id,
+      name: "Premium maintenance",
+      startDate: new Date(Date.UTC(new Date().getUTCFullYear(), 0, 1)),
+      responseTimeHours: 4,
+      resolutionTimeHours: 48,
+      includedVisits: 4,
+      monthlyFee: 450,
+    },
+  });
+
   // Inventory: two vendors and a few spares, stocked in the warehouse and the vans.
   const [netVendor, elecVendor] = await Promise.all([
     prisma.vendor.create({
