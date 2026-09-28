@@ -1,6 +1,6 @@
 # Handoff — VillaOps CMMS
 
-State as of **2026-09-28**, commit `82554bc` (phase 5 of 10 done). Read this, then
+State as of **2026-09-28**, phase 6 of 10 done (see `git log` for the commit). Read this, then
 `CLAUDE.md` (conventions) and `docs/ROADMAP.md` (phase list), before touching code.
 
 ---
@@ -35,13 +35,13 @@ and lighting. The user chose, and does not want re-litigated:
 | 3 | Work orders: checklists, photos, time, costs, sign-off, PDF, board/calendar | ✅ `85b3383` |
 | 4 | Preventive maintenance, procedures library, meters, scheduler | ✅ `944bb4c` |
 | 5 | Requests (portal + anonymous QR) and client portal | ✅ `82554bc` |
-| 6 | **Inventory & purchasing** | ⏭ next (the user was asked 6 vs 7 and hasn't answered yet) |
-| 7 | Messaging & notifications (email + web push) | |
+| 6 | Inventory & purchasing: parts, stock locations, WO parts, vendors, POs | ✅ |
+| 7 | **Messaging & notifications** (email + web push) | ⏭ next |
 | 8 | Reporting & dashboards | |
 | 9 | Offline mobile PWA | |
 | 10 | SaaS layer: Stripe billing, limits, super-admin | |
 
-The working tree is clean apart from this file and the `CLAUDE.md` pointer. The **full data
+The **full data
 model for all 10 phases already exists** in `prisma/schema.prisma` (see §5), so later phases
 are mostly UI and logic plus small additive migrations.
 
@@ -148,7 +148,8 @@ are mostly UI and logic plus small additive migrations.
 - **Storage:** `src/lib/storage.ts` (`putObject/getObject/deleteObject`). Refs look like
   `local:<org>/<yyyy-mm>/<hex>.<ext>` and are served by `/api/files/[id]`: auth-checked, `ETag`,
   `Cache-Control: private, no-cache`.
-  - Upload endpoint `/api/uploads`: targets `workOrderId | workOrderItemId | assetId | villaId`.
+  - Upload endpoint `/api/uploads`: targets `workOrderId | workOrderItemId | assetId | villaId | partId | purchaseOrderId`.
+    `<AttachmentsPanel target>` (`src/components/attachments-panel.tsx`) is the generic upload/thumbnail/delete UI.
   - The client downsizes photos first (`src/lib/upload-client.ts` → `shrinkImage`).
   - Portal and QR forms send photos inside the server-action FormData instead
     (`createRequest` in `src/lib/requests.ts`).
@@ -160,7 +161,7 @@ are mostly UI and logic plus small additive migrations.
   - `createWorkOrder` (validates refs, numbers via `nextNumber`, copies procedure items, links
     meter steps).
   - `changeStatus` (Done blocked by required items, stops timers, stamps `firstResponseAt`).
-  - `workOrderCosts`: labour + other costs. **Parts costs must be added in phase 6.**
+  - `workOrderCosts`: labour + parts + other costs (pass `parts` = the WO's `WorkOrderPart` rows).
   - `WoCtx` is the minimal context, so the scheduler can act without a request.
 - **`src/lib/pm.ts` + `src/lib/pm-schedule.ts`:** the scheduler.
   - `runDueSchedules` claims each occurrence atomically; missed occurrences collapse into one WO.
@@ -171,17 +172,33 @@ are mostly UI and logic plus small additive migrations.
   WO (one open at a time, via `WorkOrder.alertMeterId`).
 - **`src/lib/requests.ts`:** `createRequest`, `approveRequest` (creates the WO and moves photos
   onto it) and `declineRequest`.
-- **Per-org counters** via `nextNumber(orgId, key)`. Keys in use: `workOrder`, `request`.
-  Use `purchaseOrder` next.
+- **`src/lib/inventory.ts`** (DB) + **`src/lib/inventory-math.ts`** (pure, unit-tested):
+  - Every stock change goes through the private `move()`: one `PartStock` update plus one signed
+    `StockMovement` row, inside a transaction. Decrements are a guarded `updateMany … quantity >= q`,
+    so stock can never go negative and concurrent takes can't oversell (`InventoryError("insufficientStock")`).
+  - `setStockLevel` (count → ADJUSTMENT), `transferStock` (TRANSFER_OUT/IN pair), `setLocationMin`,
+    `consumePart` / `returnPart` (WO parts; a return is a *positive* CONSUMPTION with note `return`),
+    `receivePurchaseOrder` (RECEIPT movements, updates the part's unit cost to the price paid, derives
+    PARTIALLY_RECEIVED/RECEIVED), `lowStockParts`, `onOrderByPart`, `createLowStockPurchaseOrders`
+    (one draft per preferred vendor), `addLowStockLines`.
+  - Low stock = total ≤ `Part.minQuantity` (0 = untracked) **or** any location ≤ its own `PartStock.minQuantity`.
+    Reorder suggestion tops up to 2 × reorder point, net of open PO quantities.
+  - PO workflow is `poActions(status, {canApprove, hasReceipts})`: approvers approve straight from DRAFT;
+    others submit → PENDING_APPROVAL. Only drafts are editable; cancel is blocked once anything is received.
+  - Domain errors surface as `stock.<code>` message keys.
+- **Per-org counters** via `nextNumber(orgId, key)`. Keys in use: `workOrder`, `request`, `purchaseOrder`.
 
 ### UI kit
+- `<ConfirmIconButton action={boundAction}>` (`src/components/confirm-button.tsx`): confirm-then-run icon button for row removals.
 - `src/components/ui.tsx` (Button, Input, Select, Textarea, Field, Card, PageHeader, Badge, Table, FormError).
 - `badges.tsx` (system, asset status, WO status, priority), `list-controls.tsx` (FilterBar +
   Pagination, URL-driven), `empty-state`, `back-link`, `archive-button`, `recent-work-orders`,
   `sparkline`, `signature-pad`, `photo-picker`, `secret-field`.
 - **Navigation:** `src/components/shell/nav.ts`. Items have `ready: false` until built. **Flip
-  Parts, Purchase orders, Vendors, Messages and Reports to `ready: true` when their phase ships.**
-  Badges are computed in `(app)/layout.tsx`.
+  Messages and Reports to `ready: true` when their phase ships.** Badges are computed in
+  `(app)/layout.tsx` (`badges` map: pending requests, POs awaiting approval).
+- **Forms that must reset after success** (e.g. PO receiving) get a React `key` derived from the
+  data, because `useActionForm` deliberately keeps uncontrolled inputs.
 - Tailwind v4 tokens (`brand`, `muted`, `border`, `surface`, `danger`) in `src/app/globals.css`.
   Light theme only for now.
 
@@ -196,11 +213,11 @@ with `npx prisma migrate dev --name <x>`, then `npx prisma generate`, then resta
 Villa, Area, Asset, AssetStatusLog, Procedure(+Item), WorkOrder(+Assignee/Item/Comment/StatusLog/
 Cost), TimeEntry, Attachment, AuditLog, PMSchedule(+Assignee), Meter, MeterReading, Request.
 
+**Built in phase 6 (no migration was needed):** Part, StockLocation, PartStock, StockMovement,
+WorkOrderPart, Vendor(+Contact), PurchaseOrder(+Line), `Asset.parts` (compatible parts, M2M). Each org
+gets a "Main warehouse" at sign-up; the seed adds two vans, two vendors and four stocked spares.
+
 **Exist but have no UI yet (the remaining phases):**
-- **Phase 6:** `Part`, `StockLocation` (WAREHOUSE / VAN with `userId` / SITE), `PartStock`,
-  `StockMovement`, `WorkOrderPart`, `Vendor`, `VendorContact`, `PurchaseOrder`, `PurchaseOrderLine`,
-  and `Asset.parts` (compatible parts, M2M).
-  - Each org already has a "Main warehouse" (`createOrganization`); the seed also adds two vans.
 - **Phase 7:** `Conversation` (DIRECT/GROUP/TEAM/WORK_ORDER), `ConversationMember`, `Message`, `Notification`.
 - **Phase 10:** `Subscription` (a trial is created at sign-up).
 - **Not on any phase yet** (mention to the user): `ServiceContract` (SLA response/resolution
@@ -211,7 +228,11 @@ Cost), TimeEntry, Attachment, AuditLog, PMSchedule(+Assignee), Meter, MeterReadi
 
 ## 6. How to verify (proven techniques)
 
-- **Checks:** `npm run typecheck`, `npm run lint` (`npx eslint src tests`), `npm test` (vitest, 15 tests).
+- **Checks:** `npm run typecheck`, `npm run lint` (`npx eslint src tests`), `npm test` (vitest, 28 tests).
+- **Only one `next dev` per folder:** if another session's server already runs on :3000, attach with
+  `preview_start({url: "http://localhost:3000"})` instead of starting a second one (it serves the same code).
+- **PDF text check:** inflate `FlateDecode` streams with `DecompressionStream("deflate")` in the page and
+  hex-decode the `<…>` text operands (react-pdf's built-in fonts write text as hex).
 - **Browser pane:**
   - Screenshots often time out because the app window may be behind another. Prefer
     `get_page_text`, `find` and `javascript_tool`.
@@ -237,6 +258,9 @@ Cost), TimeEntry, Attachment, AuditLog, PMSchedule(+Assignee), Meter, MeterReadi
   - WOs #1–#6. #2 is a meter alert, now internal. #5 is a deliberate overdue catch-up.
   - 2 PM schedules, a UPS battery meter with readings, and 7 starter procedures.
   - Requests R1 (approved → WO #6) and R2 (declined).
+  - Phase 6: vendor "Redes Lusas Distribuição", part "Ubiquiti U6-Pro access point" (8 on hand,
+    linked to "Pool house AP", van-Rui minimum 3 so it shows as low), WO #7 with one AP used, and PO-1
+    (received in two receipts). The live DB predates the seed's new inventory block.
 
 ---
 
@@ -267,7 +291,14 @@ Cost), TimeEntry, Attachment, AuditLog, PMSchedule(+Assignee), Meter, MeterReadi
 
 ## 8. Plan for the next phases
 
-### Phase 6 — Inventory & purchasing
+### Phase 6 — Inventory & purchasing (✅ done; notes for later)
+- Not done, possible follow-ups: barcode scanning (phase 9 PWA), editing PO lines in place (delete +
+  re-add today), PO emailing to the vendor (phase 7 email), technicians restocking their own van
+  (transfers need `inventory.manage`), a stock-valuation report (phase 8).
+- Deleting a WO keeps its stock movements (parts were physically used); only "return" puts stock back.
+
+<details><summary>Original phase 6 plan</summary>
+
 - **Parts** (`/parts`): list, detail and form; SKU/barcode, system, unit cost, min qty,
   preferred vendor; photo via `/api/uploads` (add a `partId` target); compatible assets (M2M).
 - **Stock locations** (settings, or a tab on parts): warehouse, vans (linked to a technician), site stock.
@@ -290,6 +321,8 @@ Cost), TimeEntry, Attachment, AuditLog, PMSchedule(+Assignee), Meter, MeterReadi
 - **Barcode scanning:** optional; can be a PWA feature in phase 9.
 - Add translations, `TENANT_MODELS` is already correct, flip the nav items, test the stock
   arithmetic with unit tests.
+
+</details>
 
 ### Phase 7 — Messaging & notifications
 - `src/lib/notify.ts`: `notify(ctx, userIds, type, {title, body, link})` → a `Notification`

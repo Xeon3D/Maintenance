@@ -18,6 +18,8 @@ const targetSchema = z.union([
   z.object({ workOrderItemId: z.string() }),
   z.object({ assetId: z.string() }),
   z.object({ villaId: z.string() }),
+  z.object({ partId: z.string() }),
+  z.object({ purchaseOrderId: z.string() }),
 ]);
 
 export async function POST(req: Request) {
@@ -41,6 +43,12 @@ export async function POST(req: Request) {
         ? await ctx.db.workOrder.count({ where: { id: t.workOrderId } })
         : await ctx.db.workOrder.count({ where: { items: { some: { id: t.workOrderItemId } } } });
     if (!ok) return NextResponse.json({ error: "notFound" }, { status: 404 });
+  } else if ("partId" in t) {
+    if (!ctx.can("inventory.manage")) return NextResponse.json({ error: "forbidden" }, { status: 403 });
+    if (!(await ctx.db.part.count({ where: { id: t.partId } }))) return NextResponse.json({ error: "notFound" }, { status: 404 });
+  } else if ("purchaseOrderId" in t) {
+    if (!ctx.can("purchasing.manage")) return NextResponse.json({ error: "forbidden" }, { status: 403 });
+    if (!(await ctx.db.purchaseOrder.count({ where: { id: t.purchaseOrderId } }))) return NextResponse.json({ error: "notFound" }, { status: 404 });
   } else {
     if (!ctx.can("assets.manage")) return NextResponse.json({ error: "forbidden" }, { status: 403 });
     const ok =

@@ -183,13 +183,15 @@ export async function stopRunningTimers(ctx: WoCtx, workOrderId: string, at = ne
   }
 }
 
-/** Labour + other costs for a work order (parts are added by the inventory module). */
+/** Labour + parts + other costs for a work order. */
 export function workOrderCosts(wo: {
   timeEntries: { minutes: number | null; hourlyRate: unknown }[];
   otherCosts: { amount: unknown }[];
+  parts?: { quantity: unknown; unitCost: unknown }[];
 }) {
   const labor = wo.timeEntries.reduce((s, e) => s + ((e.minutes ?? 0) / 60) * Number(e.hourlyRate ?? 0), 0);
   const minutes = wo.timeEntries.reduce((s, e) => s + (e.minutes ?? 0), 0);
   const other = wo.otherCosts.reduce((s, c) => s + Number(c.amount), 0);
-  return { minutes, labor, other, total: labor + other };
+  const parts = (wo.parts ?? []).reduce((s, p) => s + Number(p.quantity) * Number(p.unitCost), 0);
+  return { minutes, labor, parts, other, total: labor + parts + other };
 }

@@ -1,6 +1,6 @@
 import { useTranslations } from "next-intl";
 import { Cable, Camera, Cpu, Lightbulb, Network, ShieldCheck, Speaker, Wrench, Zap, ChevronsUp, ChevronUp, Equal, ChevronDown, type LucideIcon } from "lucide-react";
-import type { AssetStatus, Criticality, Priority, SystemType, WorkOrderStatus } from "@/generated/prisma/enums";
+import type { AssetStatus, Criticality, Priority, PurchaseOrderStatus, SystemType, WorkOrderStatus } from "@/generated/prisma/enums";
 import { cn } from "@/lib/utils";
 
 export const SYSTEM_STYLE: Record<SystemType, { icon: LucideIcon; className: string }> = {
@@ -70,6 +70,31 @@ export function WorkOrderStatusBadge({ status, className }: { status: WorkOrderS
       {t(status)}
     </span>
   );
+}
+
+export const PO_STATUS_TONE: Record<PurchaseOrderStatus, string> = {
+  DRAFT: "bg-gray-100 text-gray-700",
+  PENDING_APPROVAL: "bg-amber-50 text-amber-800",
+  APPROVED: "bg-sky-50 text-sky-800",
+  ORDERED: "bg-indigo-50 text-indigo-800",
+  PARTIALLY_RECEIVED: "bg-violet-50 text-violet-800",
+  RECEIVED: "bg-green-50 text-green-700",
+  CANCELLED: "bg-gray-100 text-gray-500 line-through",
+};
+
+export function PoStatusBadge({ status, className }: { status: PurchaseOrderStatus; className?: string }) {
+  const t = useTranslations("poStatus");
+  return (
+    <span className={cn("inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-xs font-medium", PO_STATUS_TONE[status], className)}>
+      <span className="size-1.5 rounded-full bg-current" />
+      {t(status)}
+    </span>
+  );
+}
+
+export function LowStockBadge() {
+  const t = useTranslations("parts");
+  return <span className="inline-flex items-center rounded-full bg-red-50 px-2 py-0.5 text-xs font-medium text-red-700">{t("low")}</span>;
 }
 
 const PRIORITY_STYLE: Record<Priority, { icon: LucideIcon | null; className: string }> = {

@@ -34,6 +34,7 @@ export async function GET(_req: Request, { params }: RouteContext<"/work-orders/
       items: { orderBy: { sortOrder: "asc" } },
       timeEntries: { where: { minutes: { not: null } }, include: { user: { select: { name: true } } }, orderBy: { startedAt: "asc" } },
       attachments: { where: { mimeType: { in: [...PDF_IMAGE_TYPES] } }, orderBy: { createdAt: "asc" } },
+      parts: { include: { part: { select: { name: true, sku: true, unit: true } } }, orderBy: { id: "asc" } },
     },
   });
   if (!wo) return new Response("Not found", { status: 404 });
@@ -84,6 +85,7 @@ export async function GET(_req: Request, { params }: RouteContext<"/work-orders/
       time: t("time.title"),
       total: t("time.total"),
       photos: t("report.photos"),
+      parts: t("woParts.title"),
       signoff: t("signoff.title"),
     },
     org: ctx.organization.name,
@@ -102,6 +104,8 @@ export async function GET(_req: Request, { params }: RouteContext<"/work-orders/
       })),
     ),
     time: wo.timeEntries.map((e) => ({ who: e.user.name, when: format.dateTime(e.startedAt, { dateStyle: "short" }), duration: duration(e.minutes!), note: e.note })),
+    // Parts used (quantities only: the report is client-facing, so no costs).
+    parts: wo.parts.map((p) => ({ name: p.part.name, sku: p.part.sku, qty: `${format.number(Number(p.quantity))} ${p.part.unit}` })),
     totalTime: duration(wo.timeEntries.reduce((s, e) => s + (e.minutes ?? 0), 0)),
     photos: (await Promise.all(photoAtts.map((a) => getObject(a.url).catch(() => null)))).filter((b): b is Buffer => !!b),
     signature:

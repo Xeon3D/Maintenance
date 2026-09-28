@@ -113,6 +113,35 @@ async function main() {
     ],
   });
 
+  // Inventory: two vendors and a few spares, stocked in the warehouse and the vans.
+  const [netVendor, elecVendor] = await Promise.all([
+    prisma.vendor.create({
+      data: { organizationId: org.id, name: "Redes Lusas Distribuição", email: "orders@redeslusas.test", systems: ["NETWORK", "CCTV", "AV"] },
+    }),
+    prisma.vendor.create({
+      data: { organizationId: org.id, name: "Eléctrica do Sul", email: "vendas@electricadosul.test", systems: ["ELECTRICAL", "LIGHTING", "AUTOMATION"] },
+    }),
+  ]);
+  const locations = await prisma.stockLocation.findMany({ where: { organizationId: org.id }, orderBy: { name: "asc" } });
+  const [warehouse, vanDaniel, vanRui] = locations; // "Main warehouse", "Van — Daniel", "Van — Rui"
+  const spares = [
+    { name: "PoE injector 30W", sku: "POE-30", system: "NETWORK", unitCost: 24.9, min: 4, vendorId: netVendor.id, stock: [[warehouse, 6], [vanRui, 2]] },
+    { name: "Cat6A keystone jack", sku: "KS-6A", system: "NETWORK", unitCost: 4.2, min: 20, vendorId: netVendor.id, stock: [[warehouse, 12], [vanRui, 6]] },
+    { name: "UPS battery 12V 9Ah", sku: "BAT-12-9", system: "ELECTRICAL", unitCost: 32.5, min: 4, vendorId: elecVendor.id, stock: [[warehouse, 8]] },
+    { name: "DIN rail MCB 16A C-curve", sku: "MCB-C16", system: "ELECTRICAL", unitCost: 7.8, min: 10, vendorId: elecVendor.id, stock: [[warehouse, 15], [vanDaniel, 4]] },
+  ] as const;
+  for (const s of spares) {
+    const part = await prisma.part.create({
+      data: { organizationId: org.id, name: s.name, sku: s.sku, system: s.system, unitCost: s.unitCost, minQuantity: s.min, vendorId: s.vendorId },
+    });
+    for (const [loc, quantity] of s.stock) {
+      await prisma.partStock.create({ data: { partId: part.id, locationId: loc.id, quantity } });
+      await prisma.stockMovement.create({
+        data: { organizationId: org.id, partId: part.id, locationId: loc.id, type: "ADJUSTMENT", quantity, userId: manager.id, note: "Opening stock" },
+      });
+    }
+  }
+
   console.log(`Seeded "${org.name}". Sign in with owner@demo.test / ${PASSWORD} (all demo users share this password).`);
 }
 

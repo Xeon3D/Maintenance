@@ -14,6 +14,7 @@ export type ReportData = {
   checklist: { label: string; heading: boolean; answer: string; note: string | null; image: Buffer | null }[];
   time: { who: string; when: string; duration: string; note: string | null }[];
   totalTime: string;
+  parts: { name: string; sku: string | null; qty: string }[];
   photos: Buffer[];
   signature: { image: Buffer; name: string; at: string } | null;
 };
@@ -104,6 +105,19 @@ export function ServiceReport({ d }: { d: ReportData }) {
               <Text style={{ width: "85%", fontFamily: "Helvetica-Bold" }}>{L.total}</Text>
               <Text style={{ width: "15%", textAlign: "right", fontFamily: "Helvetica-Bold" }}>{d.totalTime}</Text>
             </View>
+          </>
+        )}
+
+        {d.parts.length > 0 && (
+          <>
+            <Text style={s.h2}>{L.parts}</Text>
+            {d.parts.map((p, i) => (
+              <View key={i} style={s.row} wrap={false}>
+                <Text style={{ width: "65%" }}>{p.name}</Text>
+                <Text style={{ width: "20%", color: "#6b7280" }}>{p.sku ?? ""}</Text>
+                <Text style={{ width: "15%", textAlign: "right" }}>{p.qty}</Text>
+              </View>
+            ))}
           </>
         )}
 

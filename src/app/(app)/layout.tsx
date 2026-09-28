@@ -8,12 +8,16 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   // Client users live in the portal.
   if (ctx.role === "REQUESTER") redirect("/portal");
 
-  const pendingRequests = ctx.can("requests.approve") ? await ctx.db.request.count({ where: { status: "PENDING" } }) : 0;
+  const [pendingRequests, posToApprove] = await Promise.all([
+    ctx.can("requests.approve") ? ctx.db.request.count({ where: { status: "PENDING" } }) : 0,
+    ctx.can("purchasing.approve") ? ctx.db.purchaseOrder.count({ where: { status: "PENDING_APPROVAL" } }) : 0,
+  ]);
+  const badges: Record<string, number> = { "/requests": pendingRequests, "/purchase-orders": posToApprove };
   const groups = NAV.map((g) => ({
     ...g,
     items: g.items
       .filter((i) => i.ready && (!i.permission || ctx.can(i.permission)))
-      .map((i) => (i.href === "/requests" && pendingRequests ? { ...i, badge: pendingRequests } : i)),
+      .map((i) => (badges[i.href] ? { ...i, badge: badges[i.href] } : i)),
   })).filter((g) => g.items.length > 0);
 
   return (

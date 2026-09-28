@@ -1,6 +1,12 @@
 "use client";
 
-export type UploadTarget = { workOrderId: string } | { workOrderItemId: string } | { assetId: string } | { villaId: string };
+export type UploadTarget =
+  | { workOrderId: string }
+  | { workOrderItemId: string }
+  | { assetId: string }
+  | { villaId: string }
+  | { partId: string }
+  | { purchaseOrderId: string };
 export type Uploaded = { id: string; url: string; filename: string; mimeType: string };
 
 const MAX_EDGE = 2000;

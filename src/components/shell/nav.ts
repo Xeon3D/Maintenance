@@ -37,9 +37,9 @@ export const NAV: NavGroup[] = [
   {
     labelKey: "supply",
     items: [
-      { href: "/parts", labelKey: "parts", icon: "Package", permission: "internal.view", ready: false },
-      { href: "/purchase-orders", labelKey: "purchaseOrders", icon: "ShoppingCart", permission: "purchasing.manage", ready: false },
-      { href: "/vendors", labelKey: "vendors", icon: "Truck", permission: "internal.view", ready: false },
+      { href: "/parts", labelKey: "parts", icon: "Package", permission: "internal.view", ready: true },
+      { href: "/purchase-orders", labelKey: "purchaseOrders", icon: "ShoppingCart", permission: "purchasing.manage", ready: true },
+      { href: "/vendors", labelKey: "vendors", icon: "Truck", permission: "internal.view", ready: true },
     ],
   },
   {

@@ -7,6 +7,7 @@ import { getContext, requirePermission, type AppContext } from "@/lib/context";
 import { enumOf, optEnumOf, optId, optNumber, optStr, parseForm, str, type FormResult } from "@/lib/forms";
 import { deleteObject } from "@/lib/storage";
 import { recordReading } from "@/lib/meters";
+import { consumePart, InventoryError, returnPart } from "@/lib/inventory";
 import {
   changeStatus,
   createWorkOrder,
@@ -311,6 +312,37 @@ export async function addCostAction(woId: string, _: FormResult, form: FormData)
 export async function deleteCostAction(woId: string, costId: string) {
   const { ctx } = await executableWorkOrder(woId);
   await ctx.db.workOrderCost.deleteMany({ where: { id: costId, workOrderId: woId } });
+  revalidatePath(path(woId));
+}
+
+// ── Parts used
+
+const partUseSchema = z.object({
+  partId: str(40),
+  locationId: str(40),
+  quantity: z.coerce.number().finite().positive().max(100_000),
+});
+
+export async function addPartAction(woId: string, _: FormResult, form: FormData): Promise<FormResult> {
+  const { ctx } = await executableWorkOrder(woId);
+  if (!ctx.can("inventory.use")) throw new Error("Forbidden");
+  const parsed = parseForm(partUseSchema, form);
+  if (parsed.error) return parsed.error;
+  const { partId, locationId, quantity } = parsed.data;
+  try {
+    await consumePart(ctx, woId, partId, locationId, quantity);
+  } catch (e) {
+    if (e instanceof InventoryError) return { error: `stock.${e.code}` };
+    throw e;
+  }
+  revalidatePath(path(woId));
+  return { ok: true };
+}
+
+export async function returnPartAction(woId: string, workOrderPartId: string) {
+  const { ctx } = await executableWorkOrder(woId);
+  if (!ctx.can("inventory.use")) throw new Error("Forbidden");
+  await returnPart(ctx, woId, workOrderPartId);
   revalidatePath(path(woId));
 }
 

@@ -12,6 +12,7 @@ import { cn } from "@/lib/utils";
 import { StatusBar } from "./status-bar";
 import { Checklist } from "./checklist";
 import { CommentBox, CostsPanel, Gallery, SignOff, TimeTracker, WorkOrderActions } from "./panels";
+import { PartsPanel } from "./parts-panel";
 
 export default async function WorkOrderPage({ params }: PageProps<"/work-orders/[id]">) {
   const { id } = await params;
@@ -35,17 +36,40 @@ export default async function WorkOrderPage({ params }: PageProps<"/work-orders/
       statusLogs: { include: { user: { select: { name: true } } }, orderBy: { createdAt: "asc" } },
       timeEntries: { include: { user: { select: { name: true } } }, orderBy: { startedAt: "desc" } },
       otherCosts: true,
+      parts: { include: { part: { select: { name: true, unit: true } }, stockLocation: { select: { name: true } } }, orderBy: { id: "asc" } },
       attachments: { where: { commentId: null, workOrderItemId: null }, orderBy: { createdAt: "asc" } },
       request: { select: { id: true, number: true } },
     },
   });
   if (!wo) notFound();
 
-  const [meters, procedures] = await Promise.all([
+  const canExecute = ctx.can("workOrders.execute");
+  const canUseParts = canExecute && ctx.can("inventory.use");
+  const [meters, procedures, partOptions, locations] = await Promise.all([
     wo.assetId ? ctx.db.meter.findMany({ where: { assetId: wo.assetId }, select: { id: true, name: true, unit: true }, orderBy: { name: "asc" } }) : [],
     ctx.db.procedure.findMany({ where: { archivedAt: null }, select: { id: true, name: true }, orderBy: { name: "asc" } }),
+    canUseParts
+      ? ctx.db.part.findMany({
+          where: { archivedAt: null },
+          select: {
+            id: true,
+            name: true,
+            sku: true,
+            unit: true,
+            stock: { where: { quantity: { gt: 0 } }, select: { locationId: true, quantity: true } },
+            assets: wo.assetId ? { where: { id: wo.assetId }, select: { id: true } } : false,
+          },
+          orderBy: { name: "asc" },
+          take: 1000,
+        })
+      : [],
+    canUseParts
+      ? ctx.db.stockLocation.findMany({ where: { archivedAt: null }, select: { id: true, name: true, type: true, userId: true }, orderBy: [{ type: "asc" }, { name: "asc" }] })
+      : [],
   ]);
-  const canExecute = ctx.can("workOrders.execute");
+  // Parts come out of my van by default, else the first warehouse.
+  const defaultLocationId =
+    locations.find((l) => l.type === "VAN" && l.userId === ctx.user.id)?.id ?? locations.find((l) => l.type === "WAREHOUSE")?.id ?? null;
   const involved = wo.createdById === ctx.user.id || wo.assignees.some((a) => a.user.id === ctx.user.id);
   const canEdit = ctx.can("workOrders.manage") || (ctx.can("workOrders.create") && involved);
   const closed = wo.status === "DONE" || wo.status === "CANCELLED";
@@ -223,12 +247,39 @@ export default async function WorkOrderPage({ params }: PageProps<"/work-orders/
           </Card>
 
           <Card className="p-5">
+            <h2 className="mb-3 font-medium">{t("woParts.title")}</h2>
+            <PartsPanel
+              woId={wo.id}
+              canUse={canUseParts}
+              used={wo.parts.map((p) => ({
+                id: p.id,
+                partId: p.partId,
+                name: p.part.name,
+                qty: `${format.number(Number(p.quantity))} ${p.part.unit}`,
+                location: p.stockLocation?.name ?? null,
+                cost: money(Number(p.quantity) * Number(p.unitCost)),
+              }))}
+              options={partOptions.map((p) => ({
+                id: p.id,
+                name: p.name,
+                sku: p.sku,
+                unit: p.unit,
+                compatible: Array.isArray(p.assets) && p.assets.length > 0,
+                stock: Object.fromEntries(p.stock.map((s) => [s.locationId, Number(s.quantity)])),
+              }))}
+              locations={locations.map((l) => ({ id: l.id, name: l.name }))}
+              defaultLocationId={defaultLocationId}
+              orderHref={ctx.can("purchasing.manage") && !closed ? `/purchase-orders/new?workOrderId=${wo.id}` : null}
+            />
+          </Card>
+
+          <Card className="p-5">
             <h2 className="mb-3 font-medium">{t("costs.title")}</h2>
             <CostsPanel
               woId={wo.id}
               canExecute={canExecute}
               costs={wo.otherCosts.map((c) => ({ id: c.id, description: c.description, amount: money(Number(c.amount)) }))}
-              summary={{ labor: money(costs.labor), other: money(costs.other), total: money(costs.total) }}
+              summary={{ labor: money(costs.labor), parts: costs.parts ? money(costs.parts) : null, other: money(costs.other), total: money(costs.total) }}
             />
           </Card>
 

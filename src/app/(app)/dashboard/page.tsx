@@ -5,6 +5,7 @@ import { Card, PageHeader } from "@/components/ui";
 import { getContext } from "@/lib/context";
 import { RecentWorkOrders } from "@/components/recent-work-orders";
 import { ACTIVE_STATUSES } from "@/lib/work-orders";
+import { lowStockParts } from "@/lib/inventory";
 
 export const metadata = { title: "Dashboard" };
 
@@ -26,14 +27,20 @@ export default async function DashboardPage() {
     db.asset.count({ where: { archivedAt: null } }),
     db.membership.count(),
   ]);
-  const pmCount = await db.pMSchedule.count({ where: { active: true } });
+  const [pmCount, low, toApprove] = await Promise.all([
+    db.pMSchedule.count({ where: { active: true } }),
+    lowStockParts(db),
+    ctx.can("purchasing.approve") ? db.purchaseOrder.count({ where: { status: "PENDING_APPROVAL" } }) : 0,
+  ]);
 
-  const stats = [
-    { label: t("openWorkOrders"), value: open },
-    { label: t("overdue"), value: overdue, alert: overdue > 0 },
-    { label: t("pendingRequests"), value: pending },
-    { label: t("villas"), value: villas },
-    { label: t("assets"), value: assets },
+  const stats: { label: string; value: number; alert?: boolean; href?: string }[] = [
+    { label: t("openWorkOrders"), value: open, href: "/work-orders" },
+    { label: t("overdue"), value: overdue, alert: overdue > 0, href: "/work-orders?overdue=1" },
+    { label: t("pendingRequests"), value: pending, href: "/requests" },
+    { label: t("lowStock"), value: low.length, alert: low.length > 0, href: "/parts?stock=low" },
+    ...(toApprove ? [{ label: t("poApprovals"), value: toApprove, alert: true, href: "/purchase-orders?status=PENDING_APPROVAL" }] : []),
+    { label: t("villas"), value: villas, href: "/villas" },
+    { label: t("assets"), value: assets, href: "/assets" },
   ];
 
   const steps = [
@@ -47,12 +54,14 @@ export default async function DashboardPage() {
     <>
       <PageHeader title={t("greeting", { name: ctx.user.name.split(" ")[0] })} description={t("subtitle")} />
 
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
         {stats.map((s) => (
-          <Card key={s.label} className="p-4">
-            <div className="text-xs text-muted">{s.label}</div>
-            <div className={`mt-1 text-2xl font-semibold tabular-nums ${s.alert ? "text-danger" : ""}`}>{s.value}</div>
-          </Card>
+          <Link key={s.label} href={s.href ?? "#"}>
+            <Card className="h-full p-4 transition hover:border-brand/40">
+              <div className="text-xs text-muted">{s.label}</div>
+              <div className={`mt-1 text-2xl font-semibold tabular-nums ${s.alert ? "text-danger" : ""}`}>{s.value}</div>
+            </Card>
+          </Link>
         ))}
       </div>
 
