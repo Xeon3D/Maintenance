@@ -1,32 +1,43 @@
-# VillaOps CMMS ("Maintenance") — app + PostgreSQL.
+# VillaOps CMMS ("Maintenance") — app + PostgreSQL + updater.
 # ZimaOS: App Store → Custom install → Import this file. Put Nginx Proxy Manager in front of port 3000
 # (enable Websockets support and "Force SSL"), then set APP_URL to the public https address.
 name: maintenance
 
 services:
   app:
-    image: xeon3d/maintenance:0.1.0
+    # "latest" lets Settings → Server install new versions with one click (through the updater below).
+    image: xeon3d/maintenance:latest
     restart: unless-stopped
     depends_on:
       db:
         condition: service_healthy
     ports:
       - "3000:3000"
+    labels:
+      # Only this container is updated by the updater.
+      com.centurylinklabs.watchtower.enable: "true"
     environment:
       DATABASE_URL: postgresql://maintenance:maintenance@db:5432/maintenance
       # Public address behind the proxy (used in emails, QR labels and push links).
       APP_URL: https://maintenance.example.com
       # Create the demo company (owner@demo.test / demo1234) when the database is empty.
       SEED_DEMO: "true"
+      # Server password: unlocks Settings → Server (software name, updates, backups).
+      SERVER_ADMIN_PASSWORD: ""
       # Enables the "Factory reset" page (erases everything, restores the demo). Leave empty to disable.
+      # If SERVER_ADMIN_PASSWORD is empty, this password also unlocks Settings → Server.
       FACTORY_RESET_PASSWORD: ""
       # Optional e-mail delivery through Resend; without it e-mails are only logged.
       RESEND_API_KEY: ""
       EMAIL_FROM: ""
+      # Watchtower sidecar that installs updates (see "updater" below).
+      UPDATER_URL: http://updater:8080
       # AUTH_SECRET, FIELD_ENCRYPTION_KEY, CRON_SECRET and VAPID keys are generated on first start
       # and kept in /data/secrets.env. Set them here only to override.
     volumes:
       - /DATA/AppData/maintenance/data:/data
+      # Backups (database + files + keys). Point this at another disk if you can.
+      - /DATA/AppData/maintenance/backups:/backups
 
   db:
     image: postgres:17-alpine
@@ -42,3 +53,21 @@ services:
       interval: 5s
       timeout: 5s
       retries: 10
+
+  # Installs updates when asked by the app (Settings → Server). It never updates on its own and only
+  # touches containers labelled above. Not exposed outside this compose network.
+  updater:
+    image: nickfedor/watchtower:latest
+    restart: unless-stopped
+    depends_on:
+      app:
+        condition: service_healthy
+    environment:
+      WATCHTOWER_HTTP_API_ENDPOINTS: update
+      # The app generates this token on first start in its data folder.
+      WATCHTOWER_HTTP_API_TOKEN: /appdata/updater-token
+      WATCHTOWER_LABEL_ENABLE: "true"
+      WATCHTOWER_CLEANUP: "true"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /DATA/AppData/maintenance/data:/appdata:ro

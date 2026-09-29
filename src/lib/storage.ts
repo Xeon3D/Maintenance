@@ -5,7 +5,8 @@ import path from "node:path";
 // Object storage. Local disk for now (UPLOAD_DIR); swap these three functions for S3/R2 in production.
 // Keys look like "<orgId>/<yyyy-mm>/<random>.<ext>" and are stored in Attachment.url as "local:<key>".
 
-const root = () => path.resolve(process.env.UPLOAD_DIR ?? "./uploads");
+export const uploadRoot = () => path.resolve(process.env.UPLOAD_DIR ?? "./uploads");
+const root = uploadRoot;
 
 function resolveKey(key: string) {
   const full = path.resolve(root(), key);

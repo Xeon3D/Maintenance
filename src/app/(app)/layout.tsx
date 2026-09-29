@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { Sidebar } from "@/components/shell/sidebar";
+import { getAppName } from "@/lib/server-settings";
 import { NAV } from "@/components/shell/nav";
 import { getContext } from "@/lib/context";
 import { unreadConversations } from "@/lib/conversations";
@@ -27,6 +28,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   return (
     <div className="min-h-screen" style={brandStyle(ctx.organization)}>
       <Sidebar
+        appName={await getAppName()}
         groups={groups}
         user={{ name: ctx.user.name, email: ctx.user.email, role: ctx.role }}
         org={{ id: ctx.organization.id, name: ctx.organization.name, logo: logoSrc(ctx.organization) }}

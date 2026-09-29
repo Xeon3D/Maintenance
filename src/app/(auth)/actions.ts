@@ -15,6 +15,7 @@ import { createTranslator } from "next-intl";
 import en from "../../../messages/en.json";
 import pt from "../../../messages/pt.json";
 import { appOrigin } from "@/lib/qr";
+import { getAppName } from "@/lib/server-settings";
 import { emailLayout, sendEmail } from "@/lib/email";
 import { background } from "@/lib/notify";
 import { clearResetTokens, createResetToken, userForResetToken } from "@/lib/password-reset";
@@ -90,7 +91,7 @@ export async function requestResetAction(_: FormState, form: FormData): Promise<
     if (raw) {
       const url = `${await appOrigin()}/reset-password/${raw}`;
       const t = createTranslator({ locale: user.locale, messages: user.locale === "pt" ? pt : en, namespace: "email" });
-      const mail = emailLayout({ org: en.common.appName, heading: t("resetSubject"), paragraphs: [t("resetBody")], cta: { label: t("resetCta"), url } });
+      const mail = emailLayout({ org: await getAppName(), heading: t("resetSubject"), paragraphs: [t("resetBody")], cta: { label: t("resetCta"), url } });
       background(() => sendEmail({ to: user.email, subject: t("resetSubject"), ...mail }));
     }
   }

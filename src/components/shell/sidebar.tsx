@@ -23,6 +23,7 @@ import {
   MessagesSquare,
   Package,
   ScanLine,
+  Server,
   ShoppingCart,
   Smartphone,
   Truck,
@@ -60,9 +61,11 @@ const ICONS: Record<string, LucideIcon> = {
   UserRound,
   Users,
   UsersRound,
+  Server,
 };
 
 type Props = {
+  appName: string;
   groups: NavGroup[]; // already filtered by permission/readiness on the server
   user: { name: string; email: string; role: string };
   org: { id: string; name: string; logo: string | null };
@@ -70,7 +73,7 @@ type Props = {
   unreadNotifications: number;
 };
 
-export function Sidebar({ groups, user, org, orgs, unreadNotifications }: Props) {
+export function Sidebar({ appName, groups, user, org, orgs, unreadNotifications }: Props) {
   const t = useTranslations();
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
@@ -91,7 +94,7 @@ export function Sidebar({ groups, user, org, orgs, unreadNotifications }: Props)
               <img src={org.logo} alt="" className="size-9 shrink-0 rounded-md border border-border bg-white object-contain p-0.5" />
             )}
             <span className="min-w-0">
-              <span className="block text-xs font-semibold uppercase tracking-wide text-brand">{t("common.appName")}</span>
+              <span className="block text-xs font-semibold uppercase tracking-wide text-brand">{appName}</span>
               <span className="block truncate text-sm font-medium">{org.name}</span>
             </span>
           </span>

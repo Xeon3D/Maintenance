@@ -1,8 +1,8 @@
 import "server-only";
-import { createHash, timingSafeEqual } from "node:crypto";
 import { prisma } from "@/lib/db/client";
 import { clearAllObjects } from "@/lib/storage";
 import { seedDemo } from "@/lib/demo-seed";
+import { AttemptLimiter, samePassword } from "@/lib/attempt-limit";
 
 // "Factory reset" for demo/test servers: erases every organization, user and file, then re-creates
 // the demo data. Only available when FACTORY_RESET_PASSWORD is set; keep that value out of the repo.
@@ -11,34 +11,13 @@ export function factoryResetEnabled() {
   return !!process.env.FACTORY_RESET_PASSWORD;
 }
 
-const digest = (s: string) => createHash("sha256").update(s, "utf8").digest();
-
 export function checkFactoryResetPassword(input: string) {
-  const expected = process.env.FACTORY_RESET_PASSWORD;
-  if (!expected) return false;
-  return timingSafeEqual(digest(input), digest(expected)); // equal-length digests: no length leak
+  return samePassword(input, process.env.FACTORY_RESET_PASSWORD);
 }
 
-// Failed attempts per client address, plus a global cap, over a 15-minute window (in memory: one server process).
-const WINDOW_MS = 15 * 60_000;
-const PER_CLIENT = 5;
-const GLOBAL = 30;
-const failures = new Map<string, number[]>();
-
-function recent(key: string, now: number) {
-  const list = (failures.get(key) ?? []).filter((t) => now - t < WINDOW_MS);
-  failures.set(key, list);
-  return list;
-}
-
-export function factoryResetBlocked(client: string, now = Date.now()) {
-  return recent(client, now).length >= PER_CLIENT || recent("*", now).length >= GLOBAL;
-}
-
-export function recordFactoryResetFailure(client: string, now = Date.now()) {
-  recent(client, now).push(now);
-  recent("*", now).push(now);
-}
+const limiter = new AttemptLimiter();
+export const factoryResetBlocked = (client: string, now = Date.now()) => limiter.blocked(client, now);
+export const recordFactoryResetFailure = (client: string, now = Date.now()) => limiter.fail(client, now);
 
 let running = false;
 
@@ -55,7 +34,7 @@ export async function factoryReset() {
     }
     await clearAllObjects();
     await seedDemo(prisma);
-    failures.clear();
+    limiter.reset();
   } finally {
     running = false;
   }

@@ -1,11 +1,15 @@
 import type { MetadataRoute } from "next";
+import { getAppName } from "@/lib/server-settings";
 
 /** Installable app. It opens on the field app, which works offline; the full app is one tap away. */
-export default function manifest(): MetadataRoute.Manifest {
+export const dynamic = "force-dynamic"; // the name is a server setting
+
+export default async function manifest(): Promise<MetadataRoute.Manifest> {
+  const name = await getAppName();
   return {
     id: "/m",
-    name: "VillaOps",
-    short_name: "VillaOps",
+    name,
+    short_name: name.length > 12 ? name.split(/\s+/)[0].slice(0, 12) : name,
     description: "Maintenance for villa technical systems — works offline in the field.",
     start_url: "/m",
     scope: "/",

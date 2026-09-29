@@ -50,3 +50,7 @@ next-env.d.ts
 
 # dev email outbox
 /.mail/
+
+# server data (dev): settings, secrets, backups
+/.data/
+/backups/

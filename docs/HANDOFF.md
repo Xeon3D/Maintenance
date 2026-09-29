@@ -5,10 +5,12 @@ State as of **2026-09-29**, phase 9 of 10 done (see `git log` for the commit). R
 **on hold**: the app runs for one company for now. Next candidate work: the Odoo integration in
 `docs/ODOO_INTEGRATION.md` (waiting on the decisions in its §10).
 
-**Released as v0.1.0**: public GitHub repo `Xeon3D/Maintenance`, public Docker Hub image
+**Released as v0.2.0** (v0.1.0 before): public GitHub repo `Xeon3D/Maintenance`, public Docker Hub image
 `xeon3d/maintenance` (built and pushed from this PC with Docker Desktop; `gh` is logged in as Xeon3D).
 The user runs it on a ZimaOS server behind Nginx Proxy Manager as an **open public demo** (nothing
-locked down, by choice) with a password-protected **factory reset**; see "Docker & releases" in §3.
+locked down, by choice) with a password-protected **factory reset**. 0.2.0 added **Settings → Server**
+(software name, one-click updates, scheduled backups with restore); see "Docker & releases" and
+"Server administration" in §3. "VillaOps" is now only the *default* software name (server setting).
 
 ---
 
@@ -21,7 +23,7 @@ and lighting. The user chose, and does not want re-litigated:
 - **Stack:** Next.js 16 + Postgres (Neon) + Prisma 7 + Auth.js v5. **Not** Supabase.
 - **Languages:** English + **European** Portuguese (pt-PT wording: "palavra-passe", "equipa", "utilizador").
 - **Scope:** everything, delivered in the 10 roadmap phases; each phase ends tested and committed.
-- **"VillaOps" is a placeholder product name**; the user has been asked for the real one.
+- **"VillaOps" is only the default software name**; the owner sets the real one in Settings → Server.
 
 ### Working rhythm the user has accepted
 1. Build a whole phase, including translations, tests and browser verification.
@@ -101,8 +103,31 @@ are mostly UI and logic plus small additive migrations.
   and `export MSYS_NO_PATHCONV=1` before `docker exec -w /app …` (Git Bash mangles absolute paths).
 - Test a build: copy `docker-compose.yml` to the scratchpad, map port 3200, use named volumes, set
   `FACTORY_RESET_PASSWORD` via a `.env` next to it, `docker compose up -d`, then `down -v` afterwards.
-- Release: bump the tag in `docker-compose.yml`, `docker build -t xeon3d/maintenance:<v> -t xeon3d/maintenance:latest .`,
-  push both, `git tag v<v>`, push, `gh release create`. ZimaOS is x86-64, so amd64 only.
+- Release: bump `version` in `package.json` (+ lock file; it is the app's version and what the update check
+  compares), `docker build -t xeon3d/maintenance:<v> -t xeon3d/maintenance:latest .`, push both tags **before**
+  `git tag v<v>` + `gh release create` (the release is what installed servers see as "update available", and
+  the updater pulls `:latest`). ZimaOS is x86-64, so amd64 only. Compose uses `:latest`.
+
+### Server administration (Settings → Server, v0.2.0)
+- Gate: `src/lib/server-admin.ts`. Needs `org.manage` **and** the server password (`SERVER_ADMIN_PASSWORD`,
+  else `FACTORY_RESET_PASSWORD`); unlock = HMAC-signed `server_admin` cookie (user id + expiry, 30 min).
+  Company roles alone aren't enough: on the open demo anyone can create a company and be its owner.
+- Server-wide settings (`src/lib/server-settings.ts`): JSON in `DATA_DIR/server-settings.json` (dev `./.data`),
+  so they survive factory reset and restore. `getAppName()` replaces the old `common.appName` message.
+- Backups (`src/lib/backups.ts`, rules in `backup-schedule.ts`): tar.gz of `manifest.json` + `database.dump`
+  (pg_dump custom) + `secrets.env` + `uploads/`, files `0600` in `BACKUP_DIR` (`/backups`). Restore: extract,
+  refuse if the backup has migrations this build doesn't know, take a `pre-restore` backup, `DROP SCHEMA public
+  CASCADE` + `pg_restore` (rolls back to the safety copy on failure), replace uploads, merge keys into
+  `DATA_DIR/secrets.env`, then `process.exit(0)` so Docker restarts it and the entrypoint re-runs migrations.
+  Scheduler: `runServerJobs()` every minute from `src/instrumentation-node.ts`; period keys in `BACKUP_DIR/.state.json`.
+- Updates (`src/lib/updates.ts`): GitHub `releases/latest` (6 h cache) vs `APP_VERSION`; "Update now" =
+  `pre-update` backup + `POST $UPDATER_URL/v1/update?image=xeon3d/maintenance&async=true` with the token the
+  entrypoint writes to `DATA_DIR/updater-token` (Watchtower reads it from its read-only mount). Watchtower
+  fork `nickfedor/watchtower` (the original containrrr one is archived); HTTP API mode disables its polling.
+- Tested 2026-09-29 in a local compose stack: scheduled + manual backups, download, upload (valid/invalid),
+  restore (data + files back, restart, migrations), lock/unlock, and a real Watchtower recreate. To force
+  "update available" in a test, set `UPDATE_REPO` to a repo with a higher release number.
+- `/api/server/backups/upload` is excluded from the proxy matcher (no 16 MB buffer) and checks access itself.
 
 ### Tooling gotchas that already cost time
 - **Don't patch TS/TSX through PowerShell double-quoted strings.** The backtick is PowerShell's
@@ -265,7 +290,7 @@ markers), Message, VerificationToken (password reset).
 
 ## 6. How to verify (proven techniques)
 
-- **Checks:** `npm run typecheck`, `npm run lint` (`npx eslint src tests`), `npm test` (vitest, 87 tests).
+- **Checks:** `npm run typecheck`, `npm run lint` (`npx eslint src tests`), `npm test` (vitest, 94 tests).
 - **Testing offline needs a production build.** In `next dev`, Turbopack only hydrates after its HMR
   websocket connects, so a page served from the SW cache stays inert with the server down. Use
   `npx next build`, then preview config `prod` (`next start -p 3100`); stop it to simulate no signal

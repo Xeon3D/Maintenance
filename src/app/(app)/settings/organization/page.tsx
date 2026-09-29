@@ -1,17 +1,15 @@
-import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { Card, Field, Input, PageHeader, Select, Textarea } from "@/components/ui";
 import { ActionForm, FieldError } from "@/components/action-form";
 import { getContext } from "@/lib/context";
 import { brandColor, DEFAULT_BRAND, logoSrc } from "@/lib/branding";
-import { factoryResetEnabled } from "@/lib/factory-reset";
+import { TIMEZONES } from "@/lib/timezones";
 import { updateOrgAction } from "../actions";
 import { BrandColorField, LogoUploader } from "./form";
 
 export const metadata = { title: "Organization" };
 
-const TIMEZONES = ["Europe/Lisbon", "Atlantic/Madeira", "Atlantic/Azores", "Europe/London", "Europe/Madrid", "Europe/Paris", "Asia/Dubai", "America/Sao_Paulo", "America/New_York", "UTC"];
 const CURRENCIES = ["EUR", "GBP", "USD", "AED", "BRL", "CHF"];
 
 export default async function OrgSettingsPage() {
@@ -98,15 +96,6 @@ export default async function OrgSettingsPage() {
             <p className="mb-3 text-xs text-muted">{t("company.logoHint")}</p>
             <LogoUploader src={logoSrc(o)} name={o.name} color={brandColor(o)} />
           </Card>
-          {factoryResetEnabled() && (
-            <Card className="border-red-200 p-5">
-              <h2 className="mb-1 font-medium text-danger">{t("auth.factoryResetTitle")}</h2>
-              <p className="mb-3 text-xs text-muted">{t("auth.factoryResetBody")}</p>
-              <Link href="/factory-reset" className="inline-flex h-8 items-center rounded-md border border-border bg-surface px-3 text-sm font-medium text-danger hover:bg-red-50">
-                {t("auth.factoryResetButton")}
-              </Link>
-            </Card>
-          )}
         </div>
       </div>
     </>
