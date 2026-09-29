@@ -5,7 +5,7 @@ import { authConfig } from "./auth.config";
 const { auth } = NextAuth(authConfig);
 
 // Routes reachable without signing in.
-const PUBLIC_PREFIXES = ["/login", "/signup", "/invite", "/forgot-password", "/reset-password/", "/r/", "/api/auth", "/api/cron/", "/sw.js"]; // cron routes check CRON_SECRET
+const PUBLIC_PREFIXES = ["/login", "/signup", "/invite", "/forgot-password", "/reset-password/", "/r/", "/api/auth", "/api/cron/", "/sw.js", "/offline.html", "/manifest.webmanifest"]; // cron routes check CRON_SECRET
 
 export default auth((req) => {
   const { pathname } = req.nextUrl;

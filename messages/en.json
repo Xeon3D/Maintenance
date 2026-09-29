@@ -103,7 +103,9 @@
     "supply": "Supply",
     "insights": "Insights",
     "profile": "My profile",
-    "contracts": "Service contracts"
+    "contracts": "Service contracts",
+    "field": "Field app (offline)",
+    "scan": "Scan"
   },
   "roles": {
     "OWNER": "Owner",
@@ -482,7 +484,12 @@
   "files": {
     "title": "Photos & files",
     "add": "Add photos or files",
-    "failed": "Some files couldn't be uploaded (JPEG, PNG, WebP or PDF up to 15 MB)."
+    "failed": "Some files couldn't be uploaded (JPEG, PNG, WebP or PDF up to 15 MB).",
+    "notFound": "The work order or step no longer exists.",
+    "forbidden": "You're not allowed to add files here.",
+    "badTarget": "The work order or step no longer exists.",
+    "badType": "Unsupported file type.",
+    "tooLarge": "File too large."
   },
   "activity": {
     "title": "Activity",
@@ -1190,5 +1197,61 @@
       "downHours": "Hours down",
       "degradedHours": "Hours degraded"
     }
+  },
+  "scan": {
+    "title": "Scan",
+    "description": "Scan an asset's QR label or a part's barcode.",
+    "close": "Close",
+    "hint": "Point the camera at a QR label or barcode. You can also type the code.",
+    "manual": "Type a code, SKU or serial number",
+    "go": "Go",
+    "denied": "Camera access was blocked. Allow it in the browser's site settings, or type the code below.",
+    "unavailable": "No camera available here (it needs HTTPS or localhost). Type the code below.",
+    "notFound": "Nothing matches “{code}”.",
+    "again": "Scan",
+    "scanPart": "Scan barcode",
+    "partNotFound": "No part with barcode or SKU “{code}”."
+  },
+  "field": {
+    "title": "Field app",
+    "myWork": "My work",
+    "count": "{count, plural, one {# open job} other {# open jobs}}",
+    "lastSync": "Updated {when}",
+    "syncNow": "Sync now",
+    "fullApp": "Open the full app",
+    "offline": "Offline. {count, plural, =0 {Everything is saved on this device.} one {# change will sync when you're back online.} other {# changes will sync when you're back online.}}",
+    "pending": "{count, plural, one {# change waiting to sync…} other {# changes waiting to sync…}}",
+    "signedOut": "Your session expired. Sign in again to sync — nothing on this device is lost.",
+    "syncFailed": "Couldn't sync just now. Changes are kept and will be retried.",
+    "issues": "{count, plural, one {# change couldn't be applied} other {# changes couldn't be applied}}",
+    "dismiss": "Dismiss",
+    "kind": {
+      "answer": "Checklist",
+      "comment": "Comment",
+      "time": "Time",
+      "status": "Status",
+      "photo": "Photo"
+    },
+    "firstLoad": "Connect once to download your work orders; after that they're available offline.",
+    "empty": "No open work orders assigned to you.",
+    "noneForAsset": "None of your open work orders are for this asset.",
+    "filteredBy": "Showing",
+    "unknownAsset": "Asset not in your work orders",
+    "openAsset": "Open",
+    "clearFilter": "Show all",
+    "offlineHint": "Works without signal. Add this app to your home screen for quick access.",
+    "timerRunning": "Timer running",
+    "steps": "{done}/{total} steps",
+    "access": "Access",
+    "start": "Start work",
+    "resume": "Resume",
+    "hold": "On hold",
+    "done": "Mark done",
+    "logged": "{minutes, plural, =0 {No time logged} other {# min logged}}",
+    "photos": "Photos",
+    "photosHint": "Photos are kept on this device and uploaded when there's a connection.",
+    "takePhoto": "Take photo",
+    "retake": "Retake",
+    "savedOnDevice": "Saved on this device — uploads when online."
   }
 }

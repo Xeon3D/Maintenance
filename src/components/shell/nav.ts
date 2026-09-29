@@ -13,7 +13,11 @@ export type NavGroup = { labelKey?: string; items: NavItem[] };
 
 export const NAV: NavGroup[] = [
   {
-    items: [{ href: "/dashboard", labelKey: "dashboard", icon: "LayoutDashboard", ready: true }],
+    items: [
+      { href: "/dashboard", labelKey: "dashboard", icon: "LayoutDashboard", ready: true },
+      { href: "/m", labelKey: "field", icon: "Smartphone", permission: "workOrders.execute", ready: true },
+      { href: "/scan", labelKey: "scan", icon: "ScanLine", permission: "internal.view", ready: true },
+    ],
   },
   {
     labelKey: "operations",

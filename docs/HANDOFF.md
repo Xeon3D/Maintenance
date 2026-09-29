@@ -1,6 +1,6 @@
 # Handoff — VillaOps CMMS
 
-State as of **2026-09-28**, phase 8 of 10 done (see `git log` for the commit). Read this, then
+State as of **2026-09-29**, phase 9 of 10 done (see `git log` for the commit). Read this, then
 `CLAUDE.md` (conventions) and `docs/ROADMAP.md` (phase list), before touching code.
 
 ---
@@ -38,8 +38,8 @@ and lighting. The user chose, and does not want re-litigated:
 | 6 | Inventory & purchasing: parts, stock locations, WO parts, vendors, POs | ✅ |
 | 7 | Messaging & notifications: in-app, email, web push, chat, password reset | ✅ |
 | 8 | Reporting & dashboards + service contracts (SLA) | ✅ |
-| 9 | **Offline mobile PWA** | ⏭ next |
-| 10 | SaaS layer: Stripe billing, limits, super-admin | |
+| 9 | Offline field app (PWA), sync, camera, QR/barcode scanning | ✅ |
+| 10 | **SaaS layer: Stripe billing, limits, super-admin** | ⏭ next |
 
 The **full data
 model for all 10 phases already exists** in `prisma/schema.prisma` (see §5), so later phases
@@ -210,7 +210,7 @@ are mostly UI and logic plus small additive migrations.
 
 ## 5. Data model notes
 
-All models are in `prisma/schema.prisma`, with 3 migrations (`init`, `pm_meters`, `notifications`). Add changes
+All models are in `prisma/schema.prisma`, with 4 migrations (`init`, `pm_meters`, `notifications`, `offline_sync`). Add changes
 with `npx prisma migrate dev --name <x>`, then `npx prisma generate` (Prisma 7 doesn't auto-generate).
 
 **Built out:** Organization, User, Membership, Invitation, Counter, Team, Client, ClientContact,
@@ -237,7 +237,12 @@ markers), Message, VerificationToken (password reset).
 
 ## 6. How to verify (proven techniques)
 
-- **Checks:** `npm run typecheck`, `npm run lint` (`npx eslint src tests`), `npm test` (vitest, 72 tests).
+- **Checks:** `npm run typecheck`, `npm run lint` (`npx eslint src tests`), `npm test` (vitest, 78 tests).
+- **Testing offline needs a production build.** In `next dev`, Turbopack only hydrates after its HMR
+  websocket connects, so a page served from the SW cache stays inert with the server down. Use
+  `npx next build`, then preview config `prod` (`next start -p 3100`); stop it to simulate no signal
+  (navigator.onLine stays true, so the app detects offline from failed fetches). Port 3100 is its own
+  origin (separate SW/caches/IndexedDB) but shares localhost cookies.
 - **Only one `next dev` per folder:** if another session's server already runs on :3000, attach with
   `preview_start({url: "http://localhost:3000"})` instead of starting a second one (it serves the same code).
 - **Library-level checks against the real DB:** a temporary `tests/_x.test.ts` with
@@ -272,6 +277,8 @@ markers), Message, VerificationToken (password reset).
   - WOs #1–#6. #2 is a meter alert, now internal. #5 is a deliberate overdue catch-up.
   - 2 PM schedules, a UPS battery meter with readings, and 7 starter procedures.
   - Requests R1 (approved → WO #6) and R2 (declined).
+  - Phase 9: WO #7 got four checklist steps (checkbox, photo, dBm reading, signature) and was
+    completed offline by Daniel in the test: answers, photo, signature, a comment, 7 min of time, Done.
   - Phase 8: contract "Premium maintenance 2026" (Whitmore, all villas, 4 h / 48 h, 4 visits,
     €450/month) linked to WOs #1–#7.
   - Phase 7: a DM Miguel↔Rui, a group "Pool house job" (Miguel, Rui, Daniel), a comment on WO #7
@@ -420,9 +427,41 @@ markers), Message, VerificationToken (password reset).
 - Timezone: report windows are UTC days (dates display in UTC to match); fine for Europe, revisit for
   orgs far from UTC.
 
-### Phase 9 — Offline PWA
-Manifest, service worker, IndexedDB queue for checklist answers, time, photos and comments on
-assigned WOs; background sync; camera capture; QR/barcode scanning.
+### Phase 9 — Offline field app (✅ done; notes for later)
+- **`/m`** (outside the `(app)` layout; technicians and anyone with `workOrders.execute`): one client
+  page, hash-routed (`#wo=<id>`) so it never needs the server once loaded. It's the manifest
+  `start_url`; sidebar has "Field app". Shows the user's assigned open WOs (max 50) from
+  `/api/offline/snapshot`: checklist, last 20 comments, villa address + access notes (never the
+  encrypted codes), asset details, and the assets at those villas (for offline QR lookups).
+- **Data on the device** (`src/lib/offline/idb.ts`, DB `villaops-field`): `kv` (snapshot, sync issues,
+  running timer — keys prefixed by user id), `queue` (ops by user, ordered by `seq`), `blobs`
+  (photos/signatures until uploaded). What's shown = `applyOps(snapshot, queue)` (pure, tested).
+- **Sync** (`src/lib/offline/sync.ts`): on load, `online`, tab visible, every 60 s, after each change,
+  and the Sync button. Photos upload via `/api/uploads` first, then become `answer` ops; the rest
+  goes to `POST /api/offline/sync` in order. The server claims each op id in `SyncOperation`
+  (tenant model) before applying, so replays are answered from the log. Outcomes: applied / stale
+  (someone else answered later — later answer wins) / rejected (rule broken, e.g. `wo.locked`,
+  `wo.requiredItems`: dropped and listed as a sync issue) / retry (server error: batch stops, stays
+  queued). An expired session keeps the queue and shows a sign-in link.
+- Server logic shared with the web app lives in `src/lib/wo-ops.ts` (`answerItem`, `addComment`,
+  `addTimeEntry`, `clampAt` — device times clamped to the last 30 days, never future).
+- Timer runs on the device and is queued as a finished interval on stop (<1 min dropped); one timer
+  at a time. "Done" is checked locally against required steps first.
+- **Service worker** (`public/sw.js`, registered on every page by `ServiceWorkerRegistrar`): caches
+  `/m` + the scripts it loaded (the page posts them via `cache-field` because the first load happens
+  before the SW controls it), `/offline.html` for other pages, static assets (cache-first in prod,
+  network-first on localhost), manifest/icons. Bump `VERSION` when the caching logic changes.
+  `sw.js` is served `no-cache` (next.config headers).
+- **Install**: `src/app/manifest.ts`, icons drawn by `src/app/icons/[file]/route.tsx` (next/og) —
+  replace with real brand artwork when the product name is decided.
+- **Scanning** (`src/components/scanner.tsx`): `BarcodeDetector` (Chrome/Android: QR + EAN/UPC/Code128…)
+  else jsQR (QR only; iPhone Safari) + manual entry. Used in `/scan` (label QR → `/r/<token>`,
+  codes → `/api/scan`: part barcode/SKU, asset tag/serial), the field app (filters to the asset's
+  WOs, offline) and the WO parts panel (picks the part). Camera needs HTTPS or localhost.
+- **Not done / limits**: true background sync with the app closed (Background Sync API is
+  Chromium-only; we sync whenever the app is open); parts usage, new WOs and requests offline (stock
+  must not oversell); offline viewing of already-uploaded photos; chat offline. iOS needs the app
+  added to the home screen for push and keeps storage less reliably.
 
 ### Phase 10 — SaaS layer
 Stripe checkout and portal (`Subscription`), plan limits (seats, villas, storage), trial expiry

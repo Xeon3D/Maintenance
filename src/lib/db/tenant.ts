@@ -31,6 +31,7 @@ export const TENANT_MODELS = new Set([
   "AuditLog",
   "Attachment",
   "Subscription",
+  "SyncOperation",
 ]);
 
 const WHERE_OPS = new Set([

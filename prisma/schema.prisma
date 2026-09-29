@@ -209,6 +209,7 @@ model User {
   assetStatusLogs    AssetStatusLog[]
   invitationsSent    Invitation[]
   pushSubscriptions  PushSubscription[]
+  syncOperations     SyncOperation[]
 }
 
 model Organization {
@@ -247,6 +248,7 @@ model Organization {
   auditLogs      AuditLog[]
   attachments    Attachment[]
   subscription   Subscription?
+  syncOperations SyncOperation[]
 }
 
 model Membership {
@@ -1176,6 +1178,24 @@ model PushSubscription {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
+}
+
+// A change made in the offline field app, keyed by the id the device generated. Replays of the same
+// id (retries after a dropped connection) are answered from this row instead of applied twice.
+model SyncOperation {
+  id             String   @id // client UUID
+  organizationId String
+  userId         String
+  kind           String
+  status         String // applied | rejected
+  error          String?
+  result         Json?
+  createdAt      DateTime @default(now())
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId, userId, createdAt])
 }
 
 model VerificationToken {

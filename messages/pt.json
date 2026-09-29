@@ -103,7 +103,9 @@
     "supply": "Aprovisionamento",
     "insights": "Análise",
     "profile": "O meu perfil",
-    "contracts": "Contratos de manutenção"
+    "contracts": "Contratos de manutenção",
+    "field": "App de campo (offline)",
+    "scan": "Ler código"
   },
   "roles": {
     "OWNER": "Proprietário",
@@ -482,7 +484,12 @@
   "files": {
     "title": "Fotografias e ficheiros",
     "add": "Adicionar fotografias ou ficheiros",
-    "failed": "Alguns ficheiros não foram carregados (JPEG, PNG, WebP ou PDF até 15 MB)."
+    "failed": "Alguns ficheiros não foram carregados (JPEG, PNG, WebP ou PDF até 15 MB).",
+    "notFound": "A ordem de trabalho ou o passo já não existe.",
+    "forbidden": "Não tem permissão para adicionar ficheiros aqui.",
+    "badTarget": "A ordem de trabalho ou o passo já não existe.",
+    "badType": "Tipo de ficheiro não suportado.",
+    "tooLarge": "Ficheiro demasiado grande."
   },
   "activity": {
     "title": "Atividade",
@@ -1190,5 +1197,61 @@
       "downHours": "Horas avariado",
       "degradedHours": "Horas degradado"
     }
+  },
+  "scan": {
+    "title": "Ler código",
+    "description": "Leia a etiqueta QR de um equipamento ou o código de barras de uma peça.",
+    "close": "Fechar",
+    "hint": "Aponte a câmara para uma etiqueta QR ou código de barras. Também pode escrever o código.",
+    "manual": "Escreva um código, referência ou número de série",
+    "go": "Ir",
+    "denied": "O acesso à câmara foi bloqueado. Permita-o nas definições do site no navegador, ou escreva o código abaixo.",
+    "unavailable": "Não há câmara disponível aqui (precisa de HTTPS ou localhost). Escreva o código abaixo.",
+    "notFound": "Nada corresponde a “{code}”.",
+    "again": "Ler código",
+    "scanPart": "Ler código de barras",
+    "partNotFound": "Nenhuma peça com o código de barras ou referência “{code}”."
+  },
+  "field": {
+    "title": "App de campo",
+    "myWork": "O meu trabalho",
+    "count": "{count, plural, one {# trabalho em aberto} other {# trabalhos em aberto}}",
+    "lastSync": "Atualizado {when}",
+    "syncNow": "Sincronizar agora",
+    "fullApp": "Abrir a aplicação completa",
+    "offline": "Sem ligação. {count, plural, =0 {Está tudo guardado neste dispositivo.} one {# alteração será sincronizada quando voltar a ter rede.} other {# alterações serão sincronizadas quando voltar a ter rede.}}",
+    "pending": "{count, plural, one {# alteração a aguardar sincronização…} other {# alterações a aguardar sincronização…}}",
+    "signedOut": "A sessão expirou. Inicie sessão novamente para sincronizar — nada neste dispositivo se perde.",
+    "syncFailed": "Não foi possível sincronizar agora. As alterações ficam guardadas e serão reenviadas.",
+    "issues": "{count, plural, one {# alteração não pôde ser aplicada} other {# alterações não puderam ser aplicadas}}",
+    "dismiss": "Dispensar",
+    "kind": {
+      "answer": "Checklist",
+      "comment": "Comentário",
+      "time": "Tempo",
+      "status": "Estado",
+      "photo": "Fotografia"
+    },
+    "firstLoad": "Ligue-se uma vez para descarregar as suas ordens de trabalho; depois ficam disponíveis sem rede.",
+    "empty": "Não tem ordens de trabalho em aberto atribuídas.",
+    "noneForAsset": "Nenhuma das suas ordens de trabalho em aberto é para este equipamento.",
+    "filteredBy": "A mostrar",
+    "unknownAsset": "Equipamento fora das suas ordens de trabalho",
+    "openAsset": "Abrir",
+    "clearFilter": "Mostrar tudo",
+    "offlineHint": "Funciona sem rede. Adicione esta aplicação ao ecrã principal para acesso rápido.",
+    "timerRunning": "Cronómetro a contar",
+    "steps": "{done}/{total} passos",
+    "access": "Acesso",
+    "start": "Iniciar trabalho",
+    "resume": "Retomar",
+    "hold": "Em espera",
+    "done": "Marcar como concluída",
+    "logged": "{minutes, plural, =0 {Sem tempo registado} other {# min registados}}",
+    "photos": "Fotografias",
+    "photosHint": "As fotografias ficam guardadas neste dispositivo e são enviadas quando houver rede.",
+    "takePhoto": "Tirar fotografia",
+    "retake": "Repetir",
+    "savedOnDevice": "Guardada neste dispositivo — é enviada quando houver rede."
   }
 }

@@ -1,0 +1,279 @@
+"use client";
+
+import { useEffect, useRef, useState } from "react";
+import { useFormatter, useTranslations } from "next-intl";
+import { Camera, ChevronLeft, CirclePause, CirclePlay, MapPin, Send, Square } from "lucide-react";
+import { Button } from "@/components/ui";
+import { PriorityText, WorkOrderStatusBadge } from "@/components/badges";
+import { MentionTextarea, type MentionMember } from "@/components/mention-textarea";
+import { shrinkImage } from "@/lib/upload-client";
+import { missingRequired } from "@/lib/offline/apply";
+import { newId } from "@/lib/offline/idb";
+import type { NewOp, OfflineWorkOrder } from "@/lib/offline-types";
+import type { WorkOrderStatus } from "@/generated/prisma/enums";
+import { ChecklistItemInput } from "./checklist-item";
+import type { Timer } from "./field-app";
+
+type Enqueue = (op: NewOp, blob?: Blob) => Promise<void>;
+
+function clock(sec: number) {
+  return `${Math.floor(sec / 3600)}:${String(Math.floor((sec % 3600) / 60)).padStart(2, "0")}:${String(sec % 60).padStart(2, "0")}`;
+}
+
+export function WorkOrderView({
+  wo,
+  members,
+  timer,
+  setTimer,
+  enqueue,
+  onBack,
+}: {
+  wo: OfflineWorkOrder;
+  members: MentionMember[];
+  timer: Timer;
+  setTimer: (t: Timer) => Promise<void>;
+  enqueue: Enqueue;
+  onBack: () => void;
+}) {
+  const t = useTranslations();
+  const format = useFormatter();
+  const [now, setNow] = useState(() => Date.now());
+  const [comment, setComment] = useState("");
+  const [blocked, setBlocked] = useState<string[] | null>(null);
+  const [holdNote, setHoldNote] = useState<string | null>(null);
+  const photoInput = useRef<HTMLInputElement>(null);
+  const runningHere = timer?.woId === wo.id;
+  const closed = wo.status === "DONE" || wo.status === "CANCELLED";
+
+  useEffect(() => {
+    if (!runningHere) return;
+    const i = setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(i);
+  }, [runningHere]);
+
+  /** Stop the device timer and queue the interval (anything under a minute is dropped). */
+  const stopTimer = async () => {
+    if (!timer) return;
+    const end = new Date();
+    if (end.getTime() - new Date(timer.startedAt).getTime() >= 60_000) {
+      await enqueue({ kind: "time", woId: timer.woId, startedAt: timer.startedAt, endedAt: end.toISOString(), at: end.toISOString() });
+    }
+    await setTimer(null);
+  };
+
+  const setStatus = async (status: WorkOrderStatus, note?: string) => {
+    if (status === "DONE") {
+      const missing = missingRequired(wo);
+      if (missing.length) {
+        setBlocked(missing.map((i) => i.label));
+        return;
+      }
+    }
+    setBlocked(null);
+    if ((status === "DONE" || status === "ON_HOLD") && runningHere) await stopTimer();
+    await enqueue({ kind: "status", woId: wo.id, status, note: note ?? null });
+  };
+
+  const addPhotos = async (files: FileList | null) => {
+    for (const f of [...(files ?? [])]) {
+      const small = await shrinkImage(f);
+      await enqueue({ kind: "photo", woId: wo.id, itemId: null, blobKey: newId(), filename: small.name }, small);
+    }
+  };
+
+  const elapsed = runningHere ? Math.max(0, Math.floor((now - new Date(timer!.startedAt).getTime()) / 1000)) : 0;
+  const address = [wo.villa?.address, wo.villa?.city].filter(Boolean).join(", ");
+
+  return (
+    <main className="pb-6">
+      <div className="border-b border-border bg-surface px-4 py-3">
+        <button onClick={onBack} className="-ml-1 mb-2 inline-flex items-center gap-1 text-sm text-muted">
+          <ChevronLeft className="size-4" />
+          {t("field.myWork")}
+        </button>
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="text-sm text-muted">#{wo.number}</span>
+          <WorkOrderStatusBadge status={wo.status} />
+          <PriorityText priority={wo.priority} />
+        </div>
+        <h1 className="mt-1 text-lg font-semibold">{wo.title}</h1>
+        {wo.dueDate && (
+          <p className="text-xs text-muted">
+            {t("wo.dueDate")}: {format.dateTime(new Date(wo.dueDate), { dateStyle: "medium", timeStyle: "short" })}
+          </p>
+        )}
+      </div>
+
+      <section className="space-y-2 border-b border-border bg-surface px-4 py-3 text-sm">
+        {wo.villa && (
+          <div>
+            <div className="font-medium">
+              {wo.villa.name}
+              {wo.area && <span className="font-normal text-muted"> · {wo.area}</span>}
+            </div>
+            {address && (
+              <a href={`https://maps.google.com/?q=${encodeURIComponent(address)}`} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 text-xs text-brand">
+                <MapPin className="size-3.5" />
+                {address}
+              </a>
+            )}
+          </div>
+        )}
+        {wo.villa?.accessNotes && (
+          <p className="whitespace-pre-wrap rounded-md bg-amber-50 px-3 py-2 text-xs text-amber-900">
+            <span className="font-medium">{t("field.access")}: </span>
+            {wo.villa.accessNotes}
+          </p>
+        )}
+        {wo.asset && (
+          <div className="text-xs">
+            <span className="text-muted">{t("wo.asset")}: </span>
+            <span className="font-medium">{wo.asset.name}</span>
+            {wo.asset.details && <span className="text-muted"> · {wo.asset.details}</span>}
+          </div>
+        )}
+        {wo.description && <p className="whitespace-pre-wrap pt-1">{wo.description}</p>}
+      </section>
+
+      {!closed && (
+        <section className="space-y-3 border-b border-border bg-surface px-4 py-3">
+          <div className="grid grid-cols-2 gap-2">
+            {wo.status === "OPEN" && (
+              <Button onClick={() => setStatus("IN_PROGRESS")} className="col-span-2 h-12">
+                {t("field.start")}
+              </Button>
+            )}
+            {wo.status === "ON_HOLD" && (
+              <Button onClick={() => setStatus("IN_PROGRESS")} className="col-span-2 h-12">
+                {t("field.resume")}
+              </Button>
+            )}
+            {wo.status === "IN_PROGRESS" && (
+              <>
+                <Button variant="secondary" onClick={() => setHoldNote("")} className="h-12">
+                  {t("field.hold")}
+                </Button>
+                <Button onClick={() => setStatus("DONE")} className="h-12">
+                  {t("field.done")}
+                </Button>
+              </>
+            )}
+          </div>
+          {holdNote !== null && (
+            <div className="space-y-2 rounded-md border border-border p-3">
+              <input
+                value={holdNote}
+                onChange={(e) => setHoldNote(e.target.value)}
+                placeholder={t("wo.holdReason")}
+                className="h-11 w-full rounded-md border border-border px-3 text-sm"
+                autoFocus
+              />
+              <div className="flex gap-2">
+                <Button
+                  size="sm"
+                  onClick={async () => {
+                    await setStatus("ON_HOLD", holdNote);
+                    setHoldNote(null);
+                  }}
+                >
+                  {t("field.hold")}
+                </Button>
+                <Button size="sm" variant="ghost" onClick={() => setHoldNote(null)}>
+                  {t("common.cancel")}
+                </Button>
+              </div>
+            </div>
+          )}
+          {blocked && (
+            <div className="rounded-md bg-red-50 px-3 py-2 text-sm text-red-800">
+              {t("wo.requiredItems")}
+              <ul className="mt-1 list-disc pl-5 text-xs">
+                {blocked.map((l) => (
+                  <li key={l}>{l}</li>
+                ))}
+              </ul>
+            </div>
+          )}
+
+          <div className="flex items-center gap-3">
+            {runningHere ? (
+              <Button variant="danger" onClick={stopTimer} className="h-11 flex-1">
+                <Square className="size-4" />
+                {t("time.stop")} <span className="font-mono tabular-nums">{clock(elapsed)}</span>
+              </Button>
+            ) : (
+              <Button
+                variant="secondary"
+                className="h-11 flex-1"
+                onClick={async () => {
+                  if (timer) await stopTimer(); // one timer at a time
+                  await setTimer({ woId: wo.id, startedAt: new Date().toISOString() });
+                  if (wo.status === "OPEN" || wo.status === "ON_HOLD") await enqueue({ kind: "status", woId: wo.id, status: "IN_PROGRESS" });
+                }}
+              >
+                {timer ? <CirclePause className="size-4" /> : <CirclePlay className="size-4" />}
+                {t("time.start")}
+              </Button>
+            )}
+            <span className="text-xs text-muted">{t("field.logged", { minutes: wo.minutesLogged })}</span>
+          </div>
+        </section>
+      )}
+
+      {wo.items.length > 0 && (
+        <section className="mt-3 border-y border-border bg-surface">
+          <h2 className="px-4 pt-3 text-sm font-medium">{t("checklist.title")}</h2>
+          <ul className="divide-y divide-border">
+            {wo.items.map((item) => (
+              <li key={item.id} className="px-4 py-3">
+                <ChecklistItemInput item={item} locked={closed} woId={wo.id} enqueue={enqueue} />
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+
+      <section className="mt-3 border-y border-border bg-surface px-4 py-3">
+        <div className="mb-2 flex items-center justify-between">
+          <h2 className="text-sm font-medium">{t("field.photos")}</h2>
+          <input ref={photoInput} type="file" accept="image/*" capture="environment" multiple className="sr-only" onChange={(e) => void addPhotos(e.target.files).then(() => (e.target.value = ""))} />
+          <Button size="sm" variant="secondary" onClick={() => photoInput.current?.click()}>
+            <Camera className="size-4" />
+            {t("field.takePhoto")}
+          </Button>
+        </div>
+        <p className="text-xs text-muted">{t("field.photosHint")}</p>
+      </section>
+
+      <section className="mt-3 border-y border-border bg-surface px-4 py-3">
+        <h2 className="mb-2 text-sm font-medium">{t("activity.title")}</h2>
+        <ul className="mb-3 space-y-3">
+          {wo.comments.map((c) => (
+            <li key={c.id} className="text-sm">
+              <div className="text-xs text-muted">
+                <span className="font-medium text-foreground">{c.user}</span> · {format.dateTime(new Date(c.at), { dateStyle: "short", timeStyle: "short" })}
+              </div>
+              <p className="whitespace-pre-wrap">{c.body}</p>
+            </li>
+          ))}
+          {wo.comments.length === 0 && <li className="text-sm text-muted">—</li>}
+        </ul>
+        <div className="flex items-end gap-2">
+          <div className="flex-1">
+            <MentionTextarea value={comment} onValueChange={setComment} members={members} placeholder={t("activity.placeholder")} rows={2} className="min-h-12" />
+          </div>
+          <Button
+            aria-label={t("activity.send")}
+            disabled={!comment.trim()}
+            onClick={async () => {
+              await enqueue({ kind: "comment", woId: wo.id, body: comment.trim() });
+              setComment("");
+            }}
+          >
+            <Send className="size-4" />
+          </Button>
+        </div>
+      </section>
+    </main>
+  );
+}

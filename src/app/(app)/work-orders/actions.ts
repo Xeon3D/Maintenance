@@ -6,11 +6,9 @@ import { z } from "zod";
 import { getContext, requirePermission, type AppContext } from "@/lib/context";
 import { enumOf, optEnumOf, optId, optNumber, optStr, parseForm, str, type FormResult } from "@/lib/forms";
 import { deleteObject } from "@/lib/storage";
-import { recordReading } from "@/lib/meters";
+import { addComment, answerItem } from "@/lib/wo-ops";
 import { consumePart, InventoryError, returnPart } from "@/lib/inventory";
-import { notify } from "@/lib/notify";
 import { contractFor } from "@/lib/contracts";
-import { excerpt, findMentions } from "@/lib/mentions";
 import {
   changeStatus,
   createWorkOrder,
@@ -195,33 +193,8 @@ export async function moveItemAction(woId: string, itemId: string, direction: -1
 }
 
 export async function answerItemAction(woId: string, itemId: string, value: string | null, note?: string | null) {
-  const { ctx, wo } = await executableWorkOrder(woId);
-  if (wo.status === "DONE" || wo.status === "CANCELLED") throw new WorkOrderError("locked");
-  const item = await ctx.db.workOrderItem.findFirst({ where: { id: itemId, workOrderId: woId } });
-  if (!item) throw new Error("Not found");
-
-  let v = value === null ? null : z.string().max(5000).parse(value).trim() || null;
-  if (v !== null) {
-    if (item.type === "NUMBER" || item.type === "METER_READING") v = String(z.coerce.number().finite().parse(v));
-    if (item.type === "PASS_FAIL") v = z.enum(["PASS", "FAIL", "FLAG"]).parse(v);
-    if (item.type === "CHECKBOX") v = z.enum(["true", "false"]).parse(v);
-    if (item.type === "MULTIPLE_CHOICE" && !item.options.includes(v)) throw new Error("Invalid choice");
-  }
-  await ctx.db.workOrderItem.update({
-    where: { id: itemId },
-    data: {
-      value: v,
-      note: note === undefined ? undefined : note?.slice(0, 2000) || null,
-      completedById: v ? ctx.user.id : null,
-      completedAt: v ? new Date() : null,
-    },
-  });
-  // Meter-reading steps also log the reading on the meter (limits, meter-based PMs, alerts).
-  if (v !== null && item.type === "METER_READING" && item.meterId && v !== item.value) {
-    await recordReading(ctx, item.meterId, Number(v), woId);
-  }
-  // Starting the checklist on an open WO counts as starting work.
-  if (v && wo.status === "OPEN") await changeStatus(ctx, woId, "IN_PROGRESS");
+  const { ctx } = await executableWorkOrder(woId);
+  await answerItem(ctx, woId, itemId, value, note);
   revalidatePath(path(woId));
 }
 
@@ -282,30 +255,8 @@ export async function deleteTimeAction(woId: string, entryId: string) {
 
 export async function addCommentAction(woId: string, body: string, attachmentIds: string[] = []) {
   const { ctx } = await executableWorkOrder(woId);
-  const text = z.string().trim().max(5000).parse(body);
-  if (!text && attachmentIds.length === 0) return;
-  const comment = await ctx.db.workOrderComment.create({ data: { workOrderId: woId, userId: ctx.user.id, body: text } });
-  if (attachmentIds.length) {
-    await ctx.db.attachment.updateMany({
-      where: { id: { in: attachmentIds }, workOrderId: woId, uploadedById: ctx.user.id, commentId: null },
-      data: { commentId: comment.id },
-    });
-  }
-  await notifyComment(ctx, woId, text);
+  await addComment(ctx, woId, body, attachmentIds);
   revalidatePath(path(woId));
-}
-
-/** @mentioned staff get MENTION; the WO's creator and assignees get WO_COMMENT. */
-async function notifyComment(ctx: AppContext, woId: string, text: string) {
-  const wo = await ctx.db.workOrder.findUnique({ where: { id: woId }, select: { number: true, title: true, createdById: true, assignees: { select: { userId: true } } } });
-  if (!wo) return;
-  const staff = await ctx.db.membership.findMany({ where: { active: true, role: { not: "REQUESTER" } }, select: { user: { select: { id: true, name: true } } } });
-  const mentioned = findMentions(text, staff.map((m) => m.user));
-  const data = { number: wo.number, title: wo.title, actor: ctx.user.name, excerpt: excerpt(text), where: `#${wo.number}` };
-  const link = path(woId);
-  await notify(ctx, mentioned, { type: "MENTION", data, link });
-  const involved = [wo.createdById, ...wo.assignees.map((a) => a.userId)].filter((u) => !mentioned.includes(u));
-  await notify(ctx, involved, { type: "WO_COMMENT", data, link });
 }
 
 export async function deleteAttachmentAction(woId: string, attachmentId: string) {

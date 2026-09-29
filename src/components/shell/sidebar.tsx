@@ -22,7 +22,9 @@ import {
   Menu,
   MessagesSquare,
   Package,
+  ScanLine,
   ShoppingCart,
+  Smartphone,
   Truck,
   UserCog,
   UserRound,
@@ -50,7 +52,9 @@ const ICONS: Record<string, LucideIcon> = {
   ListChecks,
   MessagesSquare,
   Package,
+  ScanLine,
   ShoppingCart,
+  Smartphone,
   Truck,
   UserCog,
   UserRound,
@@ -166,6 +170,9 @@ export function Sidebar({ groups, user, org, orgs, unreadNotifications }: Props)
           <Menu className="size-5" />
         </button>
         <span className="flex-1 truncate font-medium">{org.name}</span>
+        <Link href="/scan" aria-label={t("nav.scan")} className="rounded-md p-2 text-muted hover:bg-gray-100">
+          <ScanLine className="size-4" />
+        </Link>
         <NotificationBell key={unreadNotifications} initial={unreadNotifications} href="/notifications" />
       </div>
 

@@ -3,13 +3,14 @@
 import { useState, useTransition } from "react";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
-import { Undo2 } from "lucide-react";
+import { ScanLine, Undo2 } from "lucide-react";
+import { Scanner } from "@/components/scanner";
 import { ActionForm, FieldError } from "@/components/action-form";
 import { Input, Select } from "@/components/ui";
 import { addPartAction, returnPartAction } from "../actions";
 
 export type UsedPart = { id: string; partId: string; name: string; qty: string; location: string | null; cost: string | null };
-export type PartOption = { id: string; name: string; sku: string | null; unit: string; compatible: boolean; stock: Record<string, number> };
+export type PartOption = { id: string; name: string; sku: string | null; barcode: string | null; unit: string; compatible: boolean; stock: Record<string, number> };
 
 export function PartsPanel({
   woId,
@@ -33,6 +34,19 @@ export function PartsPanel({
   const [adding, setAdding] = useState(false);
   const [partId, setPartId] = useState("");
   const [locationId, setLocationId] = useState(defaultLocationId ?? locations[0]?.id ?? "");
+  const [scanning, setScanning] = useState(false);
+  const [unknownCode, setUnknownCode] = useState<string | null>(null);
+  // A scanned barcode or SKU picks the part.
+  const onScan = (code: string) => {
+    setScanning(false);
+    const c = code.trim().toLowerCase();
+    const hit = options.find((p) => p.barcode?.toLowerCase() === c || p.sku?.toLowerCase() === c);
+    setUnknownCode(hit ? null : code);
+    if (hit) {
+      setPartId(hit.id);
+      setAdding(true);
+    }
+  };
   const part = options.find((p) => p.id === partId);
   const available = part ? (part.stock[locationId] ?? 0) : null;
   const compatible = options.filter((p) => p.compatible);
@@ -46,6 +60,8 @@ export function PartsPanel({
 
   return (
     <div className="space-y-2 text-sm">
+      {scanning && <Scanner onResult={onScan} onClose={() => setScanning(false)} />}
+      {unknownCode && <p className="text-xs text-danger">{t("scan.partNotFound", { code: unknownCode })}</p>}
       {used.length === 0 && !adding && <p className="text-muted">{t("woParts.none")}</p>}
       {used.length > 0 && (
         <ul className="divide-y divide-border">
@@ -113,6 +129,12 @@ export function PartsPanel({
             <button className="text-xs font-medium text-brand" onClick={() => setAdding(true)}>
               + {t("woParts.add")}
             </button>
+            {options.length > 0 && (
+              <button className="inline-flex items-center gap-1 text-xs font-medium text-muted hover:text-brand" onClick={() => setScanning(true)}>
+                <ScanLine className="size-3.5" />
+                {t("scan.scanPart")}
+              </button>
+            )}
             {orderHref && (
               <Link href={orderHref} className="text-xs font-medium text-muted hover:text-brand">
                 {t("woParts.order")}
