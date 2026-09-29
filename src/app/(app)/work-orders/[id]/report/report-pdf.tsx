@@ -19,6 +19,8 @@ export type ReportData = {
   parts: { name: string; sku: string | null; qty: string }[];
   photos: Buffer[];
   signature: { image: Buffer; name: string; at: string } | null;
+  /** No signature because the client wasn't there. */
+  clientAbsent: boolean;
 };
 
 const s = StyleSheet.create({
@@ -127,6 +129,12 @@ export function ServiceReport({ d }: { d: ReportData }) {
             <Image src={{ data: d.signature.image, format: "png" }} style={{ width: 200, height: 80, objectFit: "contain" }} />
             <Text style={{ marginTop: 4, fontFamily: "Helvetica-Bold" }}>{d.signature.name}</Text>
             <Text style={s.muted}>{d.signature.at}</Text>
+          </View>
+        )}
+        {!d.signature && d.clientAbsent && (
+          <View wrap={false}>
+            <Text style={s.h2}>{L.signoff}</Text>
+            <Text>{L.clientAbsent}</Text>
           </View>
         )}
 

@@ -30,6 +30,9 @@ export type OfflineWorkOrder = {
   items: OfflineItem[];
   comments: { id: string; user: string; body: string; at: string }[];
   minutesLogged: number;
+  /** Client sign-off: who signed and when (pending = captured on the device, not yet uploaded). */
+  signOff: { name: string; at: string; pending?: boolean } | null;
+  clientAbsent: boolean;
 };
 
 export type Snapshot = {
@@ -47,10 +50,15 @@ export type SyncOp =
   | (Base & { kind: "answer"; itemId: string; value: string | null; note?: string | null })
   | (Base & { kind: "comment"; body: string })
   | (Base & { kind: "time"; startedAt: string; endedAt: string; note?: string | null })
-  | (Base & { kind: "status"; status: WorkOrderStatus; note?: string | null });
+  | (Base & { kind: "status"; status: WorkOrderStatus; note?: string | null })
+  | (Base & { kind: "signoff"; name: string; attachmentId: string })
+  | (Base & { kind: "clientAbsent"; absent: boolean });
 
-/** A queued change on the device. Photos and signatures are uploaded first, then become an answer (or stay a gallery photo). */
-export type QueuedOp = SyncOp | (Base & { kind: "photo"; itemId: string | null; blobKey: string; filename: string });
+/**
+ * A queued change on the device. Photos and signatures are uploaded first, then become an answer, a client
+ * sign-off (when `signOffName` is set), or stay a gallery photo.
+ */
+export type QueuedOp = SyncOp | (Base & { kind: "photo"; itemId: string | null; blobKey: string; filename: string; signOffName?: string });
 
 /** "retry" = not applied (server hiccup); keep it queued and try again later. */
 export type SyncResult = { id: string; status: "applied" | "stale" | "rejected" | "retry"; error?: string };

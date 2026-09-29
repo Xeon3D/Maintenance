@@ -11,8 +11,14 @@ export function applyOps(snapshot: Snapshot, ops: QueuedOp[], me: string): Offli
     const wo = byId.get(op.woId);
     if (!wo) continue;
     switch (op.kind) {
-      case "answer":
-      case "photo": {
+      case "photo":
+        if (op.signOffName) {
+          wo.signOff = { name: op.signOffName, at: op.at, pending: true };
+          wo.clientAbsent = false;
+          break;
+        }
+      // falls through: a checklist photo/signature answer
+      case "answer": {
         const item = wo.items.find((i) => i.id === (op.kind === "answer" ? op.itemId : op.itemId ?? ""));
         if (!item) break;
         item.value = op.kind === "answer" ? op.value : `${PENDING_PHOTO}${op.blobKey}`;
@@ -30,6 +36,13 @@ export function applyOps(snapshot: Snapshot, ops: QueuedOp[], me: string): Offli
         break;
       case "status":
         wo.status = op.status;
+        break;
+      case "signoff":
+        wo.signOff = { name: op.name, at: op.at };
+        wo.clientAbsent = false;
+        break;
+      case "clientAbsent":
+        if (!wo.signOff) wo.clientAbsent = op.absent;
         break;
     }
   }

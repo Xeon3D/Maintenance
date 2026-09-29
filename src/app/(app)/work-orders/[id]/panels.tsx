@@ -19,6 +19,7 @@ import {
   deleteCostAction,
   deleteTimeAction,
   deleteWorkOrderAction,
+  setClientAbsentAction,
   signOffAction,
   startTimerAction,
   stopTimerAction,
@@ -336,10 +337,12 @@ export function CommentBox({ woId, members }: { woId: string; members: MentionMe
 export function SignOff({
   woId,
   signed,
+  clientAbsent,
   canExecute,
 }: {
   woId: string;
   signed: { name: string; at: string; url: string } | null;
+  clientAbsent: boolean;
   canExecute: boolean;
 }) {
   const t = useTranslations("signoff");
@@ -348,6 +351,31 @@ export function SignOff({
   const [empty, setEmpty] = useState(true);
   const [open, setOpen] = useState(false);
   const [pending, start] = useTransition();
+
+  // "Client absent" replaces the signature; offered until the client has signed.
+  const absentBox = !signed && canExecute && (
+    <label className="flex items-center gap-2 text-sm">
+      <input
+        type="checkbox"
+        checked={clientAbsent}
+        disabled={pending}
+        onChange={(e) => {
+          const absent = e.target.checked;
+          start(() => setClientAbsentAction(woId, absent));
+        }}
+        className="size-4 accent-brand"
+      />
+      {t("clientAbsent")}
+    </label>
+  );
+  if (!signed && clientAbsent) {
+    return (
+      <div className="space-y-2">
+        {absentBox}
+        <p className="text-sm text-muted">{t("absentNote")}</p>
+      </div>
+    );
+  }
 
   if (signed) {
     return (
@@ -369,14 +397,18 @@ export function SignOff({
   if (!canExecute) return <p className="text-sm text-muted">{t("notSigned")}</p>;
   if (!open) {
     return (
-      <Button variant="secondary" size="sm" onClick={() => setOpen(true)}>
-        <Pencil className="size-4" />
-        {t("collect")}
-      </Button>
+      <div className="space-y-3">
+        <Button variant="secondary" size="sm" onClick={() => setOpen(true)}>
+          <Pencil className="size-4" />
+          {t("collect")}
+        </Button>
+        {absentBox}
+      </div>
     );
   }
   return (
     <div className="space-y-2">
+      {absentBox}
       <p className="text-xs text-muted">{t("hint")}</p>
       <SignaturePad ref={pad} onChange={setEmpty} />
       <Input value={name} onChange={(e) => setName(e.target.value)} placeholder={t("namePlaceholder")} />

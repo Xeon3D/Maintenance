@@ -2,7 +2,7 @@ import { revalidatePath } from "next/cache";
 import { z, ZodError } from "zod";
 import { getContext } from "@/lib/context";
 import { changeStatus, WorkOrderError } from "@/lib/work-orders";
-import { addComment, addTimeEntry, answerItem, clampAt } from "@/lib/wo-ops";
+import { addComment, addTimeEntry, answerItem, clampAt, setClientAbsent, signOff } from "@/lib/wo-ops";
 import { enumOf } from "@/lib/forms";
 import { WorkOrderStatus } from "@/generated/prisma/enums";
 import type { SyncResult } from "@/lib/offline-types";
@@ -15,6 +15,8 @@ const opSchema = z.discriminatedUnion("kind", [
   z.object({ ...base, kind: z.literal("comment"), body: z.string().max(5000) }),
   z.object({ ...base, kind: z.literal("time"), startedAt: z.string().max(40), endedAt: z.string().max(40), note: z.string().max(500).nullish() }),
   z.object({ ...base, kind: z.literal("status"), status: enumOf(WorkOrderStatus), note: z.string().max(1000).nullish() }),
+  z.object({ ...base, kind: z.literal("signoff"), name: z.string().max(150), attachmentId: z.string().min(1).max(40) }),
+  z.object({ ...base, kind: z.literal("clientAbsent"), absent: z.boolean() }),
 ]);
 
 /**
@@ -62,6 +64,12 @@ export async function POST(req: Request) {
         result = { id: o.id, status: "applied" };
       } else if (o.kind === "time") {
         await addTimeEntry(ctx, o.woId, ctx.hourlyRate, clampAt(o.startedAt), clampAt(o.endedAt), o.note ?? null);
+        result = { id: o.id, status: "applied" };
+      } else if (o.kind === "signoff") {
+        await signOff(ctx, o.woId, o.name, o.attachmentId, clampAt(o.at));
+        result = { id: o.id, status: "applied" };
+      } else if (o.kind === "clientAbsent") {
+        await setClientAbsent(ctx, o.woId, o.absent);
         result = { id: o.id, status: "applied" };
       } else {
         await changeStatus(ctx, o.woId, o.status, o.note ?? null);

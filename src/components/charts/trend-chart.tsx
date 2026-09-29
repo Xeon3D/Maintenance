@@ -75,7 +75,7 @@ export function TrendChart({ labels, series, height = 220, ariaLabel }: { labels
           <title id={titleId}>{ariaLabel}</title>
           {ticks.map((tk) => (
             <g key={tk}>
-              <line x1={M.left} x2={width - M.right} y1={y(tk)} y2={y(tk)} stroke={tk === 0 ? "#c3c2b7" : "#ebeae5"} strokeWidth={1} />
+              <line x1={M.left} x2={width - M.right} y1={y(tk)} y2={y(tk)} style={{ stroke: tk === 0 ? "var(--color-gray-300, #c3c2b7)" : "var(--border)" }} strokeWidth={1} />
               <text x={M.left - 8} y={y(tk)} dy="0.32em" textAnchor="end" className="fill-muted text-[11px] tabular-nums">
                 {tk}
               </text>
@@ -89,7 +89,7 @@ export function TrendChart({ labels, series, height = 220, ariaLabel }: { labels
               </text>
             ) : null,
           )}
-          {hover !== null && <line x1={x(hover)} x2={x(hover)} y1={M.top} y2={M.top + plotH} stroke="#9ca3af" strokeWidth={1} />}
+          {hover !== null && <line x1={x(hover)} x2={x(hover)} y1={M.top} y2={M.top + plotH} style={{ stroke: "var(--muted)" }} strokeWidth={1} />}
           {series.map((s) => (
             <g key={s.name}>
               <path
@@ -101,7 +101,7 @@ export function TrendChart({ labels, series, height = 220, ariaLabel }: { labels
                 strokeLinecap="round"
               />
               {(hover !== null ? [hover] : [n - 1]).map((i) => (
-                <circle key={i} cx={x(i)} cy={y(s.values[i] ?? 0)} r={4} fill={s.color} stroke="#fff" strokeWidth={2} />
+                <circle key={i} cx={x(i)} cy={y(s.values[i] ?? 0)} r={4} fill={s.color} style={{ stroke: "var(--surface)" }} strokeWidth={2} />
               ))}
             </g>
           ))}

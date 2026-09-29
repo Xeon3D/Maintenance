@@ -36,9 +36,34 @@ const wo: OfflineWorkOrder = {
   items: [item("h", "HEADING", true), item("check", "CHECKBOX", true), item("photo", "PHOTO", true), item("note", "TEXT")],
   comments: [],
   minutesLogged: 30,
+  signOff: null,
+  clientAbsent: false,
 };
 const snap: Snapshot = { at: "2026-09-28T10:00:00Z", user: { id: "u", name: "Rui" }, workOrders: [wo], assets: [], members: [] };
 const at = "2026-09-28T11:00:00Z";
+
+describe("client sign-off offline", () => {
+  it("shows a signature captured on the device as pending, then signed once synced", () => {
+    const pending = applyOps(snap, [{ id: "s", kind: "photo", woId: "w1", itemId: null, blobKey: "sig", filename: "signature.png", signOffName: "Maria", at }], "Rui")[0];
+    expect(pending.signOff).toEqual({ name: "Maria", at, pending: true });
+    expect(pending.items.every((i) => !i.value)).toBe(true); // not a checklist answer
+    const signed = applyOps(snap, [{ id: "s", kind: "signoff", woId: "w1", name: "Maria", attachmentId: "att", at }], "Rui")[0];
+    expect(signed.signOff).toEqual({ name: "Maria", at });
+  });
+
+  it("client absent replaces the signature, and signing clears it", () => {
+    const absent = applyOps(snap, [{ id: "a", kind: "clientAbsent", woId: "w1", absent: true, at }], "Rui")[0];
+    expect(absent.clientAbsent).toBe(true);
+    const thenSigned = applyOps(snap, [
+      { id: "a", kind: "clientAbsent", woId: "w1", absent: true, at },
+      { id: "s", kind: "signoff", woId: "w1", name: "Maria", attachmentId: "att", at },
+    ], "Rui")[0];
+    expect(thenSigned.clientAbsent).toBe(false);
+    // Once signed, "absent" can't be set (the server refuses it too).
+    const signedSnap = { ...snap, workOrders: [{ ...wo, signOff: { name: "Maria", at } }] };
+    expect(applyOps(signedSnap, [{ id: "a", kind: "clientAbsent", woId: "w1", absent: true, at }], "Rui")[0].clientAbsent).toBe(false);
+  });
+});
 
 describe("applyOps (offline overlay)", () => {
   it("lays queued changes over the snapshot without mutating it", () => {

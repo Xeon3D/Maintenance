@@ -11,7 +11,7 @@ import type { ChecklistItemType, Priority, SystemType, WorkOrderStatus, WorkOrde
 export const ACTIVE_STATUSES: WorkOrderStatus[] = ["OPEN", "IN_PROGRESS", "ON_HOLD"];
 
 export class WorkOrderError extends Error {
-  constructor(public code: "requiredItems" | "invalidRef" | "invalidAssignee" | "locked") {
+  constructor(public code: "requiredItems" | "invalidRef" | "invalidAssignee" | "locked" | "alreadySigned") {
     super(code);
   }
 }

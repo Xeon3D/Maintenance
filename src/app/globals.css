@@ -29,6 +29,79 @@ body {
   color: var(--foreground);
 }
 
+/* ── Dark theme. `html.dark` is set by the server (explicit choice) or the boot script ("system").
+   The app's own tokens change, and so do the Tailwind palette shades the UI uses: light tints become
+   translucent washes and dark text shades become light, so existing classes work in both themes.
+   bg-white is left alone on purpose: logos, signatures and printed labels stay on white. */
+@custom-variant dark (&:where(.dark, .dark *));
+
+html.dark {
+  color-scheme: dark;
+  --background: #0f1115;
+  --surface: #171a21;
+  --foreground: #e6e8ec;
+  --muted: #9aa2af;
+  --border: #2b313c;
+  --danger: #f97066;
+
+  --color-gray-50: #1b1f27;
+  --color-gray-100: #232833;
+  --color-gray-300: #3b4251;
+  --color-gray-400: #5d6574;
+  --color-gray-500: #8a92a0;
+  --color-gray-600: #a0a7b3;
+  --color-gray-700: #c4c9d1;
+  --color-slate-100: #232833;
+  --color-slate-800: #e2e8f0;
+
+  --color-red-50: rgb(239 68 68 / 0.14);
+  --color-red-100: rgb(239 68 68 / 0.22);
+  --color-red-200: rgb(239 68 68 / 0.35);
+  --color-red-700: #fca5a5;
+  --color-red-800: #fecaca;
+  --color-red-900: #fee2e2;
+  --color-green-50: rgb(34 197 94 / 0.14);
+  --color-green-300: rgb(34 197 94 / 0.45);
+  --color-green-700: #86efac;
+  --color-green-800: #bbf7d0;
+  --color-amber-50: rgb(245 158 11 / 0.14);
+  --color-amber-200: rgb(245 158 11 / 0.35);
+  --color-amber-300: rgb(245 158 11 / 0.5);
+  --color-amber-700: #fcd34d;
+  --color-amber-800: #fde68a;
+  --color-amber-900: #fef3c7;
+  --color-amber-950: #fffbeb;
+  --color-yellow-50: rgb(234 179 8 / 0.14);
+  --color-yellow-800: #fde68a;
+  --color-sky-50: rgb(14 165 233 / 0.14);
+  --color-sky-300: rgb(14 165 233 / 0.45);
+  --color-sky-800: #bae6fd;
+  --color-sky-900: #e0f2fe;
+  --color-blue-50: rgb(59 130 246 / 0.14);
+  --color-blue-800: #bfdbfe;
+  --color-blue-900: #dbeafe;
+  --color-indigo-50: rgb(99 102 241 / 0.16);
+  --color-indigo-300: rgb(99 102 241 / 0.5);
+  --color-indigo-800: #c7d2fe;
+  --color-violet-50: rgb(139 92 246 / 0.16);
+  --color-violet-800: #ddd6fe;
+  --color-purple-50: rgb(168 85 247 / 0.16);
+  --color-purple-800: #e9d5ff;
+  --color-rose-50: rgb(244 63 94 / 0.14);
+  --color-rose-800: #fecdd3;
+}
+
+/* The company colour is chosen for white text on it (buttons); as text on a dark page it is lifted. */
+html.dark .text-brand,
+html.dark .hover\:text-brand:hover,
+html.dark .release-notes a {
+  color: color-mix(in oklab, var(--brand) 45%, white);
+}
+html.dark .release-notes code,
+html.dark .release-notes pre {
+  background: var(--color-gray-100);
+}
+
 /* Release notes rendered from GitHub (Settings → Server). */
 .release-notes > * + * { margin-top: 0.5rem; }
 .release-notes h1, .release-notes h2, .release-notes h3 { font-weight: 600; margin-top: 0.9rem; }

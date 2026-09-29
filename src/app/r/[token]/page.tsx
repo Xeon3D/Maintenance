@@ -4,6 +4,8 @@ import { getTranslations } from "next-intl/server";
 import { auth } from "@/auth";
 import { Card } from "@/components/ui";
 import { LocaleSwitcher } from "@/components/locale-switcher";
+import { ThemeToggle } from "@/components/theme-toggle";
+import { getTheme } from "@/lib/theme-server";
 import { prisma } from "@/lib/db/client";
 import { PublicRequestForm } from "./public-form";
 import { brandStyle, logoSrc } from "@/lib/branding";
@@ -51,8 +53,9 @@ export default async function QrLandingPage({ params }: PageProps<"/r/[token]">)
           </p>
         )}
       </Card>
-      <div className="mt-4">
+      <div className="mt-4 flex justify-center gap-2">
         <LocaleSwitcher />
+        <ThemeToggle initial={await getTheme()} />
       </div>
     </div>
   );

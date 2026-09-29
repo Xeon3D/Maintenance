@@ -95,3 +95,19 @@ export async function addTimeEntry(ctx: WoCtx, woId: string, rate: unknown, star
   if (wo.status === "OPEN" || wo.status === "ON_HOLD") await changeStatus(ctx, woId, "IN_PROGRESS");
   return entry;
 }
+
+/** The client signs the work order (the signature is an image already uploaded to it). */
+export async function signOff(ctx: WoCtx, woId: string, signedByName: string, attachmentId: string, at = new Date()) {
+  const name = z.string().trim().min(1).max(150).parse(signedByName);
+  const att = await ctx.db.attachment.findFirst({ where: { id: attachmentId, workOrderId: woId, mimeType: "image/png" } });
+  if (!att) throw new WorkOrderError("invalidRef");
+  await ctx.db.workOrder.update({ where: { id: woId }, data: { signatureUrl: att.id, signedByName: name, signedAt: at, clientAbsent: false } });
+}
+
+/** "Client absent": no client signature is needed. Not possible once the client has signed. */
+export async function setClientAbsent(ctx: WoCtx, woId: string, absent: boolean) {
+  const wo = await ctx.db.workOrder.findUnique({ where: { id: woId }, select: { signatureUrl: true } });
+  if (!wo) throw new WorkOrderError("invalidRef");
+  if (absent && wo.signatureUrl) throw new WorkOrderError("alreadySigned");
+  await ctx.db.workOrder.update({ where: { id: woId }, data: { clientAbsent: absent } });
+}

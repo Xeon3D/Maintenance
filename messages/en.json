@@ -451,7 +451,8 @@
     "locked": "This work order is closed. Reopen it to make changes.",
     "procedureHint": "Copies the procedure's steps into this work order's checklist.",
     "clientVisible": "Visible to the client in their portal",
-    "clientVisibleHint": "Untick for internal work the client shouldn't see."
+    "clientVisibleHint": "Untick for internal work the client shouldn't see.",
+    "alreadySigned": "The client has already signed this work order."
   },
   "woStatus": {
     "OPEN": "Open",
@@ -560,7 +561,9 @@
     "confirm": "Confirm sign-off",
     "clear": "Clear",
     "clearConfirm": "Remove this signature?",
-    "notSigned": "Not signed yet."
+    "notSigned": "Not signed yet.",
+    "clientAbsent": "Client absent",
+    "absentNote": "Client absent: no signature needed."
   },
   "report": {
     "title": "Service report",
@@ -1307,7 +1310,9 @@
     "photosHint": "Photos are kept on this device and uploaded when there's a connection.",
     "takePhoto": "Take photo",
     "retake": "Retake",
-    "savedOnDevice": "Saved on this device — uploads when online."
+    "savedOnDevice": "Saved on this device — uploads when online.",
+    "signedBy": "Signed by {name}",
+    "waitingUpload": "will upload when online"
   },
   "company": {
     "details": "Company details",
@@ -1421,5 +1426,11 @@
     },
     "whatsNew": "What's new",
     "noNotes": "No release notes."
+  },
+  "theme": {
+    "label": "Appearance",
+    "light": "Light",
+    "dark": "Dark",
+    "system": "Same as device"
   }
 }

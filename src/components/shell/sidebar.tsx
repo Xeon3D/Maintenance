@@ -36,6 +36,8 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { LocaleSwitcher } from "@/components/locale-switcher";
+import { ThemeToggle } from "@/components/theme-toggle";
+import type { Theme } from "@/lib/theme";
 import { signOutAction, switchOrgAction } from "@/app/(auth)/actions";
 import { cn } from "@/lib/utils";
 import type { NavGroup } from "./nav";
@@ -68,6 +70,7 @@ const ICONS: Record<string, LucideIcon> = {
 
 type Props = {
   appName: string;
+  theme: Theme;
   groups: NavGroup[]; // already filtered by permission/readiness on the server
   user: { name: string; email: string; role: string }; // role: display name (custom role or translated built-in)
   org: { id: string; name: string; logo: string | null };
@@ -75,7 +78,7 @@ type Props = {
   unreadNotifications: number;
 };
 
-export function Sidebar({ appName, groups, user, org, orgs, unreadNotifications }: Props) {
+export function Sidebar({ appName, theme, groups, user, org, orgs, unreadNotifications }: Props) {
   const t = useTranslations();
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
@@ -156,7 +159,10 @@ export function Sidebar({ appName, groups, user, org, orgs, unreadNotifications 
       </nav>
 
       <div className="space-y-3 border-t border-border p-3">
-        <LocaleSwitcher />
+        <div className="flex items-center justify-between gap-2">
+          <LocaleSwitcher />
+          <ThemeToggle initial={theme} />
+        </div>
         <div className="flex items-center justify-between gap-2 px-1">
           <Link href="/settings/profile" onClick={() => setOpen(false)} className="min-w-0 flex-1 rounded-md hover:text-brand">
             <div className="truncate text-sm font-medium">{user.name}</div>

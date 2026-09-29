@@ -11,6 +11,8 @@ import { blobs, kv, newId, queue } from "@/lib/offline/idb";
 import { clearIssues, loadIssues, loadSnapshot, syncNow, type SyncIssue, type SyncOutcome } from "@/lib/offline/sync";
 import { cn } from "@/lib/utils";
 import { WorkOrderView } from "./work-order-view";
+import { ThemeToggle } from "@/components/theme-toggle";
+import type { Theme } from "@/lib/theme";
 
 export type Timer = { woId: string; startedAt: string } | null;
 type Status = "idle" | "syncing" | SyncOutcome["state"];
@@ -27,7 +29,7 @@ function warmCache() {
   navigator.serviceWorker.ready.then((reg) => reg.active?.postMessage({ type: "cache-field", urls: ["/m", ...assets] })).catch(() => undefined);
 }
 
-export function FieldApp({ user, org, logo }: { user: { id: string; name: string }; org: string; logo: string | null }) {
+export function FieldApp({ user, org, logo, theme }: { user: { id: string; name: string }; org: string; logo: string | null; theme: Theme }) {
   const t = useTranslations();
   const format = useFormatter();
   const [snapshot, setSnapshot] = useState<Snapshot | null>(null);
@@ -271,6 +273,9 @@ export function FieldApp({ user, org, logo }: { user: { id: string; name: string
             </ul>
           )}
           <p className="mt-6 text-center text-xs text-muted">{t("field.offlineHint")}</p>
+          <div className="mt-4 flex justify-center">
+            <ThemeToggle initial={theme} />
+          </div>
         </main>
       )}
 

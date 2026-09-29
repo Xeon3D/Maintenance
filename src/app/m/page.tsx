@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { getContext } from "@/lib/context";
 import { brandStyle, logoSrc } from "@/lib/branding";
+import { getTheme } from "@/lib/theme-server";
 import { FieldApp } from "./field-app";
 
 export const metadata = { title: "Field" };
@@ -15,7 +16,7 @@ export default async function FieldPage() {
   if (!ctx.can("workOrders.execute")) redirect("/dashboard");
   return (
     <div style={brandStyle(ctx.organization)}>
-      <FieldApp user={{ id: ctx.user.id, name: ctx.user.name }} org={ctx.organization.name} logo={logoSrc(ctx.organization)} />
+      <FieldApp user={{ id: ctx.user.id, name: ctx.user.name }} org={ctx.organization.name} logo={logoSrc(ctx.organization)} theme={await getTheme()} />
     </div>
   );
 }

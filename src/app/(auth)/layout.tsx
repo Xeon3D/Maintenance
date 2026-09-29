@@ -1,5 +1,7 @@
 import { getTranslations } from "next-intl/server";
 import { LocaleSwitcher } from "@/components/locale-switcher";
+import { ThemeToggle } from "@/components/theme-toggle";
+import { getTheme } from "@/lib/theme-server";
 import { getAppName } from "@/lib/server-settings";
 
 export default async function AuthLayout({ children }: { children: React.ReactNode }) {
@@ -12,8 +14,9 @@ export default async function AuthLayout({ children }: { children: React.ReactNo
           <p className="mt-2 text-sm text-muted">{t("auth.tagline")}</p>
         </div>
         {children}
-        <div className="mt-6 flex justify-center">
+        <div className="mt-6 flex justify-center gap-2">
           <LocaleSwitcher />
+          <ThemeToggle initial={await getTheme()} />
         </div>
       </div>
     </div>

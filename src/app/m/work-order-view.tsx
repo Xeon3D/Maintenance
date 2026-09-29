@@ -11,6 +11,7 @@ import { missingRequired } from "@/lib/offline/apply";
 import { newId } from "@/lib/offline/idb";
 import type { NewOp, OfflineWorkOrder } from "@/lib/offline-types";
 import type { WorkOrderStatus } from "@/generated/prisma/enums";
+import { SignaturePad, type SignaturePadHandle } from "@/components/signature-pad";
 import { ChecklistItemInput } from "./checklist-item";
 import type { Timer } from "./field-app";
 
@@ -246,6 +247,11 @@ export function WorkOrderView({
       </section>
 
       <section className="mt-3 border-y border-border bg-surface px-4 py-3">
+        <h2 className="mb-2 text-sm font-medium">{t("signoff.title")}</h2>
+        <FieldSignOff wo={wo} enqueue={enqueue} />
+      </section>
+
+      <section className="mt-3 border-y border-border bg-surface px-4 py-3">
         <h2 className="mb-2 text-sm font-medium">{t("activity.title")}</h2>
         <ul className="mb-3 space-y-3">
           {wo.comments.map((c) => (
@@ -275,5 +281,74 @@ export function WorkOrderView({
         </div>
       </section>
     </main>
+  );
+}
+
+/**
+ * Client sign-off on the device: a name and a signature (queued like a photo, uploaded when online),
+ * or "client absent", which removes the need for a signature.
+ */
+function FieldSignOff({ wo, enqueue }: { wo: OfflineWorkOrder; enqueue: Enqueue }) {
+  const t = useTranslations();
+  const format = useFormatter();
+  const pad = useRef<SignaturePadHandle>(null);
+  const [name, setName] = useState("");
+  const [empty, setEmpty] = useState(true);
+  const [saving, setSaving] = useState(false);
+
+  if (wo.signOff) {
+    return (
+      <p className="text-sm">
+        {t("field.signedBy", { name: wo.signOff.name })}
+        <span className="block text-xs text-muted">
+          {format.dateTime(new Date(wo.signOff.at), { dateStyle: "short", timeStyle: "short" })}
+          {wo.signOff.pending && ` · ${t("field.waitingUpload")}`}
+        </span>
+      </p>
+    );
+  }
+  return (
+    <div className="space-y-3">
+      <label className="flex items-center gap-2 text-sm">
+        <input
+          type="checkbox"
+          checked={wo.clientAbsent}
+          onChange={(e) => void enqueue({ kind: "clientAbsent", woId: wo.id, absent: e.target.checked })}
+          className="size-5 accent-brand"
+        />
+        {t("signoff.clientAbsent")}
+      </label>
+      {wo.clientAbsent ? (
+        <p className="text-sm text-muted">{t("signoff.absentNote")}</p>
+      ) : (
+        <>
+          <p className="text-xs text-muted">{t("signoff.hint")}</p>
+          <SignaturePad ref={pad} onChange={setEmpty} />
+          <input
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            placeholder={t("signoff.namePlaceholder")}
+            className="h-11 w-full rounded-md border border-border bg-surface px-3 text-sm"
+          />
+          <div className="flex gap-2">
+            <Button
+              className="h-11 flex-1"
+              disabled={empty || !name.trim() || saving}
+              onClick={async () => {
+                setSaving(true);
+                const blob = await pad.current?.toBlob();
+                if (blob) await enqueue({ kind: "photo", woId: wo.id, itemId: null, blobKey: newId(), filename: "signature.png", signOffName: name.trim() }, blob);
+                setSaving(false);
+              }}
+            >
+              {t("signoff.confirm")}
+            </Button>
+            <Button variant="ghost" className="h-11" onClick={() => pad.current?.clear()}>
+              {t("signoff.clear")}
+            </Button>
+          </div>
+        </>
+      )}
+    </div>
   );
 }

@@ -90,7 +90,12 @@ export async function syncNow(userId: string): Promise<SyncOutcome> {
       return { state: navigator.onLine ? "failed" : "offline", sent };
     }
     await blobs.del(op.blobKey);
-    if (op.itemId) {
+    if (op.signOffName) {
+      // The client's signature is on the server now; recording the sign-off is an ordinary change.
+      const signoff: QueueRow<QueuedOp> = { ...row, op: { id: row.id, kind: "signoff", woId: op.woId, name: op.signOffName, attachmentId: uploadedId, at: op.at } };
+      await queue.put(signoff);
+      batch.push(signoff);
+    } else if (op.itemId) {
       // The photo is on the server now; answering the checklist item is an ordinary change.
       const answer: QueueRow<QueuedOp> = { ...row, op: { id: row.id, kind: "answer", woId: op.woId, itemId: op.itemId, value: uploadedId, at: op.at } };
       await queue.put(answer);

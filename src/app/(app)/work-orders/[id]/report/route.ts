@@ -88,6 +88,7 @@ export async function GET(_req: Request, { params }: RouteContext<"/work-orders/
       photos: t("report.photos"),
       parts: t("woParts.title"),
       signoff: t("signoff.title"),
+      clientAbsent: t("signoff.absentNote"),
     },
     lh: await letterhead(ctx.organization, t("company.taxIdShort")),
     number: wo.number,
@@ -113,6 +114,7 @@ export async function GET(_req: Request, { params }: RouteContext<"/work-orders/
       wo.signatureUrl && wo.signedByName && wo.signedAt
         ? await load(wo.signatureUrl).then((image) => (image ? { image, name: wo.signedByName!, at: dt(wo.signedAt!) } : null))
         : null,
+    clientAbsent: wo.clientAbsent,
   };
 
   const pdf = await renderToBuffer(createElement(ServiceReport, { d: data }) as unknown as ReactElement<DocumentProps>);

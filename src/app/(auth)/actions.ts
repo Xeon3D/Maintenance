@@ -11,6 +11,7 @@ import { prisma } from "@/lib/db/client";
 import { createOrganization } from "@/lib/org";
 import { ACTIVE_ORG_COOKIE, requireUser } from "@/lib/context";
 import { isLocale, LOCALE_COOKIE } from "@/i18n/config";
+import { isTheme, THEME_COOKIE } from "@/lib/theme";
 import { createTranslator } from "next-intl";
 import en from "../../../messages/en.json";
 import pt from "../../../messages/pt.json";
@@ -148,4 +149,14 @@ export async function factoryResetAction(_: FormState, form: FormData): Promise<
   await factoryReset();
   (await cookies()).delete(ACTIVE_ORG_COOKIE);
   await signOut({ redirectTo: "/login?factory=1" }); // the signed-in user no longer exists
+}
+
+// ── Appearance
+
+/** Saves the theme on every change: to the user when signed in, and in a cookie for signed-out pages. */
+export async function setThemeAction(theme: string) {
+  if (!isTheme(theme)) return;
+  (await cookies()).set(THEME_COOKIE, theme, { path: "/", maxAge: 60 * 60 * 24 * 365, sameSite: "lax" });
+  const session = await auth();
+  if (session?.user?.id) await prisma.user.update({ where: { id: session.user.id }, data: { theme } });
 }

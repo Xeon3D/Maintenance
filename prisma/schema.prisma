@@ -178,6 +178,8 @@ model User {
   phone             String?
   image             String?
   locale            String   @default("en")
+  // Appearance: "light", "dark" or "system" (follow the device). Saved on every change of the toggle.
+  theme             String   @default("system")
   isSuperAdmin      Boolean  @default(false)
   // { [notificationType]: { email?: boolean, push?: boolean } }; missing keys use the defaults in lib/notify.
   notificationPrefs Json?
@@ -625,6 +627,8 @@ model WorkOrder {
   signatureUrl     String?
   signedByName     String?
   signedAt         DateTime?
+  // The client wasn't there to sign: no signature needed (set by the technician).
+  clientAbsent     Boolean         @default(false)
   clientVisible    Boolean         @default(true)
   createdAt        DateTime        @default(now())
   updatedAt        DateTime        @updatedAt

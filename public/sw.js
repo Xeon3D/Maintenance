@@ -8,7 +8,7 @@
 //  - manifest/icons   stale-while-revalidate (also the company logo, shown in the field app)
 // API calls, uploads and RSC requests are never cached: the field app keeps its data in IndexedDB.
 
-const VERSION = "v4";
+const VERSION = "v5";
 const STATIC = `static-${VERSION}`;
 const PAGES = `pages-${VERSION}`;
 const DEV = ["localhost", "127.0.0.1", "[::1]"].includes(self.location.hostname);

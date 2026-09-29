@@ -299,6 +299,7 @@ export default async function WorkOrderPage({ params }: PageProps<"/work-orders/
             <SignOff
               woId={wo.id}
               canExecute={canExecute}
+              clientAbsent={wo.clientAbsent}
               signed={
                 wo.signatureUrl && wo.signedByName && wo.signedAt
                   ? { name: wo.signedByName, at: dt(wo.signedAt), url: fileUrl(wo.signatureUrl) }

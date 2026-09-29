@@ -451,7 +451,8 @@
     "locked": "Esta ordem de trabalho está fechada. Reabra-a para fazer alterações.",
     "procedureHint": "Copia os passos do procedimento para a checklist desta ordem de trabalho.",
     "clientVisible": "Visível para o cliente no portal",
-    "clientVisibleHint": "Desmarque para trabalho interno que o cliente não deve ver."
+    "clientVisibleHint": "Desmarque para trabalho interno que o cliente não deve ver.",
+    "alreadySigned": "O cliente já assinou esta ordem de trabalho."
   },
   "woStatus": {
     "OPEN": "Aberta",
@@ -560,7 +561,9 @@
     "confirm": "Confirmar aprovação",
     "clear": "Limpar",
     "clearConfirm": "Remover esta assinatura?",
-    "notSigned": "Ainda não assinado."
+    "notSigned": "Ainda não assinado.",
+    "clientAbsent": "Cliente ausente",
+    "absentNote": "Cliente ausente: não é necessária assinatura."
   },
   "report": {
     "title": "Relatório de serviço",
@@ -1307,7 +1310,9 @@
     "photosHint": "As fotografias ficam guardadas neste dispositivo e são enviadas quando houver rede.",
     "takePhoto": "Tirar fotografia",
     "retake": "Repetir",
-    "savedOnDevice": "Guardada neste dispositivo — é enviada quando houver rede."
+    "savedOnDevice": "Guardada neste dispositivo — é enviada quando houver rede.",
+    "signedBy": "Assinado por {name}",
+    "waitingUpload": "será enviado quando houver rede"
   },
   "company": {
     "details": "Dados da empresa",
@@ -1421,5 +1426,11 @@
     },
     "whatsNew": "Novidades",
     "noNotes": "Sem notas de versão."
+  },
+  "theme": {
+    "label": "Aspeto",
+    "light": "Claro",
+    "dark": "Escuro",
+    "system": "Igual ao dispositivo"
   }
 }

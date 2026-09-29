@@ -6,7 +6,7 @@ import { z } from "zod";
 import { getContext, requirePermission, type AppContext } from "@/lib/context";
 import { enumOf, optEnumOf, optId, optNumber, optStr, parseForm, str, type FormResult } from "@/lib/forms";
 import { deleteObject } from "@/lib/storage";
-import { addComment, answerItem } from "@/lib/wo-ops";
+import { addComment, answerItem, setClientAbsent, signOff } from "@/lib/wo-ops";
 import { consumePart, InventoryError, returnPart } from "@/lib/inventory";
 import { contractFor } from "@/lib/contracts";
 import {
@@ -327,13 +327,13 @@ export async function returnPartAction(woId: string, workOrderPartId: string) {
 
 export async function signOffAction(woId: string, signedByName: string, attachmentId: string) {
   const { ctx } = await executableWorkOrder(woId);
-  const name = z.string().trim().min(1).max(150).parse(signedByName);
-  const att = await ctx.db.attachment.findFirst({ where: { id: attachmentId, workOrderId: woId, mimeType: "image/png" } });
-  if (!att) throw new Error("Invalid signature");
-  await ctx.db.workOrder.update({
-    where: { id: woId },
-    data: { signatureUrl: att.id, signedByName: name, signedAt: new Date() },
-  });
+  await signOff(ctx, woId, signedByName, attachmentId);
+  revalidatePath(path(woId));
+}
+
+export async function setClientAbsentAction(woId: string, absent: boolean) {
+  const { ctx } = await executableWorkOrder(woId);
+  await setClientAbsent(ctx, woId, absent);
   revalidatePath(path(woId));
 }
 

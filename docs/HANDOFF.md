@@ -172,6 +172,16 @@ are mostly UI and logic plus small additive migrations.
   rate → legacy `Membership.hourlyRate`; never for VIEWER/REQUESTER. `ctx.hourlyRate` is snapshotted
   onto each `TimeEntry`, so rate changes only affect new time. Show role names with
   `jobRole?.name ?? t("roles.X")`. Request pages show the linked job's cost (`workOrderCosts`).
+- **Theme** (light / dark / system): `User.theme`, saved by `setThemeAction` on every toggle click (plus a
+  cookie for signed-out pages); `getTheme()` (`src/lib/theme-server.ts`) feeds `<html data-theme>` and a
+  server-set `dark` class; `THEME_BOOT_SCRIPT` resolves "system" before paint and follows device changes.
+  Dark mode = `html.dark` overrides of the app tokens **and** the Tailwind palette shades in use
+  (globals.css), so plain classes like `bg-red-50 text-red-800` work in both. `bg-white` is deliberately
+  not remapped (logos, signatures, labels). New colour shades used in the UI need a dark value there.
+- **Client sign-off**: signature (`signOff()`) or `WorkOrder.clientAbsent` (`setClientAbsent()`, refused once
+  signed), both in `src/lib/wo-ops.ts` and shared by the web panel and offline sync (ops `signoff` /
+  `clientAbsent`; an offline signature is a queued photo with `signOffName`). Sign-off isn't required
+  to complete a job (yet). The PDF prints "Client absent" when set.
 - **REQUESTER users are redirected to `/portal`** by `(app)/layout.tsx`. Portal scope
   (`src/lib/portal-scope.ts`, tested):
   - Villas the member's client owns (`clientId`) **or manages** (`Villa.managerId`, a property
@@ -300,7 +310,7 @@ markers), Message, VerificationToken (password reset).
 
 ## 6. How to verify (proven techniques)
 
-- **Checks:** `npm run typecheck`, `npm run lint` (`npx eslint src tests`), `npm test` (vitest, 104 tests).
+- **Checks:** `npm run typecheck`, `npm run lint` (`npx eslint src tests`), `npm test` (vitest, 106 tests).
 - **Testing offline needs a production build.** In `next dev`, Turbopack only hydrates after its HMR
   websocket connects, so a page served from the SW cache stays inert with the server down. Use
   `npx next build`, then preview config `prod` (`next start -p 3100`); stop it to simulate no signal
