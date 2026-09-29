@@ -205,7 +205,7 @@ export async function startTimerAction(woId: string) {
   const running = await ctx.db.timeEntry.findFirst({ where: { workOrderId: woId, userId: ctx.user.id, endedAt: null } });
   if (!running) {
     await ctx.db.timeEntry.create({
-      data: { workOrderId: woId, userId: ctx.user.id, startedAt: new Date(), hourlyRate: ctx.membership.hourlyRate },
+      data: { workOrderId: woId, userId: ctx.user.id, startedAt: new Date(), hourlyRate: ctx.hourlyRate },
     });
   }
   if (wo.status === "OPEN" || wo.status === "ON_HOLD") await changeStatus(ctx, woId, "IN_PROGRESS");
@@ -237,7 +237,7 @@ export async function addTimeAction(woId: string, _: FormResult, form: FormData)
       endedAt: new Date(date.getTime() + minutes * 60_000),
       minutes,
       note,
-      hourlyRate: ctx.membership.hourlyRate,
+      hourlyRate: ctx.hourlyRate,
     },
   });
   revalidatePath(path(woId));

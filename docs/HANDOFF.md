@@ -165,10 +165,20 @@ are mostly UI and logic plus small additive migrations.
   `requirePermission("x")` in server actions. Roles: OWNER, ADMIN, MANAGER, TECHNICIAN, REQUESTER
   (the client portal) and VIEWER. Permissions for inventory, purchasing, vendors and reports
   already exist in the matrix.
-- **REQUESTER users are redirected to `/portal`** by `(app)/layout.tsx`. Portal scope:
-  - Villas where `clientId = membership.clientId`.
-  - Requests on those villas.
-  - Work orders with `clientVisible: true` on those villas.
+- **Custom roles** (`JobRole`, Settings → Roles): a name, a cost per hour and an access level (ADMIN,
+  MANAGER or TECHNICIAN). A member in a custom role has `jobRoleId` set and `role` = its access level,
+  so RBAC is unchanged; changing a role's access updates its members. Built-in role rates live in
+  `Organization.roleRates`. `hourlyRateFor()` (`src/lib/roles.ts`): custom role rate → built-in role
+  rate → legacy `Membership.hourlyRate`; never for VIEWER/REQUESTER. `ctx.hourlyRate` is snapshotted
+  onto each `TimeEntry`, so rate changes only affect new time. Show role names with
+  `jobRole?.name ?? t("roles.X")`. Request pages show the linked job's cost (`workOrderCosts`).
+- **REQUESTER users are redirected to `/portal`** by `(app)/layout.tsx`. Portal scope
+  (`src/lib/portal-scope.ts`, tested):
+  - Villas the member's client owns (`clientId`) **or manages** (`Villa.managerId`, a property
+    manager / managing company). Owners only reach their own villas; a manager reaches every villa
+    it manages across owners.
+  - Requests on those villas, and client-visible work orders there.
+  - Contracts of either the owner or the manager can cover a villa (`covers()` takes `clientIds`).
   - `/api/files/[id]` and the WO report route contain explicit portal checks.
 
 ### Forms and server actions
@@ -290,7 +300,7 @@ markers), Message, VerificationToken (password reset).
 
 ## 6. How to verify (proven techniques)
 
-- **Checks:** `npm run typecheck`, `npm run lint` (`npx eslint src tests`), `npm test` (vitest, 94 tests).
+- **Checks:** `npm run typecheck`, `npm run lint` (`npx eslint src tests`), `npm test` (vitest, 104 tests).
 - **Testing offline needs a production build.** In `next dev`, Turbopack only hydrates after its HMR
   websocket connects, so a page served from the SW cache stays inert with the server down. Use
   `npx next build`, then preview config `prod` (`next start -p 3100`); stop it to simulate no signal

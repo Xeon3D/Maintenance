@@ -9,7 +9,7 @@ import { ACTIVE_ORG_COOKIE } from "@/lib/context";
 import { signOutAction } from "../../actions";
 
 async function loadInvite(token: string) {
-  const invite = await prisma.invitation.findUnique({ where: { token }, include: { organization: true } });
+  const invite = await prisma.invitation.findUnique({ where: { token }, include: { organization: true, jobRole: { select: { name: true } } } });
   if (!invite || invite.acceptedAt || invite.expiresAt < new Date()) return null;
   return invite;
 }
@@ -27,7 +27,7 @@ export default async function InvitePage({ params }: PageProps<"/invite/[token]"
 
   const session = await auth();
   const org = invite.organization.name;
-  const role = t(`roles.${invite.role}`);
+  const role = invite.jobRole?.name ?? t(`roles.${invite.role}`);
   const next = `/invite/${token}`;
 
   async function accept() {
@@ -41,8 +41,8 @@ export default async function InvitePage({ params }: PageProps<"/invite/[token]"
     await prisma.$transaction([
       prisma.membership.upsert({
         where: { userId_organizationId: { userId: user.id, organizationId: inv.organizationId } },
-        create: { userId: user.id, organizationId: inv.organizationId, role: inv.role, clientId: inv.clientId },
-        update: { role: inv.role, clientId: inv.clientId, active: true },
+        create: { userId: user.id, organizationId: inv.organizationId, role: inv.role, jobRoleId: inv.jobRoleId, clientId: inv.clientId },
+        update: { role: inv.role, jobRoleId: inv.jobRoleId, clientId: inv.clientId, active: true },
       }),
       prisma.invitation.update({ where: { id: inv.id }, data: { acceptedAt: new Date() } }),
     ]);

@@ -9,6 +9,7 @@ import { PriorityText, SystemBadge, WorkOrderStatusBadge } from "@/components/ba
 import { RequestStatusBadge } from "@/components/request-badge";
 import { getContext } from "@/lib/context";
 import { fileUrl } from "@/lib/storage";
+import { workOrderCosts } from "@/lib/work-orders";
 import { approveRequestAction, declineRequestAction } from "../actions";
 import { ApproveFields } from "./approve-fields";
 
@@ -26,7 +27,16 @@ export default async function RequestPage({ params }: PageProps<"/requests/[id]"
       area: { select: { name: true } },
       asset: { select: { id: true, name: true, status: true } },
       requester: { select: { name: true, email: true, phone: true } },
-      workOrder: { select: { id: true, number: true, status: true } },
+      workOrder: {
+        select: {
+          id: true,
+          number: true,
+          status: true,
+          timeEntries: { select: { minutes: true, hourlyRate: true } },
+          otherCosts: { select: { amount: true } },
+          parts: { select: { quantity: true, unitCost: true } },
+        },
+      },
       attachments: { orderBy: { createdAt: "asc" } },
     },
   });
@@ -80,6 +90,36 @@ export default async function RequestPage({ params }: PageProps<"/requests/[id]"
               </Link>
             </Card>
           )}
+          {r.status === "APPROVED" && r.workOrder && (() => {
+            // What this request has cost so far: time (at each person's role rate), parts and other costs.
+            const c = workOrderCosts(r.workOrder);
+            const money = (n: number) => format.number(n, { style: "currency", currency: ctx.organization.currency });
+            return (
+              <Card className="p-5 text-sm">
+                <h2 className="mb-3 font-medium">{t("costs.title")}</h2>
+                <dl className="grid grid-cols-[1fr_auto] gap-y-1.5">
+                  <dt className="text-muted">{t("costs.timeSpent")}</dt>
+                  <dd className="text-right tabular-nums">{t("costs.hours", { hours: Math.round((c.minutes / 60) * 100) / 100 })}</dd>
+                  <dt className="text-muted">{t("costs.labor")}</dt>
+                  <dd className="text-right tabular-nums">{money(c.labor)}</dd>
+                  {c.parts > 0 && (
+                    <>
+                      <dt className="text-muted">{t("costs.parts")}</dt>
+                      <dd className="text-right tabular-nums">{money(c.parts)}</dd>
+                    </>
+                  )}
+                  {c.other > 0 && (
+                    <>
+                      <dt className="text-muted">{t("costs.other")}</dt>
+                      <dd className="text-right tabular-nums">{money(c.other)}</dd>
+                    </>
+                  )}
+                  <dt className="border-t border-border pt-1.5 font-medium">{t("costs.total")}</dt>
+                  <dd className="border-t border-border pt-1.5 text-right font-medium tabular-nums">{money(c.total)}</dd>
+                </dl>
+              </Card>
+            );
+          })()}
           {r.status === "DECLINED" && (
             <Card className="p-5 text-sm">
               <div className="font-medium">{t("requests.declined")}</div>

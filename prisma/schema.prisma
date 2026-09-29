@@ -226,6 +226,8 @@ model Organization {
   address       String?
   brandColor    String? // #rrggbb; must keep white text readable (checked on save)
   reportFooter  String? // printed at the foot of PDFs (licences, IBAN, insurance…)
+  // Cost per hour of the built-in roles, e.g. {"TECHNICIAN": 45}; custom roles carry their own (JobRole).
+  roleRates     Json?
   timezone      String   @default("Europe/Lisbon")
   currency      String   @default("EUR")
   defaultLocale String   @default("en")
@@ -234,6 +236,7 @@ model Organization {
 
   memberships    Membership[]
   invitations    Invitation[]
+  jobRoles       JobRole[]
   counters       Counter[]
   teams          Team[]
   clients        Client[]
@@ -267,6 +270,9 @@ model Membership {
   role           Role     @default(TECHNICIAN)
   // REQUESTER users are restricted to this client's villas in the portal.
   clientId       String?
+  // Custom role (e.g. "Engineer"); `role` then holds its access level. Its cost per hour applies.
+  jobRoleId      String?
+  // Legacy per-person rate, used only when neither the custom role nor the built-in role has one.
   hourlyRate     Decimal? @db.Decimal(10, 2)
   active         Boolean  @default(true)
   createdAt      DateTime @default(now())
@@ -274,6 +280,7 @@ model Membership {
   organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
   user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
   client       Client?      @relation(fields: [clientId], references: [id], onDelete: SetNull)
+  jobRole      JobRole?     @relation(fields: [jobRoleId], references: [id], onDelete: SetNull)
 
   @@unique([userId, organizationId])
   @@index([organizationId])
@@ -285,6 +292,7 @@ model Invitation {
   email          String
   role           Role
   clientId       String?
+  jobRoleId      String?
   token          String    @unique
   invitedById    String
   expiresAt      DateTime
@@ -293,7 +301,26 @@ model Invitation {
 
   organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
   invitedBy    User         @relation(fields: [invitedById], references: [id])
+  jobRole      JobRole?     @relation(fields: [jobRoleId], references: [id], onDelete: SetNull)
 
+  @@index([organizationId])
+}
+
+/// A company-defined role (Engineer, Electrician…): a name, a cost per hour, and the access level
+/// (permissions) of one of the built-in staff roles.
+model JobRole {
+  id             String   @id @default(cuid())
+  organizationId String
+  name           String
+  access         Role     @default(TECHNICIAN) // ADMIN, MANAGER or TECHNICIAN
+  hourlyRate     Decimal? @db.Decimal(10, 2)
+  createdAt      DateTime @default(now())
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  memberships  Membership[]
+  invitations  Invitation[]
+
+  @@unique([organizationId, name])
   @@index([organizationId])
 }
 

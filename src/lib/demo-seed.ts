@@ -35,6 +35,8 @@ export async function seedDemo(prisma: PrismaClient) {
       email: "geral@demo-integrations.test",
       brandColor: "#0b6e4f",
       reportFooter: "Demo data. It is erased whenever the demo is reset.",
+      // Cost per hour by role (custom roles carry their own, see "Engineer" below).
+      roleRates: { OWNER: 70, ADMIN: 60, MANAGER: 55, TECHNICIAN: 45 },
       subscription: { create: { status: "TRIALING", trialEndsAt: new Date(Date.now() + 14 * 86_400_000) } },
       stockLocations: {
         create: [
@@ -69,12 +71,15 @@ export async function seedDemo(prisma: PrismaClient) {
     prisma.client.create({ data: { organizationId: org.id, name: "Bergström Family", type: "PRIVATE_OWNER", email: "family@bergstrom.test" } }),
   ]);
 
+  // A custom role with technician access and its own rate.
+  const engineer = await prisma.jobRole.create({ data: { organizationId: org.id, name: "Electrical engineer", access: "TECHNICIAN", hourlyRate: 65 } });
+
   await prisma.membership.createMany({
     data: [
       { organizationId: org.id, userId: owner.id, role: "OWNER" },
       { organizationId: org.id, userId: manager.id, role: "MANAGER" },
-      { organizationId: org.id, userId: techNet.id, role: "TECHNICIAN", hourlyRate: 45 },
-      { organizationId: org.id, userId: techElec.id, role: "TECHNICIAN", hourlyRate: 45 },
+      { organizationId: org.id, userId: techNet.id, role: "TECHNICIAN" },
+      { organizationId: org.id, userId: techElec.id, role: "TECHNICIAN", jobRoleId: engineer.id },
       { organizationId: org.id, userId: viewer.id, role: "VIEWER" },
       { organizationId: org.id, userId: clientUser.id, role: "REQUESTER", clientId: client.id },
       { organizationId: org.id, userId: pmUser.id, role: "REQUESTER", clientId: pmClient.id },

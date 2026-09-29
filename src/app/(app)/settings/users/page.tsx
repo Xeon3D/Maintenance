@@ -2,7 +2,9 @@ import { notFound } from "next/navigation";
 import { getFormatter, getTranslations } from "next-intl/server";
 import { Badge, Card, PageHeader, Table } from "@/components/ui";
 import { getContext } from "@/lib/context";
-import { InviteForm, MemberControls, RevokeInviteButton } from "./client";
+import { ASSIGNABLE_ROLES } from "@/lib/rbac";
+import { hourlyRateFor, parseRoleRates } from "@/lib/roles";
+import { InviteForm, MemberControls, RevokeInviteButton, type RoleOptions } from "./client";
 
 export default async function UsersPage() {
   const ctx = await getContext();
@@ -10,14 +12,25 @@ export default async function UsersPage() {
   const t = await getTranslations();
   const format = await getFormatter();
 
-  const [members, invites, clients] = await Promise.all([
+  const [members, invites, clients, jobRoles] = await Promise.all([
     ctx.db.membership.findMany({
-      include: { user: true, client: true },
+      include: { user: true, client: true, jobRole: true },
       orderBy: [{ active: "desc" }, { createdAt: "asc" }],
     }),
-    ctx.db.invitation.findMany({ where: { acceptedAt: null, expiresAt: { gt: new Date() } }, orderBy: { createdAt: "desc" } }),
+    ctx.db.invitation.findMany({
+      where: { acceptedAt: null, expiresAt: { gt: new Date() } },
+      include: { jobRole: { select: { name: true } } },
+      orderBy: { createdAt: "desc" },
+    }),
     ctx.db.client.findMany({ where: { archivedAt: null }, select: { id: true, name: true }, orderBy: { name: "asc" } }),
+    ctx.db.jobRole.findMany({ select: { id: true, name: true }, orderBy: { name: "asc" } }),
   ]);
+  const rates = parseRoleRates(ctx.organization.roleRates);
+  const roleOptions: RoleOptions = {
+    builtIn: ASSIGNABLE_ROLES.map((r) => ({ value: r, label: t(`roles.${r}`) })),
+    custom: jobRoles.map((r) => ({ value: `job:${r.id}`, label: r.name })),
+  };
+  const money = (n: number) => format.number(n, { style: "currency", currency: ctx.organization.currency });
 
   return (
     <>
@@ -25,7 +38,7 @@ export default async function UsersPage() {
 
       <Card className="mb-6 p-5">
         <h2 className="mb-4 font-medium">{t("settings.invite")}</h2>
-        <InviteForm clients={clients} />
+        <InviteForm clients={clients} roleOptions={roleOptions} />
       </Card>
 
       <Card>
@@ -34,6 +47,7 @@ export default async function UsersPage() {
             <tr>
               <th>{t("common.name")}</th>
               <th>{t("common.role")}</th>
+              <th className="text-right">{t("roles.costPerHour")}</th>
               <th>{t("common.status")}</th>
               <th className="text-right">{t("common.actions")}</th>
             </tr>
@@ -50,15 +64,21 @@ export default async function UsersPage() {
                     <div className="text-xs text-muted">{m.user.email}</div>
                   </td>
                   <td>
-                    {t(`roles.${m.role}`)}
+                    {m.jobRole?.name ?? t(`roles.${m.role}`)}
                     {m.client && <div className="text-xs text-muted">{m.client.name}</div>}
+                  </td>
+                  <td className="text-right tabular-nums">
+                    {(() => {
+                      const rate = hourlyRateFor(m, rates);
+                      return rate === null ? <span className="text-muted">—</span> : money(rate);
+                    })()}
                   </td>
                   <td>
                     <Badge className={m.active ? "bg-green-50 text-green-700" : ""}>
                       {m.active ? t("common.active") : t("common.inactive")}
                     </Badge>
                   </td>
-                  <td className="text-right">{!locked && <MemberControls id={m.id} role={m.role} active={m.active} />}</td>
+                  <td className="text-right">{!locked && <MemberControls id={m.id} role={m.jobRoleId ? `job:${m.jobRoleId}` : m.role} active={m.active} roleOptions={roleOptions} />}</td>
                 </tr>
               );
             })}
@@ -82,7 +102,7 @@ export default async function UsersPage() {
               {invites.map((i) => (
                 <tr key={i.id}>
                   <td>{i.email}</td>
-                  <td>{t(`roles.${i.role}`)}</td>
+                  <td>{i.jobRole?.name ?? t(`roles.${i.role}`)}</td>
                   <td className="text-muted">{format.relativeTime(i.expiresAt)}</td>
                   <td className="text-right">
                     <RevokeInviteButton id={i.id} />

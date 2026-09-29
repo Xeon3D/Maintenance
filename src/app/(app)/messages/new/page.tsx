@@ -10,7 +10,7 @@ export default async function NewConversationPage() {
   const t = await getTranslations();
   const people = await ctx.db.membership.findMany({
     where: { active: true, role: { not: "REQUESTER" }, userId: { not: ctx.user.id } },
-    select: { role: true, user: { select: { id: true, name: true } } },
+    select: { role: true, jobRole: { select: { name: true } }, user: { select: { id: true, name: true } } },
     orderBy: { user: { name: "asc" } },
   });
 
@@ -30,7 +30,7 @@ export default async function NewConversationPage() {
                 <label className="flex items-center gap-2 rounded-md border border-border px-3 py-2 text-sm hover:bg-gray-50">
                   <input type="checkbox" name="userIds" value={p.user.id} className="size-4 accent-brand" />
                   <span className="flex-1">{p.user.name}</span>
-                  <span className="text-xs text-muted">{t(`roles.${p.role}`)}</span>
+                  <span className="text-xs text-muted">{p.jobRole?.name ?? t(`roles.${p.role}`)}</span>
                 </label>
               </li>
             ))}

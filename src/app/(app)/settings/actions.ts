@@ -93,15 +93,30 @@ export async function removeLogoAction() {
 
 const inviteSchema = z.object({
   email: z.email().transform((e) => e.toLowerCase().trim()),
-  role: z.enum(ASSIGNABLE_ROLES as [Role, ...Role[]]),
+  role: z.string().max(60), // a built-in role, or "job:<id>" for a custom role
   clientId: z.string().optional().transform((v) => v || null),
 });
+
+type Ctx = Awaited<ReturnType<typeof requirePermission>>;
+
+/** A role choice from the forms: a built-in role, or "job:<id>" (custom role → its access level). */
+async function resolveRoleChoice(ctx: Ctx, choice: string): Promise<{ role: Role; jobRoleId: string | null }> {
+  if (choice.startsWith("job:")) {
+    const jobRole = await ctx.db.jobRole.findFirst({ where: { id: choice.slice(4) }, select: { id: true, access: true } });
+    if (!jobRole) throw new Error("Invalid role");
+    return { role: jobRole.access, jobRoleId: jobRole.id };
+  }
+  if (!ASSIGNABLE_ROLES.includes(choice as Role)) throw new Error("Invalid role");
+  return { role: choice as Role, jobRoleId: null };
+}
 
 export async function inviteUserAction(_: ActionState, form: FormData): Promise<ActionState> {
   const ctx = await requirePermission("users.manage");
   const parsed = inviteSchema.safeParse(Object.fromEntries(form));
   if (!parsed.success) return { error: "somethingWrong" };
-  const { email, role } = parsed.data;
+  const { email } = parsed.data;
+  const { role, jobRoleId } = await resolveRoleChoice(ctx, parsed.data.role).catch(() => ({ role: null, jobRoleId: null }));
+  if (!role) return { error: "somethingWrong" };
   const clientId = role === "REQUESTER" ? parsed.data.clientId : null;
   await assertOwned(ctx.db, "client", [clientId]);
 
@@ -111,6 +126,7 @@ export async function inviteUserAction(_: ActionState, form: FormData): Promise<
       organizationId: ctx.organization.id,
       email,
       role,
+      jobRoleId,
       clientId,
       token,
       invitedById: ctx.user.id,
@@ -123,7 +139,8 @@ export async function inviteUserAction(_: ActionState, form: FormData): Promise<
   const locale = await getLocale();
   const t = createTranslator({ locale, messages: locale === "pt" ? pt : en });
   const url = `${await appOrigin()}/invite/${token}`;
-  const vars = { inviter: ctx.user.name, org: ctx.organization.name, role: t(`roles.${role}`) };
+  const roleLabel = jobRoleId ? (await ctx.db.jobRole.findFirst({ where: { id: jobRoleId }, select: { name: true } }))!.name : t(`roles.${role}`);
+  const vars = { inviter: ctx.user.name, org: ctx.organization.name, role: roleLabel };
   const mail = emailLayout({
     org: ctx.organization.name,
     logo: logoSrc(ctx.organization, await appOrigin()),
@@ -142,14 +159,17 @@ export async function revokeInviteAction(id: string) {
   revalidatePath("/settings/users");
 }
 
-export async function updateMemberAction(membershipId: string, data: { role?: Role; active?: boolean }) {
+export async function updateMemberAction(membershipId: string, data: { role?: string; active?: boolean }) {
   const ctx = await requirePermission("users.manage");
   const m = await ctx.db.membership.findUnique({ where: { id: membershipId } });
   if (!m || m.role === "OWNER" || m.userId === ctx.user.id) throw new Error("Forbidden");
-  const role = data.role && ASSIGNABLE_ROLES.includes(data.role) ? data.role : undefined;
+  const choice = data.role ? await resolveRoleChoice(ctx, data.role) : null;
   await ctx.db.membership.update({
     where: { id: membershipId },
-    data: { role, active: typeof data.active === "boolean" ? data.active : undefined },
+    data: {
+      ...(choice ? { role: choice.role, jobRoleId: choice.jobRoleId, clientId: choice.role === "REQUESTER" ? m.clientId : null } : {}),
+      active: typeof data.active === "boolean" ? data.active : undefined,
+    },
   });
   revalidatePath("/settings/users");
 }

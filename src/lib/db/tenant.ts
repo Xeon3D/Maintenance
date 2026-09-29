@@ -8,6 +8,7 @@ import { prisma } from "./client";
 export const TENANT_MODELS = new Set([
   "Membership",
   "Invitation",
+  "JobRole",
   "Counter",
   "Team",
   "Client",
@@ -114,7 +115,8 @@ type OwnedModel =
   | "serviceContract"
   | "pMSchedule"
   | "purchaseOrder"
-  | "category";
+  | "category"
+  | "jobRole";
 
 /** Throws unless every given id (nulls skipped) belongs to the tenant. */
 export async function assertOwned(db: TenantDb, model: OwnedModel, ids: (string | null | undefined)[]) {

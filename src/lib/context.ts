@@ -6,6 +6,7 @@ import { auth } from "@/auth";
 import { prisma } from "@/lib/db/client";
 import { tenantDb } from "@/lib/db/tenant";
 import { can, type Permission } from "@/lib/rbac";
+import { hourlyRateFor, parseRoleRates } from "@/lib/roles";
 
 export const ACTIVE_ORG_COOKIE = "active_org";
 
@@ -27,7 +28,7 @@ export const getContext = cache(async () => {
   const user = await requireUser();
   const memberships = await prisma.membership.findMany({
     where: { userId: user.id, active: true },
-    include: { organization: true },
+    include: { organization: true, jobRole: true },
     orderBy: { createdAt: "asc" },
   });
   if (memberships.length === 0) redirect("/onboarding");
@@ -41,6 +42,8 @@ export const getContext = cache(async () => {
     organization: membership.organization,
     memberships,
     role: membership.role,
+    /** Cost per hour of this member's time (from their role); null when not set or not billable. */
+    hourlyRate: hourlyRateFor(membership, parseRoleRates(membership.organization.roleRates)),
     db: tenantDb(membership.organizationId),
     can: (p: Permission) => can(membership.role, p),
   };

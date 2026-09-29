@@ -5,11 +5,13 @@ import { NAV } from "@/components/shell/nav";
 import { getContext } from "@/lib/context";
 import { unreadConversations } from "@/lib/conversations";
 import { brandStyle, logoSrc } from "@/lib/branding";
+import { getTranslations } from "next-intl/server";
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const ctx = await getContext();
   // Client users live in the portal.
   if (ctx.role === "REQUESTER") redirect("/portal");
+  const t = await getTranslations();
 
   const [pendingRequests, posToApprove, unreadMessages, unreadNotifications] = await Promise.all([
     ctx.can("requests.approve") ? ctx.db.request.count({ where: { status: "PENDING" } }) : 0,
@@ -30,7 +32,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
       <Sidebar
         appName={await getAppName()}
         groups={groups}
-        user={{ name: ctx.user.name, email: ctx.user.email, role: ctx.role }}
+        user={{ name: ctx.user.name, email: ctx.user.email, role: ctx.membership.jobRole?.name ?? t(`roles.${ctx.role}`) }}
         org={{ id: ctx.organization.id, name: ctx.organization.name, logo: logoSrc(ctx.organization) }}
         orgs={ctx.memberships.map((m) => ({ id: m.organization.id, name: m.organization.name }))}
         unreadNotifications={unreadNotifications}

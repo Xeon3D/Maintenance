@@ -115,7 +115,8 @@
     "contracts": "Service contracts",
     "field": "Field app (offline)",
     "scan": "Scan",
-    "server": "Server"
+    "server": "Server",
+    "roles": "Roles"
   },
   "roles": {
     "OWNER": "Owner",
@@ -123,7 +124,31 @@
     "MANAGER": "Manager",
     "TECHNICIAN": "Technician",
     "REQUESTER": "Client (requester)",
-    "VIEWER": "Viewer"
+    "VIEWER": "Viewer",
+    "title": "Roles",
+    "description": "What each role can do, and what an hour of its time costs. Time logged on jobs is costed with the rate of the person's role at that moment.",
+    "builtIn": "Built-in roles",
+    "builtInHint": "Leave a rate empty if you don't track costs for that role. Rate changes apply to time logged from now on.",
+    "can": {
+      "OWNER": "Everything, including billing.",
+      "ADMIN": "Everything except billing: settings, users, approvals.",
+      "MANAGER": "Plans and assigns work, manages clients, stock and purchasing.",
+      "TECHNICIAN": "Does the work: work orders, checklists, time, parts.",
+      "VIEWER": "Observer: sees everything, changes nothing.",
+      "REQUESTER": "Client portal: their villas and requests only."
+    },
+    "notBillable": "No cost (doesn't log time)",
+    "custom": "Custom roles",
+    "customHint": "Roles of your own, such as Engineer or Electrician. Each one has its own cost per hour and the access of one of the built-in roles. Assign them in Users.",
+    "new": "New role",
+    "namePlaceholder": "e.g. Engineer",
+    "members": "{count, plural, =0 {No one in this role} one {# person} other {# people}}",
+    "access": "Access",
+    "accessLike": "Same access as {role}",
+    "costPerHour": "Cost per hour",
+    "delete": "Delete",
+    "deleteConfirm": "Delete the role \"{name}\"? {count, plural, =0 {} one {The # person in it keeps the same access under the built-in role.} other {The # people in it keep the same access under the built-in role.}}",
+    "customGroup": "Custom roles"
   },
   "systems": {
     "ELECTRICAL": "Electrical",
@@ -201,7 +226,8 @@
     "brandTooLight": "Too light: white text on it wouldn't be readable. Pick a darker shade.",
     "logoTooLarge": "The logo must be 2 MB or smaller.",
     "logoType": "Use a PNG or JPEG image.",
-    "managerIsOwner": "The manager must be a different client from the owner."
+    "managerIsOwner": "The manager must be a different client from the owner.",
+    "roleNameTaken": "There's already a role with this name."
   },
   "clients": {
     "description": "Villa owners, family offices and property managers you work for.",
@@ -502,7 +528,10 @@
     "total": "Total",
     "add": "Add cost",
     "descriptionPlaceholder": "e.g. Crane hire, parking",
-    "parts": "Parts"
+    "parts": "Parts",
+    "timeSpent": "Time spent",
+    "hours": "{hours} h",
+    "other": "Other costs"
   },
   "files": {
     "title": "Photos & files",

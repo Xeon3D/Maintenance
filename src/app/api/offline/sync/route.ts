@@ -61,7 +61,7 @@ export async function POST(req: Request) {
         await addComment(ctx, o.woId, o.body, [], clampAt(o.at));
         result = { id: o.id, status: "applied" };
       } else if (o.kind === "time") {
-        await addTimeEntry(ctx, o.woId, ctx.membership.hourlyRate, clampAt(o.startedAt), clampAt(o.endedAt), o.note ?? null);
+        await addTimeEntry(ctx, o.woId, ctx.hourlyRate, clampAt(o.startedAt), clampAt(o.endedAt), o.note ?? null);
         result = { id: o.id, status: "applied" };
       } else {
         await changeStatus(ctx, o.woId, o.status, o.note ?? null);

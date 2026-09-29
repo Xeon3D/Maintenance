@@ -115,7 +115,8 @@
     "contracts": "Contratos de manutenção",
     "field": "App de campo (offline)",
     "scan": "Ler código",
-    "server": "Servidor"
+    "server": "Servidor",
+    "roles": "Funções"
   },
   "roles": {
     "OWNER": "Proprietário",
@@ -123,7 +124,31 @@
     "MANAGER": "Gestor",
     "TECHNICIAN": "Técnico",
     "REQUESTER": "Cliente (requerente)",
-    "VIEWER": "Observador"
+    "VIEWER": "Observador",
+    "title": "Funções",
+    "description": "O que cada função pode fazer e quanto custa uma hora do seu tempo. O tempo registado nos trabalhos é custeado com o valor da função da pessoa nesse momento.",
+    "builtIn": "Funções base",
+    "builtInHint": "Deixe o valor vazio se não controla custos dessa função. As alterações aplicam-se ao tempo registado a partir de agora.",
+    "can": {
+      "OWNER": "Tudo, incluindo a faturação.",
+      "ADMIN": "Tudo exceto a faturação: definições, utilizadores, aprovações.",
+      "MANAGER": "Planeia e atribui trabalho, gere clientes, stock e compras.",
+      "TECHNICIAN": "Executa o trabalho: ordens de trabalho, listas de verificação, tempo, peças.",
+      "VIEWER": "Observação: vê tudo, não altera nada.",
+      "REQUESTER": "Portal do cliente: apenas as suas moradias e pedidos."
+    },
+    "notBillable": "Sem custo (não regista tempo)",
+    "custom": "Funções personalizadas",
+    "customHint": "Funções próprias, como Engenharia ou Eletricista. Cada uma tem o seu custo por hora e o acesso de uma das funções base. Atribua-as em Utilizadores.",
+    "new": "Nova função",
+    "namePlaceholder": "ex.: Engenharia",
+    "members": "{count, plural, =0 {Ninguém nesta função} one {# pessoa} other {# pessoas}}",
+    "access": "Acesso",
+    "accessLike": "Mesmo acesso que {role}",
+    "costPerHour": "Custo por hora",
+    "delete": "Eliminar",
+    "deleteConfirm": "Eliminar a função \"{name}\"? {count, plural, =0 {} one {A # pessoa nesta função mantém o mesmo acesso com a função base.} other {As # pessoas nesta função mantêm o mesmo acesso com a função base.}}",
+    "customGroup": "Funções personalizadas"
   },
   "systems": {
     "ELECTRICAL": "Eletricidade",
@@ -201,7 +226,8 @@
     "brandTooLight": "Demasiado clara: o texto branco sobre ela não ficaria legível. Escolha um tom mais escuro.",
     "logoTooLarge": "O logótipo não pode ter mais de 2 MB.",
     "logoType": "Use uma imagem PNG ou JPEG.",
-    "managerIsOwner": "A gestão tem de ser um cliente diferente do proprietário."
+    "managerIsOwner": "A gestão tem de ser um cliente diferente do proprietário.",
+    "roleNameTaken": "Já existe uma função com este nome."
   },
   "clients": {
     "description": "Proprietários, family offices e gestores de propriedades para quem trabalha.",
@@ -502,7 +528,10 @@
     "total": "Total",
     "add": "Adicionar custo",
     "descriptionPlaceholder": "ex.: Aluguer de grua, estacionamento",
-    "parts": "Peças"
+    "parts": "Peças",
+    "timeSpent": "Tempo gasto",
+    "hours": "{hours} h",
+    "other": "Outros custos"
   },
   "files": {
     "title": "Fotografias e ficheiros",

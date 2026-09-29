@@ -6,6 +6,7 @@ import { useState, useTransition } from "react";
 import { useTranslations } from "next-intl";
 import { NotificationBell } from "@/components/notifications/bell";
 import {
+  BadgeCheck,
   Building2,
   CalendarClock,
   ChartColumn,
@@ -40,6 +41,7 @@ import { cn } from "@/lib/utils";
 import type { NavGroup } from "./nav";
 
 const ICONS: Record<string, LucideIcon> = {
+  BadgeCheck,
   Building2,
   CalendarClock,
   ChartColumn,
@@ -67,7 +69,7 @@ const ICONS: Record<string, LucideIcon> = {
 type Props = {
   appName: string;
   groups: NavGroup[]; // already filtered by permission/readiness on the server
-  user: { name: string; email: string; role: string };
+  user: { name: string; email: string; role: string }; // role: display name (custom role or translated built-in)
   org: { id: string; name: string; logo: string | null };
   orgs: { id: string; name: string }[];
   unreadNotifications: number;
@@ -158,7 +160,7 @@ export function Sidebar({ appName, groups, user, org, orgs, unreadNotifications 
         <div className="flex items-center justify-between gap-2 px-1">
           <Link href="/settings/profile" onClick={() => setOpen(false)} className="min-w-0 flex-1 rounded-md hover:text-brand">
             <div className="truncate text-sm font-medium">{user.name}</div>
-            <div className="truncate text-xs text-muted">{t(`roles.${user.role}`)}</div>
+            <div className="truncate text-xs text-muted">{user.role}</div>
           </Link>
           <NotificationBell key={unreadNotifications} initial={unreadNotifications} href="/notifications" />
           <form action={signOutAction}>
