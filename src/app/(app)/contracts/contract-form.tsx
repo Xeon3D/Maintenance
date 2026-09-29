@@ -6,14 +6,27 @@ import type { ServiceContract } from "@/generated/prisma/client";
 import type { AppContext } from "@/lib/context";
 import { dateInput } from "@/lib/forms";
 import { saveContractAction } from "./actions";
+import { ClientVillaFields, type ClientOption } from "./client-villa-fields";
 
 export async function ContractForm({ ctx, contract, defaults }: { ctx: AppContext; contract?: ServiceContract; defaults?: { clientId?: string } }) {
   const t = await getTranslations();
-  const clients = await ctx.db.client.findMany({
+  const villaFilter = { OR: [{ archivedAt: null }, { id: contract?.villaId ?? "" }] };
+  const rows = await ctx.db.client.findMany({
     where: { OR: [{ archivedAt: null }, { id: contract?.clientId ?? "" }] },
-    select: { id: true, name: true, villas: { where: { archivedAt: null }, select: { id: true, name: true }, orderBy: { name: "asc" } } },
+    select: {
+      id: true,
+      name: true,
+      villas: { where: villaFilter, select: { id: true, name: true }, orderBy: { name: "asc" } },
+      managedVillas: { where: villaFilter, select: { id: true, name: true, client: { select: { name: true } } }, orderBy: { name: "asc" } },
+    },
     orderBy: { name: "asc" },
   });
+  const clients: ClientOption[] = rows.map((c) => ({
+    id: c.id,
+    name: c.name,
+    owned: c.villas,
+    managed: c.managedVillas.map((v) => ({ id: v.id, name: v.name, owner: v.client.name })),
+  }));
 
   return (
     <ActionForm action={saveContractAction.bind(null, contract?.id ?? null)} submitLabel={contract ? t("common.save") : t("common.create")}>
@@ -21,38 +34,7 @@ export async function ContractForm({ ctx, contract, defaults }: { ctx: AppContex
         <Input name="name" defaultValue={contract?.name} placeholder={t("contracts.namePlaceholder")} required autoFocus />
         <FieldError name="name" />
       </Field>
-      <div className="grid gap-4 sm:grid-cols-2">
-        <Field label={t("villas.client")}>
-          <Select name="clientId" defaultValue={contract?.clientId ?? defaults?.clientId ?? ""} required>
-            <option value="" disabled>
-              —
-            </option>
-            {clients.map((c) => (
-              <option key={c.id} value={c.id}>
-                {c.name}
-              </option>
-            ))}
-          </Select>
-          <FieldError name="clientId" />
-        </Field>
-        <Field label={t("assets.villa")} hint={t("contracts.villaHint")}>
-          <Select name="villaId" defaultValue={contract?.villaId ?? ""}>
-            <option value="">{t("contracts.allVillas")}</option>
-            {clients
-              .filter((c) => c.villas.length > 0)
-              .map((c) => (
-                <optgroup key={c.id} label={c.name}>
-                  {c.villas.map((v) => (
-                    <option key={v.id} value={v.id}>
-                      {v.name}
-                    </option>
-                  ))}
-                </optgroup>
-              ))}
-          </Select>
-          <FieldError name="villaId" />
-        </Field>
-      </div>
+      <ClientVillaFields clients={clients} clientId={contract?.clientId ?? defaults?.clientId ?? ""} villaId={contract?.villaId ?? ""} />
       <div className="grid gap-4 sm:grid-cols-3">
         <Field label={t("common.status")}>
           <Select name="status" defaultValue={contract?.status ?? "ACTIVE"}>

@@ -53,7 +53,9 @@ export default async function ServerSettingsPage() {
   const available = backupsAvailable();
   const busy = busyState();
   const tzOptions = TIMEZONES.includes(s.timezone) ? TIMEZONES : [s.timezone, ...TIMEZONES];
-  const dateFmt = new Intl.DateTimeFormat(ctx.user.locale === "pt" ? "pt-PT" : "en-GB", { dateStyle: "medium", timeStyle: "short", timeZone: s.timezone });
+  const intlLocale = ctx.user.locale === "pt" ? "pt-PT" : "en-GB";
+  const dateFmt = new Intl.DateTimeFormat(intlLocale, { dateStyle: "medium", timeStyle: "short", timeZone: s.timezone });
+  const dayFmt = new Intl.DateTimeFormat(intlLocale, { dateStyle: "long", timeZone: s.timezone });
 
   return (
     <>
@@ -110,6 +112,29 @@ export default async function ServerSettingsPage() {
           </div>
           {!updaterConfigured() && <p className="mt-4 text-xs text-muted">{t("server.updaterMissing")}</p>}
           {update.available && updaterConfigured() && <p className="mt-4 text-xs text-muted">{t("server.updateNote")}</p>}
+          {update.changelog.length > 0 && (
+            <div className="mt-5 border-t border-border pt-4">
+              <h3 className="mb-3 text-sm font-medium">{t("server.whatsNew")}</h3>
+              <div className="max-h-[28rem] space-y-6 overflow-y-auto pr-2">
+                {update.changelog.map((r) => (
+                  <section key={r.version}>
+                    <div className="mb-2 flex flex-wrap items-baseline gap-x-2">
+                      <a href={r.url} target="_blank" rel="noreferrer" className="font-semibold text-brand hover:underline">
+                        {r.version}
+                      </a>
+                      {r.publishedAt && <span className="text-xs text-muted">{dayFmt.format(new Date(r.publishedAt))}</span>}
+                    </div>
+                    {r.html ? (
+                      // Release notes as rendered and sanitized by GitHub, cleaned again in cleanReleaseHtml().
+                      <div className="release-notes text-sm" dangerouslySetInnerHTML={{ __html: r.html }} />
+                    ) : (
+                      <p className="text-sm text-muted">{t("server.noNotes")}</p>
+                    )}
+                  </section>
+                ))}
+              </div>
+            </div>
+          )}
         </Card>
 
         {/* ── Backups */}

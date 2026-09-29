@@ -24,6 +24,7 @@ export default async function VillaPage({ params }: PageProps<"/villas/[id]">) {
     where: { id },
     include: {
       client: { include: { contacts: { orderBy: { isPrimary: "desc" }, take: 3 } } },
+      manager: { select: { id: true, name: true } },
       areas: { include: { _count: { select: { assets: { where: { archivedAt: null } } } } } },
       assets: {
         where: { archivedAt: null },
@@ -158,11 +159,19 @@ export default async function VillaPage({ params }: PageProps<"/villas/[id]">) {
         <div className="space-y-6">
           <Card className="space-y-3 p-5 text-sm">
             <div>
-              <div className="text-xs text-muted">{t("villas.client")}</div>
+              <div className="text-xs text-muted">{t("villas.owner")}</div>
               <Link href={`/clients/${villa.client.id}`} className="font-medium hover:text-brand">
                 {villa.client.name}
               </Link>
             </div>
+            {villa.manager && (
+              <div>
+                <div className="text-xs text-muted">{t("villas.manager")}</div>
+                <Link href={`/clients/${villa.manager.id}`} className="font-medium hover:text-brand">
+                  {villa.manager.name}
+                </Link>
+              </div>
+            )}
             {mapsQuery && (
               <div>
                 <div className="text-xs text-muted">{t("villas.address")}</div>

@@ -14,13 +14,14 @@ export async function seedDemo(prisma: PrismaClient) {
   const mk = (email: string, name: string, locale = "en") =>
     prisma.user.create({ data: { email, name, passwordHash, locale } });
 
-  const [owner, manager, techNet, techElec, viewer, clientUser] = await Promise.all([
+  const [owner, manager, techNet, techElec, viewer, clientUser, pmUser] = await Promise.all([
     mk(DEMO_OWNER, "Sofia Almeida", "pt"),
     mk("manager@demo.test", "Miguel Costa", "pt"),
     mk("tech.network@demo.test", "Rui Ferreira", "pt"),
     mk("tech.electrical@demo.test", "Daniel Hughes"),
     mk("viewer@demo.test", "Ana Viewer"),
     mk("client@demo.test", "James Whitmore"),
+    mk("pm@demo.test", "Carla Mendes", "pt"),
   ]);
 
   const org = await prisma.organization.create({
@@ -54,6 +55,19 @@ export async function seedDemo(prisma: PrismaClient) {
       contacts: { create: [{ name: "Maria Santos", role: "House manager", phone: "+351 912 000 000", isPrimary: true }] },
     },
   });
+  // A property-management company looking after villas of several owners (see Villa.managerId).
+  const [pmClient, otherOwner] = await Promise.all([
+    prisma.client.create({
+      data: {
+        organizationId: org.id,
+        name: "Algarve Property Care",
+        type: "PROPERTY_MANAGER",
+        email: "ops@algarvepropertycare.test",
+        contacts: { create: [{ name: "Carla Mendes", role: "Operations manager", phone: "+351 913 000 000", isPrimary: true }] },
+      },
+    }),
+    prisma.client.create({ data: { organizationId: org.id, name: "Bergström Family", type: "PRIVATE_OWNER", email: "family@bergstrom.test" } }),
+  ]);
 
   await prisma.membership.createMany({
     data: [
@@ -63,6 +77,7 @@ export async function seedDemo(prisma: PrismaClient) {
       { organizationId: org.id, userId: techElec.id, role: "TECHNICIAN", hourlyRate: 45 },
       { organizationId: org.id, userId: viewer.id, role: "VIEWER" },
       { organizationId: org.id, userId: clientUser.id, role: "REQUESTER", clientId: client.id },
+      { organizationId: org.id, userId: pmUser.id, role: "REQUESTER", clientId: pmClient.id },
     ],
   });
 
@@ -89,11 +104,26 @@ export async function seedDemo(prisma: PrismaClient) {
     data: {
       organizationId: org.id,
       clientId: client.id,
+      managerId: pmClient.id,
       name: "Villa Quinta do Lago 7",
       code: "VQL-07",
       city: "Almancil",
       country: "Portugal",
       accessNotes: "Staff entrance on the east side. Call the house manager 30 min before arrival.",
+    },
+  });
+  // Another owner's villa, managed by the same company: the property manager sees both villas,
+  // the Whitmore portal user only their own.
+  await prisma.villa.create({
+    data: {
+      organizationId: org.id,
+      clientId: otherOwner.id,
+      managerId: pmClient.id,
+      name: "Villa Vale do Lobo 12",
+      code: "VDL-12",
+      city: "Vale do Lobo",
+      country: "Portugal",
+      accessNotes: "Keys with Algarve Property Care.",
     },
   });
   const [ground, rack] = await Promise.all([

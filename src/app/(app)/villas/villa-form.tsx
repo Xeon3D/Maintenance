@@ -16,7 +16,7 @@ export async function VillaForm({
   const t = await getTranslations();
   return (
     <ActionForm action={saveVillaAction.bind(null, villa?.id ?? null)} submitLabel={villa ? t("common.save") : t("common.create")}>
-      <Field label={t("villas.client")}>
+      <Field label={t("villas.owner")}>
         <Select name="clientId" defaultValue={villa?.clientId ?? defaultClientId ?? ""} required>
           <option value="" disabled>
             —
@@ -28,6 +28,17 @@ export async function VillaForm({
           ))}
         </Select>
         <FieldError name="clientId" />
+      </Field>
+      <Field label={t("villas.manager")} hint={t("villas.managerHint")}>
+        <Select name="managerId" defaultValue={villa?.managerId ?? ""}>
+          <option value="">{t("villas.noManager")}</option>
+          {clients.map((c) => (
+            <option key={c.id} value={c.id}>
+              {c.name}
+            </option>
+          ))}
+        </Select>
+        <FieldError name="managerId" />
       </Field>
       <div className="grid gap-4 sm:grid-cols-[1fr_160px]">
         <Field label={t("common.name")}>

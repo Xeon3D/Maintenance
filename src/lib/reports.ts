@@ -4,6 +4,7 @@ import type { ReportFilters } from "@/lib/report-filters";
 import { compliance, slaStates, type SlaState } from "@/lib/sla";
 import { countByBucket, hoursBetween, mean, median, pmCompliance, sumBy, timeInStatus, workingDays } from "@/lib/report-math";
 import { ACTIVE_STATUSES, workOrderCosts } from "@/lib/work-orders";
+import { villaAccess } from "@/lib/portal-scope";
 import type { Prisma } from "@/generated/prisma/client";
 import type { Priority, SystemType, WorkOrderType } from "@/generated/prisma/enums";
 
@@ -20,7 +21,7 @@ export const STANDARD_HOURS_PER_DAY = 8;
 
 export function woScope(f: ReportFilters): Prisma.WorkOrderWhereInput {
   return {
-    ...(f.villaId ? { villaId: f.villaId } : f.clientId ? { villa: { clientId: f.clientId } } : {}),
+    ...(f.villaId ? { villaId: f.villaId } : f.clientId ? { villa: villaAccess(f.clientId) } : {}),
     ...(f.system ? { system: f.system } : {}),
   };
 }
@@ -279,7 +280,7 @@ export async function assetReport(ctx: Ctx, f: ReportFilters) {
   const assets = await ctx.db.asset.findMany({
     where: {
       archivedAt: null,
-      ...(f.villaId ? { villaId: f.villaId } : f.clientId ? { villa: { clientId: f.clientId } } : {}),
+      ...(f.villaId ? { villaId: f.villaId } : f.clientId ? { villa: villaAccess(f.clientId) } : {}),
       ...(f.system ? { system: f.system } : {}),
     },
     select: {

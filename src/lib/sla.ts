@@ -53,10 +53,13 @@ export type ContractLike = {
   systems: SystemType[];
 };
 
-/** Whether a contract covers a job at a villa (of a client), for a system, opened at `at`. */
-export function covers(c: ContractLike, job: { villaId: string; clientId: string; system: SystemType | null; at: Date }) {
+/**
+ * Whether a contract covers a job at a villa, for a system, opened at `at`. `clientIds` are the villa's
+ * owner and, if any, its property manager: a contract with either can cover the villa.
+ */
+export function covers(c: ContractLike, job: { villaId: string; clientIds: string[]; system: SystemType | null; at: Date }) {
   if (c.status !== "ACTIVE" && c.status !== "EXPIRED") return false; // drafts and cancelled never apply
-  if (c.clientId !== job.clientId) return false;
+  if (!job.clientIds.includes(c.clientId)) return false;
   if (c.villaId && c.villaId !== job.villaId) return false;
   if (job.at < c.startDate || (c.endDate && job.at > endOfDay(c.endDate))) return false;
   if (c.systems.length > 0 && (!job.system || !c.systems.includes(job.system))) return false;

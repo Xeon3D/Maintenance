@@ -37,7 +37,7 @@ describe("SLA", () => {
 
 describe("contract matching", () => {
   const base: ContractLike = { id: "c", clientId: "cl", villaId: null, status: "ACTIVE", startDate: d("2026-01-01Z"), endDate: d("2026-12-31Z"), systems: [] };
-  const job = { villaId: "v1", clientId: "cl", system: "NETWORK" as const, at: d("2026-06-01Z") };
+  const job = { villaId: "v1", clientIds: ["cl"], system: "NETWORK" as const, at: d("2026-06-01Z") };
 
   it("respects client, villa, dates (end day inclusive) and systems", () => {
     expect(covers(base, job)).toBe(true);
@@ -47,6 +47,13 @@ describe("contract matching", () => {
     expect(covers(base, { ...job, at: d("2027-01-01T01:00:00Z") })).toBe(false);
     expect(covers({ ...base, systems: ["CCTV"] }, job)).toBe(false);
     expect(covers({ ...base, status: "DRAFT" }, job)).toBe(false);
+  });
+
+  it("covers a villa through its owner or its property manager", () => {
+    const managed = { ...job, clientIds: ["owner", "pm"] };
+    expect(covers({ ...base, clientId: "pm" }, managed)).toBe(true);
+    expect(covers({ ...base, clientId: "owner" }, managed)).toBe(true);
+    expect(covers({ ...base, clientId: "other-owner" }, managed)).toBe(false);
   });
 
   it("prefers a villa-specific contract", () => {

@@ -82,7 +82,7 @@ Run the scheduler one of two ways:
 Admins can also press "Run scheduler" on the Preventive maintenance page. Meter-based
 schedules and meter alerts run immediately when a reading is recorded.
 
-Demo users (password `demo1234`): `owner@`, `manager@`, `tech.network@`, `tech.electrical@`, `viewer@`, `client@` — all `@demo.test`.
+Demo users (password `demo1234`): `owner@`, `manager@`, `tech.network@`, `tech.electrical@`, `viewer@`, `client@` (villa owner portal), `pm@` (property manager portal: two owners' villas) — all `@demo.test`.
 
 ## Scripts
 

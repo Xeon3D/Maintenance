@@ -28,6 +28,11 @@ export default async function ClientPage({ params }: PageProps<"/clients/[id]">)
         orderBy: { name: "asc" },
         include: { _count: { select: { assets: { where: { archivedAt: null } } } } },
       },
+      managedVillas: {
+        where: { archivedAt: null },
+        orderBy: { name: "asc" },
+        include: { client: { select: { id: true, name: true } } },
+      },
     },
   });
   if (!client) notFound();
@@ -88,6 +93,29 @@ export default async function ClientPage({ params }: PageProps<"/clients/[id]">)
               </ul>
             )}
           </Card>
+
+          {client.managedVillas.length > 0 && (
+            <Card>
+              <div className="border-b border-border px-5 py-3">
+                <h2 className="font-medium">{t("villas.managedVillas")}</h2>
+                <p className="text-xs text-muted">{t("villas.managedVillasHint")}</p>
+              </div>
+              <ul className="divide-y divide-border">
+                {client.managedVillas.map((v) => (
+                  <li key={v.id}>
+                    <Link href={`/villas/${v.id}`} className="flex items-center justify-between gap-3 px-5 py-3 hover:bg-gray-50">
+                      <span>
+                        <span className="font-medium">{v.name}</span>
+                        {v.code && <span className="ml-2 font-mono text-xs text-muted">{v.code}</span>}
+                        <span className="block text-xs text-muted">{[v.city, v.country].filter(Boolean).join(", ")}</span>
+                      </span>
+                      <span className="text-right text-sm text-muted">{t("villas.ownedBy", { name: v.client.name })}</span>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </Card>
+          )}
 
           <Card>
             <div className="flex items-center justify-between border-b border-border px-5 py-3">

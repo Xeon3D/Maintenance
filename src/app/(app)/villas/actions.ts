@@ -7,29 +7,39 @@ import { requirePermission } from "@/lib/context";
 import { assertOwned } from "@/lib/db/tenant";
 import { enumOf, optId, optNumber, optStr, parseForm, str, type FormResult } from "@/lib/forms";
 import { AreaKind } from "@/generated/prisma/enums";
+import { relinkClientWorkOrders } from "@/lib/contracts";
 
-const villaSchema = z.object({
-  clientId: str(40),
-  name: str(150),
-  code: optStr(30),
-  address: optStr(300),
-  city: optStr(100),
-  country: optStr(100),
-  latitude: optNumber().refine((v) => v === null || Math.abs(v) <= 90),
-  longitude: optNumber().refine((v) => v === null || Math.abs(v) <= 180),
-  accessNotes: optStr(5000),
-});
+const villaSchema = z
+  .object({
+    clientId: str(40),
+    managerId: optId(),
+    name: str(150),
+    code: optStr(30),
+    address: optStr(300),
+    city: optStr(100),
+    country: optStr(100),
+    latitude: optNumber().refine((v) => v === null || Math.abs(v) <= 90),
+    longitude: optNumber().refine((v) => v === null || Math.abs(v) <= 180),
+    accessNotes: optStr(5000),
+  })
+  .refine((v) => v.managerId !== v.clientId, { path: ["managerId"], message: "managerIsOwner" });
 
 export async function saveVillaAction(id: string | null, _: FormResult, form: FormData): Promise<FormResult> {
   const ctx = await requirePermission("clients.manage");
   const parsed = parseForm(villaSchema, form);
   if (parsed.error) return parsed.error;
   const { data } = parsed;
-  await assertOwned(ctx.db, "client", [data.clientId]);
+  await assertOwned(ctx.db, "client", [data.clientId, data.managerId]);
 
   let villaId = id;
   if (id) {
+    const before = await ctx.db.villa.findUniqueOrThrow({ where: { id }, select: { clientId: true, managerId: true } });
     await ctx.db.villa.update({ where: { id }, data });
+    // Owner or manager changed: the villa's jobs may now fall under a different service contract.
+    if (before.clientId !== data.clientId || before.managerId !== data.managerId) {
+      const affected = new Set([before.clientId, before.managerId, data.clientId, data.managerId].filter((c): c is string => !!c));
+      for (const clientId of affected) await relinkClientWorkOrders(ctx.db, clientId);
+    }
   } else {
     villaId = (await ctx.db.villa.create({ data: { ...data, organizationId: ctx.organization.id } })).id;
   }

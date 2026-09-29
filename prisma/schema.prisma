@@ -351,11 +351,12 @@ model Client {
   createdAt      DateTime   @default(now())
   updatedAt      DateTime   @updatedAt
 
-  organization Organization      @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-  contacts     ClientContact[]
-  villas       Villa[]
-  contracts    ServiceContract[]
-  portalUsers  Membership[]
+  organization  Organization      @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  contacts      ClientContact[]
+  villas        Villa[]           @relation("VillaOwner")
+  managedVillas Villa[]           @relation("VillaManager")
+  contracts     ServiceContract[]
+  portalUsers   Membership[]
 
   @@index([organizationId])
 }
@@ -375,7 +376,10 @@ model ClientContact {
 model Villa {
   id             String    @id @default(cuid())
   organizationId String
+  // The owner (billing client). A property manager / managing company can be added as manager:
+  // portal users of either client can see the villa and request work on it.
   clientId       String
+  managerId      String?
   name           String
   code           String? // short internal ref, e.g. "VQL-07"
   address        String?
@@ -392,7 +396,8 @@ model Villa {
   updatedAt      DateTime  @updatedAt
 
   organization Organization      @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-  client       Client            @relation(fields: [clientId], references: [id])
+  client       Client            @relation("VillaOwner", fields: [clientId], references: [id])
+  manager      Client?           @relation("VillaManager", fields: [managerId], references: [id], onDelete: SetNull)
   areas        Area[]
   assets       Asset[]
   contracts    ServiceContract[]
@@ -402,6 +407,7 @@ model Villa {
   attachments  Attachment[]
 
   @@index([organizationId, clientId])
+  @@index([managerId])
 }
 
 model Area {

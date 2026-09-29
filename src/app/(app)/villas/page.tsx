@@ -22,7 +22,8 @@ export default async function VillasPage({ searchParams }: PageProps<"/villas">)
 
   const where = {
     archivedAt: archived ? { not: null } : null,
-    ...(clientId ? { clientId } : {}),
+    // A client's villas: owned or managed by it.
+    ...(clientId ? { AND: [{ OR: [{ clientId }, { managerId: clientId }] }] } : {}),
     ...searchWhere(q, ["name", "code", "city", "address"]),
   };
   const [villas, total, clients] = await Promise.all([
@@ -30,6 +31,7 @@ export default async function VillasPage({ searchParams }: PageProps<"/villas">)
       where,
       include: {
         client: { select: { id: true, name: true } },
+        manager: { select: { name: true } },
         _count: {
           select: {
             assets: { where: { archivedAt: null } },
@@ -87,7 +89,7 @@ export default async function VillasPage({ searchParams }: PageProps<"/villas">)
             <thead>
               <tr>
                 <th>{t("common.name")}</th>
-                <th>{t("villas.client")}</th>
+                <th>{t("villas.owner")}</th>
                 <th>{t("villas.city")}</th>
                 <th className="text-right">{t("nav.assets")}</th>
                 <th className="text-right">{t("villas.openWorkOrders")}</th>
@@ -106,6 +108,7 @@ export default async function VillasPage({ searchParams }: PageProps<"/villas">)
                     <Link href={`/clients/${v.client.id}`} className="text-muted hover:text-brand">
                       {v.client.name}
                     </Link>
+                    {v.manager && <span className="block text-xs text-muted">{t("villas.managedBy", { name: v.manager.name })}</span>}
                   </td>
                   <td className="text-muted">{v.city ?? "—"}</td>
                   <td className="text-right tabular-nums">{v._count.assets}</td>

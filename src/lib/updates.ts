@@ -11,28 +11,54 @@ const REPO = () => process.env.UPDATE_REPO || "Xeon3D/Maintenance";
 const IMAGE = () => process.env.APP_IMAGE || "xeon3d/maintenance";
 const CHECK_TTL = 6 * 3_600_000;
 
-export type ReleaseInfo = { version: string; url: string; notes: string; publishedAt: string | null };
-export type UpdateStatus = { current: string; latest: ReleaseInfo | null; available: boolean; checkedAt: Date | null; error: string | null };
+export type ReleaseInfo = { version: string; url: string; html: string; publishedAt: string | null };
+export type UpdateStatus = {
+  current: string;
+  latest: ReleaseInfo | null;
+  available: boolean;
+  /** Releases newer than the installed version, newest first (what an update would bring). */
+  changelog: ReleaseInfo[];
+  checkedAt: Date | null;
+  error: string | null;
+};
 
-let cache: { at: number; latest: ReleaseInfo | null; error: string | null } | null = null;
+type GhRelease = { tag_name: string; html_url: string; body_html?: string; published_at?: string; draft: boolean; prerelease: boolean };
+
+let cache: { at: number; releases: ReleaseInfo[]; error: string | null } | null = null;
+
+/**
+ * GitHub renders and sanitizes release notes (body_html). As a second line of defence anything
+ * active is stripped here too, and links open in a new tab.
+ */
+export function cleanReleaseHtml(html: string) {
+  return html
+    .replace(/<(script|style|iframe|object|embed|form)\b[\s\S]*?<\/\1\s*>/gi, "")
+    .replace(/<\/?(script|style|iframe|object|embed|form|input|button|meta|link|base)\b[^>]*>/gi, "")
+    .replace(/\son[a-z]+\s*=\s*("[^"]*"|'[^']*'|[^\s>]+)/gi, "")
+    .replace(/\b(href|src)\s*=\s*(["'])\s*(javascript|data|vbscript):[^"']*\2/gi, '$1="#"')
+    .replace(/<a\s/gi, '<a target="_blank" rel="noreferrer noopener" ');
+}
 
 export async function checkForUpdate(force = false): Promise<UpdateStatus> {
   if (force || !cache || Date.now() - cache.at > CHECK_TTL) {
     try {
-      const res = await fetch(`https://api.github.com/repos/${REPO()}/releases/latest`, {
-        headers: { Accept: "application/vnd.github+json", "User-Agent": `maintenance/${APP_VERSION}` },
+      const res = await fetch(`https://api.github.com/repos/${REPO()}/releases?per_page=30`, {
+        headers: { Accept: "application/vnd.github.html+json", "User-Agent": `maintenance/${APP_VERSION}` },
         signal: AbortSignal.timeout(10_000),
         cache: "no-store",
       });
       if (!res.ok) throw new Error(`GitHub answered ${res.status}`);
-      const r = (await res.json()) as { tag_name: string; html_url: string; body?: string; published_at?: string };
-      cache = { at: Date.now(), latest: { version: r.tag_name.replace(/^v/i, ""), url: r.html_url, notes: r.body ?? "", publishedAt: r.published_at ?? null }, error: null };
+      const releases = ((await res.json()) as GhRelease[])
+        .filter((r) => !r.draft && !r.prerelease)
+        .map((r) => ({ version: r.tag_name.replace(/^v/i, ""), url: r.html_url, html: cleanReleaseHtml(r.body_html ?? ""), publishedAt: r.published_at ?? null }))
+        .sort((a, b) => compareVersions(b.version, a.version));
+      cache = { at: Date.now(), releases, error: null };
     } catch (e) {
-      cache = { at: Date.now(), latest: cache?.latest ?? null, error: e instanceof Error ? e.message : String(e) };
+      cache = { at: Date.now(), releases: cache?.releases ?? [], error: e instanceof Error ? e.message : String(e) };
     }
   }
-  const latest = cache.latest;
-  return { current: APP_VERSION, latest, available: !!latest && compareVersions(latest.version, APP_VERSION) > 0, checkedAt: new Date(cache.at), error: cache.error };
+  const changelog = cache.releases.filter((r) => compareVersions(r.version, APP_VERSION) > 0);
+  return { current: APP_VERSION, latest: cache.releases[0] ?? null, available: changelog.length > 0, changelog, checkedAt: new Date(cache.at), error: cache.error };
 }
 
 /** The Watchtower API token: UPDATER_TOKEN, else the file the entrypoint generates in DATA_DIR. */

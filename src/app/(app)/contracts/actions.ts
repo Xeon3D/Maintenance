@@ -7,6 +7,7 @@ import { requirePermission } from "@/lib/context";
 import { enumOf, optDate, optId, optInt, optNumber, optStr, parseForm, str, type FormResult } from "@/lib/forms";
 import { relinkClientWorkOrders } from "@/lib/contracts";
 import { ContractStatus, SystemType } from "@/generated/prisma/enums";
+import { villaAccess } from "@/lib/portal-scope";
 
 const hours = () => optInt().refine((v) => v === null || (v >= 1 && v <= 24 * 365));
 
@@ -37,10 +38,10 @@ export async function saveContractAction(id: string | null, _: FormResult, form:
   const systems = z.array(enumOf(SystemType)).parse(form.getAll("systems"));
   const data = { ...parsed.data, systems };
 
-  // The client must be ours, and a villa must belong to that client.
+  // The client must be ours, and a villa must be one it owns or manages.
   const client = await ctx.db.client.findUnique({ where: { id: data.clientId }, select: { id: true } });
   if (!client) return { error: "validation", fieldErrors: { clientId: "invalid" } };
-  if (data.villaId && !(await ctx.db.villa.count({ where: { id: data.villaId, clientId: data.clientId } }))) {
+  if (data.villaId && !(await ctx.db.villa.count({ where: { id: data.villaId, ...villaAccess(data.clientId) } }))) {
     return { error: "validation", fieldErrors: { villaId: "villaNotClients" } };
   }
 

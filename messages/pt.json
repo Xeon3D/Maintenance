@@ -196,11 +196,12 @@
     "wrongPassword": "Essa não é a sua palavra-passe atual.",
     "endBeforeStart": "A data de fim é anterior à data de início.",
     "resolutionBeforeResponse": "O tempo de resolução não pode ser inferior ao tempo de resposta.",
-    "villaNotClients": "Essa moradia pertence a outro cliente.",
+    "villaNotClients": "Essa moradia não é deste cliente nem gerida por ele.",
     "invalid_color": "Use uma cor hexadecimal, como #1f4f8f.",
     "brandTooLight": "Demasiado clara: o texto branco sobre ela não ficaria legível. Escolha um tom mais escuro.",
     "logoTooLarge": "O logótipo não pode ter mais de 2 MB.",
-    "logoType": "Use uma imagem PNG ou JPEG."
+    "logoType": "Use uma imagem PNG ou JPEG.",
+    "managerIsOwner": "A gestão tem de ser um cliente diferente do proprietário."
   },
   "clients": {
     "description": "Proprietários, family offices e gestores de propriedades para quem trabalha.",
@@ -228,6 +229,7 @@
     "needClient": "Crie primeiro um cliente; cada moradia pertence a um cliente.",
     "allClients": "Todos os clientes",
     "client": "Cliente",
+    "owner": "Proprietário",
     "code": "Código",
     "codeHint": "Referência curta impressa nas etiquetas.",
     "address": "Morada",
@@ -241,7 +243,14 @@
     "needsAttention": "Requer atenção",
     "systems": "Sistemas instalados",
     "openMaps": "Abrir no Maps",
-    "secrets": "Códigos de acesso"
+    "secrets": "Códigos de acesso",
+    "manager": "Gestão da propriedade / empresa",
+    "managerHint": "Opcional. Os utilizadores do portal deste cliente também veem esta moradia e podem pedir trabalhos. Os utilizadores do portal do proprietário só veem as moradias do próprio proprietário.",
+    "noManager": "Nenhuma",
+    "managedBy": "Gerida por {name}",
+    "managedVillas": "Moradias geridas",
+    "managedVillasHint": "Moradias de outros proprietários que este cliente gere. Os utilizadores do portal deste cliente podem pedir trabalhos nelas.",
+    "ownedBy": "Proprietário: {name}"
   },
   "areas": {
     "title": "Pisos e divisões",
@@ -1061,7 +1070,7 @@
     "openEnded": "sem termo",
     "pastEnd": "Data de fim ultrapassada",
     "namePlaceholder": "p. ex. Manutenção Premium 2026",
-    "villaHint": "Deixe em todas as moradias para um acordo que abrange todo o cliente.",
+    "villaHint": "Deixe em todas as moradias para um acordo de cliente (abrange as moradias próprias e geridas).",
     "startDate": "Início",
     "endDate": "Fim",
     "endDateHint": "Vazio = sem data de fim.",
@@ -1089,7 +1098,10 @@
     "resolveBy": "Resolver até",
     "autoLinkHint": "As ordens de trabalho nas moradias abrangidas, para os sistemas abrangidos, abertas entre as datas de início e fim, são associadas automaticamente a este contrato, incluindo as anteriores.",
     "noneForClient": "Este cliente não tem contrato de manutenção.",
-    "deleteConfirm": "Eliminar este contrato? As ordens de trabalho mantêm-se, mas deixam de ter SLA associado."
+    "deleteConfirm": "Eliminar este contrato? As ordens de trabalho mantêm-se, mas deixam de ter SLA associado.",
+    "pickClientFirst": "Escolha primeiro o cliente.",
+    "ownedVillas": "Próprias",
+    "managedVillas": "Geridas para outros proprietários"
   },
   "reports": {
     "description": "Desempenho, SLA, custos, técnicos e fiabilidade dos equipamentos.",
@@ -1377,6 +1389,8 @@
       "updaterNotConfigured": "O serviço de atualização não está configurado (ver docker-compose.yml).",
       "updateInProgress": "Já está a decorrer uma atualização.",
       "updaterError": "O serviço de atualização não aceitou o pedido. Verifique se está a funcionar."
-    }
+    },
+    "whatsNew": "Novidades",
+    "noNotes": "Sem notas de versão."
   }
 }

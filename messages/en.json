@@ -196,11 +196,12 @@
     "wrongPassword": "That isn't your current password.",
     "endBeforeStart": "The end date is before the start date.",
     "resolutionBeforeResponse": "Resolution time can't be shorter than response time.",
-    "villaNotClients": "That villa belongs to a different client.",
+    "villaNotClients": "That villa is not owned or managed by this client.",
     "invalid_color": "Use a hex colour like #1f4f8f.",
     "brandTooLight": "Too light: white text on it wouldn't be readable. Pick a darker shade.",
     "logoTooLarge": "The logo must be 2 MB or smaller.",
-    "logoType": "Use a PNG or JPEG image."
+    "logoType": "Use a PNG or JPEG image.",
+    "managerIsOwner": "The manager must be a different client from the owner."
   },
   "clients": {
     "description": "Villa owners, family offices and property managers you work for.",
@@ -228,6 +229,7 @@
     "needClient": "Create a client first; each villa belongs to a client.",
     "allClients": "All clients",
     "client": "Client",
+    "owner": "Owner",
     "code": "Code",
     "codeHint": "Short reference printed on labels.",
     "address": "Address",
@@ -241,7 +243,14 @@
     "needsAttention": "Needs attention",
     "systems": "Installed systems",
     "openMaps": "Open in Maps",
-    "secrets": "Access codes"
+    "secrets": "Access codes",
+    "manager": "Property manager / company",
+    "managerHint": "Optional. Its portal users can also see this villa and request work here. The owner's portal users only ever see the owner's own villas.",
+    "noManager": "None",
+    "managedBy": "Managed by {name}",
+    "managedVillas": "Villas managed",
+    "managedVillasHint": "Villas of other owners that this client manages. Its portal users can request work on them.",
+    "ownedBy": "Owner: {name}"
   },
   "areas": {
     "title": "Floors & rooms",
@@ -1061,7 +1070,7 @@
     "openEnded": "open-ended",
     "pastEnd": "Past end date",
     "namePlaceholder": "e.g. Premium maintenance 2026",
-    "villaHint": "Leave on all villas for a client-wide agreement.",
+    "villaHint": "Leave on all villas for a client-wide agreement (covers the villas it owns and manages).",
     "startDate": "Start",
     "endDate": "End",
     "endDateHint": "Blank = no end date.",
@@ -1089,7 +1098,10 @@
     "resolveBy": "Resolve by",
     "autoLinkHint": "Work orders at the covered villas, for the covered systems, opened between the start and end dates are linked to this contract automatically, including earlier ones.",
     "noneForClient": "No service contract for this client.",
-    "deleteConfirm": "Delete this contract? Its work orders stay, but lose the SLA link."
+    "deleteConfirm": "Delete this contract? Its work orders stay, but lose the SLA link.",
+    "pickClientFirst": "Choose the client first.",
+    "ownedVillas": "Owned",
+    "managedVillas": "Managed for other owners"
   },
   "reports": {
     "description": "Performance, SLA, costs, technicians and equipment reliability.",
@@ -1377,6 +1389,8 @@
       "updaterNotConfigured": "The updater service isn't set up (see docker-compose.yml).",
       "updateInProgress": "An update is already running.",
       "updaterError": "The updater service didn't accept the request. Check that it is running."
-    }
+    },
+    "whatsNew": "What's new",
+    "noNotes": "No release notes."
   }
 }
