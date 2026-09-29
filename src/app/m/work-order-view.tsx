@@ -40,7 +40,7 @@ export function WorkOrderView({
   const format = useFormatter();
   const [now, setNow] = useState(() => Date.now());
   const [comment, setComment] = useState("");
-  const [blocked, setBlocked] = useState<string[] | null>(null);
+  const [blocked, setBlocked] = useState<{ items: string[]; signOff: boolean } | null>(null);
   const [holdNote, setHoldNote] = useState<string | null>(null);
   const photoInput = useRef<HTMLInputElement>(null);
   const runningHere = timer?.woId === wo.id;
@@ -64,9 +64,11 @@ export function WorkOrderView({
 
   const setStatus = async (status: WorkOrderStatus, note?: string) => {
     if (status === "DONE") {
-      const missing = missingRequired(wo);
-      if (missing.length) {
-        setBlocked(missing.map((i) => i.label));
+      const items = missingRequired(wo).map((i) => i.label);
+      // The server enforces this too: a signature, or "client absent".
+      const signOff = !wo.signOff && !wo.clientAbsent;
+      if (items.length || signOff) {
+        setBlocked({ items, signOff });
         return;
       }
     }
@@ -186,13 +188,18 @@ export function WorkOrderView({
             </div>
           )}
           {blocked && (
-            <div className="rounded-md bg-red-50 px-3 py-2 text-sm text-red-800">
-              {t("wo.requiredItems")}
-              <ul className="mt-1 list-disc pl-5 text-xs">
-                {blocked.map((l) => (
-                  <li key={l}>{l}</li>
-                ))}
-              </ul>
+            <div className="space-y-1 rounded-md bg-red-50 px-3 py-2 text-sm text-red-800">
+              {blocked.items.length > 0 && (
+                <>
+                  {t("wo.requiredItems")}
+                  <ul className="mt-1 list-disc pl-5 text-xs">
+                    {blocked.items.map((l) => (
+                      <li key={l}>{l}</li>
+                    ))}
+                  </ul>
+                </>
+              )}
+              {blocked.signOff && <p>{t("wo.signOffRequired")}</p>}
             </div>
           )}
 

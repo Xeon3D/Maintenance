@@ -339,6 +339,8 @@ export async function setClientAbsentAction(woId: string, absent: boolean) {
 
 export async function clearSignOffAction(woId: string) {
   const { ctx, wo } = await executableWorkOrder(woId);
+  // A completed job must stay signed off; reopen it first.
+  if (wo.status === "DONE" && !wo.clientAbsent) throw new WorkOrderError("locked");
   if (wo.signatureUrl) {
     const att = await ctx.db.attachment.findUnique({ where: { id: wo.signatureUrl } });
     if (att) {

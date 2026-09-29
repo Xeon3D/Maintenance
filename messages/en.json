@@ -452,7 +452,8 @@
     "procedureHint": "Copies the procedure's steps into this work order's checklist.",
     "clientVisible": "Visible to the client in their portal",
     "clientVisibleHint": "Untick for internal work the client shouldn't see.",
-    "alreadySigned": "The client has already signed this work order."
+    "alreadySigned": "The client has already signed this work order.",
+    "signOffRequired": "Client sign-off: collect the client's signature, or tick Client absent."
   },
   "woStatus": {
     "OPEN": "Open",

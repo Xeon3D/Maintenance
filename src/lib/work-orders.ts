@@ -11,7 +11,7 @@ import type { ChecklistItemType, Priority, SystemType, WorkOrderStatus, WorkOrde
 export const ACTIVE_STATUSES: WorkOrderStatus[] = ["OPEN", "IN_PROGRESS", "ON_HOLD"];
 
 export class WorkOrderError extends Error {
-  constructor(public code: "requiredItems" | "invalidRef" | "invalidAssignee" | "locked" | "alreadySigned") {
+  constructor(public code: "requiredItems" | "invalidRef" | "invalidAssignee" | "locked" | "alreadySigned" | "signOffRequired") {
     super(code);
   }
 }
@@ -148,6 +148,11 @@ async function linkMeterItems(ctx: WoCtx, assetId: string | null, items: Checkli
   });
 }
 
+/** A job can only be completed once the client has signed, or it is marked "client absent". */
+export function isSignedOff(wo: { signatureUrl: string | null; clientAbsent: boolean }) {
+  return !!wo.signatureUrl || wo.clientAbsent;
+}
+
 export function isItemComplete(item: { type: ChecklistItemType; value: string | null }) {
   if (item.type === "HEADING") return true;
   if (item.type === "CHECKBOX") return item.value === "true";
@@ -166,6 +171,7 @@ export async function changeStatus(ctx: WoCtx, workOrderId: string, to: WorkOrde
   if (to === "DONE" && wo.items.some((i) => i.required && !isItemComplete(i))) {
     throw new WorkOrderError("requiredItems");
   }
+  if (to === "DONE" && !isSignedOff(wo)) throw new WorkOrderError("signOffRequired");
 
   const now = new Date();
   if (to === "DONE" || to === "CANCELLED") await stopRunningTimers(ctx, workOrderId, now);

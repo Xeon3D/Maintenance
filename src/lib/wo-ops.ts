@@ -106,8 +106,10 @@ export async function signOff(ctx: WoCtx, woId: string, signedByName: string, at
 
 /** "Client absent": no client signature is needed. Not possible once the client has signed. */
 export async function setClientAbsent(ctx: WoCtx, woId: string, absent: boolean) {
-  const wo = await ctx.db.workOrder.findUnique({ where: { id: woId }, select: { signatureUrl: true } });
+  const wo = await ctx.db.workOrder.findUnique({ where: { id: woId }, select: { signatureUrl: true, status: true } });
   if (!wo) throw new WorkOrderError("invalidRef");
   if (absent && wo.signatureUrl) throw new WorkOrderError("alreadySigned");
+  // A completed job must stay signed off; reopen it first.
+  if (!absent && wo.status === "DONE" && !wo.signatureUrl) throw new WorkOrderError("locked");
   await ctx.db.workOrder.update({ where: { id: woId }, data: { clientAbsent: absent } });
 }

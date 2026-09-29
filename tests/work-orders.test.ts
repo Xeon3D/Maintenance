@@ -3,7 +3,7 @@ import { describe, expect, it, vi } from "vitest";
 vi.mock("server-only", () => ({}));
 vi.mock("@/lib/db/client", () => ({ prisma: {} }));
 
-import { isItemComplete, workOrderCosts } from "@/lib/work-orders";
+import { isItemComplete, isSignedOff, workOrderCosts } from "@/lib/work-orders";
 
 describe("isItemComplete", () => {
   it("treats headings as complete and unchecked boxes as incomplete", () => {
@@ -32,5 +32,13 @@ describe("workOrderCosts", () => {
     expect(c.minutes).toBe(120);
     expect(c.labor).toBe(90);
     expect(c.total).toBeCloseTo(115.5);
+  });
+});
+
+describe("isSignedOff (required to complete a job)", () => {
+  it("needs the client's signature or client absent", () => {
+    expect(isSignedOff({ signatureUrl: null, clientAbsent: false })).toBe(false);
+    expect(isSignedOff({ signatureUrl: "att1", clientAbsent: false })).toBe(true);
+    expect(isSignedOff({ signatureUrl: null, clientAbsent: true })).toBe(true);
   });
 });

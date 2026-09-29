@@ -180,8 +180,7 @@ are mostly UI and logic plus small additive migrations.
   not remapped (logos, signatures, labels). New colour shades used in the UI need a dark value there.
 - **Client sign-off**: signature (`signOff()`) or `WorkOrder.clientAbsent` (`setClientAbsent()`, refused once
   signed), both in `src/lib/wo-ops.ts` and shared by the web panel and offline sync (ops `signoff` /
-  `clientAbsent`; an offline signature is a queued photo with `signOffName`). Sign-off isn't required
-  to complete a job (yet). The PDF prints "Client absent" when set.
+  `clientAbsent`; an offline signature is a queued photo with `signOffName`). Completing a job **requires** a signature or client absent (`isSignedOff()`, enforced in `changeStatus`); a done job's sign-off can't be removed without reopening it. The PDF prints "Client absent" when set.
 - **REQUESTER users are redirected to `/portal`** by `(app)/layout.tsx`. Portal scope
   (`src/lib/portal-scope.ts`, tested):
   - Villas the member's client owns (`clientId`) **or manages** (`Villa.managerId`, a property
@@ -310,7 +309,7 @@ markers), Message, VerificationToken (password reset).
 
 ## 6. How to verify (proven techniques)
 
-- **Checks:** `npm run typecheck`, `npm run lint` (`npx eslint src tests`), `npm test` (vitest, 106 tests).
+- **Checks:** `npm run typecheck`, `npm run lint` (`npx eslint src tests`), `npm test` (vitest, 107 tests).
 - **Testing offline needs a production build.** In `next dev`, Turbopack only hydrates after its HMR
   websocket connects, so a page served from the SW cache stays inert with the server down. Use
   `npx next build`, then preview config `prod` (`next start -p 3100`); stop it to simulate no signal

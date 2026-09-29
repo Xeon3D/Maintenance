@@ -300,6 +300,7 @@ export default async function WorkOrderPage({ params }: PageProps<"/work-orders/
               woId={wo.id}
               canExecute={canExecute}
               clientAbsent={wo.clientAbsent}
+              done={wo.status === "DONE"}
               signed={
                 wo.signatureUrl && wo.signedByName && wo.signedAt
                   ? { name: wo.signedByName, at: dt(wo.signedAt), url: fileUrl(wo.signatureUrl) }

@@ -452,7 +452,8 @@
     "procedureHint": "Copia os passos do procedimento para a checklist desta ordem de trabalho.",
     "clientVisible": "Visível para o cliente no portal",
     "clientVisibleHint": "Desmarque para trabalho interno que o cliente não deve ver.",
-    "alreadySigned": "O cliente já assinou esta ordem de trabalho."
+    "alreadySigned": "O cliente já assinou esta ordem de trabalho.",
+    "signOffRequired": "Assinatura do cliente: recolha a assinatura do cliente ou marque Cliente ausente."
   },
   "woStatus": {
     "OPEN": "Aberta",

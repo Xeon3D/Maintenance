@@ -338,13 +338,17 @@ export function SignOff({
   woId,
   signed,
   clientAbsent,
-  canExecute,
+  canExecute: canExecuteRaw,
+  done,
 }: {
   woId: string;
   signed: { name: string; at: string; url: string } | null;
   clientAbsent: boolean;
   canExecute: boolean;
+  /** Completed jobs keep their sign-off (it is required to complete); reopen to change it. */
+  done: boolean;
 }) {
+  const canExecute = canExecuteRaw && !done;
   const t = useTranslations("signoff");
   const pad = useRef<SignaturePadHandle>(null);
   const [name, setName] = useState("");
