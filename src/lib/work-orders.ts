@@ -195,7 +195,7 @@ async function notifyStatus(ctx: WoCtx, wo: { id: string; number: number; title:
   if (!req) return;
   const clientData = { ...data, note: "", request: req.number };
   if (req.requesterId) await notify(ctx, [req.requesterId], { type: "WO_STATUS", data: clientData, link: `/portal/requests/${req.id}` });
-  else notifyExternal(ctx.organization, req.requesterEmail, ctx.organization.defaultLocale, "WO_STATUS", clientData);
+  else await notifyExternal(ctx.organization, req.requesterEmail, ctx.organization.defaultLocale, "WO_STATUS", clientData);
 }
 
 export async function stopRunningTimers(ctx: WoCtx, workOrderId: string, at = new Date(), userId?: string) {

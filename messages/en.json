@@ -145,7 +145,7 @@
   },
   "settings": {
     "orgTitle": "Organization",
-    "orgDescription": "Company details used across work orders and reports.",
+    "orgDescription": "Your company's name, logo and details, used across the app, the client portal, emails and PDF documents.",
     "timezone": "Time zone",
     "currency": "Currency",
     "defaultLanguage": "Default language",
@@ -186,7 +186,11 @@
     "wrongPassword": "That isn't your current password.",
     "endBeforeStart": "The end date is before the start date.",
     "resolutionBeforeResponse": "Resolution time can't be shorter than response time.",
-    "villaNotClients": "That villa belongs to a different client."
+    "villaNotClients": "That villa belongs to a different client.",
+    "invalid_color": "Use a hex colour like #1f4f8f.",
+    "brandTooLight": "Too light: white text on it wouldn't be readable. Pick a darker shade.",
+    "logoTooLarge": "The logo must be 2 MB or smaller.",
+    "logoType": "Use a PNG or JPEG image."
   },
   "clients": {
     "description": "Villa owners, family offices and property managers you work for.",
@@ -1253,5 +1257,32 @@
     "takePhoto": "Take photo",
     "retake": "Retake",
     "savedOnDevice": "Saved on this device — uploads when online."
+  },
+  "company": {
+    "details": "Company details",
+    "name": "Company name",
+    "nameHint": "Shown in the app, the client portal and emails.",
+    "legalName": "Legal name",
+    "legalNameHint": "If different, e.g. \"Demo Integrations, Lda.\" Printed on documents.",
+    "taxId": "Tax number (NIF)",
+    "branding": "Branding",
+    "brandColor": "Brand colour",
+    "brandColorHint": "Used for buttons, links, the portal and PDF headers. Leave blank for the default blue.",
+    "preview": "Button",
+    "linkPreview": "Link text",
+    "resetColor": "Use default",
+    "tooLight": "Too light for white text; it won't be saved.",
+    "documents": "Documents",
+    "reportFooter": "Document footer",
+    "reportFooterHint": "Printed at the bottom of service reports and purchase orders, e.g. licence number, insurance or IBAN.",
+    "regional": "Regional settings",
+    "logo": "Logo",
+    "logoHint": "PNG or JPEG up to 2 MB. A wide logo on a white or transparent background works best.",
+    "noLogo": "No logo",
+    "uploadLogo": "Upload logo",
+    "replaceLogo": "Replace logo",
+    "removeLogoConfirm": "Remove the logo?",
+    "badColor": "Use a hex colour like #1f4f8f.",
+    "taxIdShort": "VAT no."
   }
 }

@@ -212,7 +212,7 @@ are mostly UI and logic plus small additive migrations.
 
 ## 5. Data model notes
 
-All models are in `prisma/schema.prisma`, with 4 migrations (`init`, `pm_meters`, `notifications`, `offline_sync`). Add changes
+All models are in `prisma/schema.prisma`, with 5 migrations (`init`, `pm_meters`, `notifications`, `offline_sync`, `company_profile`). Add changes
 with `npx prisma migrate dev --name <x>`, then `npx prisma generate` (Prisma 7 doesn't auto-generate).
 
 **Built out:** Organization, User, Membership, Invitation, Counter, Team, Client, ClientContact,
@@ -239,7 +239,7 @@ markers), Message, VerificationToken (password reset).
 
 ## 6. How to verify (proven techniques)
 
-- **Checks:** `npm run typecheck`, `npm run lint` (`npx eslint src tests`), `npm test` (vitest, 78 tests).
+- **Checks:** `npm run typecheck`, `npm run lint` (`npx eslint src tests`), `npm test` (vitest, 84 tests).
 - **Testing offline needs a production build.** In `next dev`, Turbopack only hydrates after its HMR
   websocket connects, so a page served from the SW cache stays inert with the server down. Use
   `npx next build`, then preview config `prod` (`next start -p 3100`); stop it to simulate no signal
@@ -272,7 +272,7 @@ markers), Message, VerificationToken (password reset).
   - `owner` Sofia (OWNER), `manager` Miguel (MANAGER), `tech.network` Rui (TECHNICIAN, €45/h),
     `tech.electrical` Daniel (TECHNICIAN), `viewer` Ana (VIEWER).
   - `client` James Whitmore (REQUESTER → client "Whitmore Family Office").
-  - The preview pane is currently signed in as the **manager**.
+  - The preview pane is currently signed in as the **owner** (Sofia).
 - **Demo data now includes test records** from phases 2–5. The user knows; keep or clean up on request:
   - Villa "Villa Quinta do Lago 7" (code `VQL-07`), which has a test access code.
   - 9 assets, including "Cinema access point", "Pool house rack", "Pool house AP" and "Cinema projector".
@@ -428,6 +428,23 @@ markers), Message, VerificationToken (password reset).
   use `<a>`: the Next lint rule treats `/assets/export` as a page link.
 - Timezone: report windows are UTC days (dates display in UTC to match); fine for Europe, revisit for
   orgs far from UTC.
+
+### Company profile & branding (added after phase 9)
+- `/settings/organization` (owner/admin): name, legal name, NIF, address, phone, email, website,
+  brand colour, document footer, logo, plus the regional settings.
+- `src/lib/branding.ts` (pure, tested): `brandColor()` falls back to the default blue unless the saved
+  colour gives ≥ 4.5:1 with white (buttons use white text on it, links use it on white).
+  `brandStyle()` sets `--brand` and `--color-brand` inline on the app/portal/field/QR wrappers.
+  `companyLines()` builds the letterhead; `logoSrc()` gives a versioned logo URL.
+- Logo: PNG/JPEG only, ≤ 2 MB, type sniffed from the bytes (no SVG: it can carry script and react-pdf
+  can't embed it). Stored via `putObject` under `<org>/branding/`, served publicly by
+  `/api/org-logo/[id]?v=<updatedAt>` (immutable cache; public for QR pages and emails). The SW
+  caches it for the offline field app (cache `v3`).
+- PDFs share `src/components/pdf/letterhead.tsx` (`PdfHeader`/`PdfFooter`, data from
+  `src/lib/letterhead.ts`); emails get the logo and colour through `emailLayout({logo, color})`.
+- Demo org now has example details and a generated logo (set during testing).
+- The *product* name ("VillaOps", `common.appName`) is still a placeholder, separate from the
+  company name.
 
 ### Phase 9 — Offline field app (✅ done; notes for later)
 - **`/m`** (outside the `(app)` layout; technicians and anyone with `workOrders.execute`): one client

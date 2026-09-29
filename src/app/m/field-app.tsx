@@ -27,7 +27,7 @@ function warmCache() {
   navigator.serviceWorker.ready.then((reg) => reg.active?.postMessage({ type: "cache-field", urls: ["/m", ...assets] })).catch(() => undefined);
 }
 
-export function FieldApp({ user, org }: { user: { id: string; name: string }; org: string }) {
+export function FieldApp({ user, org, logo }: { user: { id: string; name: string }; org: string; logo: string | null }) {
   const t = useTranslations();
   const format = useFormatter();
   const [snapshot, setSnapshot] = useState<Snapshot | null>(null);
@@ -157,6 +157,10 @@ export function FieldApp({ user, org }: { user: { id: string; name: string }; or
     <div className="mx-auto min-h-screen max-w-2xl bg-background pb-16">
       <header className="sticky top-0 z-20 border-b border-border bg-surface/95 backdrop-blur">
         <div className="flex h-14 items-center gap-2 px-4">
+          {logo && (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={logo} alt="" className="size-8 shrink-0 rounded bg-white object-contain" />
+          )}
           <div className="min-w-0 flex-1">
             <div className="truncate text-sm font-semibold text-brand">{org}</div>
             <div className="truncate text-xs text-muted">

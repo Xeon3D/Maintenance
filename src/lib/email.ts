@@ -38,15 +38,25 @@ export function esc(s: string) {
 }
 
 /** Minimal, client-safe HTML layout: heading, paragraphs, one button, small footer. */
-export function emailLayout(o: { org: string; heading: string; paragraphs: string[]; cta?: { label: string; url: string }; footer?: string }) {
+export function emailLayout(o: {
+  org: string;
+  heading: string;
+  paragraphs: string[];
+  cta?: { label: string; url: string };
+  footer?: string;
+  /** Absolute logo URL and brand colour (defaults to the app's blue). */
+  logo?: string | null;
+  color?: string;
+}) {
+  const color = o.color ?? "#1f4f8f";
   const p = o.paragraphs.map((x) => `<p style="margin:0 0 12px;line-height:1.5">${esc(x).replace(/\n/g, "<br>")}</p>`).join("");
   const button = o.cta
-    ? `<p style="margin:20px 0"><a href="${esc(o.cta.url)}" style="background:#1f4f8f;color:#fff;text-decoration:none;padding:10px 18px;border-radius:6px;display:inline-block;font-weight:600">${esc(o.cta.label)}</a></p>`
+    ? `<p style="margin:20px 0"><a href="${esc(o.cta.url)}" style="background:${esc(color)};color:#fff;text-decoration:none;padding:10px 18px;border-radius:6px;display:inline-block;font-weight:600">${esc(o.cta.label)}</a></p>`
     : "";
   const html = `<!doctype html><html><body style="margin:0;background:#f5f6f8;font-family:-apple-system,Segoe UI,Helvetica,Arial,sans-serif;color:#16181d">
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr><td align="center" style="padding:24px 12px">
 <table role="presentation" width="100%" style="max-width:560px;background:#fff;border:1px solid #e5e7eb;border-radius:8px"><tr><td style="padding:24px">
-<div style="font-size:12px;font-weight:700;color:#1f4f8f;text-transform:uppercase;letter-spacing:.04em;margin-bottom:12px">${esc(o.org)}</div>
+${o.logo ? `<img src="${esc(o.logo)}" alt="${esc(o.org)}" height="40" style="display:block;height:40px;max-width:180px;margin-bottom:10px">` : ""}<div style="font-size:12px;font-weight:700;color:${esc(color)};text-transform:uppercase;letter-spacing:.04em;margin-bottom:12px">${esc(o.org)}</div>
 <h1 style="font-size:18px;margin:0 0 14px">${esc(o.heading)}</h1>${p}${button}
 ${o.footer ? `<p style="margin:20px 0 0;font-size:12px;color:#6b7280">${esc(o.footer)}</p>` : ""}
 </td></tr></table></td></tr></table></body></html>`;

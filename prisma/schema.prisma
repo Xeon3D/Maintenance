@@ -216,7 +216,16 @@ model Organization {
   id            String   @id @default(cuid())
   name          String
   slug          String   @unique
-  logoUrl       String?
+  logoUrl       String? // storage ref of the company logo (PNG/JPEG), served by /api/org-logo/[id]
+  // Company details shown on reports, purchase orders, emails and the portal.
+  legalName     String?
+  taxId         String?
+  email         String?
+  phone         String?
+  website       String?
+  address       String?
+  brandColor    String? // #rrggbb; must keep white text readable (checked on save)
+  reportFooter  String? // printed at the foot of PDFs (licences, IBAN, insurance…)
   timezone      String   @default("Europe/Lisbon")
   currency      String   @default("EUR")
   defaultLocale String   @default("en")

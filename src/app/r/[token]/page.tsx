@@ -6,6 +6,7 @@ import { Card } from "@/components/ui";
 import { LocaleSwitcher } from "@/components/locale-switcher";
 import { prisma } from "@/lib/db/client";
 import { PublicRequestForm } from "./public-form";
+import { brandStyle, logoSrc } from "@/lib/branding";
 
 // Public landing for asset QR labels.
 //  - staff of the owning org → the asset page
@@ -15,7 +16,7 @@ export default async function QrLandingPage({ params }: PageProps<"/r/[token]">)
   const { token } = await params;
   const asset = await prisma.asset.findUnique({
     where: { qrToken: token },
-    select: { id: true, name: true, organizationId: true, archivedAt: true, organization: { select: { name: true } } },
+    select: { id: true, name: true, organizationId: true, archivedAt: true, organization: { select: { id: true, name: true, logoUrl: true, updatedAt: true, brandColor: true } } },
   });
   if (!asset || asset.archivedAt) notFound();
 
@@ -29,9 +30,13 @@ export default async function QrLandingPage({ params }: PageProps<"/r/[token]">)
 
   const t = await getTranslations();
   return (
-    <div className="flex min-h-screen flex-col items-center px-4 py-8">
+    <div className="flex min-h-screen flex-col items-center px-4 py-8" style={brandStyle(asset.organization)}>
       <Card className="w-full max-w-md p-6">
         <div className="text-center">
+          {logoSrc(asset.organization) && (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={logoSrc(asset.organization)!} alt="" className="mx-auto mb-2 h-12 max-w-40 object-contain" />
+          )}
           <div className="text-xs font-semibold uppercase tracking-wide text-brand">{asset.organization.name}</div>
           <h1 className="mt-2 text-lg font-semibold">{asset.name}</h1>
           <p className="mb-5 mt-1 text-sm text-muted">{t("qr.intro")}</p>

@@ -4,6 +4,7 @@ import { getFormatter, getTranslations } from "next-intl/server";
 import { getContext } from "@/lib/context";
 import { getObject } from "@/lib/storage";
 import { ServiceReport, type ReportData } from "./report-pdf";
+import { letterhead } from "@/lib/letterhead";
 
 const MAX_PHOTOS = 12;
 const PDF_IMAGE_TYPES = new Set(["image/jpeg", "image/png"]);
@@ -88,7 +89,7 @@ export async function GET(_req: Request, { params }: RouteContext<"/work-orders/
       parts: t("woParts.title"),
       signoff: t("signoff.title"),
     },
-    org: ctx.organization.name,
+    lh: await letterhead(ctx.organization, t("company.taxIdShort")),
     number: wo.number,
     title: wo.title,
     generatedAt: dt(new Date()),

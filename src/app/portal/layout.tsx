@@ -6,18 +6,26 @@ import { LocaleSwitcher } from "@/components/locale-switcher";
 import { Button } from "@/components/ui";
 import { getPortalContext } from "@/lib/portal";
 import { signOutAction } from "@/app/(auth)/actions";
+import { brandStyle, logoSrc } from "@/lib/branding";
 
 export default async function PortalLayout({ children }: { children: React.ReactNode }) {
   const ctx = await getPortalContext();
   const t = await getTranslations();
+  const logo = logoSrc(ctx.organization);
   const unread = await ctx.db.notification.count({ where: { userId: ctx.user.id, readAt: null } });
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen" style={brandStyle(ctx.organization)}>
       <header className="sticky top-0 z-30 border-b border-border bg-surface">
         <div className="mx-auto flex h-14 max-w-4xl items-center justify-between gap-3 px-4">
-          <Link href="/portal" className="min-w-0">
-            <span className="block truncate text-sm font-semibold text-brand">{ctx.organization.name}</span>
-            <span className="block truncate text-xs text-muted">{t("portal.title")}</span>
+          <Link href="/portal" className="flex min-w-0 items-center gap-2.5">
+            {logo && (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={logo} alt="" className="h-9 max-w-24 shrink-0 object-contain" />
+            )}
+            <span className="min-w-0">
+              <span className="block truncate text-sm font-semibold text-brand">{ctx.organization.name}</span>
+              <span className="block truncate text-xs text-muted">{t("portal.title")}</span>
+            </span>
           </Link>
           <div className="flex items-center gap-2">
             <Link href="/portal/requests/new" className="hidden sm:block">

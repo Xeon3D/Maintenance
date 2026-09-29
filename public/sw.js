@@ -5,10 +5,10 @@
 //                     (dev reuses file names, so cache-first would serve stale code)
 //  - /m               the field app page: network-first, falls back to the last copy when offline
 //  - other pages      network only; offline they get /offline.html (which links to /m)
-//  - manifest/icons   stale-while-revalidate
+//  - manifest/icons   stale-while-revalidate (also the company logo, shown in the field app)
 // API calls, uploads and RSC requests are never cached: the field app keeps its data in IndexedDB.
 
-const VERSION = "v2";
+const VERSION = "v3";
 const STATIC = `static-${VERSION}`;
 const PAGES = `pages-${VERSION}`;
 const DEV = ["localhost", "127.0.0.1", "[::1]"].includes(self.location.hostname);
@@ -106,7 +106,7 @@ self.addEventListener("fetch", (event) => {
     }
     return;
   }
-  if (url.pathname === "/manifest.webmanifest" || url.pathname.startsWith("/icons/")) {
+  if (url.pathname === "/manifest.webmanifest" || url.pathname.startsWith("/icons/") || url.pathname.startsWith("/api/org-logo/")) {
     event.respondWith(staleWhileRevalidate(request));
   }
 });

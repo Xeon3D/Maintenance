@@ -145,7 +145,7 @@
   },
   "settings": {
     "orgTitle": "Organização",
-    "orgDescription": "Dados da empresa usados nas ordens de trabalho e relatórios.",
+    "orgDescription": "Nome, logótipo e dados da sua empresa, usados na aplicação, no portal do cliente, nos emails e nos documentos PDF.",
     "timezone": "Fuso horário",
     "currency": "Moeda",
     "defaultLanguage": "Idioma predefinido",
@@ -186,7 +186,11 @@
     "wrongPassword": "Essa não é a sua palavra-passe atual.",
     "endBeforeStart": "A data de fim é anterior à data de início.",
     "resolutionBeforeResponse": "O tempo de resolução não pode ser inferior ao tempo de resposta.",
-    "villaNotClients": "Essa moradia pertence a outro cliente."
+    "villaNotClients": "Essa moradia pertence a outro cliente.",
+    "invalid_color": "Use uma cor hexadecimal, como #1f4f8f.",
+    "brandTooLight": "Demasiado clara: o texto branco sobre ela não ficaria legível. Escolha um tom mais escuro.",
+    "logoTooLarge": "O logótipo não pode ter mais de 2 MB.",
+    "logoType": "Use uma imagem PNG ou JPEG."
   },
   "clients": {
     "description": "Proprietários, family offices e gestores de propriedades para quem trabalha.",
@@ -1253,5 +1257,32 @@
     "takePhoto": "Tirar fotografia",
     "retake": "Repetir",
     "savedOnDevice": "Guardada neste dispositivo — é enviada quando houver rede."
+  },
+  "company": {
+    "details": "Dados da empresa",
+    "name": "Nome da empresa",
+    "nameHint": "Aparece na aplicação, no portal do cliente e nos emails.",
+    "legalName": "Denominação social",
+    "legalNameHint": "Se for diferente, p. ex. \"Demo Integrations, Lda.\" Aparece nos documentos.",
+    "taxId": "NIF",
+    "branding": "Imagem da marca",
+    "brandColor": "Cor da marca",
+    "brandColorHint": "Usada em botões, links, no portal e no cabeçalho dos PDF. Deixe em branco para o azul predefinido.",
+    "preview": "Botão",
+    "linkPreview": "Texto de link",
+    "resetColor": "Usar predefinição",
+    "tooLight": "Demasiado clara para texto branco; não será guardada.",
+    "documents": "Documentos",
+    "reportFooter": "Rodapé dos documentos",
+    "reportFooterHint": "Aparece no fundo dos relatórios de serviço e das notas de encomenda, p. ex. alvará, seguro ou IBAN.",
+    "regional": "Definições regionais",
+    "logo": "Logótipo",
+    "logoHint": "PNG ou JPEG até 2 MB. Funciona melhor um logótipo horizontal com fundo branco ou transparente.",
+    "noLogo": "Sem logótipo",
+    "uploadLogo": "Carregar logótipo",
+    "replaceLogo": "Substituir logótipo",
+    "removeLogoConfirm": "Remover o logótipo?",
+    "badColor": "Use uma cor hexadecimal, como #1f4f8f.",
+    "taxIdShort": "NIF"
   }
 }

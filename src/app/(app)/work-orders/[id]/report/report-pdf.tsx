@@ -1,11 +1,13 @@
 /* eslint-disable jsx-a11y/alt-text -- react-pdf <Image> is not an HTML img and has no alt prop */
 import { Document, Image, Page, StyleSheet, Text, View } from "@react-pdf/renderer";
+import { PdfFooter, PdfHeader } from "@/components/pdf/letterhead";
+import type { Letterhead } from "@/lib/letterhead";
 
 // Client-facing service report. Internal costs are deliberately left out.
 
 export type ReportData = {
   labels: Record<string, string>;
-  org: string;
+  lh: Letterhead;
   number: number;
   title: string;
   generatedAt: string;
@@ -20,10 +22,7 @@ export type ReportData = {
 };
 
 const s = StyleSheet.create({
-  page: { padding: 36, fontSize: 9.5, fontFamily: "Helvetica", color: "#16181d" },
-  header: { flexDirection: "row", justifyContent: "space-between", borderBottom: "1.5pt solid #1f4f8f", paddingBottom: 10, marginBottom: 14 },
-  org: { fontSize: 11, fontFamily: "Helvetica-Bold", color: "#1f4f8f" },
-  docTitle: { fontSize: 16, fontFamily: "Helvetica-Bold", marginTop: 4 },
+  page: { padding: 36, paddingBottom: 54, fontSize: 9.5, fontFamily: "Helvetica", color: "#16181d" },
   muted: { color: "#6b7280" },
   h2: { fontSize: 11, fontFamily: "Helvetica-Bold", marginTop: 16, marginBottom: 6 },
   grid: { flexDirection: "row", flexWrap: "wrap" },
@@ -33,24 +32,14 @@ const s = StyleSheet.create({
   heading: { fontFamily: "Helvetica-Bold", backgroundColor: "#f3f4f6", paddingVertical: 4, paddingHorizontal: 4, marginTop: 4 },
   photos: { flexDirection: "row", flexWrap: "wrap", gap: 6 },
   photo: { width: 170, height: 128, objectFit: "cover", borderRadius: 3 },
-  footer: { position: "absolute", bottom: 20, left: 36, right: 36, flexDirection: "row", justifyContent: "space-between", fontSize: 8, color: "#9ca3af" },
 });
 
 export function ServiceReport({ d }: { d: ReportData }) {
   const L = d.labels;
   return (
-    <Document title={`${L.reportTitle} #${d.number}`} author={d.org}>
+    <Document title={`${L.reportTitle} #${d.number}`} author={d.lh.name}>
       <Page size="A4" style={s.page}>
-        <View style={s.header} fixed>
-          <View>
-            <Text style={s.org}>{d.org}</Text>
-            <Text style={s.docTitle}>{L.reportTitle}</Text>
-          </View>
-          <View style={{ alignItems: "flex-end" }}>
-            <Text style={{ fontSize: 13, fontFamily: "Helvetica-Bold" }}>#{d.number}</Text>
-            <Text style={s.muted}>{d.generatedAt}</Text>
-          </View>
-        </View>
+        <PdfHeader lh={d.lh} title={L.reportTitle} reference={`#${d.number}`} date={d.generatedAt} />
 
         <Text style={{ fontSize: 12, fontFamily: "Helvetica-Bold", marginBottom: 8 }}>{d.title}</Text>
         <View style={s.grid}>
@@ -141,12 +130,7 @@ export function ServiceReport({ d }: { d: ReportData }) {
           </View>
         )}
 
-        <View style={s.footer} fixed>
-          <Text>
-            {d.org} · {L.reportTitle} #{d.number}
-          </Text>
-          <Text render={({ pageNumber, totalPages }) => `${pageNumber} / ${totalPages}`} />
-        </View>
+        <PdfFooter lh={d.lh} label={`${L.reportTitle} #${d.number}`} />
       </Page>
     </Document>
   );

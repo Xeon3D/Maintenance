@@ -65,7 +65,7 @@ const ICONS: Record<string, LucideIcon> = {
 type Props = {
   groups: NavGroup[]; // already filtered by permission/readiness on the server
   user: { name: string; email: string; role: string };
-  org: { id: string; name: string };
+  org: { id: string; name: string; logo: string | null };
   orgs: { id: string; name: string }[];
   unreadNotifications: number;
 };
@@ -85,9 +85,15 @@ export function Sidebar({ groups, user, org, orgs, unreadNotifications }: Props)
           onClick={() => orgs.length > 1 && setOrgMenu((v) => !v)}
           className="flex w-full items-center justify-between rounded-md px-2 py-2 text-left hover:bg-gray-100"
         >
-          <span className="min-w-0">
-            <span className="block text-xs font-semibold uppercase tracking-wide text-brand">{t("common.appName")}</span>
-            <span className="block truncate text-sm font-medium">{org.name}</span>
+          <span className="flex min-w-0 items-center gap-2.5">
+            {org.logo && (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={org.logo} alt="" className="size-9 shrink-0 rounded-md border border-border bg-white object-contain p-0.5" />
+            )}
+            <span className="min-w-0">
+              <span className="block text-xs font-semibold uppercase tracking-wide text-brand">{t("common.appName")}</span>
+              <span className="block truncate text-sm font-medium">{org.name}</span>
+            </span>
           </span>
           {orgs.length > 1 && <ChevronsUpDown className="size-4 text-muted" />}
         </button>
@@ -169,6 +175,10 @@ export function Sidebar({ groups, user, org, orgs, unreadNotifications }: Props)
         <button type="button" onClick={() => setOpen(true)} aria-label="Menu" className="-ml-2 rounded-md p-2 hover:bg-gray-100">
           <Menu className="size-5" />
         </button>
+        {org.logo && (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src={org.logo} alt="" className="size-7 rounded bg-white object-contain" />
+        )}
         <span className="flex-1 truncate font-medium">{org.name}</span>
         <Link href="/scan" aria-label={t("nav.scan")} className="rounded-md p-2 text-muted hover:bg-gray-100">
           <ScanLine className="size-4" />

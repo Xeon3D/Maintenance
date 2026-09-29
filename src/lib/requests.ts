@@ -88,7 +88,7 @@ export async function notifyRequester(
 ) {
   const data = { number: req.number, title: req.title, status, detail: reason ? `${req.title} — ${reason}` : req.title };
   if (req.requesterId) await notify(ctx, [req.requesterId], { type: "REQUEST_UPDATE", data, link: `/portal/requests/${req.id}` });
-  else notifyExternal(ctx.organization, req.requesterEmail, ctx.organization.defaultLocale, "REQUEST_UPDATE", data);
+  else await notifyExternal(ctx.organization, req.requesterEmail, ctx.organization.defaultLocale, "REQUEST_UPDATE", data);
 }
 
 /** Turns a pending request into a work order (with overrides) and links the request's photos to it. */

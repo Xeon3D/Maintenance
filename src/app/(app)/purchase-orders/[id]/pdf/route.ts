@@ -4,6 +4,7 @@ import { getFormatter, getTranslations } from "next-intl/server";
 import { getContext } from "@/lib/context";
 import { poTotals } from "@/lib/inventory-math";
 import { PurchaseOrderPdf, type PoPdfData } from "./po-pdf";
+import { letterhead } from "@/lib/letterhead";
 
 export async function GET(_req: Request, { params }: RouteContext<"/purchase-orders/[id]/pdf">) {
   const { id } = await params;
@@ -39,7 +40,7 @@ export async function GET(_req: Request, { params }: RouteContext<"/purchase-ord
       total: t("po.total"),
       notes: t("common.notes"),
     },
-    org: ctx.organization.name,
+    lh: await letterhead(ctx.organization, t("company.taxIdShort")),
     number: po.number,
     date: date(po.orderDate ?? po.createdAt),
     vendor: {
