@@ -1,7 +1,9 @@
 # Handoff — VillaOps CMMS
 
 State as of **2026-09-29**, phase 9 of 10 done (see `git log` for the commit). Read this, then
-`CLAUDE.md` (conventions) and `docs/ROADMAP.md` (phase list), before touching code.
+`CLAUDE.md` (conventions) and `docs/ROADMAP.md` (phase list), before touching code. Phase 10 (billing/SaaS) is
+**on hold**: the app runs for one company for now. Next candidate work: the Odoo integration in
+`docs/ODOO_INTEGRATION.md` (waiting on the decisions in its §10).
 
 ---
 
