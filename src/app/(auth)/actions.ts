@@ -2,7 +2,7 @@
 
 import bcrypt from "bcryptjs";
 import { AuthError } from "next-auth";
-import { cookies } from "next/headers";
+import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { getLocale } from "next-intl/server";
 import { z } from "zod";
@@ -18,6 +18,7 @@ import { appOrigin } from "@/lib/qr";
 import { emailLayout, sendEmail } from "@/lib/email";
 import { background } from "@/lib/notify";
 import { clearResetTokens, createResetToken, userForResetToken } from "@/lib/password-reset";
+import { checkFactoryResetPassword, factoryReset, factoryResetBlocked, factoryResetEnabled, recordFactoryResetFailure } from "@/lib/factory-reset";
 
 export type FormState = { error?: string } | undefined;
 
@@ -128,4 +129,22 @@ export async function switchOrgAction(organizationId: string) {
   if (!m?.active) return;
   (await cookies()).set(ACTIVE_ORG_COOKIE, organizationId, { path: "/", httpOnly: true, sameSite: "lax" });
   redirect("/dashboard");
+}
+
+// ── Factory reset (demo/test servers; see src/lib/factory-reset.ts)
+
+export async function factoryResetAction(_: FormState, form: FormData): Promise<FormState> {
+  if (!factoryResetEnabled()) return { error: "somethingWrong" };
+  const h = await headers();
+  const client = h.get("x-forwarded-for")?.split(",")[0]?.trim() || h.get("x-real-ip") || "unknown";
+  if (factoryResetBlocked(client)) return { error: "tooManyAttempts" };
+  const password = form.get("password");
+  if (typeof password !== "string" || !checkFactoryResetPassword(password)) {
+    recordFactoryResetFailure(client);
+    return { error: "wrongResetPassword" };
+  }
+  console.warn(`[factory-reset] requested from ${client}`);
+  await factoryReset();
+  (await cookies()).delete(ACTIVE_ORG_COOKIE);
+  await signOut({ redirectTo: "/login?factory=1" }); // the signed-in user no longer exists
 }

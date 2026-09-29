@@ -4,6 +4,8 @@ import createNextIntlPlugin from "next-intl/plugin";
 const withNextIntl = createNextIntlPlugin("./src/i18n/request.ts");
 
 const nextConfig: NextConfig = {
+  // Self-contained server bundle for the Docker image (see Dockerfile).
+  output: "standalone",
   // Rendered server-side only (PDF service reports).
   serverExternalPackages: ["@react-pdf/renderer"],
   // The service worker must always be revalidated so fixes reach devices promptly.

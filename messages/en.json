@@ -65,7 +65,17 @@
     "resetDone": "Your password was changed. Sign in with the new one.",
     "resetExpired": "This reset link has expired or was already used.",
     "invalidEmail": "Enter a valid email address.",
-    "passwordMismatch": "The passwords don't match."
+    "passwordMismatch": "The passwords don't match.",
+    "factoryReset": "Factory reset…",
+    "factoryResetTitle": "Factory reset",
+    "factoryResetBody": "Erases every company, user, work order and uploaded file on this server and restores the demo data. This cannot be undone.",
+    "factoryResetPassword": "Reset password",
+    "factoryResetButton": "Erase everything and restore the demo",
+    "factoryResetting": "Resetting…",
+    "factoryResetConfirm": "Erase ALL data on this server and restore the demo? This cannot be undone.",
+    "factoryResetDone": "The server was reset to the demo data. Sign in with owner@demo.test / demo1234.",
+    "wrongResetPassword": "Wrong reset password.",
+    "tooManyAttempts": "Too many attempts. Try again in 15 minutes."
   },
   "onboarding": {
     "title": "Create your organization",

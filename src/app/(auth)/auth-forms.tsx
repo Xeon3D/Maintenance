@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useActionForm } from "@/lib/use-action-form";
 import { useTranslations } from "next-intl";
 import { Button, Card, Field, FormError, Input } from "@/components/ui";
-import { loginAction, requestResetAction, resetPasswordAction, signupAction, type FormState } from "./actions";
+import { factoryResetAction, loginAction, requestResetAction, resetPasswordAction, signupAction, type FormState } from "./actions";
 
 function useErrorText(state: FormState) {
   const t = useTranslations();
@@ -12,7 +12,7 @@ function useErrorText(state: FormState) {
   return t.has(`auth.${state.error}`) ? t(`auth.${state.error}`) : t("common.somethingWrong");
 }
 
-export function LoginForm({ next, reset }: { next?: string; reset?: boolean }) {
+export function LoginForm({ next, reset, factory, canFactoryReset }: { next?: string; reset?: boolean; factory?: boolean; canFactoryReset?: boolean }) {
   const t = useTranslations("auth");
   const [state, action, pending] = useActionForm(loginAction);
   const error = useErrorText(state);
@@ -20,6 +20,7 @@ export function LoginForm({ next, reset }: { next?: string; reset?: boolean }) {
     <Card className="p-6">
       <h1 className="mb-5 text-lg font-semibold">{t("signInTitle")}</h1>
       {reset && <p className="mb-4 rounded-md bg-green-50 px-3 py-2 text-sm text-green-800">{t("resetDone")}</p>}
+      {factory && <p className="mb-4 rounded-md bg-green-50 px-3 py-2 text-sm text-green-800">{t("factoryResetDone")}</p>}
       <form onSubmit={action} className="space-y-4">
         <input type="hidden" name="next" value={next ?? ""} />
         <Field label={t("email")}>
@@ -42,6 +43,46 @@ export function LoginForm({ next, reset }: { next?: string; reset?: boolean }) {
         {t("noAccount")}{" "}
         <Link href={next ? `/signup?next=${encodeURIComponent(next)}` : "/signup"} className="font-medium text-brand">
           {t("signUp")}
+        </Link>
+      </p>
+      {canFactoryReset && (
+        <p className="mt-3 text-center text-xs">
+          <Link href="/factory-reset" className="text-muted hover:text-danger">
+            {t("factoryReset")}
+          </Link>
+        </p>
+      )}
+    </Card>
+  );
+}
+
+/** Erases everything and restores the demo data; needs the server's FACTORY_RESET_PASSWORD. */
+export function FactoryResetForm() {
+  const t = useTranslations("auth");
+  const [state, action, pending] = useActionForm(factoryResetAction);
+  const error = useErrorText(state);
+  return (
+    <Card className="p-6">
+      <h1 className="mb-2 text-lg font-semibold">{t("factoryResetTitle")}</h1>
+      <p className="mb-5 text-sm text-muted">{t("factoryResetBody")}</p>
+      <form
+        onSubmit={(e) => {
+          if (!confirm(t("factoryResetConfirm"))) return e.preventDefault();
+          action(e);
+        }}
+        className="space-y-4"
+      >
+        <Field label={t("factoryResetPassword")}>
+          <Input name="password" type="password" autoComplete="off" required autoFocus />
+        </Field>
+        <FormError message={error} />
+        <Button variant="danger" className="w-full" disabled={pending}>
+          {pending ? t("factoryResetting") : t("factoryResetButton")}
+        </Button>
+      </form>
+      <p className="mt-5 text-center text-sm">
+        <Link href="/login" className="text-muted hover:text-brand">
+          {t("backToSignIn")}
         </Link>
       </p>
     </Card>

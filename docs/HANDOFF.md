@@ -5,6 +5,11 @@ State as of **2026-09-29**, phase 9 of 10 done (see `git log` for the commit). R
 **on hold**: the app runs for one company for now. Next candidate work: the Odoo integration in
 `docs/ODOO_INTEGRATION.md` (waiting on the decisions in its §10).
 
+**Released as v0.1.0**: public GitHub repo `Xeon3D/Maintenance`, public Docker Hub image
+`xeon3d/maintenance` (built and pushed from this PC with Docker Desktop; `gh` is logged in as Xeon3D).
+The user runs it on a ZimaOS server behind Nginx Proxy Manager as an **open public demo** (nothing
+locked down, by choice) with a password-protected **factory reset**; see "Docker & releases" in §3.
+
 ---
 
 ## 1. What this is
@@ -77,6 +82,27 @@ are mostly UI and logic plus small additive migrations.
 - **Prisma:** `prisma@latest` resolves to an 8.0 RC. **Keep `prisma` and `@prisma/client` pinned to 7.x.**
 - `prisma init` added agent-skill folders (`.agents/`, `.claude/skills/prisma-*`, `.windsurf/`,
   `skills-lock.json`). These are harmless reference docs and are committed.
+- `FACTORY_RESET_PASSWORD` is set in the local `.env` (value given by the user in chat). **It must never
+  be committed or printed**: the repo is public. The ZimaOS server has its own copy in the compose env.
+
+### Docker & releases
+- `next.config.ts` has `output: "standalone"`. `Dockerfile` (node:24-bookworm-slim, multi-stage):
+  standalone server + a separate `/migrator` folder with the pinned Prisma CLI, `prisma/` and `prisma.config.ts`.
+- `docker/entrypoint.sh`: generates missing `AUTH_SECRET`, `FIELD_ENCRYPTION_KEY`, `CRON_SECRET` and VAPID
+  keys (plain node crypto: `web-push` is bundled, not in `node_modules`) into `/data/secrets.env`, runs
+  `prisma migrate deploy`, then `node server.js`. Env vars win over the generated values.
+- `src/instrumentation.ts`: `SEED_DEMO=true` seeds the demo org when there are no organizations.
+  The seed lives in `src/lib/demo-seed.ts` (relative imports; shared by `prisma/seed.ts`).
+- Factory reset (`src/lib/factory-reset.ts`, page `/factory-reset`, public in `proxy.ts`): TRUNCATEs every
+  table except `_prisma_migrations`, empties `UPLOAD_DIR`, re-seeds, signs the caller out. Password compared
+  with `timingSafeEqual` on SHA-256 digests; 5 failures per client IP / 30 overall per 15 min (in memory).
+  **Never test it against the Neon dev DB**; test it in a throwaway compose stack (below).
+- Docker CLI isn't on the Bash tool's PATH: `export PATH="$PATH:/c/Program Files/Docker/Docker/resources/bin"`,
+  and `export MSYS_NO_PATHCONV=1` before `docker exec -w /app …` (Git Bash mangles absolute paths).
+- Test a build: copy `docker-compose.yml` to the scratchpad, map port 3200, use named volumes, set
+  `FACTORY_RESET_PASSWORD` via a `.env` next to it, `docker compose up -d`, then `down -v` afterwards.
+- Release: bump the tag in `docker-compose.yml`, `docker build -t xeon3d/maintenance:<v> -t xeon3d/maintenance:latest .`,
+  push both, `git tag v<v>`, push, `gh release create`. ZimaOS is x86-64, so amd64 only.
 
 ### Tooling gotchas that already cost time
 - **Don't patch TS/TSX through PowerShell double-quoted strings.** The backtick is PowerShell's
@@ -239,7 +265,7 @@ markers), Message, VerificationToken (password reset).
 
 ## 6. How to verify (proven techniques)
 
-- **Checks:** `npm run typecheck`, `npm run lint` (`npx eslint src tests`), `npm test` (vitest, 84 tests).
+- **Checks:** `npm run typecheck`, `npm run lint` (`npx eslint src tests`), `npm test` (vitest, 87 tests).
 - **Testing offline needs a production build.** In `next dev`, Turbopack only hydrates after its HMR
   websocket connects, so a page served from the SW cache stays inert with the server down. Use
   `npx next build`, then preview config `prod` (`next start -p 3100`); stop it to simulate no signal

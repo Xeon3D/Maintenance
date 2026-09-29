@@ -1,0 +1,14 @@
+.git
+.github
+.claude
+node_modules
+.next
+.env*
+uploads
+.mail
+src/generated
+coverage
+*.tsbuildinfo
+next-env.d.ts
+Dockerfile
+docker-compose*.yml

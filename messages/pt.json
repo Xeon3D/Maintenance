@@ -65,7 +65,17 @@
     "resetDone": "A palavra-passe foi alterada. Inicie sessão com a nova.",
     "resetExpired": "Este link de redefinição expirou ou já foi usado.",
     "invalidEmail": "Introduza um endereço de email válido.",
-    "passwordMismatch": "As palavras-passe não coincidem."
+    "passwordMismatch": "As palavras-passe não coincidem.",
+    "factoryReset": "Repor definições de fábrica…",
+    "factoryResetTitle": "Repor definições de fábrica",
+    "factoryResetBody": "Apaga todas as empresas, utilizadores, ordens de trabalho e ficheiros deste servidor e repõe os dados de demonstração. Não é possível anular.",
+    "factoryResetPassword": "Palavra-passe de reposição",
+    "factoryResetButton": "Apagar tudo e repor a demonstração",
+    "factoryResetting": "A repor…",
+    "factoryResetConfirm": "Apagar TODOS os dados deste servidor e repor a demonstração? Não é possível anular.",
+    "factoryResetDone": "O servidor foi reposto com os dados de demonstração. Inicie sessão com owner@demo.test / demo1234.",
+    "wrongResetPassword": "Palavra-passe de reposição incorreta.",
+    "tooManyAttempts": "Demasiadas tentativas. Tente novamente dentro de 15 minutos."
   },
   "onboarding": {
     "title": "Crie a sua organização",

@@ -1,0 +1,44 @@
+# VillaOps CMMS ("Maintenance") — app + PostgreSQL.
+# ZimaOS: App Store → Custom install → Import this file. Put Nginx Proxy Manager in front of port 3000
+# (enable Websockets support and "Force SSL"), then set APP_URL to the public https address.
+name: maintenance
+
+services:
+  app:
+    image: xeon3d/maintenance:0.1.0
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "3000:3000"
+    environment:
+      DATABASE_URL: postgresql://maintenance:maintenance@db:5432/maintenance
+      # Public address behind the proxy (used in emails, QR labels and push links).
+      APP_URL: https://maintenance.example.com
+      # Create the demo company (owner@demo.test / demo1234) when the database is empty.
+      SEED_DEMO: "true"
+      # Enables the "Factory reset" page (erases everything, restores the demo). Leave empty to disable.
+      FACTORY_RESET_PASSWORD: ""
+      # Optional e-mail delivery through Resend; without it e-mails are only logged.
+      RESEND_API_KEY: ""
+      EMAIL_FROM: ""
+      # AUTH_SECRET, FIELD_ENCRYPTION_KEY, CRON_SECRET and VAPID keys are generated on first start
+      # and kept in /data/secrets.env. Set them here only to override.
+    volumes:
+      - /DATA/AppData/maintenance/data:/data
+
+  db:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: maintenance
+      POSTGRES_PASSWORD: maintenance
+      POSTGRES_DB: maintenance
+    volumes:
+      - /DATA/AppData/maintenance/postgres:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U maintenance"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
