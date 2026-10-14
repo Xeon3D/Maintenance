@@ -5,7 +5,8 @@ import type { Role } from "@/generated/prisma/enums";
 
 export const PERMISSIONS = {
   "org.manage": ["OWNER", "ADMIN"],
-  "billing.manage": ["OWNER"],
+  "billing.manage": ["OWNER", "ACCOUNTANT"], // invoicing (no screens yet; for a future billing module / Odoo)
+  "costs.view": ["OWNER", "ADMIN", "MANAGER", "TECHNICIAN", "VIEWER", "ACCOUNTANT"], // labour, parts and totals, contract fees
   "users.manage": ["OWNER", "ADMIN"],
   "teams.manage": ["OWNER", "ADMIN", "MANAGER"],
   "clients.manage": ["OWNER", "ADMIN", "MANAGER"],
@@ -15,6 +16,7 @@ export const PERMISSIONS = {
   "workOrders.create": ["OWNER", "ADMIN", "MANAGER", "TECHNICIAN"],
   "workOrders.manage": ["OWNER", "ADMIN", "MANAGER"], // assign, delete, edit anyone's
   "workOrders.execute": ["OWNER", "ADMIN", "MANAGER", "TECHNICIAN"],
+  "workOrders.sendReport": ["OWNER", "ADMIN", "MANAGER"], // e-mail the PDF service report
   "requests.create": ["OWNER", "ADMIN", "MANAGER", "TECHNICIAN", "REQUESTER"],
   "requests.approve": ["OWNER", "ADMIN", "MANAGER"],
   "pm.manage": ["OWNER", "ADMIN", "MANAGER"],
@@ -24,30 +26,29 @@ export const PERMISSIONS = {
   "purchasing.manage": ["OWNER", "ADMIN", "MANAGER"],
   "purchasing.approve": ["OWNER", "ADMIN"],
   "vendors.manage": ["OWNER", "ADMIN", "MANAGER"],
-  "reports.view": ["OWNER", "ADMIN", "MANAGER", "VIEWER"],
-  "internal.view": ["OWNER", "ADMIN", "MANAGER", "TECHNICIAN", "VIEWER"], // anything not client-facing
+  "reports.view": ["OWNER", "ADMIN", "MANAGER", "VIEWER", "ACCOUNTANT"],
+  "internal.view": ["OWNER", "ADMIN", "MANAGER", "TECHNICIAN", "VIEWER", "ACCOUNTANT"], // anything not client-facing
 } as const satisfies Record<string, readonly Role[]>;
 
 export type Permission = keyof typeof PERMISSIONS;
 export const ALL_PERMISSIONS = Object.keys(PERMISSIONS) as Permission[];
 
 /** Staff roles whose permissions the Super Admin can change. OWNER always has everything; the client role is fixed. */
-export const EDITABLE_ROLES = ["ADMIN", "MANAGER", "TECHNICIAN", "VIEWER"] as const satisfies readonly Role[];
+export const EDITABLE_ROLES = ["ADMIN", "MANAGER", "TECHNICIAN", "VIEWER", "ACCOUNTANT"] as const satisfies readonly Role[];
 export type EditableRole = (typeof EDITABLE_ROLES)[number];
 export const isEditableRole = (r: string): r is EditableRole => (EDITABLE_ROLES as readonly string[]).includes(r);
 
 /** Always on for staff roles: it is access to the staff app itself (without it an account can't open anything). */
 export const STAFF_BASE: Permission[] = ["internal.view"];
-/** Only the Super Admin: never grantable. */
-export const OWNER_ONLY: Permission[] = ["billing.manage"];
 
 /** Permissions shown in Settings → Roles, by section. */
 export const PERMISSION_GROUPS: { key: string; permissions: Permission[] }[] = [
   { key: "admin", permissions: ["org.manage", "users.manage", "teams.manage"] },
-  { key: "work", permissions: ["workOrders.create", "workOrders.execute", "workOrders.manage", "requests.create", "requests.approve", "pm.manage", "procedures.manage"] },
+  { key: "work", permissions: ["workOrders.create", "workOrders.execute", "workOrders.manage", "workOrders.sendReport", "requests.create", "requests.approve", "pm.manage", "procedures.manage"] },
   { key: "sites", permissions: ["clients.manage", "contracts.manage", "assets.manage", "secrets.view"] },
   { key: "supply", permissions: ["inventory.use", "inventory.manage", "vendors.manage", "purchasing.manage", "purchasing.approve"] },
   { key: "insights", permissions: ["reports.view"] },
+  { key: "finance", permissions: ["costs.view", "billing.manage"] },
 ];
 export const GRANTABLE: Permission[] = PERMISSION_GROUPS.flatMap((g) => g.permissions);
 
@@ -99,7 +100,7 @@ export function can(role: Role, permission: Permission): boolean {
   return (PERMISSIONS[permission] as readonly Role[]).includes(role);
 }
 
-export const ASSIGNABLE_ROLES: Role[] = ["ADMIN", "MANAGER", "TECHNICIAN", "REQUESTER", "VIEWER"];
+export const ASSIGNABLE_ROLES: Role[] = ["ADMIN", "MANAGER", "TECHNICIAN", "ACCOUNTANT", "REQUESTER", "VIEWER"];
 
 const sameSet = (a: Permission[], b: Permission[]) => a.length === b.length && a.every((p) => b.includes(p));
 

@@ -49,7 +49,7 @@ export default async function RolesPage() {
                   </div>
                 </div>
               ))}
-              {(["VIEWER", "REQUESTER"] as const).map((r) => (
+              {(["VIEWER", "ACCOUNTANT", "REQUESTER"] as const).map((r) => (
                 <div key={r} className="flex flex-wrap items-center justify-between gap-3 bg-gray-50 px-4 py-3">
                   <div className="min-w-0 flex-1">
                     <div className="text-sm font-medium">{t(`roles.${r}`)}</div>

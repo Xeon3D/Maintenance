@@ -5,6 +5,7 @@ import { ExportLink, loadReport, Section } from "../common";
 
 export default async function TechnicianReportPage({ searchParams }: PageProps<"/reports/technicians">) {
   const { ctx, f, t, money, pct, num, day } = await loadReport(searchParams);
+  const showCosts = ctx.can("costs.view");
   const r = await technicianReport(ctx, f);
 
   return (
@@ -28,7 +29,7 @@ export default async function TechnicianReportPage({ searchParams }: PageProps<"
                 <th className="text-right">{t("reports.utilisation")}</th>
                 <th className="text-right">{t("reports.jobsWorked")}</th>
                 <th className="text-right">{t("reports.jobsCompleted")}</th>
-                <th className="text-right">{t("costs.labor")}</th>
+                {showCosts && <th className="text-right">{t("costs.labor")}</th>}
               </tr>
             </thead>
             <tbody>
@@ -39,7 +40,7 @@ export default async function TechnicianReportPage({ searchParams }: PageProps<"
                   <td className="text-right tabular-nums">{pct(p.utilisation)}</td>
                   <td className="text-right tabular-nums">{p.jobs}</td>
                   <td className="text-right tabular-nums">{p.completed}</td>
-                  <td className="text-right tabular-nums">{money(p.labor)}</td>
+                  {showCosts && <td className="text-right tabular-nums">{money(p.labor)}</td>}
                 </tr>
               ))}
             </tbody>

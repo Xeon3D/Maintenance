@@ -91,10 +91,10 @@ export async function notify(actor: NotifyActor, userIds: (string | null | undef
   });
 }
 
-type Brand = { org: string; logo: string | null; color: string; privacyUrl: string };
+export type Brand = { org: string; logo: string | null; color: string; privacyUrl: string };
 
 /** Name, absolute logo URL and colour for emails. */
-async function orgBrand(orgId: string, base: string): Promise<Brand> {
+export async function orgBrand(orgId: string, base: string): Promise<Brand> {
   const org = await prisma.organization.findUniqueOrThrow({ where: { id: orgId }, select: { id: true, name: true, slug: true, logoUrl: true, updatedAt: true, brandColor: true } });
   return { org: org.name, logo: logoSrc(org, base), color: brandColor(org), privacyUrl: base + privacyPath(org) };
 }

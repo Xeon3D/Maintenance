@@ -136,7 +136,8 @@
       "MANAGER": "Por defeito: planeia e atribui trabalho, gere clientes, stock e compras.",
       "TECHNICIAN": "Por defeito: executa o trabalho — ordens de trabalho, listas de verificação, tempo, peças.",
       "VIEWER": "Por defeito: observação — vê tudo, não altera nada.",
-      "REQUESTER": "Portal do cliente: apenas as suas moradias e pedidos."
+      "REQUESTER": "Portal do cliente: apenas as suas moradias e pedidos.",
+      "ACCOUNTANT": "Por defeito: relatórios, custos e faturação; sem trabalho de campo."
     },
     "notBillable": "Sem custo (não regista tempo)",
     "custom": "Funções personalizadas",
@@ -149,7 +150,8 @@
     "costPerHour": "Custo por hora",
     "delete": "Eliminar",
     "deleteConfirm": "Eliminar a função \"{name}\"? {count, plural, =0 {} one {A # pessoa nesta função mantém o mesmo acesso com a função base.} other {As # pessoas nesta função mantêm o mesmo acesso com a função base.}}",
-    "customGroup": "Funções personalizadas"
+    "customGroup": "Funções personalizadas",
+    "ACCOUNTANT": "Contabilista"
   },
   "systems": {
     "ELECTRICAL": "Eletricidade",
@@ -231,7 +233,8 @@
     "roleNameTaken": "Já existe uma função com este nome.",
     "closesBeforeOpens": "A hora de fecho tem de ser depois da hora de abertura.",
     "badHoliday": "Indique uma data por linha, no formato AAAA-MM-DD.",
-    "categoryTaken": "Já existe uma categoria com este nome."
+    "categoryTaken": "Já existe uma categoria com este nome.",
+    "badEmails": "Um ou mais endereços não são endereços de e-mail válidos."
   },
   "clients": {
     "description": "Proprietários, family offices e gestores de propriedades para quem trabalha.",
@@ -1564,7 +1567,8 @@
     "work": "Trabalho",
     "sites": "Clientes, moradias e ativos",
     "supply": "Stock e compras",
-    "insights": "Relatórios"
+    "insights": "Relatórios",
+    "finance": "Finanças"
   },
   "perm": {
     "org": {
@@ -1597,6 +1601,10 @@
       "manage": {
         "label": "Gerir todas as ordens de trabalho",
         "hint": "Atribuir, editar e eliminar as ordens de trabalho de qualquer pessoa; categorias."
+      },
+      "sendReport": {
+        "label": "Enviar relatórios de serviço",
+        "hint": "Enviar por e-mail o relatório de serviço em PDF ao cliente e a outros destinatários."
       }
     },
     "requests": {
@@ -1676,6 +1684,53 @@
         "label": "Relatórios",
         "hint": "Painéis, SLA, custos e exportações."
       }
+    },
+    "costs": {
+      "view": {
+        "label": "Ver custos",
+        "hint": "Mão de obra, peças e totais nas ordens de trabalho e pedidos, relatórios de custos e mensalidades dos contratos."
+      }
+    },
+    "billing": {
+      "manage": {
+        "label": "Faturação",
+        "hint": "Faturação. Reservada para o módulo de faturação e a integração com a contabilidade (ainda sem ecrãs)."
+      }
     }
+  },
+  "reportEmail": {
+    "title": "Enviar o relatório de serviço por e-mail",
+    "hint": "Envia o relatório de serviço em PDF (sem custos) a cada endereço em separado.",
+    "noDefaults": "Sem destinatários por defeito: acrescente o e-mail do cliente, contactos que recebem relatórios ou cópias da empresa, ou escreva endereços abaixo.",
+    "extra": "Outros endereços (um por linha)",
+    "send": "Enviar relatório",
+    "sending": "A enviar…",
+    "sent": "Enviado.",
+    "lastSent": "Último envio {at} para {count, plural, one {# endereço} other {# endereços}}.",
+    "notConfigured": "O e-mail não está configurado neste servidor (RESEND_API_KEY e EMAIL_FROM), por isso o relatório não pode ser enviado.",
+    "noRecipients": "Escolha ou escreva pelo menos um endereço.",
+    "source": {
+      "client": "Cliente",
+      "contact": "Contacto do cliente",
+      "clientExtra": "Cópia do cliente",
+      "company": "Cópia da empresa"
+    },
+    "clientEmails": "Cópias dos relatórios de serviço",
+    "clientEmailsHint": "Endereços extra sugeridos ao enviar os relatórios de serviço deste cliente (por exemplo, um family office), um por linha.",
+    "contactCheckbox": "Recebe relatórios de serviço",
+    "contactOn": "Recebe relatórios",
+    "contactOff": "Sem relatórios",
+    "contactToggleHint": "Se este contacto é sugerido ao enviar relatórios de serviço",
+    "companyTitle": "Cópias dos relatórios de serviço",
+    "companyHint": "Sugeridos como destinatários sempre que um relatório de serviço é enviado, além do cliente. Quem envia pode desmarcá-los.",
+    "companyRoles": "Todas as pessoas destas funções",
+    "companyPeople": "Estas pessoas",
+    "companyEmails": "Estes endereços",
+    "onePerLine": "Um por linha.",
+    "subject": "Relatório de serviço n.º {number}: {title}",
+    "body": "Segue em anexo o relatório de serviço da ordem de trabalho n.º {number}, \"{title}\".",
+    "bodyVilla": "Segue em anexo o relatório de serviço da ordem de trabalho n.º {number}, \"{title}\", na {villa}.",
+    "signature": "Com os melhores cumprimentos,\n{company}",
+    "privacy": "Aviso de privacidade"
   }
 }

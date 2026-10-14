@@ -1,3 +1,4 @@
+import { notFound } from "next/navigation";
 import { Table } from "@/components/ui";
 import { BarList, StackedBars } from "@/components/charts/bars";
 import { StatTile } from "@/components/charts/stat-tile";
@@ -9,6 +10,7 @@ const TOP = 12;
 
 export default async function CostReportPage({ searchParams }: PageProps<"/reports/costs">) {
   const { ctx, f, t, money, day } = await loadReport(searchParams);
+  if (!ctx.can("costs.view")) notFound();
   const c = await costReport(ctx, f);
   const kinds = [t("costs.labor"), t("costs.parts"), t("reports.otherCosts")];
   const showFees = !f.system; // fees aren't per system

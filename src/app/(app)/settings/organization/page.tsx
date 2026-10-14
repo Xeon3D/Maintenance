@@ -9,6 +9,11 @@ import { TIMEZONES } from "@/lib/timezones";
 import { privacyPath } from "@/lib/privacy";
 import { parseRetention, RETENTION_KEYS, RETENTION_MAX } from "@/lib/retention-rules";
 import { parseBusinessHours } from "@/lib/sla-clock";
+import { parseCompanyRecipients } from "@/lib/report-recipients";
+
+// Roles that can be sent copies of service reports (custom roles are added from the company's list).
+const REPORT_ROLES = ["ADMIN", "MANAGER", "TECHNICIAN", "ACCOUNTANT", "VIEWER"] as const;
+const NL = "\n";
 
 // Monday first, Sunday last (day numbers: 0 = Sunday).
 const WEEK = [1, 2, 3, 4, 5, 6, 0];
@@ -28,6 +33,15 @@ export default async function OrgSettingsPage() {
   const o = ctx.organization;
   const retention = parseRetention(o.retention);
   const hours = parseBusinessHours(o.businessHours);
+  const reports = parseCompanyRecipients(o.reportRecipients);
+  const [staff, jobRoles] = await Promise.all([
+    ctx.db.membership.findMany({ where: { active: true, role: { not: "REQUESTER" } }, select: { user: { select: { id: true, name: true, email: true } } }, orderBy: { user: { name: "asc" } } }),
+    ctx.db.jobRole.findMany({ select: { id: true, name: true }, orderBy: { name: "asc" } }),
+  ]);
+  const roleOptions = [
+    ...REPORT_ROLES.map((r) => ({ value: r as string, label: t(`roles.${r}`) })),
+    ...jobRoles.map((j) => ({ value: `job:${j.id}`, label: j.name })),
+  ];
   const format = await getFormatter();
   // 2026-10-04 is a Sunday: day d of the week is 4 + d October.
   const weekday = (d: number) => format.dateTime(new Date(Date.UTC(2026, 9, 4 + d, 12)), { weekday: "long", timeZone: "UTC" });
@@ -123,6 +137,37 @@ export default async function OrgSettingsPage() {
                 </Select>
               </Field>
             </div>
+
+            <h2 className="border-t border-border pt-5 font-medium">{t("reportEmail.companyTitle")}</h2>
+            <p className="-mt-2 text-xs text-muted">{t("reportEmail.companyHint")}</p>
+            <div className="grid gap-4 sm:grid-cols-2">
+              <fieldset>
+                <legend className="mb-1.5 text-sm font-medium">{t("reportEmail.companyRoles")}</legend>
+                <div className="space-y-1">
+                  {roleOptions.map((r) => (
+                    <label key={r.value} className="flex items-center gap-2 text-sm">
+                      <input type="checkbox" name="reportRoles" value={r.value} defaultChecked={reports.roles.includes(r.value)} className="size-4 accent-brand" />
+                      {r.label}
+                    </label>
+                  ))}
+                </div>
+              </fieldset>
+              <fieldset>
+                <legend className="mb-1.5 text-sm font-medium">{t("reportEmail.companyPeople")}</legend>
+                <div className="max-h-48 space-y-1 overflow-y-auto">
+                  {staff.map(({ user: u }) => (
+                    <label key={u.id} className="flex items-center gap-2 text-sm">
+                      <input type="checkbox" name="reportUserIds" value={u.id} defaultChecked={reports.userIds.includes(u.id)} className="size-4 accent-brand" />
+                      <span className="truncate">{u.name}</span>
+                    </label>
+                  ))}
+                </div>
+              </fieldset>
+            </div>
+            <Field label={t("reportEmail.companyEmails")} hint={t("reportEmail.onePerLine")}>
+              <Textarea name="reportCompanyEmails" defaultValue={reports.emails.join(NL)} className="min-h-16" placeholder="contabilidade@exemplo.pt" />
+              <FieldError name="reportCompanyEmails" />
+            </Field>
 
             <h2 className="border-t border-border pt-5 font-medium">{t("businessHours.title")}</h2>
             <p className="-mt-2 text-xs text-muted">{t("businessHours.hint")}</p>

@@ -20,6 +20,9 @@ import { appOrigin } from "@/lib/qr";
 import { privacyPath } from "@/lib/privacy";
 import { RETENTION_MAX } from "@/lib/retention-rules";
 import { businessHoursFromForm } from "@/lib/sla-clock";
+import { MAX_EXTRA, parseEmailList } from "@/lib/report-recipients";
+
+const STAFF_REPORT_ROLES: string[] = ["ADMIN", "MANAGER", "TECHNICIAN", "ACCOUNTANT", "VIEWER"];
 import { erasedName, eraseMember, ErasureError } from "@/lib/erasure";
 import { emailLayout, sendEmail } from "@/lib/email";
 import { background } from "@/lib/notify";
@@ -61,8 +64,19 @@ export async function updateOrgAction(_: FormResult, form: FormData): Promise<Fo
     return typeof v === "string" ? v : null;
   });
   if ("errors" in bh) return { error: "validation", fieldErrors: bh.errors };
+  // Company copies of e-mailed service reports: only this company's staff, known roles and valid addresses.
+  const reportEmails = parseEmailList(String(form.get("reportCompanyEmails") ?? ""));
+  if (reportEmails.invalid.length) return { error: "validation", fieldErrors: { reportCompanyEmails: "badEmails" } };
+  const wantedUsers = form.getAll("reportUserIds").map(String);
+  const staffIds = new Set((await ctx.db.membership.findMany({ where: { active: true, role: { not: "REQUESTER" }, userId: { in: wantedUsers } }, select: { userId: true } })).map((m) => m.userId));
+  const jobIds = new Set((await ctx.db.jobRole.findMany({ select: { id: true } })).map((j) => `job:${j.id}`));
+  const reportRecipients = {
+    userIds: wantedUsers.filter((id) => staffIds.has(id)),
+    roles: form.getAll("reportRoles").map(String).filter((r) => STAFF_REPORT_ROLES.includes(r) || jobIds.has(r)),
+    emails: reportEmails.emails.slice(0, MAX_EXTRA),
+  };
   const { notificationsDays, auditMonths, requestersMonths, chatMonths, ...rest } = parsed.data;
-  const data = { ...rest, brandColor: normalizeHex(rest.brandColor), retention: { notificationsDays, auditMonths, requestersMonths, chatMonths }, businessHours: bh.hours };
+  const data = { ...rest, brandColor: normalizeHex(rest.brandColor), retention: { notificationsDays, auditMonths, requestersMonths, chatMonths }, businessHours: bh.hours, reportRecipients };
   // Organization isn't a tenant-scoped model; scope by id explicitly.
   await prisma.organization.update({ where: { id: ctx.organization.id }, data });
   revalidatePath("/", "layout");

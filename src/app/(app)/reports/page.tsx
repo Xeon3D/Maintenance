@@ -20,7 +20,7 @@ export default async function ReportsOverviewPage({ searchParams }: PageProps<"/
     { label: t("reports.kpi.slaResponse"), value: pct(o.slaResponse.pct), sub: decided(o.slaResponse), alert: o.slaResponse.pct !== null && o.slaResponse.pct < 0.9 },
     { label: t("reports.kpi.slaResolution"), value: pct(o.slaResolution.pct), sub: decided(o.slaResolution), alert: o.slaResolution.pct !== null && o.slaResolution.pct < 0.9 },
     { label: t("reports.kpi.pm"), value: pct(o.pm.pct), sub: t("reports.pmSub", { onTime: o.pm.onTime, due: o.pm.due }), alert: o.pm.pct !== null && o.pm.pct < 0.8 },
-    { label: t("reports.kpi.cost"), value: money(o.cost), sub: t("reports.kpi.costHint") },
+    ...(ctx.can("costs.view") ? [{ label: t("reports.kpi.cost"), value: money(o.cost), sub: t("reports.kpi.costHint") }] : []),
   ];
 
   return (

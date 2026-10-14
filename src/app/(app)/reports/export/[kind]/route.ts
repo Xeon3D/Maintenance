@@ -89,5 +89,13 @@ export async function GET(req: Request, { params }: RouteContext<"/reports/expor
     default:
       return new Response("Not found", { status: 404 });
   }
+  if (!ctx.can("costs.view")) {
+    // Without "See costs": no cost export, and no money columns in the others.
+    if (kind === "costs") return new Response("Not found", { status: 404 });
+    const money = new Set([t("costs.labor"), t("costs.parts"), t("reports.otherCosts"), t("costs.total")]);
+    const keep = header.map((h, i) => (money.has(h) ? -1 : i)).filter((i) => i >= 0);
+    header = keep.map((i) => header[i]);
+    rows = rows.map((r) => keep.map((i) => r[i]));
+  }
   return csvResponse(`${kind}_${span}.csv`, toCsv(header, rows));
 }

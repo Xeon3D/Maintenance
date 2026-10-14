@@ -174,13 +174,23 @@ restart `next dev` after adding a file. `npx playwright install --with-deps chro
   enforces this.
 - **RBAC:** default matrix in `src/lib/rbac.ts`. Use `ctx.can("x")` in pages (`notFound()` when denied) and
   `requirePermission("x")` in server actions; never `can(role, …)` (it ignores the company's settings).
-  Roles: OWNER (shown as **"Super Admin"**), ADMIN, MANAGER, TECHNICIAN, REQUESTER (the client portal) and VIEWER.
+  Roles: OWNER (shown as **"Super Admin"**), ADMIN, MANAGER, TECHNICIAN, ACCOUNTANT ("Contabilista": reports, costs,
+  billing; not billable, not a van owner), REQUESTER (the client portal) and VIEWER.
   - **Configurable permissions** (Settings → Roles, editable only by OWNER via `requireOwner()`): overrides for
-    ADMIN/MANAGER/TECHNICIAN/VIEWER in `Organization.rolePermissions`, and per custom role in `JobRole.permissions`
-    (null = follow its access level). `effectivePermissions()` resolves them; `ctx.can` and `membersWith()` use it.
-    OWNER always has everything; REQUESTER is fixed (portal users must never get internal permissions);
-    `internal.view` is always on for staff roles; `billing.manage` is OWNER-only. A new permission goes in
-    `PERMISSIONS` **and** `PERMISSION_GROUPS` (a test checks), with `perm.<key>.label/hint` messages.
+    ADMIN/MANAGER/TECHNICIAN/VIEWER/ACCOUNTANT in `Organization.rolePermissions`, and per custom role in
+    `JobRole.permissions` (null = follow its access level). `effectivePermissions()` resolves them; `ctx.can` and
+    `membersWith()` use it. OWNER always has everything; REQUESTER is fixed (portal users must never get internal
+    permissions); `internal.view` is always on for staff roles. A new permission goes in `PERMISSIONS` **and**
+    `PERMISSION_GROUPS` (a test checks), with `perm.<key>.label/hint` messages.
+  - `costs.view` gates labour/parts/totals (WO costs card, request cost summary, cost report + money columns in CSV
+    exports, overview cost KPI, technician labour column) and contract fees (a form without it keeps the stored fee).
+    Purchase prices (parts, POs, vendors) stay with the inventory/purchasing permissions. `billing.manage` is
+    grantable but has no screens yet.
+  - **E-mailed service reports** (manual, `workOrders.sendReport`): WO page panel → `sendReportAction` →
+    `lib/report-email.ts` (`reportRecipients`: client e-mail, contacts with `receivesReports`, `Client.reportEmails`,
+    company list `Organization.reportRecipients` {userIds, roles incl. "job:<id>", emails}; `sendServiceReport`:
+    PDF from `lib/service-report.ts` in the company language, one e-mail per address, `WorkOrder.reportSentAt/To`,
+    audit log). Pure rules in `lib/report-recipients.ts`. In production it refuses when e-mail isn't configured.
   - Structural checks stay on the role itself: REQUESTER = portal user, OWNER can't be changed or erased.
   - Not to be confused with `User.isSuperAdmin` (unused; meant for a future platform console in phase 10).
 - **Custom roles** (`JobRole`, Settings → Roles): a name, a cost per hour and an access level (ADMIN,

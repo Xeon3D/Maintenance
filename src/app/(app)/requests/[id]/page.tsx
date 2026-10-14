@@ -90,7 +90,7 @@ export default async function RequestPage({ params }: PageProps<"/requests/[id]"
               </Link>
             </Card>
           )}
-          {r.status === "APPROVED" && r.workOrder && (() => {
+          {r.status === "APPROVED" && r.workOrder && ctx.can("costs.view") && (() => {
             // What this request has cost so far: time (at each person's role rate), parts and other costs.
             const c = workOrderCosts(r.workOrder);
             const money = (n: number) => format.number(n, { style: "currency", currency: ctx.organization.currency });

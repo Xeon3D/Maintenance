@@ -19,7 +19,7 @@ const TABS = [
 type Option = { id: string; name: string };
 
 /** One filter row above everything it scopes, then the tabs (which keep the filters). */
-export function ReportNav({ clients, villas, systems }: { clients: Option[]; villas: (Option & { clientId: string })[]; systems: string[] }) {
+export function ReportNav({ clients, villas, systems, showCosts }: { clients: Option[]; villas: (Option & { clientId: string })[]; systems: string[]; showCosts: boolean }) {
   const t = useTranslations();
   const router = useRouter();
   const pathname = usePathname();
@@ -81,7 +81,7 @@ export function ReportNav({ clients, villas, systems }: { clients: Option[]; vil
         </Select>
       </div>
       <nav className="-mb-px flex gap-1 overflow-x-auto border-b border-border">
-        {TABS.map((tab) => {
+        {TABS.filter((tab) => showCosts || tab.key !== "costs").map((tab) => {
           const active = pathname === tab.href;
           return (
             <Link

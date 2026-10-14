@@ -59,7 +59,9 @@ export default async function ContractPage({ params }: PageProps<"/contracts/[id
     [t("contracts.resolutionHours"), contract.resolutionTimeHours != null ? t("contracts.hours", { n: contract.resolutionTimeHours }) : "—"],
     [t("contracts.slaClock"), [contract.businessHoursOnly ? t("contracts.clockBusiness") : t("contracts.clockAlways"), contract.pauseOnHold && t("contracts.clockPauses")].filter(Boolean).join(" · ")],
     [t("contracts.includedVisits"), contract.includedVisits ?? "—"],
-    [t("contracts.monthlyFee"), contract.monthlyFee != null ? format.number(Number(contract.monthlyFee), { style: "currency", currency: ctx.organization.currency }) : "—"],
+    ...(ctx.can("costs.view")
+      ? ([[t("contracts.monthlyFee"), contract.monthlyFee != null ? format.number(Number(contract.monthlyFee), { style: "currency", currency: ctx.organization.currency }) : "—"]] as [string, React.ReactNode][])
+      : []),
     [
       t("contracts.systems"),
       contract.systems.length ? (

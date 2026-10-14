@@ -14,7 +14,7 @@ export async function seedDemo(prisma: PrismaClient) {
   const mk = (email: string, name: string, locale = "en") =>
     prisma.user.create({ data: { email, name, passwordHash, locale } });
 
-  const [owner, manager, techNet, techElec, viewer, clientUser, pmUser] = await Promise.all([
+  const [owner, manager, techNet, techElec, viewer, clientUser, pmUser, accountant] = await Promise.all([
     mk(DEMO_OWNER, "Sofia Almeida", "pt"),
     mk("manager@demo.test", "Miguel Costa", "pt"),
     mk("tech.network@demo.test", "Rui Ferreira", "pt"),
@@ -22,6 +22,7 @@ export async function seedDemo(prisma: PrismaClient) {
     mk("viewer@demo.test", "Ana Viewer"),
     mk("client@demo.test", "James Whitmore"),
     mk("pm@demo.test", "Carla Mendes", "pt"),
+    mk("accountant@demo.test", "Teresa Lopes", "pt"),
   ]);
 
   const org = await prisma.organization.create({
@@ -81,6 +82,7 @@ export async function seedDemo(prisma: PrismaClient) {
       { organizationId: org.id, userId: techNet.id, role: "TECHNICIAN" },
       { organizationId: org.id, userId: techElec.id, role: "TECHNICIAN", jobRoleId: engineer.id },
       { organizationId: org.id, userId: viewer.id, role: "VIEWER" },
+      { organizationId: org.id, userId: accountant.id, role: "ACCOUNTANT" },
       { organizationId: org.id, userId: clientUser.id, role: "REQUESTER", clientId: client.id },
       { organizationId: org.id, userId: pmUser.id, role: "REQUESTER", clientId: pmClient.id },
     ],

@@ -19,7 +19,7 @@ export default async function ReportsLayout({ children }: { children: React.Reac
   return (
     <>
       <PageHeader title={t("nav.reports")} description={t("reports.description")} />
-      <ReportNav clients={clients} villas={villas} systems={Object.values(SystemType)} />
+      <ReportNav clients={clients} villas={villas} systems={Object.values(SystemType)} showCosts={ctx.can("costs.view")} />
       {children}
     </>
   );
