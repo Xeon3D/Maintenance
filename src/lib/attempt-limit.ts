@@ -25,6 +25,11 @@ export class AttemptLimiter {
     this.recent("*", now).push(now);
   }
 
+  /** Forgets one client's failures (e.g. after a successful sign-in). */
+  clear(client: string) {
+    this.failures.delete(client);
+  }
+
   reset() {
     this.failures.clear();
   }

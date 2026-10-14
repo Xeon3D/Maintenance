@@ -1,7 +1,7 @@
 "use server";
 
 import bcrypt from "bcryptjs";
-import { AuthError } from "next-auth";
+import { AuthError, CredentialsSignin } from "next-auth";
 import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { getLocale } from "next-intl/server";
@@ -37,6 +37,7 @@ export async function loginAction(_: FormState, form: FormData): Promise<FormSta
       redirectTo: safeNext(form.get("next")),
     });
   } catch (e) {
+    if (e instanceof CredentialsSignin && e.code === "too_many_attempts") return { error: "tooManyAttempts" };
     if (e instanceof AuthError) return { error: "invalidCredentials" };
     throw e; // NEXT_REDIRECT on success
   }

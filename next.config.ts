@@ -3,14 +3,50 @@ import createNextIntlPlugin from "next-intl/plugin";
 
 const withNextIntl = createNextIntlPlugin("./src/i18n/request.ts");
 
+const dev = process.env.NODE_ENV !== "production";
+
+// Content Security Policy: everything comes from this origin. Inline scripts are allowed because Next
+// streams its hydration data inline and the theme boot script runs before paint (nonces would force
+// every page to render dynamically and break the cached offline field app). Images may come from
+// https sources only for release notes in Settings → Server. Dev needs eval and the HMR websocket.
+const csp = [
+  "default-src 'self'",
+  `script-src 'self' 'unsafe-inline'${dev ? " 'unsafe-eval'" : ""}`,
+  "style-src 'self' 'unsafe-inline'",
+  "img-src 'self' data: blob: https:",
+  "font-src 'self' data:",
+  `connect-src 'self'${dev ? " ws: wss:" : ""}`,
+  "media-src 'self' blob:",
+  "worker-src 'self' blob:",
+  "manifest-src 'self'",
+  "object-src 'none'",
+  "base-uri 'self'",
+  "form-action 'self'",
+  "frame-ancestors 'none'",
+].join("; ");
+
+const securityHeaders = [
+  { key: "Content-Security-Policy", value: csp },
+  // Browsers ignore HSTS on plain http, so this is safe on a LAN install; behind the https proxy it
+  // pins the domain to https for 180 days (subdomains untouched).
+  { key: "Strict-Transport-Security", value: "max-age=15552000" },
+  { key: "X-Frame-Options", value: "DENY" },
+  { key: "X-Content-Type-Options", value: "nosniff" },
+  { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
+  // Camera for QR/barcode scanning; nothing else.
+  { key: "Permissions-Policy", value: "camera=(self), microphone=(), geolocation=(), payment=(), usb=(), interest-cohort=()" },
+];
+
 const nextConfig: NextConfig = {
   // Self-contained server bundle for the Docker image (see Dockerfile).
   output: "standalone",
   // Rendered server-side only (PDF service reports).
   serverExternalPackages: ["@react-pdf/renderer"],
-  // The service worker must always be revalidated so fixes reach devices promptly.
+  poweredByHeader: false,
   async headers() {
     return [
+      { source: "/:path*", headers: securityHeaders },
+      // The service worker must always be revalidated so fixes reach devices promptly.
       {
         source: "/sw.js",
         headers: [

@@ -16,6 +16,7 @@ The image is published as [`xeon3d/maintenance`](https://hub.docker.com/r/xeon3d
    - `FACTORY_RESET_PASSWORD`: set it to enable the **Factory reset** page; leave empty to disable.
      If `SERVER_ADMIN_PASSWORD` is empty, this one also unlocks Settings → Server.
    - `SEED_DEMO`: `"true"` creates the demo company on an empty database; set `"false"` for real use.
+   - `DEMO_MODE`: `"true"` on a public demo shows a banner asking people not to enter real personal data.
    - Change the PostgreSQL password (in both places) for anything beyond a demo.
    - If port 3000 is taken, change only the left number of `"3000:3000"` (e.g. `"3001:3000"`).
 3. **Nginx Proxy Manager:** add a Proxy Host for your domain forwarding (scheme `http`) to the
@@ -68,7 +69,7 @@ npm run db:seed        # demo org — sign in as owner@demo.test / demo1234
 npm run dev            # http://localhost:3000
 ```
 
-`.env` needs `DATABASE_URL`, `AUTH_SECRET`, `AUTH_TRUST_HOST`, `FIELD_ENCRYPTION_KEY` (32 random bytes, base64), `UPLOAD_DIR` and `CRON_SECRET`. Optional: `APP_URL`, `VAPID_PUBLIC_KEY`/`VAPID_PRIVATE_KEY`, `RESEND_API_KEY`/`EMAIL_FROM`, `SERVER_ADMIN_PASSWORD`, `FACTORY_RESET_PASSWORD`, `SEED_DEMO`, `APP_NAME` (default software name). Dev keeps server settings in `./.data` and backups in `./backups` (backups need `pg_dump`/`pg_restore`/`psql`/`tar` on PATH, so in practice only in Docker).
+`.env` needs `DATABASE_URL`, `AUTH_SECRET`, `AUTH_TRUST_HOST`, `FIELD_ENCRYPTION_KEY` (32 random bytes, base64), `UPLOAD_DIR` and `CRON_SECRET`. Optional: `APP_URL`, `VAPID_PUBLIC_KEY`/`VAPID_PRIVATE_KEY`, `RESEND_API_KEY`/`EMAIL_FROM`, `SERVER_ADMIN_PASSWORD`, `FACTORY_RESET_PASSWORD`, `SEED_DEMO`, `DEMO_MODE` (public demo banner), `APP_NAME` (default software name). Dev keeps server settings in `./.data` and backups in `./backups` (backups need `pg_dump`/`pg_restore`/`psql`/`tar` on PATH, so in practice only in Docker).
 
 ## Preventive maintenance scheduler
 

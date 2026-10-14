@@ -9,6 +9,7 @@ import { getTheme } from "@/lib/theme-server";
 import { prisma } from "@/lib/db/client";
 import { PublicRequestForm } from "./public-form";
 import { brandStyle, logoSrc } from "@/lib/branding";
+import { privacyPath } from "@/lib/privacy";
 
 // Public landing for asset QR labels.
 //  - staff of the owning org → the asset page
@@ -18,7 +19,7 @@ export default async function QrLandingPage({ params }: PageProps<"/r/[token]">)
   const { token } = await params;
   const asset = await prisma.asset.findUnique({
     where: { qrToken: token },
-    select: { id: true, name: true, organizationId: true, archivedAt: true, organization: { select: { id: true, name: true, logoUrl: true, updatedAt: true, brandColor: true } } },
+    select: { id: true, name: true, organizationId: true, archivedAt: true, organization: { select: { id: true, name: true, slug: true, logoUrl: true, updatedAt: true, brandColor: true } } },
   });
   if (!asset || asset.archivedAt) notFound();
 
@@ -43,7 +44,7 @@ export default async function QrLandingPage({ params }: PageProps<"/r/[token]">)
           <h1 className="mt-2 text-lg font-semibold">{asset.name}</h1>
           <p className="mb-5 mt-1 text-sm text-muted">{t("qr.intro")}</p>
         </div>
-        <PublicRequestForm token={token} />
+        <PublicRequestForm token={token} privacyHref={privacyPath(asset.organization)} />
         {!session?.user && (
           <p className="mt-5 text-center text-xs text-muted">
             {t("qr.haveAccount")}{" "}

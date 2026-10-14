@@ -44,6 +44,8 @@ export function emailLayout(o: {
   paragraphs: string[];
   cta?: { label: string; url: string };
   footer?: string;
+  /** Link to the company's privacy notice, printed under the footer. */
+  privacy?: { label: string; url: string };
   /** Absolute logo URL and brand colour (defaults to the app's blue). */
   logo?: string | null;
   color?: string;
@@ -59,7 +61,8 @@ export function emailLayout(o: {
 ${o.logo ? `<img src="${esc(o.logo)}" alt="${esc(o.org)}" height="40" style="display:block;height:40px;max-width:180px;margin-bottom:10px">` : ""}<div style="font-size:12px;font-weight:700;color:${esc(color)};text-transform:uppercase;letter-spacing:.04em;margin-bottom:12px">${esc(o.org)}</div>
 <h1 style="font-size:18px;margin:0 0 14px">${esc(o.heading)}</h1>${p}${button}
 ${o.footer ? `<p style="margin:20px 0 0;font-size:12px;color:#6b7280">${esc(o.footer)}</p>` : ""}
+${o.privacy ? `<p style="margin:12px 0 0;font-size:12px"><a href="${esc(o.privacy.url)}" style="color:#6b7280">${esc(o.privacy.label)}</a></p>` : ""}
 </td></tr></table></td></tr></table></body></html>`;
-  const text = [o.heading, "", ...o.paragraphs, ...(o.cta ? ["", `${o.cta.label}: ${o.cta.url}`] : []), ...(o.footer ? ["", o.footer] : [])].join("\n");
+  const text = [o.heading, "", ...o.paragraphs, ...(o.cta ? ["", `${o.cta.label}: ${o.cta.url}`] : []), ...(o.footer ? ["", o.footer] : []), ...(o.privacy ? ["", `${o.privacy.label}: ${o.privacy.url}`] : [])].join("\n");
   return { html, text };
 }

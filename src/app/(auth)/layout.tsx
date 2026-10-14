@@ -1,11 +1,15 @@
+import Link from "next/link";
 import { getTranslations } from "next-intl/server";
 import { LocaleSwitcher } from "@/components/locale-switcher";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { getTheme } from "@/lib/theme-server";
 import { getAppName } from "@/lib/server-settings";
+import { prisma } from "@/lib/db/client";
 
 export default async function AuthLayout({ children }: { children: React.ReactNode }) {
   const t = await getTranslations();
+  // /privacy resolves to the company's notice only on a single-company server (see privacy/page.tsx).
+  const singleCompany = (await prisma.organization.count()) === 1;
   return (
     <div className="flex min-h-screen flex-col items-center justify-center px-4 py-12">
       <div className="w-full max-w-sm">
@@ -18,6 +22,13 @@ export default async function AuthLayout({ children }: { children: React.ReactNo
           <LocaleSwitcher />
           <ThemeToggle initial={await getTheme()} />
         </div>
+        {singleCompany && (
+          <p className="mt-4 text-center text-xs">
+            <Link href="/privacy" className="text-muted hover:text-brand">
+              {t("privacy.title")}
+            </Link>
+          </p>
+        )}
       </div>
     </div>
   );

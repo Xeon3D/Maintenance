@@ -38,7 +38,7 @@ export function ActionForm({
 
   return (
     <FieldErrorsContext.Provider value={state?.fieldErrors}>
-      <form onSubmit={formAction} className={cn("space-y-4", className)}>
+      <form method="post" onSubmit={formAction} className={cn("space-y-4", className)}>
         <fieldset disabled={pending} className="space-y-4">
           {children}
         </fieldset>

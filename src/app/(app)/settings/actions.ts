@@ -17,6 +17,7 @@ import { createTranslator } from "next-intl";
 import en from "../../../../messages/en.json";
 import pt from "../../../../messages/pt.json";
 import { appOrigin } from "@/lib/qr";
+import { privacyPath } from "@/lib/privacy";
 import { emailLayout, sendEmail } from "@/lib/email";
 import { background } from "@/lib/notify";
 
@@ -38,6 +39,7 @@ const orgSchema = z.object({
     "brandTooLight",
   ),
   reportFooter: optStr(500),
+  privacyNotice: optStr(20000),
   timezone: z.string().trim().min(1).max(64),
   currency: z.string().trim().length(3).toUpperCase(),
   defaultLocale: z.enum(LOCALES),
@@ -148,6 +150,7 @@ export async function inviteUserAction(_: ActionState, form: FormData): Promise<
     heading: t("email.inviteSubject", vars),
     paragraphs: [t("email.inviteBody", vars)],
     cta: { label: t("email.inviteCta"), url },
+    privacy: { label: t("email.privacy"), url: `${await appOrigin()}${privacyPath(ctx.organization)}` },
   });
   background(() => sendEmail({ to: email, subject: t("email.inviteSubject", vars), ...mail }));
   return { ok: true, inviteUrl: `/invite/${token}`, inviteEmail: email };

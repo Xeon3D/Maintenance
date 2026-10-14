@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { Card, Field, Input, PageHeader, Select, Textarea } from "@/components/ui";
@@ -5,6 +6,7 @@ import { ActionForm, FieldError } from "@/components/action-form";
 import { getContext } from "@/lib/context";
 import { brandColor, DEFAULT_BRAND, logoSrc } from "@/lib/branding";
 import { TIMEZONES } from "@/lib/timezones";
+import { privacyPath } from "@/lib/privacy";
 import { updateOrgAction } from "../actions";
 import { BrandColorField, LogoUploader } from "./form";
 
@@ -63,6 +65,16 @@ export default async function OrgSettingsPage() {
             <Field label={t("company.reportFooter")} hint={t("company.reportFooterHint")}>
               <Textarea name="reportFooter" defaultValue={o.reportFooter ?? ""} className="min-h-16" maxLength={500} />
             </Field>
+
+            <h2 className="border-t border-border pt-5 font-medium">{t("privacy.title")}</h2>
+            <Field label={t("privacy.customNotice")} hint={t("privacy.customNoticeHint")}>
+              <Textarea name="privacyNotice" defaultValue={o.privacyNotice ?? ""} className="min-h-40" maxLength={20000} />
+            </Field>
+            <p className="-mt-2 text-xs">
+              <Link href={privacyPath(o)} target="_blank" className="font-medium text-brand">
+                {t("privacy.view")}
+              </Link>
+            </p>
 
             <h2 className="border-t border-border pt-5 font-medium">{t("company.regional")}</h2>
             <div className="grid gap-4 sm:grid-cols-3">

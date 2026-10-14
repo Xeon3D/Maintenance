@@ -52,6 +52,8 @@ lawyer or DPO confirm the conclusions before relying on them, especially before 
 
 ### 1.4 Gaps, by priority
 
+**Progress (2026-10-14):** ✅ 1 privacy notice (`/privacy/<slug>`, custom text in Settings → Organization, linked from the QR form, sign-in, portal, profile and e-mails); ✅ 2 sign-in limit (10 failures per account / 30 per address in 15 min); ✅ 3 "Download my data" (JSON, profile page; staff export of a client is still open); ✅ 7 security headers (`next.config.ts`); ✅ 8 demo banner (`DEMO_MODE=true`). Still open: 4, 5, 6 and the admin items 9–11.
+
 | # | Gap | GDPR article | Fix | Effort |
 |---|---|---|---|---|
 | 1 | **No privacy notice**, including on the **public QR request form** that collects name/e-mail/phone from anyone | 12–14 | Privacy page (company-editable text in Settings), linked from the QR form, sign-in, portal and e-mails; short notice under the form | S |

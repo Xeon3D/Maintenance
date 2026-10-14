@@ -74,7 +74,7 @@
     "factoryResetConfirm": "Erase ALL data on this server and restore the demo? This cannot be undone.",
     "factoryResetDone": "The server was reset to the demo data. Sign in with owner@demo.test / demo1234.",
     "wrongResetPassword": "Wrong reset password.",
-    "tooManyAttempts": "Too many attempts. Try again in 15 minutes."
+    "tooManyAttempts": "Too many failed sign-in attempts. Wait 15 minutes and try again, or reset your password."
   },
   "onboarding": {
     "title": "Create your organization",
@@ -1002,7 +1002,8 @@
     "inviteCta": "Accept invitation",
     "resetSubject": "Reset your password",
     "resetBody": "Someone asked to reset the password for this account. If it was you, use the button below within an hour. If not, you can ignore this email.",
-    "resetCta": "Choose a new password"
+    "resetCta": "Choose a new password",
+    "privacy": "Privacy notice"
   },
   "notifications": {
     "title": "Notifications",
@@ -1433,5 +1434,49 @@
     "light": "Light",
     "dark": "Dark",
     "system": "Same as device"
+  },
+  "demo": {
+    "banner": "Public demo: don't enter real personal data. Everything here is erased at every reset."
+  },
+  "privacy": {
+    "title": "Privacy notice",
+    "qrNotice": "Your details are used only to handle this request and to contact you about it.",
+    "contactFallback": "the contact details above",
+    "yourData": "Your data",
+    "yourDataHint": "Download a copy of everything stored about you (JSON), or read how your data is used.",
+    "download": "Download my data",
+    "customNotice": "Custom privacy notice",
+    "customNoticeHint": "Plain text; leave a blank line between paragraphs. Leave empty to use the built-in notice, filled in with the company details above. It is public and linked from request forms, the client portal and e-mails.",
+    "view": "View the public notice",
+    "default": {
+      "controller": {
+        "title": "Who is responsible",
+        "body": "{company} is the controller of the personal data processed in this maintenance system. For any question about your data, contact us: {contact}."
+      },
+      "data": {
+        "title": "What we collect",
+        "body": "Contact details (name, e-mail, phone) of clients, villa contacts, staff and people who report a fault; addresses and access notes of the properties we maintain; maintenance requests, work orders, photos, client signatures and messages; for staff, time logged on jobs; and technical records such as sign-in and security logs."
+      },
+      "purposes": {
+        "title": "Why we use it",
+        "body": "To provide the maintenance services agreed with our clients (performance of a contract), to answer requests and faults reported to us, to plan and document our work, to meet legal obligations such as invoicing and record keeping, and to keep the system secure (legitimate interest)."
+      },
+      "recipients": {
+        "title": "Who receives it",
+        "body": "Only our staff who need it for their work, and service providers that host the system or deliver e-mails on our behalf under a data processing agreement. We do not sell your data or use it for advertising."
+      },
+      "retention": {
+        "title": "How long we keep it",
+        "body": "For as long as we provide services to you and afterwards for the periods required by law (for example, accounting records). Data no longer needed is deleted or anonymised."
+      },
+      "security": {
+        "title": "How we protect it",
+        "body": "Access is restricted by role, passwords are stored hashed, access codes and device credentials are encrypted and every view of them is logged, and connections are encrypted."
+      },
+      "rights": {
+        "title": "Your rights",
+        "body": "You may ask to access, correct or erase your data, to restrict or object to its processing, and to receive it in a portable format. Users can download their data from their profile. You may also complain to your data protection authority (in Portugal, the CNPD)."
+      }
+    }
   }
 }

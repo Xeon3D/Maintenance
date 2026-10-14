@@ -36,7 +36,7 @@ export function brandStyle(org: { brandColor?: string | null }) {
   return (c === DEFAULT_BRAND ? {} : { "--brand": c, "--color-brand": c }) as React.CSSProperties;
 }
 
-type LogoOrg = { id: string; logoUrl?: string | null; updatedAt: Date };
+export type LogoOrg = { id: string; logoUrl?: string | null; updatedAt: Date };
 
 /** Public URL of the logo (versioned, so a new upload isn't hidden by caches), or null. */
 export function logoSrc(org: LogoOrg, origin = "") {
