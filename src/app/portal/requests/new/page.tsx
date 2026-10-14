@@ -21,10 +21,12 @@ export default async function NewPortalRequestPage({ searchParams }: PageProps<"
   ]);
   // Prefill from a QR scan (?assetId=) when the asset is on one of this client's villas.
   const asset = assets.find((a) => a.id === sp(params, "assetId"));
+  // Opened from a property (or a QR label on one): "back" returns to it.
+  const backVilla = villas.find((v) => v.id === (asset?.villaId ?? sp(params, "villaId")));
 
   return (
     <>
-      <BackLink href="/portal" label={t("portal.title")} />
+      {backVilla ? <BackLink href={`/portal/villas/${backVilla.id}`} label={backVilla.name} /> : <BackLink href="/portal" label={t("portal.yourVillas")} />}
       <h1 className="mb-1 text-xl font-semibold">{t("portal.newRequest")}</h1>
       <p className="mb-5 text-sm text-muted">{t("portal.newRequestHint")}</p>
       <Card className="p-5 sm:p-6">

@@ -1,12 +1,14 @@
 import { getContext } from "@/lib/context";
 import { renderServiceReport } from "@/lib/service-report";
+import { portalScopes } from "@/lib/portal-scope";
 
 export async function GET(_req: Request, { params }: RouteContext<"/work-orders/[id]/report">) {
   const { id } = await params;
   const ctx = await getContext();
-  // Staff, or a client-portal user for a client-visible WO on one of their villas.
+  // Staff, or a client-portal user for a client-visible WO on a villa they can reach: one they own, or one their
+  // company manages for another owner (the same rule as the portal, lib/portal-scope.ts).
   const portalScope =
-    ctx.role === "REQUESTER" && ctx.membership.clientId ? { clientVisible: true, villa: { clientId: ctx.membership.clientId } } : null;
+    ctx.role === "REQUESTER" && ctx.membership.clientId ? portalScopes(ctx.membership.clientId, ctx.user.id).workOrderWhere : null;
   if (!ctx.can("internal.view") && !portalScope) return new Response("Not found", { status: 404 });
 
   const report = await renderServiceReport(ctx, { id, ...(ctx.can("internal.view") ? {} : portalScope) });

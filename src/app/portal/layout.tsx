@@ -1,11 +1,10 @@
 import Link from "next/link";
 import { getTranslations } from "next-intl/server";
-import { LogOut, Plus, UserRound } from "lucide-react";
+import { LogOut, UserRound } from "lucide-react";
 import { NotificationBell } from "@/components/notifications/bell";
 import { LocaleSwitcher } from "@/components/locale-switcher";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { getTheme } from "@/lib/theme-server";
-import { Button } from "@/components/ui";
 import { getPortalContext } from "@/lib/portal";
 import { signOutAction } from "@/app/(auth)/actions";
 import { brandStyle, logoSrc } from "@/lib/branding";
@@ -32,12 +31,6 @@ export default async function PortalLayout({ children }: { children: React.React
             </span>
           </Link>
           <div className="flex items-center gap-2">
-            <Link href="/portal/requests/new" className="hidden sm:block">
-              <Button size="sm">
-                <Plus className="size-4" />
-                {t("portal.newRequest")}
-              </Button>
-            </Link>
             <LocaleSwitcher className="hidden sm:inline-flex" />
             <ThemeToggle initial={theme} className="hidden sm:inline-flex" />
             <NotificationBell key={unread} initial={unread} href="/portal/notifications" />
@@ -58,15 +51,8 @@ export default async function PortalLayout({ children }: { children: React.React
           {t("privacy.title")}
         </Link>
       </footer>
-      {/* Mobile: the main action is always one tap away. */}
-      <Link
-        href="/portal/requests/new"
-        className="fixed bottom-5 right-5 flex items-center gap-2 rounded-full bg-brand px-5 py-3 text-sm font-medium text-brand-foreground shadow-lg sm:hidden"
-      >
-        <Plus className="size-4" />
-        {t("portal.newRequest")}
-      </Link>
-      <div className="flex justify-center gap-2 pb-24 sm:hidden">
+      {/* New requests start from a property (portal home → property → New request). */}
+      <div className="flex justify-center gap-2 pb-6 sm:hidden">
         <LocaleSwitcher />
         <ThemeToggle initial={theme} />
       </div>
