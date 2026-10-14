@@ -2,7 +2,7 @@ import { getRequestConfig } from "next-intl/server";
 import { cookies, headers } from "next/headers";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/db/client";
-import { DEFAULT_LOCALE, isLocale, LOCALE_COOKIE, type Locale } from "./config";
+import { DEFAULT_LOCALE, INTL_LOCALE, isLocale, LOCALE_COOKIE, type Locale } from "./config";
 
 const ACTIVE_ORG_COOKIE = "active_org"; // mirrors lib/context (importing it here would pull in redirect logic)
 const DEFAULT_TIMEZONE = "Europe/Lisbon";
@@ -30,7 +30,8 @@ async function resolveTimeZone(): Promise<string> {
 export default getRequestConfig(async () => {
   const [locale, timeZone] = await Promise.all([resolveLocale(), resolveTimeZone()]);
   return {
-    locale,
+    // Formatting locale (en-GB / pt-PT); messages are per language. Read the app locale with appLocale().
+    locale: INTL_LOCALE[locale],
     timeZone,
     messages: (await import(`../../messages/${locale}.json`)).default,
   };

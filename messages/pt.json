@@ -1538,5 +1538,12 @@
     "uses": "{n, plural, =0 {Sem uso} one {# ordem de trabalho} other {# ordens de trabalho}}",
     "deleteConfirm": "Eliminar esta categoria? É removida das ordens de trabalho; as ordens de trabalho ficam.",
     "all": "Todas as categorias"
+  },
+  "dateInput": {
+    "datePlaceholder": "DD/MM/AAAA",
+    "timePlaceholder": "HH:MM",
+    "pick": "Escolher data",
+    "badDate": "Indique uma data válida no formato DD/MM/AAAA.",
+    "badTime": "Indique uma hora no formato HH:MM (24 horas)."
   }
 }

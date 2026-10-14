@@ -10,7 +10,7 @@ import { auth, signIn, signOut } from "@/auth";
 import { prisma } from "@/lib/db/client";
 import { createOrganization } from "@/lib/org";
 import { ACTIVE_ORG_COOKIE, requireUser } from "@/lib/context";
-import { isLocale, LOCALE_COOKIE } from "@/i18n/config";
+import { appLocale, isLocale, LOCALE_COOKIE } from "@/i18n/config";
 import { isTheme, THEME_COOKIE } from "@/lib/theme";
 import { createTranslator } from "next-intl";
 import en from "../../../messages/en.json";
@@ -60,12 +60,12 @@ export async function signupAction(_: FormState, form: FormData): Promise<FormSt
 
   if (await prisma.user.findUnique({ where: { email } })) return { error: "emailTaken" };
 
-  const locale = await getLocale();
+  const locale = appLocale(await getLocale());
   const user = await prisma.user.create({
-    data: { name, email, passwordHash: await bcrypt.hash(password, 12), locale: isLocale(locale) ? locale : "en" },
+    data: { name, email, passwordHash: await bcrypt.hash(password, 12), locale },
   });
   if (company) {
-    const org = await createOrganization(user.id, company, isLocale(locale) ? locale : "en");
+    const org = await createOrganization(user.id, company, locale);
     (await cookies()).set(ACTIVE_ORG_COOKIE, org.id, { path: "/", httpOnly: true, sameSite: "lax" });
   }
 

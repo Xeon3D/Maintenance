@@ -215,7 +215,11 @@ restart `next dev` after adding a file. `npx playwright install --with-deps chro
 - **Error codes returned from actions are message keys**, e.g. `"wo.requiredItems"` or
   `"requests.notPending"`. `ActionForm` resolves `common.<code>`, then `<code>`.
 - **Dates:**
-  - Datetime inputs use `<DateTimeField name>`, which submits ISO in the browser's time zone.
+  - European formats in both languages: next-intl's `locale` is `en-GB` / `pt-PT` (`INTL_LOCALE` in
+    `src/i18n/config.ts`), so read the app language with `appLocale(await getLocale())`, never `=== "pt"`.
+  - Never use native `type="date|time|datetime-local"` inputs (they follow the browser's language, e.g.
+    MM/DD/YYYY and AM/PM). Use `<DateInput>` / `<TimeInput>` (`src/components/date-input.tsx`; they submit
+    `yyyy-mm-dd` / `HH:MM`) or `<DateTimeField name>`, which submits ISO in the browser's time zone.
   - Rendering uses next-intl with the org time zone (`src/i18n/request.ts` looks it up per request).
   - Recurrence maths is time-zone aware (`src/lib/pm-schedule.ts`).
 

@@ -7,7 +7,7 @@ import { requirePermission } from "@/lib/context";
 import { prisma } from "@/lib/db/client";
 import { assertOwned } from "@/lib/db/tenant";
 import { ASSIGNABLE_ROLES } from "@/lib/rbac";
-import { LOCALES } from "@/i18n/config";
+import { appLocale, LOCALES } from "@/i18n/config";
 import { optStr, parseForm, str, type FormResult } from "@/lib/forms";
 import { brandColor, contrastWithWhite, logoSrc, MIN_CONTRAST, normalizeHex } from "@/lib/branding";
 import { deleteObject, putObject } from "@/lib/storage";
@@ -151,7 +151,7 @@ export async function inviteUserAction(_: ActionState, form: FormData): Promise<
   revalidatePath("/settings/users");
 
   // Emailed in the inviter's current language; the link is also shown so it can be shared directly.
-  const locale = await getLocale();
+  const locale = appLocale(await getLocale());
   const t = createTranslator({ locale, messages: locale === "pt" ? pt : en });
   const url = `${await appOrigin()}/invite/${token}`;
   const roleLabel = jobRoleId ? (await ctx.db.jobRole.findFirst({ where: { id: jobRoleId }, select: { name: true } }))!.name : t(`roles.${role}`);
