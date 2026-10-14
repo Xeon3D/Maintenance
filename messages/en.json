@@ -1840,6 +1840,7 @@
       "badState": "The sign-in link expired. Unlock Settings → Server and connect again.",
       "locked": "Sign in to the app and connect again.",
       "noRefresh": "The account didn't grant offline access. Connect again and accept all permissions.",
+      "noDriveScope": "Google Drive access wasn't granted. Connect again and, on Google's screen, tick the Google Drive permission (or \"Select all\").",
       "missingApp": "Save the client ID and secret first."
     },
     "mail": {
@@ -1850,6 +1851,39 @@
       "notEncrypted": "A backup was made: {name} ({size}). It isn't attached because only encrypted backups are e-mailed and this one isn't encrypted.",
       "testSubject": "{app}: backup e-mail test",
       "testBody": "This is a test. Backups will be e-mailed to this address."
+    }
+  },
+  "terms": {
+    "title": "Terms of use",
+    "sections": {
+      "service": {
+        "title": "The service",
+        "body": "This maintenance system is operated by {company} to plan, carry out and document the maintenance of the properties and systems it looks after, and to let its clients report faults and follow the work done. These terms apply to everyone who signs in or uses its public pages (such as the QR request form)."
+      },
+      "accounts": {
+        "title": "Accounts",
+        "body": "Accounts are created by {company} or by invitation. Keep your password to yourself and tell us straight away if you think someone else has used your account. We may suspend or close accounts that are misused or no longer needed, for example when a contract or employment ends."
+      },
+      "use": {
+        "title": "Acceptable use",
+        "body": "Use the system only for its purpose: maintenance requests, work orders and related communication. Do not try to reach data you were not given access to, interfere with its operation or security, upload unlawful content or malware, or use it to send unsolicited messages."
+      },
+      "content": {
+        "title": "Your content",
+        "body": "Requests, photos, comments, signatures and other content you add stay yours; you allow {company} to store and use them to provide and document the service. Make sure you may share what you upload (for example, photos of other people's property). Access codes and device credentials are confidential and must not be passed on."
+      },
+      "privacy": {
+        "title": "Personal data",
+        "body": "Personal data is handled as described in the privacy notice of {company}."
+      },
+      "availability": {
+        "title": "Availability and liability",
+        "body": "We aim to keep the system available and its data backed up, but it is provided as is and may be interrupted for maintenance or by events outside our control. The maintenance services themselves are governed by the agreement between {company} and each client; to the extent the law allows, {company} is not liable for indirect losses arising from the use of, or the inability to use, the system."
+      },
+      "law": {
+        "title": "Changes, law and contact",
+        "body": "We may update these terms; the current version is always on this page, and continuing to use the system means accepting it. These terms are governed by Portuguese law. Questions: {contact}."
+      }
     }
   }
 }

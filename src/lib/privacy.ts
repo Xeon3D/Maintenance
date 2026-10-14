@@ -5,6 +5,12 @@ export const PRIVACY_SECTIONS = ["controller", "data", "purposes", "recipients",
 
 export const privacyPath = (org: { slug: string }) => `/privacy/${org.slug}`;
 
+// Terms of use: a public page at /terms/<slug>, the built-in text filled with the company's details
+// (e.g. for the "terms of service" link that Google and Microsoft ask for when registering an OAuth app).
+export const TERMS_SECTIONS = ["service", "accounts", "use", "content", "privacy", "availability", "law"] as const;
+
+export const termsPath = (org: { slug: string }) => `/terms/${org.slug}`;
+
 /** Splits plain text into paragraphs (blank lines), keeping single line breaks inside them. */
 export function paragraphs(text: string) {
   return text

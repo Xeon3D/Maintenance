@@ -9,7 +9,7 @@ import { PriorityText, SystemBadge, WorkOrderStatusBadge } from "@/components/ba
 import { RequestStatusBadge } from "@/components/request-badge";
 import { getContext } from "@/lib/context";
 import { fileUrl } from "@/lib/storage";
-import { workOrderCosts } from "@/lib/work-orders";
+import { assignableUsers, workOrderCosts } from "@/lib/work-orders";
 import { approveRequestAction, declineRequestAction } from "../actions";
 import { ApproveFields } from "./approve-fields";
 
@@ -46,7 +46,7 @@ export default async function RequestPage({ params }: PageProps<"/requests/[id]"
   const [teams, members] = canApprove
     ? await Promise.all([
         ctx.db.team.findMany({ include: { members: { select: { userId: true } } }, orderBy: { name: "asc" } }),
-        ctx.db.membership.findMany({ where: { active: true, role: { not: "REQUESTER" } }, select: { user: { select: { id: true, name: true } } } }),
+        assignableUsers(ctx.db),
       ])
     : [[], []];
 
@@ -136,7 +136,7 @@ export default async function RequestPage({ params }: PageProps<"/requests/[id]"
                   priority={r.priority}
                   system={r.system}
                   teams={teams.map((x) => ({ id: x.id, name: x.name, memberIds: x.members.map((m) => m.userId) }))}
-                  people={members.map((m) => m.user).sort((a, b) => a.name.localeCompare(b.name))}
+                  people={members}
                 />
               </ActionForm>
             </Card>

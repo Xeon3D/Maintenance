@@ -4,7 +4,7 @@ import path from "node:path";
 import { afterAll, afterEach, describe, expect, it, vi } from "vitest";
 import { cleanFolder, cloudReady, DEFAULT_BACKUP_COPIES, emailPlan, normalizeBackupCopies } from "@/lib/backup-copies-settings";
 import { onedriveAuthorizeUrl, onedriveTarget } from "@/lib/cloud/onedrive";
-import { driveQuote, gdriveAuthorizeUrl, gdriveTarget } from "@/lib/cloud/gdrive";
+import { driveQuote, gdriveAuthorizeUrl, gdriveConnect, gdriveTarget } from "@/lib/cloud/gdrive";
 import { webdavTarget } from "@/lib/cloud/webdav";
 
 const dir = await mkdtemp(path.join(tmpdir(), "copies-"));
@@ -109,6 +109,19 @@ describe("Google Drive", () => {
     expect(u.searchParams.get("access_type")).toBe("offline");
     expect(u.searchParams.get("scope")).toContain("drive.file");
     expect(driveQuote("it's")).toBe("it\\'s");
+  });
+
+  it("tells whether Drive access was actually granted (Google lets the person untick it)", async () => {
+    const connect = async (scope: string) => {
+      mockFetch((c) => (c.url.includes("/token") ? json({ access_token: "AT", refresh_token: "RT", scope }) : json({ email: "me@example.com" })));
+      return gdriveConnect({ clientId: "c", clientSecret: "s" }, "code", "https://app.test/cb");
+    };
+    expect(await connect("openid https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/drive.file")).toEqual({
+      refreshToken: "RT",
+      account: "me@example.com",
+      driveGranted: true,
+    });
+    expect((await connect("openid https://www.googleapis.com/auth/userinfo.email")).driveGranted).toBe(false);
   });
 
   it("creates the folder path once, then uploads resumably until the last part", async () => {
