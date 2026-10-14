@@ -531,7 +531,10 @@
     "minutes": "Minutos",
     "notePlaceholder": "Nota (opcional)",
     "running": "a decorrer",
-    "total": "Total"
+    "total": "Total",
+    "billed": "Faturado",
+    "billedHint": "O tempo de cada técnico arredondado para cima a blocos de {block} minutos (Definições → Empresa).",
+    "billedFrom": "{billed} (registado {logged})"
   },
   "costs": {
     "title": "Custos",
@@ -542,7 +545,8 @@
     "parts": "Peças",
     "timeSpent": "Tempo gasto",
     "hours": "{hours} h",
-    "other": "Outros custos"
+    "other": "Outros custos",
+    "timeBilled": "Tempo faturado"
   },
   "files": {
     "title": "Fotografias e ficheiros",
@@ -1275,8 +1279,11 @@
       "firstResponse": "Primeira resposta",
       "minutes": "Minutos registados",
       "downHours": "Horas avariado",
-      "degradedHours": "Horas degradado"
-    }
+      "degradedHours": "Horas degradado",
+      "billedMinutes": "Minutos faturados"
+    },
+    "billedHoursCol": "Horas faturadas",
+    "billedHoursHint": "Horas cobradas: o tempo de cada técnico por ordem de trabalho arredondado ao período de faturação. A utilização usa as horas registadas."
   },
   "scan": {
     "title": "Ler código",
@@ -2121,7 +2128,8 @@
       "van": "Carrinha",
       "direction": "Sentido",
       "parts": "Peças",
-      "note": "Nota"
+      "note": "Nota",
+      "timeRounding": "Blocos de faturação do tempo"
     }
   },
   "van": {
@@ -2162,5 +2170,12 @@
     "add": "Adicionar número de série",
     "scan": "Ler número de série com a câmara",
     "remove": "Remover {serial}"
+  },
+  "timeBilling": {
+    "title": "Faturação do tempo",
+    "rounding": "Faturar o tempo em blocos de",
+    "hint": "O tempo de cada técnico numa ordem de trabalho é arredondado para cima a blocos inteiros no custo de mão de obra e no relatório de serviço (p. ex. 34 minutos são faturados como 1 hora com blocos de 30 minutos). O tempo registado mantém-se tal como foi registado.",
+    "none": "Sem arredondamento (minutos registados)",
+    "block": "{minutes} minutos"
   }
 }

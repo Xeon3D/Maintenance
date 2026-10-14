@@ -7,6 +7,7 @@ import { assertOwned, nextNumber } from "@/lib/db/tenant";
 import { notify, notifyExternal } from "@/lib/notify";
 import { contractFor } from "@/lib/contracts";
 import { effectivePermissions } from "@/lib/rbac";
+import { billedTime, type TimeEntryLike } from "@/lib/billing-time";
 import type { ChecklistItemType, Priority, SystemType, WorkOrderStatus, WorkOrderType } from "@/generated/prisma/enums";
 
 export const ACTIVE_STATUSES: WorkOrderStatus[] = ["OPEN", "IN_PROGRESS", "ON_HOLD"];
@@ -248,15 +249,20 @@ export async function stopRunningTimers(ctx: WoCtx, workOrderId: string, at = ne
   }
 }
 
-/** Labour + parts + other costs for a work order. */
-export function workOrderCosts(wo: {
-  timeEntries: { minutes: number | null; hourlyRate: unknown }[];
-  otherCosts: { amount: unknown }[];
-  parts?: { quantity: unknown; unitCost: unknown }[];
-}) {
-  const labor = wo.timeEntries.reduce((s, e) => s + ((e.minutes ?? 0) / 60) * Number(e.hourlyRate ?? 0), 0);
-  const minutes = wo.timeEntries.reduce((s, e) => s + (e.minutes ?? 0), 0);
+/**
+ * Labour + parts + other costs for a work order. Labour uses billed time: each technician's minutes rounded up
+ * to `block` (the company's billing period, see lib/billing-time.ts); `minutes` is the time actually logged.
+ */
+export function workOrderCosts(
+  wo: {
+    timeEntries: TimeEntryLike[];
+    otherCosts: { amount: unknown }[];
+    parts?: { quantity: unknown; unitCost: unknown }[];
+  },
+  block: number,
+) {
+  const time = billedTime(wo.timeEntries, block);
   const other = wo.otherCosts.reduce((s, c) => s + Number(c.amount), 0);
   const parts = (wo.parts ?? []).reduce((s, p) => s + Number(p.quantity) * Number(p.unitCost), 0);
-  return { minutes, labor, parts, other, total: labor + parts + other };
+  return { minutes: time.minutes, billedMinutes: time.billed, labor: time.labor, parts, other, total: time.labor + parts + other };
 }

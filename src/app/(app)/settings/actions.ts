@@ -27,6 +27,7 @@ import { erasedName, eraseMember, ErasureError } from "@/lib/erasure";
 import { emailLayout, sendEmail } from "@/lib/email";
 import { background } from "@/lib/notify";
 import { audit, changesOf } from "@/lib/audit";
+import { TIME_ROUNDING_OPTIONS } from "@/lib/billing-time";
 
 export type ActionState = { ok?: boolean; error?: string; inviteUrl?: string; inviteEmail?: string } | undefined;
 
@@ -54,6 +55,7 @@ const orgSchema = z.object({
   timezone: z.string().trim().min(1).max(64),
   currency: z.string().trim().length(3).toUpperCase(),
   defaultLocale: z.enum(LOCALES),
+  timeRounding: z.coerce.number().int().refine((v) => (TIME_ROUNDING_OPTIONS as readonly number[]).includes(v), "invalid"),
 });
 
 export async function updateOrgAction(_: FormResult, form: FormData): Promise<FormResult> {

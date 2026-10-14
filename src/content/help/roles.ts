@@ -60,7 +60,7 @@ When someone logs time on a work order, the app stores the time together with th
 - the custom role's rate, if they have a custom role with a rate;
 - otherwise the rate of their built-in role.
 
-Labour cost is the time multiplied by that stored rate. It appears in a work order's costs, in requests and in the cost reports (see [Reports](/help/reports)), for people allowed to **See costs**.
+Labour cost is the billed time multiplied by that stored rate. Billed time is each technician's time on the work order rounded up to the company's blocks (30 minutes by default, see [Organization](/help/organization)), so 34 minutes at 40 per hour cost 40. It appears in a work order's costs, in requests and in the cost reports (see [Reports](/help/reports)), for people allowed to **See costs**.
 
 > Rate changes only apply to time logged from now on. Time already recorded keeps the rate it was logged with, so changing a rate never rewrites past costs. The same is true when you move a person to another role.
 
@@ -143,7 +143,7 @@ Quando alguém regista tempo numa ordem de trabalho, a aplicação guarda o temp
 - o valor da função personalizada, se tiver uma função personalizada com valor;
 - caso contrário, o valor da sua função base.
 
-O custo de mão de obra é o tempo multiplicado por esse valor guardado. Aparece nos custos da ordem de trabalho, nos pedidos e nos relatórios de custos (veja [Relatórios](/help/reports)), para quem tem permissão para **Ver custos**.
+O custo de mão de obra é o tempo faturado multiplicado por esse valor guardado. O tempo faturado é o tempo de cada técnico na ordem de trabalho arredondado para cima aos blocos da empresa (30 minutos por defeito, veja [Empresa](/help/organization)), por isso 34 minutos a 40 por hora custam 40. Aparece nos custos da ordem de trabalho, nos pedidos e nos relatórios de custos (veja [Relatórios](/help/reports)), para quem tem permissão para **Ver custos**.
 
 > As alterações de valor só se aplicam ao tempo registado a partir de agora. O tempo já registado mantém o valor com que foi registado, por isso mudar um valor nunca altera custos passados. O mesmo acontece quando muda uma pessoa de função.
 

@@ -87,7 +87,7 @@ describe("work order parts cost", () => {
   it("adds parts into the work order total", () => {
     const parts = [{ quantity: "2", unitCost: "12.50" }, { quantity: 1.5, unitCost: 4 }];
     expect(partsCost(parts)).toBe(31);
-    const c = workOrderCosts({ timeEntries: [{ minutes: 60, hourlyRate: 45 }], otherCosts: [{ amount: 10 }], parts });
+    const c = workOrderCosts({ timeEntries: [{ minutes: 60, hourlyRate: 45 }], otherCosts: [{ amount: 10 }], parts }, 0);
     expect(c.parts).toBe(31);
     expect(c.total).toBe(86);
   });

@@ -531,7 +531,10 @@
     "minutes": "Minutes",
     "notePlaceholder": "Note (optional)",
     "running": "running",
-    "total": "Total"
+    "total": "Total",
+    "billed": "Billed",
+    "billedHint": "Each technician's time rounded up to blocks of {block} minutes (Settings → Organization).",
+    "billedFrom": "{billed} (logged {logged})"
   },
   "costs": {
     "title": "Costs",
@@ -542,7 +545,8 @@
     "parts": "Parts",
     "timeSpent": "Time spent",
     "hours": "{hours} h",
-    "other": "Other costs"
+    "other": "Other costs",
+    "timeBilled": "Time billed"
   },
   "files": {
     "title": "Photos & files",
@@ -1275,8 +1279,11 @@
       "firstResponse": "First response",
       "minutes": "Minutes logged",
       "downHours": "Hours down",
-      "degradedHours": "Hours degraded"
-    }
+      "degradedHours": "Hours degraded",
+      "billedMinutes": "Minutes billed"
+    },
+    "billedHoursCol": "Hours billed",
+    "billedHoursHint": "Hours charged: each technician's time per work order rounded up to the billing period. Utilisation uses the hours logged."
   },
   "scan": {
     "title": "Scan",
@@ -2121,7 +2128,8 @@
       "van": "Van",
       "direction": "Direction",
       "parts": "Parts",
-      "note": "Note"
+      "note": "Note",
+      "timeRounding": "Time billing blocks"
     }
   },
   "van": {
@@ -2162,5 +2170,12 @@
     "add": "Add serial number",
     "scan": "Read serial number with the camera",
     "remove": "Remove {serial}"
+  },
+  "timeBilling": {
+    "title": "Time billing",
+    "rounding": "Bill time in blocks of",
+    "hint": "Each technician's time on a work order is rounded up to whole blocks for labour cost and the service report (e.g. 34 minutes bill as 1 hour with 30-minute blocks). The time logged is kept as it is.",
+    "none": "No rounding (minutes logged)",
+    "block": "{minutes} minutes"
   }
 }
