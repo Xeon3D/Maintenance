@@ -29,7 +29,8 @@ and lighting. The user chose, and does not want re-litigated:
 1. Build a whole phase, including translations, tests and browser verification.
 2. Run `typecheck`, `lint` and `test`, then verify in the preview browser (details in §6).
 3. Commit at the end of the phase (the message style is in `git log`), ending with the
-   `Co-Authored-By: Claude …` trailer. The repo-local git identity is `xeon4 <xeon4d@gmail.com>`.
+   `Co-Authored-By: Claude …` trailer. The repo-local git identity is `Marcos Alves <malves@diniscoelho.pt>`
+   (since 2026-10-14; older commits are `xeon4`).
 4. Send a short summary covering: what's new, what was tested, what was fixed along the way,
    and things to know. Then ask whether to continue with the next phase.
 
@@ -57,6 +58,13 @@ are mostly UI and logic plus small additive migrations.
 ---
 
 ## 3. Environment (Windows 11)
+
+**Docker-only machines (2026-10-14):** a PC without Node can develop entirely in containers: a compose stack
+with `postgres:17-alpine` and `node:24-bookworm-slim` (repo bind-mounted at `/app`, named volumes for
+`node_modules` and `.next`, `WATCHPACK_POLLING=true`, port 3000), `.env` pointing at `db:5432`, and every
+`npm`/`npx` command run with `docker compose exec`. Turbopack misses **new** files over the Windows bind mount:
+restart `next dev` after adding a file. `npx playwright install --with-deps chromium` works in that container.
+
 
 - **Node 24** was installed after the Claude app started, so the app's inherited PATH lacks it.
   - PowerShell: prefix commands with
