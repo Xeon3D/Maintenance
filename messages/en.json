@@ -120,7 +120,7 @@
     "categories": "Categories"
   },
   "roles": {
-    "OWNER": "Owner",
+    "OWNER": "Super Admin",
     "ADMIN": "Administrator",
     "MANAGER": "Manager",
     "TECHNICIAN": "Technician",
@@ -131,11 +131,11 @@
     "builtIn": "Built-in roles",
     "builtInHint": "Leave a rate empty if you don't track costs for that role. Rate changes apply to time logged from now on.",
     "can": {
-      "OWNER": "Everything, including billing.",
-      "ADMIN": "Everything except billing: settings, users, approvals.",
-      "MANAGER": "Plans and assigns work, manages clients, stock and purchasing.",
-      "TECHNICIAN": "Does the work: work orders, checklists, time, parts.",
-      "VIEWER": "Observer: sees everything, changes nothing.",
+      "OWNER": "Everything, always. The only role that can change what the others may do.",
+      "ADMIN": "By default: everything except billing — settings, users, approvals.",
+      "MANAGER": "By default: plans and assigns work, manages clients, stock and purchasing.",
+      "TECHNICIAN": "By default: does the work — work orders, checklists, time, parts.",
+      "VIEWER": "By default: observer — sees everything, changes nothing.",
       "REQUESTER": "Client portal: their villas and requests only."
     },
     "notBillable": "No cost (doesn't log time)",
@@ -204,7 +204,7 @@
     "addMember": "Add member",
     "specialty": "Specialty",
     "noTeams": "No teams yet.",
-    "cannotChangeOwner": "The owner's role can't be changed."
+    "cannotChangeOwner": "The Super Admin's role can't be changed."
   },
   "validation": {
     "invalid": "Invalid value.",
@@ -888,7 +888,7 @@
     "shipping": "Shipping",
     "notesHint": "Printed on the PDF sent to the vendor.",
     "prefillLowStock": "Add this vendor's low-stock parts",
-    "awaitingApproval": "Waiting for an owner or admin to approve.",
+    "awaitingApproval": "Waiting for someone who can approve purchase orders.",
     "lines": "Items",
     "noLines": "No items yet.",
     "needLines": "Add at least one item first.",
@@ -1545,5 +1545,137 @@
     "pick": "Choose a date",
     "badDate": "Enter a valid date as DD/MM/YYYY.",
     "badTime": "Enter a time as HH:MM (24-hour)."
+  },
+  "perms": {
+    "title": "Permissions",
+    "hint": "What each role may do. Roles start with the defaults; tick or untick to change them. A custom role follows its access level until you change it here. Changes apply straight away to everyone in the role.",
+    "ownerOnly": "Only the Super Admin can change permissions.",
+    "always": "Always",
+    "fixedAll": "all, fixed",
+    "fixedClient": "fixed",
+    "customised": "Changed",
+    "reset": "Restore defaults",
+    "resetConfirm": "Put every role back to the default permissions?",
+    "staffApp": "Use the staff app",
+    "staffAppHint": "Always on for staff roles; client accounts only see the client portal."
+  },
+  "permGroup": {
+    "admin": "Administration",
+    "work": "Work",
+    "sites": "Clients, villas and assets",
+    "supply": "Stock and purchasing",
+    "insights": "Reports"
+  },
+  "perm": {
+    "org": {
+      "manage": {
+        "label": "Company settings",
+        "hint": "Company profile, privacy, retention, business hours; with the server password, Settings → Server."
+      }
+    },
+    "users": {
+      "manage": {
+        "label": "Users and roles",
+        "hint": "Invite, deactivate and erase people; change their role; role costs."
+      }
+    },
+    "teams": {
+      "manage": {
+        "label": "Teams",
+        "hint": "Create teams and choose their members."
+      }
+    },
+    "workOrders": {
+      "create": {
+        "label": "Create work orders",
+        "hint": "Open jobs and edit the ones they created or are assigned to."
+      },
+      "execute": {
+        "label": "Carry out work",
+        "hint": "Checklists, time, comments, sign-off and status; the field app."
+      },
+      "manage": {
+        "label": "Manage all work orders",
+        "hint": "Assign, edit and delete anyone's work orders; categories."
+      }
+    },
+    "requests": {
+      "create": {
+        "label": "Submit requests",
+        "hint": "Report a fault or ask for work."
+      },
+      "approve": {
+        "label": "Approve requests",
+        "hint": "Turn requests into work orders, or decline them."
+      }
+    },
+    "pm": {
+      "manage": {
+        "label": "Preventive maintenance",
+        "hint": "Schedules, meters and the scheduler."
+      }
+    },
+    "procedures": {
+      "manage": {
+        "label": "Procedures",
+        "hint": "The library of reusable checklists."
+      }
+    },
+    "clients": {
+      "manage": {
+        "label": "Clients and villas",
+        "hint": "Create and edit clients, contacts, villas and areas."
+      }
+    },
+    "contracts": {
+      "manage": {
+        "label": "Service contracts",
+        "hint": "Contracts, service levels and fees."
+      }
+    },
+    "assets": {
+      "manage": {
+        "label": "Assets",
+        "hint": "Create, edit and import equipment; QR labels."
+      }
+    },
+    "secrets": {
+      "view": {
+        "label": "See access codes",
+        "hint": "Villa codes and device passwords (every view is logged)."
+      }
+    },
+    "inventory": {
+      "use": {
+        "label": "Use parts",
+        "hint": "Take parts from stock onto work orders."
+      },
+      "manage": {
+        "label": "Manage stock",
+        "hint": "Parts, stock locations, counts and transfers."
+      }
+    },
+    "vendors": {
+      "manage": {
+        "label": "Vendors",
+        "hint": "Suppliers and their contacts."
+      }
+    },
+    "purchasing": {
+      "manage": {
+        "label": "Purchase orders",
+        "hint": "Create, send and receive purchase orders."
+      },
+      "approve": {
+        "label": "Approve purchase orders",
+        "hint": "Approve or reject orders waiting for approval."
+      }
+    },
+    "reports": {
+      "view": {
+        "label": "Reports",
+        "hint": "Dashboards, SLA, costs and exports."
+      }
+    }
   }
 }

@@ -2,10 +2,12 @@
 
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
-import { requirePermission } from "@/lib/context";
+import { requireOwner, requirePermission } from "@/lib/context";
 import { prisma } from "@/lib/db/client";
 import { optNumber, parseForm, str, type FormResult } from "@/lib/forms";
 import { CUSTOM_ROLE_ACCESS, RATED_ROLES, type RoleRates } from "@/lib/roles";
+import { builtInRoleToStore, customRoleToStore, EDITABLE_ROLES, GRANTABLE, isEditableRole, parseRolePermissions, rolePermissionsFor, type RolePermissions } from "@/lib/rbac";
+import { Prisma } from "@/generated/prisma/client";
 
 const rate = () => optNumber().refine((v) => v === null || (v >= 0 && v <= 100_000), "invalid");
 
@@ -61,4 +63,41 @@ export async function deleteJobRoleAction(id: string) {
   const ctx = await requirePermission("users.manage");
   await ctx.db.jobRole.deleteMany({ where: { id } });
   revalidatePath("/settings", "layout");
+}
+
+// ── Permissions (Super Admin only)
+
+/**
+ * Saves the permission matrix. Checkboxes are named "role:<ROLE>" / "job:<id>" with a permission as value.
+ * A role left equal to its default (or a custom role equal to its access level) is stored as "no override",
+ * so it keeps following the defaults.
+ */
+export async function saveRolePermissionsAction(_: FormResult, form: FormData): Promise<FormResult> {
+  const ctx = await requireOwner();
+  const pick = (key: string) => GRANTABLE.filter((p) => form.getAll(key).includes(p));
+  const before = parseRolePermissions(ctx.organization.rolePermissions);
+
+  const overrides: RolePermissions = {};
+  for (const r of EDITABLE_ROLES) {
+    const list = builtInRoleToStore(r, pick(`role:${r}`));
+    if (list) overrides[r] = list;
+  }
+  // Organization isn't a tenant-scoped model; scope by id explicitly.
+  await prisma.organization.update({ where: { id: ctx.organization.id }, data: { rolePermissions: Object.keys(overrides).length ? overrides : Prisma.DbNull } });
+
+  for (const j of await ctx.db.jobRole.findMany({ select: { id: true, access: true, permissions: true } })) {
+    if (!form.has(`present:job:${j.id}`) || !isEditableRole(j.access)) continue; // created after the page was opened: leave it alone
+    const list = customRoleToStore(j.permissions, pick(`job:${j.id}`), rolePermissionsFor(j.access, before), rolePermissionsFor(j.access, overrides));
+    await ctx.db.jobRole.update({ where: { id: j.id }, data: { permissions: list ?? Prisma.DbNull } });
+  }
+  revalidatePath("/", "layout");
+  return { ok: true };
+}
+
+/** Puts every role back to the default permissions. */
+export async function resetRolePermissionsAction() {
+  const ctx = await requireOwner();
+  await prisma.organization.update({ where: { id: ctx.organization.id }, data: { rolePermissions: Prisma.DbNull } });
+  await ctx.db.jobRole.updateMany({ data: { permissions: Prisma.DbNull } });
+  revalidatePath("/", "layout");
 }

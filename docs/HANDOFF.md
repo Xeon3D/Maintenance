@@ -172,10 +172,17 @@ restart `next dev` after adding a file. `npx playwright install --with-deps chro
   reached through a parent loaded via `ctx.db`.
 - **A model that gains `organizationId` must be added to `TENANT_MODELS`.** `tests/tenant-models.test.ts`
   enforces this.
-- **RBAC:** matrix in `src/lib/rbac.ts`. Use `ctx.can("x")` in pages (`notFound()` when denied) and
-  `requirePermission("x")` in server actions. Roles: OWNER, ADMIN, MANAGER, TECHNICIAN, REQUESTER
-  (the client portal) and VIEWER. Permissions for inventory, purchasing, vendors and reports
-  already exist in the matrix.
+- **RBAC:** default matrix in `src/lib/rbac.ts`. Use `ctx.can("x")` in pages (`notFound()` when denied) and
+  `requirePermission("x")` in server actions; never `can(role, …)` (it ignores the company's settings).
+  Roles: OWNER (shown as **"Super Admin"**), ADMIN, MANAGER, TECHNICIAN, REQUESTER (the client portal) and VIEWER.
+  - **Configurable permissions** (Settings → Roles, editable only by OWNER via `requireOwner()`): overrides for
+    ADMIN/MANAGER/TECHNICIAN/VIEWER in `Organization.rolePermissions`, and per custom role in `JobRole.permissions`
+    (null = follow its access level). `effectivePermissions()` resolves them; `ctx.can` and `membersWith()` use it.
+    OWNER always has everything; REQUESTER is fixed (portal users must never get internal permissions);
+    `internal.view` is always on for staff roles; `billing.manage` is OWNER-only. A new permission goes in
+    `PERMISSIONS` **and** `PERMISSION_GROUPS` (a test checks), with `perm.<key>.label/hint` messages.
+  - Structural checks stay on the role itself: REQUESTER = portal user, OWNER can't be changed or erased.
+  - Not to be confused with `User.isSuperAdmin` (unused; meant for a future platform console in phase 10).
 - **Custom roles** (`JobRole`, Settings → Roles): a name, a cost per hour and an access level (ADMIN,
   MANAGER or TECHNICIAN). A member in a custom role has `jobRoleId` set and `role` = its access level,
   so RBAC is unchanged; changing a role's access updates its members. Built-in role rates live in

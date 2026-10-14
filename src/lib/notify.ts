@@ -5,7 +5,7 @@ import en from "../../messages/en.json";
 import pt from "../../messages/pt.json";
 import { prisma } from "@/lib/db/client";
 import type { TenantDb } from "@/lib/db/tenant";
-import { PERMISSIONS, type Permission } from "@/lib/rbac";
+import { effectivePermissions, type Permission } from "@/lib/rbac";
 import { emailLayout, sendEmail } from "@/lib/email";
 import { brandColor, logoSrc } from "@/lib/branding";
 import { privacyPath } from "@/lib/privacy";
@@ -120,9 +120,11 @@ export async function notifyExternal(org: { id: string; name: string }, to: stri
   background(() => sendEmail({ to, subject: r.title, ...emailLayout({ ...brand, heading: r.title, paragraphs: r.body ? [r.body] : [], footer: t("externalFooter"), privacy: { label: t("privacy"), url: brand.privacyUrl } }) }));
 }
 
-/** Active members whose role has `permission` (e.g. everyone who can approve requests). */
+/** Active members who have `permission` with the company's permission settings (e.g. everyone who can approve requests). */
 export async function membersWith(db: TenantDb, permission: Permission, extra: { excludeRoles?: Role[] } = {}) {
-  const roles = (PERMISSIONS[permission] as readonly Role[]).filter((r) => !extra.excludeRoles?.includes(r));
-  const rows = await db.membership.findMany({ where: { active: true, role: { in: roles } }, select: { userId: true } });
-  return rows.map((r) => r.userId);
+  const rows = await db.membership.findMany({
+    where: { active: true, ...(extra.excludeRoles?.length ? { role: { notIn: extra.excludeRoles } } : {}) },
+    select: { userId: true, role: true, jobRole: { select: { permissions: true } }, organization: { select: { rolePermissions: true } } },
+  });
+  return rows.filter((r) => effectivePermissions(r.role, r.organization.rolePermissions, r.jobRole?.permissions).has(permission)).map((r) => r.userId);
 }

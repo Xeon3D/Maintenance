@@ -6,6 +6,7 @@ import { getContext } from "@/lib/context";
 import { CUSTOM_ROLE_ACCESS, parseRoleRates, RATED_ROLES } from "@/lib/roles";
 import { saveJobRoleAction, saveRoleRatesAction } from "./actions";
 import { DeleteJobRoleButton } from "./delete-button";
+import { PermissionsMatrix } from "./permissions-matrix";
 import { titled } from "@/lib/metadata";
 
 export const generateMetadata = titled("nav.roles");
@@ -30,7 +31,7 @@ export default async function RolesPage() {
   return (
     <>
       <PageHeader title={t("roles.title")} description={t("roles.description")} />
-      <div className="max-w-4xl space-y-6">
+      <div className="max-w-5xl space-y-6">
         <Card className="p-5">
           <h2 className="mb-1 font-medium">{t("roles.builtIn")}</h2>
           <p className="mb-4 text-sm text-muted">{t("roles.builtInHint")}</p>
@@ -81,6 +82,8 @@ export default async function RolesPage() {
             </div>
           </div>
         </Card>
+
+        <PermissionsMatrix rolePermissions={ctx.organization.rolePermissions} jobRoles={jobRoles} editable={ctx.role === "OWNER"} />
       </div>
     </>
   );

@@ -120,7 +120,7 @@
     "categories": "Categorias"
   },
   "roles": {
-    "OWNER": "Proprietário",
+    "OWNER": "Super Admin",
     "ADMIN": "Administrador",
     "MANAGER": "Gestor",
     "TECHNICIAN": "Técnico",
@@ -131,11 +131,11 @@
     "builtIn": "Funções base",
     "builtInHint": "Deixe o valor vazio se não controla custos dessa função. As alterações aplicam-se ao tempo registado a partir de agora.",
     "can": {
-      "OWNER": "Tudo, incluindo a faturação.",
-      "ADMIN": "Tudo exceto a faturação: definições, utilizadores, aprovações.",
-      "MANAGER": "Planeia e atribui trabalho, gere clientes, stock e compras.",
-      "TECHNICIAN": "Executa o trabalho: ordens de trabalho, listas de verificação, tempo, peças.",
-      "VIEWER": "Observação: vê tudo, não altera nada.",
+      "OWNER": "Tudo, sempre. A única função que pode alterar o que as outras podem fazer.",
+      "ADMIN": "Por defeito: tudo exceto a faturação — definições, utilizadores, aprovações.",
+      "MANAGER": "Por defeito: planeia e atribui trabalho, gere clientes, stock e compras.",
+      "TECHNICIAN": "Por defeito: executa o trabalho — ordens de trabalho, listas de verificação, tempo, peças.",
+      "VIEWER": "Por defeito: observação — vê tudo, não altera nada.",
       "REQUESTER": "Portal do cliente: apenas as suas moradias e pedidos."
     },
     "notBillable": "Sem custo (não regista tempo)",
@@ -204,7 +204,7 @@
     "addMember": "Adicionar membro",
     "specialty": "Especialidade",
     "noTeams": "Ainda não há equipas.",
-    "cannotChangeOwner": "A função do proprietário não pode ser alterada."
+    "cannotChangeOwner": "A função do Super Admin não pode ser alterada."
   },
   "validation": {
     "invalid": "Valor inválido.",
@@ -888,7 +888,7 @@
     "shipping": "Portes",
     "notesHint": "Aparece no PDF enviado ao fornecedor.",
     "prefillLowStock": "Adicionar as peças deste fornecedor com stock baixo",
-    "awaitingApproval": "A aguardar aprovação de um proprietário ou administrador.",
+    "awaitingApproval": "A aguardar aprovação de alguém que possa aprovar encomendas.",
     "lines": "Artigos",
     "noLines": "Ainda não há artigos.",
     "needLines": "Adicione primeiro pelo menos um artigo.",
@@ -1545,5 +1545,137 @@
     "pick": "Escolher data",
     "badDate": "Indique uma data válida no formato DD/MM/AAAA.",
     "badTime": "Indique uma hora no formato HH:MM (24 horas)."
+  },
+  "perms": {
+    "title": "Permissões",
+    "hint": "O que cada função pode fazer. As funções começam com as permissões por defeito; marque ou desmarque para as alterar. Uma função personalizada segue o seu nível de acesso até a alterar aqui. As alterações aplicam-se de imediato a todas as pessoas da função.",
+    "ownerOnly": "Só o Super Admin pode alterar as permissões.",
+    "always": "Sempre",
+    "fixedAll": "tudo, fixo",
+    "fixedClient": "fixo",
+    "customised": "Alterada",
+    "reset": "Repor as permissões por defeito",
+    "resetConfirm": "Repor as permissões por defeito em todas as funções?",
+    "staffApp": "Usar a app da equipa",
+    "staffAppHint": "Sempre ativo nas funções da equipa; as contas de cliente só veem o portal do cliente."
+  },
+  "permGroup": {
+    "admin": "Administração",
+    "work": "Trabalho",
+    "sites": "Clientes, moradias e ativos",
+    "supply": "Stock e compras",
+    "insights": "Relatórios"
+  },
+  "perm": {
+    "org": {
+      "manage": {
+        "label": "Definições da empresa",
+        "hint": "Perfil da empresa, privacidade, conservação de dados, horário; com a palavra-passe do servidor, Definições → Servidor."
+      }
+    },
+    "users": {
+      "manage": {
+        "label": "Utilizadores e funções",
+        "hint": "Convidar, desativar e apagar pessoas; mudar a função; custos das funções."
+      }
+    },
+    "teams": {
+      "manage": {
+        "label": "Equipas",
+        "hint": "Criar equipas e escolher os membros."
+      }
+    },
+    "workOrders": {
+      "create": {
+        "label": "Criar ordens de trabalho",
+        "hint": "Abrir trabalhos e editar os que criou ou lhe estão atribuídos."
+      },
+      "execute": {
+        "label": "Executar trabalho",
+        "hint": "Listas de verificação, tempo, comentários, assinatura e estado; a app de campo."
+      },
+      "manage": {
+        "label": "Gerir todas as ordens de trabalho",
+        "hint": "Atribuir, editar e eliminar as ordens de trabalho de qualquer pessoa; categorias."
+      }
+    },
+    "requests": {
+      "create": {
+        "label": "Fazer pedidos",
+        "hint": "Comunicar uma avaria ou pedir trabalho."
+      },
+      "approve": {
+        "label": "Aprovar pedidos",
+        "hint": "Transformar pedidos em ordens de trabalho, ou recusá-los."
+      }
+    },
+    "pm": {
+      "manage": {
+        "label": "Manutenção preventiva",
+        "hint": "Planos, contadores e o agendador."
+      }
+    },
+    "procedures": {
+      "manage": {
+        "label": "Procedimentos",
+        "hint": "A biblioteca de listas de verificação reutilizáveis."
+      }
+    },
+    "clients": {
+      "manage": {
+        "label": "Clientes e moradias",
+        "hint": "Criar e editar clientes, contactos, moradias e áreas."
+      }
+    },
+    "contracts": {
+      "manage": {
+        "label": "Contratos de serviço",
+        "hint": "Contratos, níveis de serviço e mensalidades."
+      }
+    },
+    "assets": {
+      "manage": {
+        "label": "Ativos",
+        "hint": "Criar, editar e importar equipamentos; etiquetas QR."
+      }
+    },
+    "secrets": {
+      "view": {
+        "label": "Ver códigos de acesso",
+        "hint": "Códigos das moradias e palavras-passe de equipamentos (cada consulta fica registada)."
+      }
+    },
+    "inventory": {
+      "use": {
+        "label": "Usar peças",
+        "hint": "Retirar peças do stock para ordens de trabalho."
+      },
+      "manage": {
+        "label": "Gerir stock",
+        "hint": "Peças, locais de stock, contagens e transferências."
+      }
+    },
+    "vendors": {
+      "manage": {
+        "label": "Fornecedores",
+        "hint": "Fornecedores e os seus contactos."
+      }
+    },
+    "purchasing": {
+      "manage": {
+        "label": "Encomendas",
+        "hint": "Criar, enviar e receber encomendas."
+      },
+      "approve": {
+        "label": "Aprovar encomendas",
+        "hint": "Aprovar ou rejeitar encomendas que aguardam aprovação."
+      }
+    },
+    "reports": {
+      "view": {
+        "label": "Relatórios",
+        "hint": "Painéis, SLA, custos e exportações."
+      }
+    }
   }
 }
