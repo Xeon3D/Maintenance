@@ -7,6 +7,7 @@ import type { AppContext } from "@/lib/context";
 import { dateInput } from "@/lib/forms";
 import { saveContractAction } from "./actions";
 import { ClientVillaFields, type ClientOption } from "./client-villa-fields";
+import { DateInput } from "@/components/date-input";
 
 export async function ContractForm({ ctx, contract, defaults }: { ctx: AppContext; contract?: ServiceContract; defaults?: { clientId?: string } }) {
   const t = await getTranslations();
@@ -46,11 +47,11 @@ export async function ContractForm({ ctx, contract, defaults }: { ctx: AppContex
           </Select>
         </Field>
         <Field label={t("contracts.startDate")}>
-          <Input name="startDate" type="date" defaultValue={dateInput(contract?.startDate ?? new Date())} required />
+          <DateInput name="startDate" defaultValue={dateInput(contract?.startDate ?? new Date())} required />
           <FieldError name="startDate" />
         </Field>
         <Field label={t("contracts.endDate")} hint={t("contracts.endDateHint")}>
-          <Input name="endDate" type="date" defaultValue={dateInput(contract?.endDate)} />
+          <DateInput name="endDate" defaultValue={dateInput(contract?.endDate)} />
           <FieldError name="endDate" />
         </Field>
       </div>

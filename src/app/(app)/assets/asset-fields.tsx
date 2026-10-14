@@ -8,6 +8,7 @@ import { CATEGORY_SUGGESTIONS } from "@/lib/asset-catalog";
 import { dateInput } from "@/lib/forms";
 import { descendantsOf, flattenTree } from "@/lib/tree";
 import { AssetStatus, Criticality, SystemType } from "@/generated/prisma/enums";
+import { DateInput } from "@/components/date-input";
 
 type Ref = { id: string; name: string; villaId: string; parentId: string | null };
 
@@ -189,10 +190,10 @@ export function AssetFields({
         </div>
         <div className="grid gap-4 sm:grid-cols-4">
           <Field label={t("assets.installDate")}>
-            <Input name="installDate" type="date" defaultValue={dateInput(asset.installDate)} />
+            <DateInput name="installDate" defaultValue={dateInput(asset.installDate)} />
           </Field>
           <Field label={t("assets.warrantyExpiry")}>
-            <Input name="warrantyExpiry" type="date" defaultValue={dateInput(asset.warrantyExpiry)} />
+            <DateInput name="warrantyExpiry" defaultValue={dateInput(asset.warrantyExpiry)} />
           </Field>
           <Field label={t("assets.purchaseCost")}>
             <Input name="purchaseCost" inputMode="decimal" defaultValue={asset.purchaseCost ?? ""} />

@@ -1538,5 +1538,12 @@
     "uses": "{n, plural, =0 {Not used} one {# work order} other {# work orders}}",
     "deleteConfirm": "Delete this category? It is removed from its work orders; the work orders stay.",
     "all": "All categories"
+  },
+  "dateInput": {
+    "datePlaceholder": "DD/MM/YYYY",
+    "timePlaceholder": "HH:MM",
+    "pick": "Choose a date",
+    "badDate": "Enter a valid date as DD/MM/YYYY.",
+    "badTime": "Enter a time as HH:MM (24-hour)."
   }
 }

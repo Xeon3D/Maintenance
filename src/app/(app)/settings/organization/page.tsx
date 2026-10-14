@@ -15,6 +15,7 @@ const WEEK = [1, 2, 3, 4, 5, 6, 0];
 import { updateOrgAction } from "../actions";
 import { BrandColorField, LogoUploader } from "./form";
 import { titled } from "@/lib/metadata";
+import { TimeInput } from "@/components/date-input";
 
 export const generateMetadata = titled("nav.organization");
 
@@ -134,9 +135,9 @@ export default async function OrgSettingsPage() {
                       <input type="checkbox" name={`open${d}`} defaultChecked={!!h} className="size-4 accent-brand" />
                       {weekday(d)}
                     </label>
-                    <Input name={`start${d}`} type="time" defaultValue={h?.start ?? "09:00"} className="w-28" aria-label={`${weekday(d)} ${t("businessHours.from")}`} />
+                    <TimeInput name={`start${d}`} defaultValue={h?.start ?? "09:00"} className="w-24" aria-label={`${weekday(d)} ${t("businessHours.from")}`} />
                     <span className="text-muted">–</span>
-                    <Input name={`end${d}`} type="time" defaultValue={h?.end ?? "18:00"} className="w-28" aria-label={`${weekday(d)} ${t("businessHours.to")}`} />
+                    <TimeInput name={`end${d}`} defaultValue={h?.end ?? "18:00"} className="w-24" aria-label={`${weekday(d)} ${t("businessHours.to")}`} />
                     <FieldError name={`end${d}`} />
                   </div>
                 );

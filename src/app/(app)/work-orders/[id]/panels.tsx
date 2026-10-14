@@ -10,6 +10,7 @@ import { Button, Field, Input } from "@/components/ui";
 import { MentionTextarea, type MentionMember } from "@/components/mention-textarea";
 import { SignaturePad, type SignaturePadHandle } from "@/components/signature-pad";
 import { uploadFile, type Uploaded } from "@/lib/upload-client";
+import { DateInput } from "@/components/date-input";
 import {
   addCommentAction,
   addCostAction,
@@ -87,7 +88,7 @@ export function TimeTracker({
         <ActionForm action={addTimeAction.bind(null, woId)} submitLabel={t("common.add")} className="rounded-md border border-border p-3">
           <div className="grid grid-cols-2 gap-2">
             <Field label={t("time.date")}>
-              <Input name="date" type="date" required defaultValue={new Date().toISOString().slice(0, 10)} />
+              <DateInput name="date" required defaultValue={new Date().toISOString().slice(0, 10)} />
             </Field>
             <Field label={t("time.minutes")}>
               <Input name="minutes" type="number" min={1} max={1440} required />

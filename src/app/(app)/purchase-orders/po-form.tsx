@@ -6,6 +6,7 @@ import type { AppContext } from "@/lib/context";
 import { dateInput } from "@/lib/forms";
 import { ACTIVE_STATUSES } from "@/lib/work-orders";
 import { savePoAction } from "./actions";
+import { DateInput } from "@/components/date-input";
 
 export async function PoForm({
   ctx,
@@ -61,7 +62,7 @@ export async function PoForm({
       </div>
       <div className="grid gap-4 sm:grid-cols-2">
         <Field label={t("po.expectedDate")}>
-          <Input name="expectedDate" type="date" defaultValue={dateInput(po?.expectedDate)} />
+          <DateInput name="expectedDate" defaultValue={dateInput(po?.expectedDate)} />
         </Field>
         <Field label={t("po.workOrder")} hint={t("po.workOrderHint")}>
           <Select name="workOrderId" defaultValue={po?.workOrderId ?? defaults?.workOrderId ?? ""}>

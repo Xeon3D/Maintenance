@@ -3,8 +3,9 @@
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { Input, Select } from "@/components/ui";
+import { Select } from "@/components/ui";
 import { cn } from "@/lib/utils";
+import { DateInput } from "@/components/date-input";
 
 const TABS = [
   { href: "/reports", key: "overview" },
@@ -47,9 +48,9 @@ export function ReportNav({ clients, villas, systems }: { clients: Option[]; vil
         </Select>
         {range === "custom" && (
           <>
-            <Input type="date" aria-label={t("reports.from")} className="w-auto" defaultValue={params.get("from") ?? ""} onChange={(e) => set({ from: e.target.value })} />
+            <DateInput aria-label={t("reports.from")} className="w-36" defaultValue={params.get("from") ?? ""} onChange={(v) => set({ from: v })} />
             <span className="text-sm text-muted">–</span>
-            <Input type="date" aria-label={t("reports.to")} className="w-auto" defaultValue={params.get("to") ?? ""} onChange={(e) => set({ to: e.target.value })} />
+            <DateInput aria-label={t("reports.to")} className="w-36" defaultValue={params.get("to") ?? ""} onChange={(v) => set({ to: v })} />
           </>
         )}
         <Select aria-label={t("villas.client")} value={clientId} onChange={(e) => set({ clientId: e.target.value, villaId: "" })}>

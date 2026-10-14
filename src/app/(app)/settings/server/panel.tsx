@@ -2,7 +2,7 @@
 
 import { useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { Download, Lock, RotateCcw, Trash2, Upload } from "lucide-react";
 import { Badge, Button, FormError, Table } from "@/components/ui";
 import type { FormResult } from "@/lib/forms";
@@ -163,7 +163,7 @@ export function BackupsTable({ rows, current, canRestore, timezone }: { rows: Ba
   const [error, setError] = useState<string | null>(null);
   const [waiting, setWaiting] = useState<number | null>(null);
   const [restoring, setRestoring] = useState(false);
-  const fmt = new Intl.DateTimeFormat(undefined, { dateStyle: "medium", timeStyle: "short", timeZone: timezone });
+  const fmt = new Intl.DateTimeFormat(useLocale(), { dateStyle: "medium", timeStyle: "short", timeZone: timezone });
 
   const restore = (row: BackupRow) => {
     const typed = prompt(t("restoreConfirm", { date: fmt.format(new Date(row.createdAt)), version: row.version }));
