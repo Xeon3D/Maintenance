@@ -237,6 +237,7 @@ model Organization {
   businessHours Json?
   // Permissions of the built-in staff roles, e.g. {"MANAGER": ["workOrders.manage", …]}; a missing role uses the defaults in lib/rbac.
   rolePermissions Json?
+  timeRounding   Int      @default(30) // billing period in minutes: each technician's time on a work order is rounded up to it (0 = none)
   // Who also gets e-mailed service reports: {"userIds": […], "roles": ["ACCOUNTANT", "job:<id>"], "emails": […]}.
   reportRecipients Json?
   privacyNotice String? // custom privacy notice (plain text) shown at /privacy/<slug>; null = built-in template

@@ -135,6 +135,8 @@ The **Time** panel records who worked on the job and for how long:
 
 Forgot to start the timer? Click **Log time** and enter the **Date**, the **Minutes** and an optional note. The list shows each entry and the **Total**. You can delete your own entries; managers can delete anyone's.
 
+Below the total, **Billed** shows the time that is charged: each technician's time on the job rounded up to whole blocks (30 minutes unless your company chose otherwise in [Settings → Organization](/help/organization)). For example, 34 minutes logged by one technician bill as 1 hour. The minutes logged stay as they are.
+
 ## Photos and files
 
 **Add photos or files** uploads pictures (JPEG, PNG, WebP) or PDFs of up to 15 MB, for example before-and-after photos or a commissioning sheet. Click a thumbnail to open it. You can delete your own files; managers can delete any.
@@ -156,7 +158,7 @@ The stock goes down straight away. The serial numbers are shown under the part (
 
 The **Costs** panel adds up what the job cost:
 
-- **Labour**: time logged, at the hourly rate of each person's role.
+- **Labour**: the billed time (each technician's time rounded up to the company's blocks), at the hourly rate of each person's role.
 - **Parts**: the parts used, at their unit cost.
 - Other costs added with **Add cost** (a description and an amount, for example crane hire or parking).
 - **Total**.
@@ -175,7 +177,7 @@ If nobody is there to sign, tick **Client absent** instead. The signature can be
 
 ## The service report
 
-**Service report** opens a PDF for the client with the job details, description, checklist answers, time, parts used (with their serial numbers), photos and the signature (or a note that the client was absent). It never includes costs.
+**Service report** opens a PDF for the client with the job details, description, checklist answers, the time billed per technician, parts used (with their serial numbers), photos and the signature (or a note that the client was absent). It never includes costs.
 
 To send it, use the **E-mail the service report** panel:
 
@@ -338,6 +340,8 @@ O painel **Tempo** regista quem trabalhou no trabalho e durante quanto tempo:
 
 Esqueceu-se de iniciar o cronómetro? Clique em **Registar tempo** e indique a **Data**, os **Minutos** e uma nota opcional. A lista mostra cada registo e o **Total**. Pode eliminar os seus próprios registos; os gestores podem eliminar os de qualquer pessoa.
 
+Por baixo do total, **Faturado** mostra o tempo que é cobrado: o tempo de cada técnico no trabalho arredondado para cima a blocos inteiros (30 minutos, a não ser que a empresa tenha escolhido outro valor em [Definições → Empresa](/help/organization)). Por exemplo, 34 minutos registados por um técnico são faturados como 1 hora. Os minutos registados mantêm-se.
+
 ## Fotografias e ficheiros
 
 **Adicionar fotografias ou ficheiros** carrega imagens (JPEG, PNG, WebP) ou PDF até 15 MB, por exemplo fotografias do antes e depois ou uma folha de comissionamento. Clique numa miniatura para a abrir. Pode eliminar os seus próprios ficheiros; os gestores podem eliminar qualquer um.
@@ -359,7 +363,7 @@ O stock desce de imediato. Os números de série aparecem por baixo da peça (**
 
 O painel **Custos** soma o que o trabalho custou:
 
-- **Mão de obra**: o tempo registado, ao preço por hora da função de cada pessoa.
+- **Mão de obra**: o tempo faturado (o tempo de cada técnico arredondado aos blocos da empresa), ao preço por hora da função de cada pessoa.
 - **Peças**: as peças usadas, ao custo unitário.
 - Outros custos acrescentados com **Adicionar custo** (uma descrição e um valor, por exemplo aluguer de grua ou estacionamento).
 - **Total**.
@@ -378,7 +382,7 @@ Se não estiver ninguém para assinar, marque **Cliente ausente**. A assinatura 
 
 ## O relatório de serviço
 
-**Relatório de serviço** abre um PDF para o cliente com os dados do trabalho, a descrição, as respostas da checklist, o tempo, as peças usadas (com os números de série), as fotografias e a assinatura (ou a indicação de que o cliente estava ausente). Nunca inclui custos.
+**Relatório de serviço** abre um PDF para o cliente com os dados do trabalho, a descrição, as respostas da checklist, o tempo faturado de cada técnico, as peças usadas (com os números de série), as fotografias e a assinatura (ou a indicação de que o cliente estava ausente). Nunca inclui custos.
 
 Para o enviar, use o painel **Enviar o relatório de serviço por e-mail**:
 

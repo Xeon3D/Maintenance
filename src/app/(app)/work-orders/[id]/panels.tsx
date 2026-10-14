@@ -42,12 +42,15 @@ export function TimeTracker({
   runningSince,
   canExecute,
   canDeleteAny,
+  billed,
 }: {
   woId: string;
   entries: TimeRow[];
   runningSince: string | null; // my running timer
   canExecute: boolean;
   canDeleteAny: boolean;
+  /** Time billed per technician (rounded up to the billing period); null when the company doesn't round. */
+  billed: { block: number; total: number; people: { name: string; minutes: number; billed: number }[] } | null;
 }) {
   const t = useTranslations();
   const [pending, start] = useTransition();
@@ -125,6 +128,24 @@ export function TimeTracker({
             <span>{t("time.total")}</span>
             <span className="tabular-nums">{formatDuration(total)}</span>
           </li>
+          {billed && billed.total > 0 && (
+            <li className="py-1.5">
+              <div className="flex justify-between font-medium">
+                <span title={t("time.billedHint", { block: billed.block })}>{t("time.billed")}</span>
+                <span className="tabular-nums">{formatDuration(billed.total)}</span>
+              </div>
+              {billed.people.length > 0 && (
+                <ul className="mt-0.5 space-y-0.5 text-xs text-muted">
+                  {billed.people.map((p) => (
+                    <li key={p.name} className="flex justify-between">
+                      <span>{p.name}</span>
+                      <span className="tabular-nums">{t("time.billedFrom", { billed: formatDuration(p.billed), logged: formatDuration(p.minutes) })}</span>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </li>
+          )}
         </ul>
       )}
     </div>

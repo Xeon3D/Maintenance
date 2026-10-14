@@ -8,6 +8,7 @@ import { getObject } from "@/lib/storage";
 import { letterhead } from "@/lib/letterhead";
 import { INTL_LOCALE, type Locale } from "@/i18n/config";
 import { ServiceReport, type ReportData } from "@/app/(app)/work-orders/[id]/report/report-pdf";
+import { billedTime, timeRoundingOf } from "@/lib/billing-time";
 
 // The client-facing PDF service report of a work order (no costs). Used by the download route and by
 // e-mailing (lib/report-email.ts). `where` scopes the work order (tenant + portal rules are the caller's);
@@ -56,6 +57,17 @@ export async function renderServiceReport(ctx: Pick<AppContext, "db" | "organiza
     const shown = (type === "NUMBER" || type === "METER_READING") && !isNaN(Number(value)) ? format.number(Number(value)) : value;
     return unit ? `${shown} ${unit}` : shown;
   };
+
+  // Client-facing time is the billed time: one line per technician, their time on this work order rounded up to
+  // the company's billing period (lib/billing-time.ts), with the dates and notes of their entries.
+  const billed = billedTime(wo.timeEntries, timeRoundingOf(ctx.organization.timeRounding));
+  const day = (d: Date) => format.dateTime(d, { dateStyle: "short" });
+  const timeRows = billed.people.map((p) => {
+    const mine = wo.timeEntries.filter((e) => (e.userId ?? "-") === p.userId);
+    const first = day(mine[0].startedAt);
+    const last = day(mine[mine.length - 1].startedAt);
+    return { who: mine[0].user.name, when: first === last ? first : `${first} – ${last}`, duration: duration(p.billed), note: mine.map((e) => e.note).filter(Boolean).join("; ") || null };
+  });
 
   const signatureIds = new Set([wo.signatureUrl, ...wo.items.filter((i) => i.type === "SIGNATURE").map((i) => i.value)]);
   const photoAtts = wo.attachments.filter((a) => !signatureIds.has(a.id)).slice(0, MAX_PHOTOS);
@@ -107,10 +119,10 @@ export async function renderServiceReport(ctx: Pick<AppContext, "db" | "organiza
         image: i.type === "SIGNATURE" && i.value ? await load(i.value) : null,
       })),
     ),
-    time: wo.timeEntries.map((e) => ({ who: e.user.name, when: format.dateTime(e.startedAt, { dateStyle: "short" }), duration: duration(e.minutes!), note: e.note })),
+    time: timeRows,
     // Parts used (quantities only: the report is client-facing, so no costs).
     parts: wo.parts.map((p) => ({ name: p.part.name, sku: p.part.sku, qty: `${format.number(Number(p.quantity))} ${p.part.unit}`, serials: p.serialNumbers })),
-    totalTime: duration(wo.timeEntries.reduce((s, e) => s + (e.minutes ?? 0), 0)),
+    totalTime: duration(billed.billed),
     photos: (await Promise.all(photoAtts.map((a) => getObject(a.url).catch(() => null)))).filter((b): b is Buffer => !!b),
     signature:
       wo.signatureUrl && wo.signedByName && wo.signedAt

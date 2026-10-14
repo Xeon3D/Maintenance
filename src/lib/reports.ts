@@ -4,6 +4,7 @@ import type { ReportFilters } from "@/lib/report-filters";
 import { compliance, SLA_STATUS_LOGS, slaCalendar, slaStates, type SlaState } from "@/lib/sla";
 import { countByBucket, hoursBetween, mean, median, pmCompliance, sumBy, timeInStatus, workingDays } from "@/lib/report-math";
 import { ACTIVE_STATUSES, workOrderCosts } from "@/lib/work-orders";
+import { billedTime, timeRoundingOf } from "@/lib/billing-time";
 import { villaAccess } from "@/lib/portal-scope";
 import type { Prisma } from "@/generated/prisma/client";
 import type { Priority, SystemType, WorkOrderType } from "@/generated/prisma/enums";
@@ -29,7 +30,7 @@ export function woScope(f: ReportFilters): Prisma.WorkOrderWhereInput {
 const inRange = (f: ReportFilters) => ({ gte: f.from, lte: f.to });
 
 const costSelect = {
-  timeEntries: { select: { minutes: true, hourlyRate: true } },
+  timeEntries: { select: { userId: true, minutes: true, hourlyRate: true } },
   parts: { select: { quantity: true, unitCost: true } },
   otherCosts: { select: { amount: true } },
 } as const;
@@ -64,7 +65,8 @@ export async function overview(ctx: Ctx, f: ReportFilters, now = new Date()) {
   const responses = opened.filter((w) => REACTIVE_TYPES.includes(w.type) && w.firstResponseAt).map((w) => hoursBetween(w.createdAt, w.firstResponseAt!));
   const calendar = slaCalendar(ctx.organization);
   const sla = opened.filter((w) => w.contract).map((w) => slaStates(w, w.contract, now, calendar));
-  const cost = opened.reduce((s, w) => s + workOrderCosts(w).total, 0);
+  const block = timeRoundingOf(ctx.organization.timeRounding);
+  const cost = opened.reduce((s, w) => s + workOrderCosts(w, block).total, 0);
   const trend = countByBucket({ opened: opened.map((w) => w.createdAt), completed: completed.map((w) => w.completedAt) }, f.from, f.to);
 
   return {
@@ -196,7 +198,8 @@ export async function costReport(ctx: Ctx, f: ReportFilters) {
       select: { clientId: true, monthlyFee: true, startDate: true, endDate: true },
     }),
   ]);
-  const rows = wos.map((w) => ({ ...w, cost: workOrderCosts(w) }));
+  const block = timeRoundingOf(ctx.organization.timeRounding);
+  const rows = wos.map((w) => ({ ...w, cost: workOrderCosts(w, block) }));
   type Row = (typeof rows)[number];
   const group = (key: (r: Row) => { id: string; name: string } | null) => {
     const m = new Map<string, { id: string; name: string; labor: number; parts: number; other: number; total: number; count: number }>();
@@ -249,21 +252,26 @@ export async function technicianReport(ctx: Ctx, f: ReportFilters) {
     }),
     ctx.db.workOrder.findMany({ where: { ...scope, status: "DONE", completedAt: inRange(f), completedById: { not: null } }, select: { completedById: true } }),
   ]);
-  const people = new Map<string, { id: string; name: string; minutes: number; labor: number; jobs: Set<number>; completed: number }>();
+  const people = new Map<string, { id: string; name: string; minutes: number; billed: number; labor: number; jobs: Set<number>; completed: number }>();
+  const block = timeRoundingOf(ctx.organization.timeRounding);
+  // Hours worked are the minutes logged (utilisation); labour and billed hours use each technician's time per
+  // work order rounded up to the billing period.
   withTime.forEach((w, i) => {
-    for (const e of w.timeEntries) {
-      const p = people.get(e.userId) ?? { id: e.userId, name: e.user.name, minutes: 0, labor: 0, jobs: new Set<number>(), completed: 0 };
-      p.minutes += e.minutes ?? 0;
-      p.labor += ((e.minutes ?? 0) / 60) * Number(e.hourlyRate ?? 0);
+    const names = new Map(w.timeEntries.map((e) => [e.userId, e.user.name]));
+    for (const t of billedTime(w.timeEntries, block).people) {
+      const p = people.get(t.userId) ?? { id: t.userId, name: names.get(t.userId) ?? "", minutes: 0, billed: 0, labor: 0, jobs: new Set<number>(), completed: 0 };
+      p.minutes += t.minutes;
+      p.billed += t.billed;
+      p.labor += t.labor;
       p.jobs.add(i);
-      people.set(e.userId, p);
+      people.set(t.userId, p);
     }
   });
   const doneBy = sumBy(completed, (w) => w.completedById, () => 1);
   const missing = doneBy.filter(([id]) => !people.has(id)).map(([id]) => id);
   if (missing.length) {
     const users = await ctx.db.membership.findMany({ where: { userId: { in: missing } }, select: { user: { select: { id: true, name: true } } } });
-    for (const u of users) people.set(u.user.id, { id: u.user.id, name: u.user.name, minutes: 0, labor: 0, jobs: new Set(), completed: 0 });
+    for (const u of users) people.set(u.user.id, { id: u.user.id, name: u.user.name, minutes: 0, billed: 0, labor: 0, jobs: new Set(), completed: 0 });
   }
   for (const [id, n] of doneBy) {
     const p = people.get(id);
@@ -273,7 +281,7 @@ export async function technicianReport(ctx: Ctx, f: ReportFilters) {
   return {
     availableHours: available,
     people: [...people.values()]
-      .map((p) => ({ id: p.id, name: p.name, hours: p.minutes / 60, labor: p.labor, jobs: p.jobs.size, completed: p.completed, utilisation: available ? p.minutes / 60 / available : null }))
+      .map((p) => ({ id: p.id, name: p.name, hours: p.minutes / 60, billedHours: p.billed / 60, labor: p.labor, jobs: p.jobs.size, completed: p.completed, utilisation: available ? p.minutes / 60 / available : null }))
       .sort((a, b) => b.hours - a.hours),
   };
 }

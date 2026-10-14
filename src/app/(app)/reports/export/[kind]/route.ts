@@ -4,6 +4,7 @@ import { parseReportFilters } from "@/lib/report-filters";
 import { assetReport, costReport, slaReport, technicianReport, woScope } from "@/lib/reports";
 import { SLA_STATUS_LOGS, slaCalendar, slaStates } from "@/lib/sla";
 import { workOrderCosts } from "@/lib/work-orders";
+import { timeRoundingOf } from "@/lib/billing-time";
 import { csvResponse, money, moneyColumns, toCsv, type Cell, type Column } from "@/lib/csv";
 
 const r2 = (n: number | null) => (n === null ? null : Math.round(n * 100) / 100);
@@ -35,7 +36,7 @@ export async function GET(req: Request, { params }: RouteContext<"/reports/expor
           asset: { select: { name: true } },
           contract: { select: { name: true, responseTimeHours: true, resolutionTimeHours: true, businessHoursOnly: true, pauseOnHold: true } },
           statusLogs: SLA_STATUS_LOGS,
-          timeEntries: { select: { minutes: true, hourlyRate: true } },
+          timeEntries: { select: { userId: true, minutes: true, hourlyRate: true } },
           parts: { select: { quantity: true, unitCost: true } },
           otherCosts: { select: { amount: true } },
         },
@@ -44,17 +45,17 @@ export async function GET(req: Request, { params }: RouteContext<"/reports/expor
       header = [
         t("reports.csv.number"), t("wo.title"), t("wo.type"), t("common.status"), t("wo.priority"), t("assets.system"),
         t("villas.client"), t("assets.villa"), t("wo.asset"), t("wo.createdAt"), t("reports.csv.firstResponse"), t("wo.completedAt"),
-        t("contracts.contract"), t("contracts.responseShort"), t("contracts.resolutionShort"), t("reports.csv.minutes"),
+        t("contracts.contract"), t("contracts.responseShort"), t("contracts.resolutionShort"), t("reports.csv.minutes"), t("reports.csv.billedMinutes"),
         money(t("costs.labor")), money(t("costs.parts")), money(t("reports.otherCosts")), money(t("costs.total")),
       ];
       rows = wos.map((w) => {
-        const c = workOrderCosts(w);
+        const c = workOrderCosts(w, timeRoundingOf(ctx.organization.timeRounding));
         const s = w.contract ? slaStates(w, w.contract, now, slaCalendar(ctx.organization)) : null;
         return [
           w.number, w.title, t(`woType.${w.type}`), t(`woStatus.${w.status}`), t(`priority.${w.priority}`), sys(w.system),
           w.villa?.client.name, w.villa?.name, w.asset?.name, when(w.createdAt), when(w.firstResponseAt), when(w.completedAt),
           w.contract?.name, s && s.response !== "na" ? t(`sla.${s.response}`) : null, s && s.resolution !== "na" ? t(`sla.${s.resolution}`) : null,
-          c.minutes, r2(c.labor), r2(c.parts), r2(c.other), r2(c.total),
+          c.minutes, c.billedMinutes, r2(c.labor), r2(c.parts), r2(c.other), r2(c.total),
         ];
       });
       break;
@@ -77,8 +78,8 @@ export async function GET(req: Request, { params }: RouteContext<"/reports/expor
     }
     case "technicians": {
       const r = await technicianReport(ctx, f);
-      header = [t("reports.person"), t("reports.hoursCol"), `${t("reports.utilisation")} (%)`, t("reports.jobsWorked"), t("reports.jobsCompleted"), money(t("costs.labor"))];
-      rows = r.people.map((p) => [p.name, r2(p.hours), p.utilisation === null ? null : r2(p.utilisation * 100), p.jobs, p.completed, r2(p.labor)]);
+      header = [t("reports.person"), t("reports.hoursCol"), t("reports.billedHoursCol"), `${t("reports.utilisation")} (%)`, t("reports.jobsWorked"), t("reports.jobsCompleted"), money(t("costs.labor"))];
+      rows = r.people.map((p) => [p.name, r2(p.hours), r2(p.billedHours), p.utilisation === null ? null : r2(p.utilisation * 100), p.jobs, p.completed, r2(p.labor)]);
       break;
     }
     case "assets": {

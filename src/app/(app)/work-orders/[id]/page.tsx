@@ -9,6 +9,7 @@ import { slaCalendar, slaStates } from "@/lib/sla";
 import { getContext } from "@/lib/context";
 import { fileUrl } from "@/lib/storage";
 import { ACTIVE_STATUSES, workOrderCosts } from "@/lib/work-orders";
+import { billedTime, timeRoundingOf } from "@/lib/billing-time";
 import { cn } from "@/lib/utils";
 import { StatusBar } from "./status-bar";
 import { Checklist } from "./checklist";
@@ -86,7 +87,8 @@ export default async function WorkOrderPage({ params }: PageProps<"/work-orders/
   const overdue = !!wo.dueDate && wo.dueDate < now && ACTIVE_STATUSES.includes(wo.status);
 
   const money = (n: number) => format.number(n, { style: "currency", currency: ctx.organization.currency });
-  const costs = workOrderCosts(wo);
+  const block = timeRoundingOf(ctx.organization.timeRounding);
+  const costs = workOrderCosts(wo, block);
   const dt = (d: Date) => format.dateTime(d, { dateStyle: "medium", timeStyle: "short" });
   const reportEmail = ctx.can("workOrders.sendReport") ? await reportRecipients(ctx, wo.id) : null;
   const sla = wo.contract ? slaStates(wo, wo.contract, now, slaCalendar(ctx.organization)) : null;
@@ -246,6 +248,19 @@ export default async function WorkOrderPage({ params }: PageProps<"/work-orders/
                 label: format.dateTime(e.startedAt, { dateStyle: "short" }),
                 note: e.note,
               }))}
+              billed={
+                block
+                  ? {
+                      block,
+                      total: costs.billedMinutes,
+                      people: billedTime(wo.timeEntries, block).people.map((p) => ({
+                        name: wo.timeEntries.find((e) => e.userId === p.userId)?.user.name ?? "",
+                        minutes: p.minutes,
+                        billed: p.billed,
+                      })),
+                    }
+                  : null
+              }
             />
           </Card>
 

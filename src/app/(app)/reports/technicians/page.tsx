@@ -26,6 +26,7 @@ export default async function TechnicianReportPage({ searchParams }: PageProps<"
               <tr>
                 <th>{t("reports.person")}</th>
                 <th className="text-right">{t("reports.hoursCol")}</th>
+                <th className="text-right" title={t("reports.billedHoursHint")}>{t("reports.billedHoursCol")}</th>
                 <th className="text-right">{t("reports.utilisation")}</th>
                 <th className="text-right">{t("reports.jobsWorked")}</th>
                 <th className="text-right">{t("reports.jobsCompleted")}</th>
@@ -37,6 +38,7 @@ export default async function TechnicianReportPage({ searchParams }: PageProps<"
                 <tr key={p.id}>
                   <td className="font-medium">{p.name}</td>
                   <td className="text-right tabular-nums">{num(p.hours)}</td>
+                  <td className="text-right tabular-nums">{num(p.billedHours)}</td>
                   <td className="text-right tabular-nums">{pct(p.utilisation)}</td>
                   <td className="text-right tabular-nums">{p.jobs}</td>
                   <td className="text-right tabular-nums">{p.completed}</td>

@@ -10,6 +10,7 @@ import { RequestStatusBadge } from "@/components/request-badge";
 import { getContext } from "@/lib/context";
 import { fileUrl } from "@/lib/storage";
 import { assignableUsers, workOrderCosts } from "@/lib/work-orders";
+import { timeRoundingOf } from "@/lib/billing-time";
 import { approveRequestAction, declineRequestAction } from "../actions";
 import { ApproveFields } from "./approve-fields";
 
@@ -32,7 +33,7 @@ export default async function RequestPage({ params }: PageProps<"/requests/[id]"
           id: true,
           number: true,
           status: true,
-          timeEntries: { select: { minutes: true, hourlyRate: true } },
+          timeEntries: { select: { userId: true, minutes: true, hourlyRate: true } },
           otherCosts: { select: { amount: true } },
           parts: { select: { quantity: true, unitCost: true } },
         },
@@ -92,7 +93,7 @@ export default async function RequestPage({ params }: PageProps<"/requests/[id]"
           )}
           {r.status === "APPROVED" && r.workOrder && ctx.can("costs.view") && (() => {
             // What this request has cost so far: time (at each person's role rate), parts and other costs.
-            const c = workOrderCosts(r.workOrder);
+            const c = workOrderCosts(r.workOrder, timeRoundingOf(ctx.organization.timeRounding));
             const money = (n: number) => format.number(n, { style: "currency", currency: ctx.organization.currency });
             return (
               <Card className="p-5 text-sm">
@@ -100,6 +101,12 @@ export default async function RequestPage({ params }: PageProps<"/requests/[id]"
                 <dl className="grid grid-cols-[1fr_auto] gap-y-1.5">
                   <dt className="text-muted">{t("costs.timeSpent")}</dt>
                   <dd className="text-right tabular-nums">{t("costs.hours", { hours: Math.round((c.minutes / 60) * 100) / 100 })}</dd>
+                  {c.billedMinutes !== c.minutes && (
+                    <>
+                      <dt className="text-muted">{t("costs.timeBilled")}</dt>
+                      <dd className="text-right tabular-nums">{t("costs.hours", { hours: Math.round((c.billedMinutes / 60) * 100) / 100 })}</dd>
+                    </>
+                  )}
                   <dt className="text-muted">{t("costs.labor")}</dt>
                   <dd className="text-right tabular-nums">{money(c.labor)}</dd>
                   {c.parts > 0 && (

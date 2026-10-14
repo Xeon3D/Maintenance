@@ -6,6 +6,7 @@ import { ActionForm, FieldError } from "@/components/action-form";
 import { getContext } from "@/lib/context";
 import { brandColor, DEFAULT_BRAND, logoSrc } from "@/lib/branding";
 import { TIMEZONES } from "@/lib/timezones";
+import { TIME_ROUNDING_OPTIONS, timeRoundingOf } from "@/lib/billing-time";
 import { privacyPath } from "@/lib/privacy";
 import { parseRetention, RETENTION_KEYS, RETENTION_MAX } from "@/lib/retention-rules";
 import { parseBusinessHours } from "@/lib/sla-clock";
@@ -134,6 +135,19 @@ export default async function OrgSettingsPage() {
                 <Select name="defaultLocale" defaultValue={o.defaultLocale}>
                   <option value="en">English</option>
                   <option value="pt">Português</option>
+                </Select>
+              </Field>
+            </div>
+
+            <h2 className="border-t border-border pt-5 font-medium">{t("timeBilling.title")}</h2>
+            <div className="grid gap-4 sm:grid-cols-2">
+              <Field label={t("timeBilling.rounding")} hint={t("timeBilling.hint")}>
+                <Select name="timeRounding" defaultValue={String(timeRoundingOf(o.timeRounding))}>
+                  {TIME_ROUNDING_OPTIONS.map((m) => (
+                    <option key={m} value={m}>
+                      {m === 0 ? t("timeBilling.none") : t("timeBilling.block", { minutes: m })}
+                    </option>
+                  ))}
                 </Select>
               </Field>
             </div>
