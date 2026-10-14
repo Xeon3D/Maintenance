@@ -156,14 +156,23 @@ async function doBackup(kind: BackupKind) {
     await rm(part, { force: true });
     await rm(`${part}.enc`, { force: true });
   }
-  await prune();
+  const removed = await prune();
+  // Off-server copies (e-mail / cloud): in the background, except before an update, which replaces this
+  // container right after — then they get up to 10 minutes to finish first.
+  const copies = import("@/lib/backup-copies").then(({ copyBackup }) => copyBackup(path.join(dir, name), kind, removed));
+  if (kind === "pre-update") await Promise.race([copies, new Promise((r) => setTimeout(r, COPY_WAIT_MS))]);
   return name;
 }
 
+const COPY_WAIT_MS = 10 * 60_000;
+
+/** Deletes the backups the schedule no longer keeps; returns their names. */
 async function prune() {
   const settings = await getServerSettings();
   const names = (await listBackups()).map((b) => b.name);
-  for (const n of backupsToPrune(names, settings.backups)) await rm(path.join(backupDir(), n), { force: true });
+  const removed = backupsToPrune(names, settings.backups);
+  for (const n of removed) await rm(path.join(backupDir(), n), { force: true });
+  return removed;
 }
 
 export function createBackup(kind: BackupKind = "manual") {

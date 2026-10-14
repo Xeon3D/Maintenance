@@ -13,9 +13,14 @@ import { BackupError, createBackup, deleteBackup, restartSoon, restoreBackup, up
 import { checkForUpdate, updaterConfigured } from "@/lib/updates";
 import { getTranslations } from "next-intl/server";
 import { encryptField } from "@/lib/crypto";
-import { emailLayout, sendTestEmail } from "@/lib/email";
+import { emailLayout, sendEmail, sendTestEmail } from "@/lib/email";
 import { EMAIL_PROVIDERS, SMTP_SECURITY, validFrom, type EmailProvider, type EmailSettings, type SmtpSecurity } from "@/lib/email-settings";
-import { isEmail } from "@/lib/report-recipients";
+import { isEmail, parseEmailList } from "@/lib/report-recipients";
+import { mkdtemp, rm, stat, writeFile } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import path from "node:path";
+import { cloudTarget, removeCloudCopy } from "@/lib/backup-copies";
+import { CLOUD_PROVIDERS, cleanFolder, COPY_KINDS, MAX_EMAIL_MB, type BackupCopies, type CloudProvider } from "@/lib/backup-copies-settings";
 
 const PAGE = "/settings/server";
 
@@ -92,6 +97,7 @@ export async function backupNowAction(): Promise<FormResult> {
 export async function deleteBackupAction(name: string) {
   await requireServerAdmin();
   await deleteBackup(name).catch(() => undefined);
+  void removeCloudCopy(name); // when mirroring deletes to the cloud folder
   revalidatePath(PAGE);
 }
 
@@ -194,4 +200,114 @@ export async function saveEmailAction(_: EmailResult, form: FormData): Promise<E
   await updateServerSettings({ email: read.settings });
   revalidatePath(PAGE);
   return { ok: true };
+}
+
+// ── Backup copies (e-mail / cloud)
+
+export type CopiesResult = { ok?: boolean; error?: string; fieldErrors?: Record<string, string>; detail?: string; tested?: string } | undefined;
+
+/** Reads the form; secret fields left blank keep their stored value. */
+function copiesFromForm(form: FormData, current: BackupCopies): { copies: BackupCopies } | { fieldErrors: Record<string, string> } {
+  const get = (k: string) => String(form.get(k) ?? "").trim();
+  const errors: Record<string, string> = {};
+  const to = parseEmailList(get("emailTo"));
+  if (to.invalid.length) errors.emailTo = "badEmails";
+  const emailEnabled = form.get("emailEnabled") === "on";
+  if (emailEnabled && !to.emails.length) errors.emailTo = "too_small";
+  const maxMb = Number(get("emailMaxMb") || 20);
+  if (!(maxMb >= 1 && maxMb <= MAX_EMAIL_MB)) errors.emailMaxMb = "invalid";
+  const provider = (CLOUD_PROVIDERS as readonly string[]).includes(get("provider")) ? (get("provider") as CloudProvider) : "off";
+  const webdavUrl = get("webdavUrl").replace(/\/+$/, "");
+  if (provider === "webdav" && !/^https?:\/\/\S+$/i.test(webdavUrl)) errors.webdavUrl = "invalid_url";
+  const keep = (field: string, stored: string | null) => (get(field) ? encryptField(get(field)) : stored);
+  const kinds = (field: string) => COPY_KINDS.filter((k) => form.getAll(field).includes(k));
+  const c = current.cloud;
+  const odClientId = get("odClientId");
+  const gdClientId = get("gdClientId");
+  const copies: BackupCopies = {
+    email: { enabled: emailEnabled, to: to.emails.slice(0, 5), kinds: kinds("emailKinds"), encryptedOnly: form.get("emailEncryptedOnly") === "on", maxMb: Math.round(maxMb) },
+    cloud: {
+      provider,
+      kinds: kinds("cloudKinds"),
+      folder: cleanFolder(get("folder")) || c.folder,
+      mirrorDeletes: form.get("mirrorDeletes") === "on",
+      onedrive: {
+        tenant: get("odTenant") || "common",
+        clientId: odClientId,
+        clientSecretEnc: keep("odClientSecret", c.onedrive.clientSecretEnc),
+        siteUrl: get("odSiteUrl"),
+        // A different app registration invalidates the stored sign-in.
+        refreshTokenEnc: odClientId === c.onedrive.clientId ? c.onedrive.refreshTokenEnc : null,
+        account: odClientId === c.onedrive.clientId ? c.onedrive.account : null,
+      },
+      gdrive: {
+        clientId: gdClientId,
+        clientSecretEnc: keep("gdClientSecret", c.gdrive.clientSecretEnc),
+        refreshTokenEnc: gdClientId === c.gdrive.clientId ? c.gdrive.refreshTokenEnc : null,
+        account: gdClientId === c.gdrive.clientId ? c.gdrive.account : null,
+        folderId: c.gdrive.folderId,
+        folderPath: c.gdrive.folderPath,
+      },
+      webdav: { url: webdavUrl, user: get("webdavUser"), passwordEnc: keep("webdavPassword", c.webdav.passwordEnc) },
+    },
+  };
+  if (form.get("odSiteUrl") && get("odSiteUrl") && !/^https:\/\/[^/\s]+\.sharepoint\.com\/\S*$/i.test(get("odSiteUrl"))) errors.odSiteUrl = "invalid_url";
+  return Object.keys(errors).length ? { fieldErrors: errors } : { copies };
+}
+
+/** Saves the copy settings; with intent=testEmail / testCloud it checks that channel with what is in the form. */
+export async function saveBackupCopiesAction(_: CopiesResult, form: FormData): Promise<CopiesResult> {
+  await requireServerAdmin();
+  const current = (await getServerSettings()).backupCopies;
+  const read = copiesFromForm(form, current);
+  if ("fieldErrors" in read) return { error: "validation", fieldErrors: read.fieldErrors };
+  const intent = form.get("intent");
+
+  if (intent === "testEmail") {
+    if (!read.copies.email.to.length) return { error: "validation", fieldErrors: { emailTo: "too_small" } };
+    const app = await getAppName();
+    const t = await getTranslations("backupCopies.mail");
+    try {
+      for (const to of read.copies.email.to) await sendEmail({ to, subject: t("testSubject", { app }), ...emailLayout({ org: app, heading: t("testSubject", { app }), paragraphs: [t("testBody")] }) });
+    } catch (e) {
+      return { error: "backupCopies.testFailed", detail: e instanceof Error ? e.message.slice(0, 300) : String(e) };
+    }
+    return { ok: true, tested: read.copies.email.to.join(", ") };
+  }
+
+  if (intent === "testCloud") {
+    const target = cloudTarget(read.copies.cloud);
+    if (!target) return { error: "backupCopies.cloudNotReady" };
+    const dir = await mkdtemp(path.join(tmpdir(), "copy-test-"));
+    const file = path.join(dir, "connection-test.txt");
+    try {
+      await writeFile(file, `Connection test from ${await getAppName()} at ${new Date().toISOString()}\n`);
+      const size = (await stat(file)).size;
+      await target.upload(file, "connection-test.txt", size);
+      const listed = await target.list();
+      await target.remove("connection-test.txt");
+      if (!listed.includes("connection-test.txt")) return { error: "backupCopies.testFailed", detail: "uploaded, but not found in the folder listing" };
+    } catch (e) {
+      return { error: "backupCopies.testFailed", detail: e instanceof Error ? e.message.slice(0, 300) : String(e) };
+    } finally {
+      await rm(dir, { recursive: true, force: true });
+    }
+    return { ok: true, tested: read.copies.cloud.folder };
+  }
+
+  await updateServerSettings({ backupCopies: read.copies });
+  revalidatePath(PAGE);
+  return { ok: true };
+}
+
+/** Forgets the stored OneDrive / Google sign-in. */
+export async function disconnectCloudAction(provider: "onedrive" | "gdrive") {
+  await requireServerAdmin();
+  const s = (await getServerSettings()).backupCopies;
+  const cloud =
+    provider === "onedrive"
+      ? { ...s.cloud, onedrive: { ...s.cloud.onedrive, refreshTokenEnc: null, account: null } }
+      : { ...s.cloud, gdrive: { ...s.cloud.gdrive, refreshTokenEnc: null, account: null, folderId: null, folderPath: null } };
+  await updateServerSettings({ backupCopies: { ...s, cloud } });
+  revalidatePath(PAGE);
 }

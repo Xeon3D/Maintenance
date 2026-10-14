@@ -17,10 +17,19 @@ import { BackupNowButton, BackupsTable, UpdateButton, UploadBackup } from "./pan
 import { titled } from "@/lib/metadata";
 import { EmailForm } from "./email-form";
 import { deliveryStatus } from "@/lib/email";
+import { BackupCopiesForm } from "./backup-copies-form";
+import { copyStatus } from "@/lib/backup-copies";
+import { cloudRedirectUri } from "@/lib/cloud/oauth-paths";
+
+// Results of coming back from Microsoft / Google (Settings → Server → Backup copies → Connect).
+const CLOUD_RESULTS = ["connected", "denied", "failed", "badState", "locked", "noRefresh", "missingApp"];
 
 export const generateMetadata = titled("nav.server");
 
-export default async function ServerSettingsPage() {
+export default async function ServerSettingsPage({ searchParams }: PageProps<"/settings/server">) {
+  const sp = await searchParams;
+  const cloudResult = typeof sp.cloud === "string" ? sp.cloud : null;
+  const cloudDetail = typeof sp.detail === "string" ? sp.detail.slice(0, 200) : null;
   const ctx = await getContext();
   if (!ctx.can("org.manage")) notFound();
   const t = await getTranslations();
@@ -52,7 +61,8 @@ export default async function ServerSettingsPage() {
     );
   }
 
-  const [settings, update, backups, mailStatus] = await Promise.all([getServerSettings(), checkForUpdate(), listBackups(), deliveryStatus()]);
+  const [settings, update, backups, mailStatus, copies] = await Promise.all([getServerSettings(), checkForUpdate(), listBackups(), deliveryStatus(), copyStatus()]);
+  const bc = settings.backupCopies.cloud;
   const s = settings.backups;
   const available = backupsAvailable();
   const busy = busyState();
@@ -237,6 +247,34 @@ export default async function ServerSettingsPage() {
               timezone={s.timezone}
             />
           </div>
+        </Card>
+
+        {/* ── Backup copies (e-mail / cloud) */}
+        <Card id="backup-copies" className="scroll-mt-20 p-6">
+          <h2 className="mb-1 font-medium">{t("backupCopies.title")}</h2>
+          <p className="mb-4 text-sm text-muted">{t("backupCopies.hint")}</p>
+          {cloudResult && (
+            <p className={`mb-4 rounded-md px-3 py-2 text-sm ${cloudResult === "connected" ? "bg-green-50 text-green-800" : "bg-red-50 text-red-800"}`}>
+              {t(`backupCopies.oauth.${CLOUD_RESULTS.includes(cloudResult) ? cloudResult : "failed"}` as never)} {cloudDetail && <span className="break-all">({cloudDetail})</span>}
+            </p>
+          )}
+          <BackupCopiesForm
+            backupsEncrypted={!!backupPassword()}
+            redirectUri={await cloudRedirectUri()}
+            last={{ email: copies.email ?? null, cloud: copies.cloud ?? null }}
+            values={{
+              email: settings.backupCopies.email,
+              cloud: {
+                provider: bc.provider,
+                kinds: bc.kinds,
+                folder: bc.folder,
+                mirrorDeletes: bc.mirrorDeletes,
+                onedrive: { tenant: bc.onedrive.tenant, clientId: bc.onedrive.clientId, hasSecret: !!bc.onedrive.clientSecretEnc, siteUrl: bc.onedrive.siteUrl, account: bc.onedrive.account, connected: !!bc.onedrive.refreshTokenEnc },
+                gdrive: { clientId: bc.gdrive.clientId, hasSecret: !!bc.gdrive.clientSecretEnc, account: bc.gdrive.account, connected: !!bc.gdrive.refreshTokenEnc },
+                webdav: { url: bc.webdav.url, user: bc.webdav.user, hasPassword: !!bc.webdav.passwordEnc },
+              },
+            }}
+          />
         </Card>
 
         {factoryResetEnabled() && (

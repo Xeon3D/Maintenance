@@ -55,6 +55,12 @@ because it acts on the whole installation rather than one company:
   the app restarts afterwards. Backups go to `/backups` — map it to another disk, and download copies
   off the server now and then. Backups made by a newer version can't be restored on an older one.
   With `BACKUP_PASSWORD` set, new backups are encrypted (a lock icon marks them) and restore/upload decrypt them.
+  An older backup restores on a newer version: its database is brought up to date by the migrations at restart.
+- **Backup copies** — as each backup is made, e-mail it (up to 5 addresses; choose which kinds, whether only
+  encrypted ones are sent, and the largest attachment — bigger ones send a notice instead) and/or copy it to a cloud
+  folder: **OneDrive / SharePoint**, **Google Drive** (both need an OAuth app registered once; the page shows the
+  redirect URI and the steps) or **WebDAV** (Nextcloud, NAS…). Backups the schedule removes are removed from the
+  folder too (optional). *Send test e-mail* and *Test upload* check the settings; the last result is shown.
 
 ### Updating from 0.3.0
 
