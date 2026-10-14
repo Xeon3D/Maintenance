@@ -1,5 +1,6 @@
 import { getContext, type AppContext } from "@/lib/context";
 import { getObject } from "@/lib/storage";
+import { portalScopes } from "@/lib/portal-scope";
 
 // Files are immutable, so the attachment id doubles as ETag. `no-cache` makes the browser revalidate
 // on every view (auth is re-checked; unchanged files get a cheap 304), so nothing stays viewable after sign-out.
@@ -9,11 +10,10 @@ const CACHE = "private, no-cache";
 async function portalCanSee(ctx: AppContext, att: { requestId: string | null; workOrderId: string | null }) {
   const clientId = ctx.membership.clientId;
   if (ctx.role !== "REQUESTER" || !clientId) return false;
-  if (att.workOrderId && (await ctx.db.workOrder.count({ where: { id: att.workOrderId, clientVisible: true, villa: { clientId } } }))) return true;
-  if (att.requestId) {
-    const n = await ctx.db.request.count({ where: { id: att.requestId, OR: [{ villa: { clientId } }, { requesterId: ctx.user.id }] } });
-    if (n) return true;
-  }
+  // Same reach as the portal: villas the client owns or manages for another owner (lib/portal-scope.ts).
+  const scope = portalScopes(clientId, ctx.user.id);
+  if (att.workOrderId && (await ctx.db.workOrder.count({ where: { id: att.workOrderId, ...scope.workOrderWhere } }))) return true;
+  if (att.requestId && (await ctx.db.request.count({ where: { id: att.requestId, ...scope.requestWhere } }))) return true;
   return false;
 }
 

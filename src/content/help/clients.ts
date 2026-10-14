@@ -57,7 +57,7 @@ When a work order is finished, its PDF service report can be e-mailed from the w
 
 ## Portal access for client users
 
-Clients can sign in to the client portal to see their villas, send requests and follow the jobs shared with them. Portal users are invited from [Settings → Users](/help/users):
+Clients can sign in to the client portal. It opens on their properties; each property has two buttons: **Report a problem** (a new request) and **Earlier requests** (what they asked for and the jobs shared with them, with the service report of each finished job). Portal users are invited from [Settings → Users](/help/users):
 
 1. Click **Invite user** and type the person's e-mail.
 2. Choose the role **Client (requester)**.
@@ -128,7 +128,7 @@ Quando uma ordem de trabalho termina, o relatório de serviço em PDF pode ser e
 
 ## Acesso ao portal para utilizadores do cliente
 
-Os clientes podem entrar no portal do cliente para ver as suas moradias, enviar pedidos e acompanhar os trabalhos partilhados com eles. Os utilizadores do portal são convidados em [Definições → Utilizadores](/help/users):
+Os clientes podem entrar no portal do cliente. O portal abre nas suas propriedades; cada propriedade tem dois botões: **Reportar um problema** (um pedido novo) e **Pedidos anteriores** (o que pediram e os trabalhos partilhados com eles, com o relatório de serviço de cada trabalho concluído). Os utilizadores do portal são convidados em [Definições → Utilizadores](/help/users):
 
 1. Clique em **Convidar utilizador** e escreva o email da pessoa.
 2. Escolha a função **Cliente (requerente)**.

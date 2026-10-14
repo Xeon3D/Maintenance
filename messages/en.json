@@ -717,16 +717,12 @@
   },
   "portal": {
     "title": "Client portal",
-    "subtitle": "Report a problem and follow the work on your properties.",
     "newRequest": "Report a problem",
     "newRequestHint": "Tell us what's wrong. Photos help our technicians arrive prepared.",
     "noVillas": "Your account isn't linked to any property yet. Please contact us.",
     "yourVillas": "Your properties",
     "inProgress": "{count, plural, one {# job in progress} other {# jobs in progress}}",
     "allGood": "No open work",
-    "yourRequests": "Your requests",
-    "noRequests": "You haven't reported anything yet.",
-    "recentWork": "Recently completed",
     "report": "Report",
     "whereInHouse": "Where in the house?",
     "whichEquipment": "Which equipment?",
@@ -766,8 +762,11 @@
     "stepInProgress": "Technician on it",
     "stepDone": "Completed",
     "downloadReport": "Download service report",
-    "workHistory": "Work history",
-    "installedSystems": "Installed systems"
+    "pickVilla": "Choose a property to report a problem or see earlier requests and their reports.",
+    "pastRequests": "Earlier requests",
+    "pastRequestsHint": "What you asked for and the work done, with the service reports.",
+    "noPastRequests": "Nothing here yet.",
+    "requestNumber": "Request R{number}"
   },
   "vendors": {
     "description": "Suppliers, subcontractors and manufacturers you buy parts and equipment from.",

@@ -11,7 +11,7 @@ Problems reported by clients, from the client portal or by scanning a QR label o
 
 Clients don't create work orders themselves: they send a request, and your team decides what to do with it.
 
-- **Client portal**: a client with a portal account clicks **Report a problem**, picks the villa, the area and the equipment if they know it, describes the problem, says how urgent it is and can add up to 4 photos.
+- **Client portal**: a client with a portal account opens one of their properties, clicks **Report a problem**, picks the area and the equipment if they know it, describes the problem, says how urgent it is and can add up to 4 photos.
 - **QR label**: every asset has a QR label (see [Assets](/help/assets)). Anyone who scans it with a phone gets a short form for that equipment, without needing an account; they leave their name and contact details. Clients who are signed in go to the portal form instead, already filled in with the equipment, and staff go to the asset's page.
 
 When a request arrives, everyone who can approve requests gets a notification, and the number of pending requests appears next to **Requests** in the menu.
@@ -77,7 +77,7 @@ Problemas reportados pelos clientes, a partir do portal do cliente ou ao digital
 
 Os clientes não criam ordens de trabalho: enviam um pedido e a sua equipa decide o que fazer com ele.
 
-- **Portal do cliente**: um cliente com conta no portal clica em **Reportar um problema**, escolhe a moradia, a divisão e o equipamento, se souber, descreve o problema, indica a urgência e pode juntar até 4 fotografias.
+- **Portal do cliente**: um cliente com conta no portal abre uma das suas propriedades, clica em **Reportar um problema**, escolhe a divisão e o equipamento, se souber, descreve o problema, indica a urgência e pode juntar até 4 fotografias.
 - **Etiqueta QR**: cada equipamento tem uma etiqueta QR (veja [Equipamentos](/help/assets)). Quem a digitalizar com o telemóvel recebe um formulário curto para esse equipamento, sem precisar de conta; deixa o nome e os contactos. Os clientes com sessão iniciada vão para o formulário do portal, já preenchido com o equipamento, e os colaboradores vão para a página do equipamento.
 
 Quando chega um pedido, todas as pessoas que podem aprovar pedidos recebem uma notificação, e o número de pedidos pendentes aparece junto a **Pedidos** no menu.
