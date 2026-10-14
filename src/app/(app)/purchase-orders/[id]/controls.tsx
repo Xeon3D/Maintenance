@@ -1,11 +1,14 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import Link from "next/link";
 import { useTranslations } from "next-intl";
-import { Ban, Check, CornerUpLeft, PackagePlus, Send, ShoppingCart, Trash2, Undo2 } from "lucide-react";
-import { Button } from "@/components/ui";
+import { Ban, Check, CornerUpLeft, PackagePlus, Pencil, Send, ShoppingCart, Trash2, Undo2 } from "lucide-react";
+import { FieldError, FieldErrorsProvider } from "@/components/action-form";
+import { Button, Input } from "@/components/ui";
+import { useActionForm } from "@/lib/use-action-form";
 import type { PoAction } from "@/lib/inventory-math";
-import { addLowStockLinesAction, deletePoAction, poTransitionAction } from "../actions";
+import { addLowStockLinesAction, deletePoAction, poTransitionAction, updateLineAction } from "../actions";
 
 const ICONS = { submit: Send, approve: Check, reject: CornerUpLeft, order: ShoppingCart, cancel: Ban, reopen: Undo2 };
 
@@ -75,5 +78,75 @@ export function AddLowStockButton({ poId }: { poId: string }) {
       </Button>
       {msg && <span className="text-xs text-muted">{msg}</span>}
     </span>
+  );
+}
+
+export type DraftLine = { id: string; description: string; quantity: number; unitCost: number; unit: string | null; sku: string | null; partHref: string | null };
+
+/** A draft PO line: read-only cells with a pencil that turns the row into an inline editor. */
+export function DraftLineRow({ poId, line, display, remove }: { poId: string; line: DraftLine; display: { quantity: string; unitCost: string; total: string }; remove: React.ReactNode }) {
+  const t = useTranslations();
+  const [state, submit, pending] = useActionForm(updateLineAction.bind(null, poId, line.id));
+  // The editor stays open until a save succeeds: remember which result was current when it opened.
+  const [openedAt, setOpenedAt] = useState<{ state: typeof state } | null>(null);
+  const editing = !!openedAt && !(state?.ok && state !== openedAt.state);
+  const setEditing = (on: boolean) => setOpenedAt(on ? { state } : null);
+
+  if (editing) {
+    return (
+      <tr>
+        <td colSpan={5}>
+          <form method="post" onSubmit={submit} className="flex flex-wrap items-start gap-2">
+            <FieldErrorsProvider errors={state?.fieldErrors}>
+              <div className="min-w-48 flex-1">
+                <Input name="description" defaultValue={line.description} required maxLength={300} aria-label={t("po.item")} autoFocus />
+                <FieldError name="description" />
+              </div>
+              <div className="w-28">
+                <Input name="quantity" type="number" min="0.001" step="any" defaultValue={line.quantity} required aria-label={t("stock.quantity")} className="text-right" />
+                <FieldError name="quantity" />
+              </div>
+              <div className="w-32">
+                <Input name="unitCost" type="number" min="0" step="0.01" defaultValue={line.unitCost} required aria-label={t("parts.unitCost")} className="text-right" />
+                <FieldError name="unitCost" />
+              </div>
+              <Button size="sm" disabled={pending} className="h-9">
+                {t("common.save")}
+              </Button>
+              <Button size="sm" type="button" variant="ghost" className="h-9" onClick={() => setEditing(false)}>
+                {t("common.cancel")}
+              </Button>
+              {state?.error && state.error !== "validation" && <p className="w-full text-xs text-danger">{t.has(state.error) ? t(state.error) : t("common.somethingWrong")}</p>}
+            </FieldErrorsProvider>
+          </form>
+        </td>
+      </tr>
+    );
+  }
+  return (
+    <tr>
+      <td>
+        {line.partHref ? (
+          <Link href={line.partHref} className="hover:text-brand">
+            {line.description}
+          </Link>
+        ) : (
+          line.description
+        )}
+        {line.sku && <div className="font-mono text-xs text-muted">{line.sku}</div>}
+        {!line.partHref && <div className="text-xs text-muted">{t("po.freeText")}</div>}
+      </td>
+      <td className="text-right tabular-nums">
+        {display.quantity} <span className="text-xs text-muted">{line.unit}</span>
+      </td>
+      <td className="text-right tabular-nums">{display.unitCost}</td>
+      <td className="text-right tabular-nums">{display.total}</td>
+      <td className="w-16 whitespace-nowrap text-right">
+        <button type="button" title={t("common.edit")} onClick={() => setEditing(true)} className="rounded p-1.5 text-muted hover:bg-gray-100 hover:text-brand">
+          <Pencil className="size-4" />
+        </button>
+        {remove}
+      </td>
+    </tr>
   );
 }

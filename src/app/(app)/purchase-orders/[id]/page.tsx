@@ -14,7 +14,7 @@ import { PO_RECEIVABLE, poActions, poTotals, remainingQty } from "@/lib/inventor
 import { cn } from "@/lib/utils";
 import { addLineAction, deleteLineAction, deletePoAttachmentAction, receiveAction } from "../actions";
 import { PoForm } from "../po-form";
-import { AddLowStockButton, PoWorkflow } from "./controls";
+import { AddLowStockButton, DraftLineRow, PoWorkflow } from "./controls";
 
 export default async function PurchaseOrderPage({ params }: PageProps<"/purchase-orders/[id]">) {
   const { id } = await params;
@@ -140,6 +140,17 @@ export default async function PurchaseOrderPage({ params }: PageProps<"/purchase
                 </thead>
                 <tbody>
                   {po.lines.map((l) => {
+                    if (draft) {
+                      return (
+                        <DraftLineRow
+                          key={l.id}
+                          poId={po.id}
+                          line={{ id: l.id, description: l.description, quantity: Number(l.quantity), unitCost: Number(l.unitCost), unit: l.part?.unit ?? null, sku: l.part?.sku ?? null, partHref: l.part ? `/parts/${l.part.id}` : null }}
+                          display={{ quantity: format.number(Number(l.quantity)), unitCost: money(Number(l.unitCost)), total: money(Number(l.quantity) * Number(l.unitCost)) }}
+                          remove={<ConfirmIconButton action={deleteLineAction.bind(null, po.id, l.id)} />}
+                        />
+                      );
+                    }
                     const rec = Number(l.receivedQuantity);
                     const full = remainingQty(l) === 0;
                     return (

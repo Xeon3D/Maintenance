@@ -389,8 +389,7 @@ markers), Message, VerificationToken (password reset).
 ## 8. Plan for the next phases
 
 ### Phase 6 — Inventory & purchasing (✅ done; notes for later)
-- Not done, possible follow-ups: barcode scanning (phase 9 PWA), editing PO lines in place (delete +
-  re-add today), PO emailing to the vendor (phase 7 email), technicians restocking their own van
+- Not done, possible follow-ups: barcode scanning (phase 9 PWA), PO emailing to the vendor (phase 7 email), technicians restocking their own van
   (transfers need `inventory.manage`), a stock-valuation report (phase 8).
 - Deleting a WO keeps its stock movements (parts were physically used); only "return" puts stock back.
 

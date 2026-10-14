@@ -113,6 +113,24 @@ export async function addLineAction(poId: string, _: FormResult, form: FormData)
   });
 }
 
+const lineEditSchema = z.object({
+  description: str(300),
+  quantity: z.coerce.number().finite().positive().max(1_000_000),
+  unitCost: z.coerce.number().finite().min(0).max(10_000_000),
+});
+
+/** Edits a line of a draft in place (description, quantity, unit cost). */
+export async function updateLineAction(poId: string, lineId: string, _: FormResult, form: FormData): Promise<FormResult> {
+  const parsed = parseForm(lineEditSchema, form);
+  if (parsed.error) return parsed.error;
+  return guarded(async () => {
+    const { ctx, po } = await draftPo(poId);
+    const { count } = await ctx.db.purchaseOrderLine.updateMany({ where: { id: lineId, purchaseOrderId: po.id }, data: parsed.data });
+    if (!count) throw new InventoryError("invalidRef");
+    revalidatePath(path(poId));
+  });
+}
+
 export async function deleteLineAction(poId: string, lineId: string) {
   const { ctx, po } = await draftPo(poId);
   await ctx.db.purchaseOrderLine.deleteMany({ where: { id: lineId, purchaseOrderId: po.id } });
