@@ -14,8 +14,9 @@ import { TIMEZONES } from "@/lib/timezones";
 import { SCHEDULED_KINDS } from "@/lib/backup-schedule";
 import { checkUpdatesAction, lockAction, saveGeneralAction, saveScheduleAction, unlockAction } from "./actions";
 import { BackupNowButton, BackupsTable, UpdateButton, UploadBackup } from "./panel";
+import { titled } from "@/lib/metadata";
 
-export const metadata = { title: "Server" };
+export const generateMetadata = titled("nav.server");
 
 export default async function ServerSettingsPage() {
   const ctx = await getContext();

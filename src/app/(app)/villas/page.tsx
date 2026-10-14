@@ -7,8 +7,9 @@ import { FilterBar, Pagination } from "@/components/list-controls";
 import { EmptyState } from "@/components/empty-state";
 import { getContext } from "@/lib/context";
 import { pageOf, PAGE_SIZE, searchWhere, sp } from "@/lib/list";
+import { titled } from "@/lib/metadata";
 
-export const metadata = { title: "Villas" };
+export const generateMetadata = titled("nav.villas");
 
 export default async function VillasPage({ searchParams }: PageProps<"/villas">) {
   const ctx = await getContext();

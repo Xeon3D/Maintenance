@@ -6,8 +6,9 @@ import { getContext } from "@/lib/context";
 import { RecentWorkOrders } from "@/components/recent-work-orders";
 import { ACTIVE_STATUSES } from "@/lib/work-orders";
 import { lowStockParts } from "@/lib/inventory";
+import { titled } from "@/lib/metadata";
 
-export const metadata = { title: "Dashboard" };
+export const generateMetadata = titled("nav.dashboard");
 
 export default async function DashboardPage() {
   const ctx = await getContext();

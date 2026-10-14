@@ -14,8 +14,9 @@ import { Priority, SystemType, WorkOrderStatus } from "@/generated/prisma/enums"
 import { woFilter, WO_ORDER } from "./filter";
 import { BoardView } from "./board";
 import { CalendarView } from "./calendar";
+import { titled } from "@/lib/metadata";
 
-export const metadata = { title: "Work orders" };
+export const generateMetadata = titled("nav.workOrders");
 
 const WO_LIST_INCLUDE = {
   villa: { select: { id: true, name: true } },

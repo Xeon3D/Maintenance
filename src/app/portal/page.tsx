@@ -6,8 +6,9 @@ import { WorkOrderStatusBadge } from "@/components/badges";
 import { RequestStatusBadge } from "@/components/request-badge";
 import { getPortalContext } from "@/lib/portal";
 import { ACTIVE_STATUSES } from "@/lib/work-orders";
+import { titled } from "@/lib/metadata";
 
-export const metadata = { title: "Portal" };
+export const generateMetadata = titled("portal.title");
 
 export default async function PortalHome() {
   const ctx = await getPortalContext();

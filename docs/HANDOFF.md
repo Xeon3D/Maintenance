@@ -218,7 +218,7 @@ are mostly UI and logic plus small additive migrations.
   `node scripts/merge-messages.mjs en <file>` (and the same for `pt`).
 - ICU plurals are used, e.g. `pm.every.MONTHLY` has `=3 {Quarterly}`. Don't create a key that is
   also a namespace: `pm.every` vs `pm.every.DAILY` broke once.
-- Known gap: `metadata.title` strings are English-only.
+- Browser titles: `export const generateMetadata = titled("nav.x")` (`src/lib/metadata.ts`), never a static English `metadata.title`.
 
 ### Files and secrets
 - **Storage:** `src/lib/storage.ts` (`putObject/getObject/deleteObject`). Refs look like
@@ -376,7 +376,6 @@ markers), Message, VerificationToken (password reset).
 5. **The user should rotate the Neon password.** `.env` then needs the new URL.
 
 **Smaller**
-- Browser `<title>`s are English-only (`export const metadata` in pages; switch to `generateMetadata` with translations).
 - `NextIntlClientProvider` ships every message to the client (fine now; scope it later for performance).
 - CSV asset import inserts one row at a time (slow near the 2,000-row limit).
 - Staff can't create a request manually (they create WOs directly). Probably fine.

@@ -14,8 +14,9 @@ import { parseBusinessHours } from "@/lib/sla-clock";
 const WEEK = [1, 2, 3, 4, 5, 6, 0];
 import { updateOrgAction } from "../actions";
 import { BrandColorField, LogoUploader } from "./form";
+import { titled } from "@/lib/metadata";
 
-export const metadata = { title: "Organization" };
+export const generateMetadata = titled("nav.organization");
 
 const CURRENCIES = ["EUR", "GBP", "USD", "AED", "BRL", "CHF"];
 

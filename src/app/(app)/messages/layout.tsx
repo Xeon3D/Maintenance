@@ -5,8 +5,9 @@ import { getContext } from "@/lib/context";
 import { listConversations } from "@/lib/conversations";
 import { excerpt } from "@/lib/mentions";
 import { ConversationList } from "./conversation-list";
+import { titled } from "@/lib/metadata";
 
-export const metadata = { title: "Messages" };
+export const generateMetadata = titled("nav.messages");
 
 export default async function MessagesLayout({ children }: { children: React.ReactNode }) {
   const ctx = await getContext();

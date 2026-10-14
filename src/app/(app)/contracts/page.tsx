@@ -9,8 +9,9 @@ import { getContext } from "@/lib/context";
 import { pageOf, PAGE_SIZE, searchWhere, sp } from "@/lib/list";
 import { ContractStatus } from "@/generated/prisma/enums";
 import { ContractStatusBadge } from "./status-badge";
+import { titled } from "@/lib/metadata";
 
-export const metadata = { title: "Service contracts" };
+export const generateMetadata = titled("nav.contracts");
 
 export default async function ContractsPage({ searchParams }: PageProps<"/contracts">) {
   const ctx = await getContext();

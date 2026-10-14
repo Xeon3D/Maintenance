@@ -4,8 +4,9 @@ import { PageHeader } from "@/components/ui";
 import { getContext } from "@/lib/context";
 import { SystemType } from "@/generated/prisma/enums";
 import { ReportNav } from "./report-nav";
+import { titled } from "@/lib/metadata";
 
-export const metadata = { title: "Reports" };
+export const generateMetadata = titled("nav.reports");
 
 export default async function ReportsLayout({ children }: { children: React.ReactNode }) {
   const ctx = await getContext();

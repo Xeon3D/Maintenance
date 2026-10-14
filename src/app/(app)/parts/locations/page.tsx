@@ -10,8 +10,9 @@ import { getContext } from "@/lib/context";
 import { StockLocationType } from "@/generated/prisma/enums";
 import type { StockLocation } from "@/generated/prisma/client";
 import { saveLocationAction, setLocationArchivedAction } from "../actions";
+import { titled } from "@/lib/metadata";
 
-export const metadata = { title: "Stock locations" };
+export const generateMetadata = titled("stock.locations");
 
 const ICON = { WAREHOUSE: Warehouse, VAN: Truck, SITE: House };
 
