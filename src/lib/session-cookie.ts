@@ -29,3 +29,9 @@ export function isPageLoad(method: string, headers: Headers) {
 export function needsRenewal(issuedAt: unknown, now = Math.floor(Date.now() / 1000)) {
   return typeof issuedAt === "number" && now - issuedAt > RENEW_AFTER;
 }
+
+/** The Auth.js session cookie, in either name, including chunks ("….0", "….1") of a large token. */
+export const isSessionCookie = (name: string) => /^(__Secure-)?authjs\.session-token(\.\d+)?$/.test(name);
+
+/** Options that delete a session cookie (a "__Secure-" cookie can only be changed with `secure`). */
+export const expiredSessionCookie = (name: string) => ({ path: "/", maxAge: 0, httpOnly: true, sameSite: "lax" as const, secure: name.startsWith("__Secure-") });

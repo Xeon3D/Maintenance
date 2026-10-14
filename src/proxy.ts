@@ -3,7 +3,7 @@ import { encode, getToken } from "next-auth/jwt";
 import { isPageLoad, needsRenewal, SESSION_MAX_AGE, sessionCookieName, usesSecureCookie } from "@/lib/session-cookie";
 
 // Routes reachable without signing in.
-const PUBLIC_PREFIXES = ["/login", "/signup", "/invite", "/forgot-password", "/factory-reset", "/reset-password/", "/r/", "/api/auth", "/api/cron/", "/sw.js", "/offline.html", "/manifest.webmanifest", "/api/org-logo/", "/api/version", "/privacy"]; // cron routes check CRON_SECRET
+const PUBLIC_PREFIXES = ["/login", "/signup", "/invite", "/forgot-password", "/factory-reset", "/reset-password/", "/r/", "/api/auth", "/api/cron/", "/sw.js", "/offline.html", "/manifest.webmanifest", "/api/org-logo/", "/api/version", "/privacy", "/session/clear"]; // cron routes check CRON_SECRET
 
 // The session is only read here (see lib/session-cookie.ts for why it isn't rewritten on every request).
 export default async function proxy(req: NextRequest) {
