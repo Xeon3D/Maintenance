@@ -53,7 +53,7 @@ The company has a public privacy notice, linked from request forms, the client p
 
 - **Time zone**: all dates and times in the app, reports and schedules use it.
 - **Currency**: used for amounts to bill, prices, contract fees and purchase orders.
-- **Default language**: the company's language. Each person can still switch their own language at the bottom of the menu.
+- **Default language**: the company's language. Each person can still choose their own language in [Profile](/help/profile).
 
 ## Time billing
 
@@ -135,7 +135,7 @@ A **Conservação de dados** define durante quanto tempo se guardam os registos 
 
 - **Fuso horário**: todas as datas e horas da aplicação, dos relatórios e dos agendamentos usam-no.
 - **Moeda**: usada nos valores a faturar, preços, mensalidades dos contratos e notas de encomenda.
-- **Idioma predefinido**: o idioma da empresa. Cada pessoa pode na mesma mudar o seu idioma no fundo do menu.
+- **Idioma predefinido**: o idioma da empresa. Cada pessoa pode na mesma escolher o seu idioma no [Perfil](/help/profile).
 
 ## Faturação do tempo
 

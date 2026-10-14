@@ -11,7 +11,7 @@ How the app is organised, what you see depending on your role, and the few thing
 
 Everything starts from the menu on the left (on a phone, open it with the menu button at the top). The menu only shows the areas your role can use, so two colleagues may see different menus.
 
-![The menu on the left, with the company at the top and your name, language and theme at the bottom](getting-started-shell)
+![The menu on the left, with the company at the top and your name at the bottom](getting-started-shell)
 
 - **Dashboard**, **Field app (offline)** and **Scan**: your starting point, the offline app for the field and the QR / barcode reader.
 - **Operations**: work orders, requests from clients, preventive maintenance, procedures (checklists) and messages.
@@ -50,9 +50,9 @@ Each person has a role in the company. The usual defaults are:
 - **Lists** have a search box and filters at the top. The filters are part of the page address, so you can bookmark or share a filtered list.
 - **Archive** hides a record from the lists without deleting its history. Archived records can be shown with a filter and restored.
 - **Dates** are always day/month/year and times are 24-hour, in the company's time zone.
-- **Language and theme**: switch between English and Português, and between light, dark and automatic theme, at the bottom of the menu. The choice is remembered for your account.
+- **Language and theme**: switch between English and Português, and between light, dark and automatic theme, in your [Profile](/help/profile) (click your name at the bottom of the menu). The choice is remembered for your account.
 - **Notifications**: the bell next to your name shows what needs your attention. See [Notifications](/help/notifications).
-- **Help**: the **?** button at the bottom of the menu opens the help for the page you're on.
+- **Help**: the round **?** button in the bottom-right corner of every page opens the help for the page you're on.
 
 ## More than one company
 
@@ -66,7 +66,7 @@ Como a aplicação está organizada, o que vê consoante a sua função e o que 
 
 Tudo começa no menu à esquerda (no telemóvel, abra-o com o botão de menu no topo). O menu só mostra as áreas que a sua função pode usar, por isso dois colegas podem ver menus diferentes.
 
-![O menu à esquerda, com a empresa no topo e o seu nome, idioma e tema em baixo](getting-started-shell)
+![O menu à esquerda, com a empresa no topo e o seu nome em baixo](getting-started-shell)
 
 - **Painel**, **App de campo (offline)** e **Ler código**: o seu ponto de partida, a aplicação offline para o terreno e o leitor de QR / códigos de barras.
 - **Operações**: ordens de trabalho, pedidos dos clientes, manutenção preventiva, procedimentos (listas de verificação) e mensagens.
@@ -105,9 +105,9 @@ Cada pessoa tem uma função na empresa. Por defeito:
 - As **listas** têm uma caixa de pesquisa e filtros no topo. Os filtros fazem parte do endereço da página, por isso pode guardar ou partilhar uma lista filtrada.
 - **Arquivar** esconde um registo das listas sem apagar o seu histórico. Os registos arquivados podem ser mostrados com um filtro e restaurados.
 - As **datas** são sempre dia/mês/ano e as horas em formato de 24 horas, no fuso horário da empresa.
-- **Idioma e tema**: mude entre English e Português, e entre tema claro, escuro e automático, no fundo do menu. A escolha fica guardada na sua conta.
+- **Idioma e tema**: mude entre English e Português, e entre tema claro, escuro e automático, no seu [Perfil](/help/profile) (clique no seu nome no fundo do menu). A escolha fica guardada na sua conta.
 - **Notificações**: o sino junto ao seu nome mostra o que precisa da sua atenção. Veja [Notificações](/help/notifications).
-- **Ajuda**: o botão **?** no fundo do menu abre a ajuda da página em que está.
+- **Ajuda**: o botão redondo **?** no canto inferior direito de cada página abre a ajuda da página em que está.
 
 ## Mais do que uma empresa
 

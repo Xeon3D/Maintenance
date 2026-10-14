@@ -2,9 +2,6 @@ import Link from "next/link";
 import { getTranslations } from "next-intl/server";
 import { LogOut, UserRound } from "lucide-react";
 import { NotificationBell } from "@/components/notifications/bell";
-import { LocaleSwitcher } from "@/components/locale-switcher";
-import { ThemeToggle } from "@/components/theme-toggle";
-import { getTheme } from "@/lib/theme-server";
 import { getPortalContext } from "@/lib/portal";
 import { signOutAction } from "@/app/(auth)/actions";
 import { brandStyle, logoSrc } from "@/lib/branding";
@@ -12,7 +9,6 @@ import { privacyPath } from "@/lib/privacy";
 
 export default async function PortalLayout({ children }: { children: React.ReactNode }) {
   const ctx = await getPortalContext();
-  const theme = await getTheme();
   const t = await getTranslations();
   const logo = logoSrc(ctx.organization);
   const unread = await ctx.db.notification.count({ where: { userId: ctx.user.id, readAt: null } });
@@ -31,8 +27,6 @@ export default async function PortalLayout({ children }: { children: React.React
             </span>
           </Link>
           <div className="flex items-center gap-2">
-            <LocaleSwitcher className="hidden sm:inline-flex" />
-            <ThemeToggle initial={theme} className="hidden sm:inline-flex" />
             <NotificationBell key={unread} initial={unread} href="/portal/notifications" />
             <Link href="/portal/profile" title={t("nav.profile")} className="rounded-md p-2 text-muted hover:bg-gray-100">
               <UserRound className="size-4" />
@@ -51,11 +45,6 @@ export default async function PortalLayout({ children }: { children: React.React
           {t("privacy.title")}
         </Link>
       </footer>
-      {/* New requests start from a property (portal home → property → New request). */}
-      <div className="flex justify-center gap-2 pb-6 sm:hidden">
-        <LocaleSwitcher />
-        <ThemeToggle initial={theme} />
-      </div>
     </div>
   );
 }

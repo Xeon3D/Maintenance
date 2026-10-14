@@ -1096,7 +1096,9 @@
       "LOW_STOCK": "Peças a esgotar",
       "PO_APPROVAL": "Notas de encomenda a aguardar aprovação",
       "PO_UPDATE": "Atualizações das minhas notas de encomenda"
-    }
+    },
+    "appearance": "Idioma e aspeto",
+    "language": "Idioma"
   },
   "contractStatus": {
     "DRAFT": "Rascunho",

@@ -1096,7 +1096,9 @@
       "LOW_STOCK": "Parts running low",
       "PO_APPROVAL": "Purchase orders waiting for approval",
       "PO_UPDATE": "Updates on my purchase orders"
-    }
+    },
+    "appearance": "Language and appearance",
+    "language": "Language"
   },
   "contractStatus": {
     "DRAFT": "Draft",
