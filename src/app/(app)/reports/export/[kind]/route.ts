@@ -4,7 +4,7 @@ import { parseReportFilters } from "@/lib/report-filters";
 import { assetReport, costReport, slaReport, technicianReport, woScope } from "@/lib/reports";
 import { SLA_STATUS_LOGS, slaCalendar, slaStates } from "@/lib/sla";
 import { workOrderCosts } from "@/lib/work-orders";
-import { csvResponse, toCsv, type Cell } from "@/lib/csv";
+import { csvResponse, money, moneyColumns, toCsv, type Cell, type Column } from "@/lib/csv";
 
 const r2 = (n: number | null) => (n === null ? null : Math.round(n * 100) / 100);
 
@@ -13,6 +13,8 @@ export async function GET(req: Request, { params }: RouteContext<"/reports/expor
   const { kind } = await params;
   const ctx = await getContext();
   if (!ctx.can("reports.view")) return new Response("Not found", { status: 404 });
+  // Without "See costs": no cost export, and no money columns in the others (moneyColumns below).
+  if (kind === "costs" && !ctx.can("costs.view")) return new Response("Not found", { status: 404 });
   const f = parseReportFilters(Object.fromEntries(new URL(req.url).searchParams));
   const t = await getTranslations();
   // Spreadsheet-friendly "2026-09-28 14:05" in the organisation's time zone.
@@ -22,7 +24,7 @@ export async function GET(req: Request, { params }: RouteContext<"/reports/expor
   const sys = (s: string | null) => (s ? t(`systems.${s}` as never) : null);
   const now = new Date();
 
-  let header: string[];
+  let header: Column[];
   let rows: Cell[][];
   switch (kind) {
     case "work-orders": {
@@ -43,7 +45,7 @@ export async function GET(req: Request, { params }: RouteContext<"/reports/expor
         t("reports.csv.number"), t("wo.title"), t("wo.type"), t("common.status"), t("wo.priority"), t("assets.system"),
         t("villas.client"), t("assets.villa"), t("wo.asset"), t("wo.createdAt"), t("reports.csv.firstResponse"), t("wo.completedAt"),
         t("contracts.contract"), t("contracts.responseShort"), t("contracts.resolutionShort"), t("reports.csv.minutes"),
-        t("costs.labor"), t("costs.parts"), t("reports.otherCosts"), t("costs.total"),
+        money(t("costs.labor")), money(t("costs.parts")), money(t("reports.otherCosts")), money(t("costs.total")),
       ];
       rows = wos.map((w) => {
         const c = workOrderCosts(w);
@@ -69,15 +71,14 @@ export async function GET(req: Request, { params }: RouteContext<"/reports/expor
     }
     case "costs": {
       const c = await costReport(ctx, f);
-      header = [t("assets.villa"), t("reports.jobs"), t("costs.labor"), t("costs.parts"), t("reports.otherCosts"), t("costs.total")];
+      header = [t("assets.villa"), t("reports.jobs"), money(t("costs.labor")), money(t("costs.parts")), money(t("reports.otherCosts")), money(t("costs.total"))];
       rows = c.byVilla.map((v) => [v.name, v.count, r2(v.labor), r2(v.parts), r2(v.other), r2(v.total)]);
       break;
     }
     case "technicians": {
       const r = await technicianReport(ctx, f);
-      header = [t("reports.person"), t("reports.hoursCol"), t("reports.utilisation"), t("reports.jobsWorked"), t("reports.jobsCompleted"), t("costs.labor")];
+      header = [t("reports.person"), t("reports.hoursCol"), `${t("reports.utilisation")} (%)`, t("reports.jobsWorked"), t("reports.jobsCompleted"), money(t("costs.labor"))];
       rows = r.people.map((p) => [p.name, r2(p.hours), p.utilisation === null ? null : r2(p.utilisation * 100), p.jobs, p.completed, r2(p.labor)]);
-      header[2] += " (%)";
       break;
     }
     case "assets": {
@@ -89,13 +90,6 @@ export async function GET(req: Request, { params }: RouteContext<"/reports/expor
     default:
       return new Response("Not found", { status: 404 });
   }
-  if (!ctx.can("costs.view")) {
-    // Without "See costs": no cost export, and no money columns in the others.
-    if (kind === "costs") return new Response("Not found", { status: 404 });
-    const money = new Set([t("costs.labor"), t("costs.parts"), t("reports.otherCosts"), t("costs.total")]);
-    const keep = header.map((h, i) => (money.has(h) ? -1 : i)).filter((i) => i >= 0);
-    header = keep.map((i) => header[i]);
-    rows = rows.map((r) => keep.map((i) => r[i]));
-  }
-  return csvResponse(`${kind}_${span}.csv`, toCsv(header, rows));
+  const csv = moneyColumns(header, rows, ctx.can("costs.view"));
+  return csvResponse(`${kind}_${span}.csv`, toCsv(csv.header, csv.rows));
 }

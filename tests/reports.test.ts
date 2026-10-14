@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { compliance, contractYear, covers, pickContract, slaStates, type ContractLike } from "@/lib/sla";
 import { buckets, countByBucket, grainFor, median, pmCompliance, sumBy, timeInStatus, workingDays } from "@/lib/report-math";
-import { toCsv } from "@/lib/csv";
+import { money, moneyColumns, toCsv } from "@/lib/csv";
 
 const d = (s: string) => new Date(s);
 const H = 3_600_000;
@@ -111,5 +111,12 @@ describe("CSV", () => {
   it("quotes, neutralises formulas and adds a BOM", () => {
     const csv = toCsv(["a", "b"], [["=SUM(A1)", 'say "hi", ok'], [null, -2]]);
     expect(csv).toBe('﻿a,b\r\n\'=SUM(A1),"say ""hi"", ok"\r\n,-2\r\n');
+  });
+
+  it("drops money columns without costs.view, even when a label matches a money label", () => {
+    const header = ["Job", money("Labour"), "Labour", money("Total")];
+    const rows = [["WO-1", 40, "x", 55]];
+    expect(moneyColumns(header, rows, false)).toEqual({ header: ["Job", "Labour"], rows: [["WO-1", "x"]] });
+    expect(moneyColumns(header, rows, true)).toEqual({ header: ["Job", "Labour", "Labour", "Total"], rows });
   });
 });
