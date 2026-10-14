@@ -1,6 +1,8 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { cookies } from "next/headers";
+import { expiredSessionCookie, isSessionCookie } from "@/lib/session-cookie";
 import { z } from "zod";
 import { requirePermission } from "@/lib/context";
 import { optStr, parseForm, type FormResult } from "@/lib/forms";
@@ -100,6 +102,11 @@ export async function restoreBackupAction(name: string): Promise<RestoreResult> 
   try {
     const { overridden } = await restoreBackup(name);
     console.warn(`[server-admin] restore of ${name} by ${ctx.user.email}`);
+    // The data was replaced: this session's account may not exist in the backup. Sign in again afterwards.
+    const jar = await cookies();
+    for (const { name: cookie } of jar.getAll()) {
+      if (isSessionCookie(cookie)) jar.set(cookie, "", expiredSessionCookie(cookie));
+    }
     return { ok: true, restarting: restartSoon(), overridden };
   } catch (e) {
     return failure(e);

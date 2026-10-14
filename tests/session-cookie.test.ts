@@ -85,3 +85,21 @@ describe("proxy", () => {
     expect(Math.abs((claims!.iat as number) - Date.now() / 1000)).toBeLessThan(60);
   });
 });
+
+describe("clearing a stale session", () => {
+  it("recognises the session cookie in every form, and nothing else", async () => {
+    const { isSessionCookie, expiredSessionCookie } = await import("@/lib/session-cookie");
+    for (const n of ["authjs.session-token", "__Secure-authjs.session-token", "authjs.session-token.0", "__Secure-authjs.session-token.1"]) expect(isSessionCookie(n)).toBe(true);
+    for (const n of ["authjs.callback-url", "authjs.session-tokenx", "active_org", "server_admin"]) expect(isSessionCookie(n)).toBe(false);
+    expect(expiredSessionCookie("__Secure-authjs.session-token")).toMatchObject({ maxAge: 0, secure: true });
+  });
+
+  it("the clear route deletes the session cookies and goes to sign-in", async () => {
+    const { NextRequest } = await import("next/server");
+    const { GET } = await import("@/app/session/clear/route");
+    const res = GET(new NextRequest("http://app.test/session/clear", { headers: { cookie: "authjs.session-token=abc; active_org=o1; __Secure-authjs.session-token=def" } }));
+    expect(res.headers.get("location")).toBe("http://app.test/login");
+    const cleared = res.headers.getSetCookie().map((c) => c.split("=")[0]);
+    expect(cleared.sort()).toEqual(["__Secure-authjs.session-token", "authjs.session-token"]);
+  });
+});

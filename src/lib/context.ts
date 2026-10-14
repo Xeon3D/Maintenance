@@ -15,7 +15,9 @@ export const requireUser = cache(async () => {
   const session = await auth();
   if (!session?.user?.id) redirect("/login");
   const user = await prisma.user.findUnique({ where: { id: session.user.id } });
-  if (!user) redirect("/login");
+  // A valid cookie for an account that is gone (backup restored, factory reset) or erased: clear it, or
+  // proxy.ts and this redirect would bounce between /login and the app forever.
+  if (!user || user.erasedAt) redirect("/session/clear");
   return user;
 });
 
