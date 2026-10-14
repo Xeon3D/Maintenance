@@ -19,6 +19,7 @@ import pt from "../../../../messages/pt.json";
 import { appOrigin } from "@/lib/qr";
 import { privacyPath } from "@/lib/privacy";
 import { RETENTION_MAX } from "@/lib/retention-rules";
+import { businessHoursFromForm } from "@/lib/sla-clock";
 import { erasedName, eraseMember, ErasureError } from "@/lib/erasure";
 import { emailLayout, sendEmail } from "@/lib/email";
 import { background } from "@/lib/notify";
@@ -55,8 +56,13 @@ export async function updateOrgAction(_: FormResult, form: FormData): Promise<Fo
   const ctx = await requirePermission("org.manage");
   const parsed = parseForm(orgSchema, form);
   if (parsed.error) return parsed.error;
+  const bh = businessHoursFromForm((k) => {
+    const v = form.get(k);
+    return typeof v === "string" ? v : null;
+  });
+  if ("errors" in bh) return { error: "validation", fieldErrors: bh.errors };
   const { notificationsDays, auditMonths, requestersMonths, chatMonths, ...rest } = parsed.data;
-  const data = { ...rest, brandColor: normalizeHex(rest.brandColor), retention: { notificationsDays, auditMonths, requestersMonths, chatMonths } };
+  const data = { ...rest, brandColor: normalizeHex(rest.brandColor), retention: { notificationsDays, auditMonths, requestersMonths, chatMonths }, businessHours: bh.hours };
   // Organization isn't a tenant-scoped model; scope by id explicitly.
   await prisma.organization.update({ where: { id: ctx.organization.id }, data });
   revalidatePath("/", "layout");

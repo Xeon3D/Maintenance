@@ -227,7 +227,9 @@
     "logoTooLarge": "The logo must be 2 MB or smaller.",
     "logoType": "Use a PNG or JPEG image.",
     "managerIsOwner": "The manager must be a different client from the owner.",
-    "roleNameTaken": "There's already a role with this name."
+    "roleNameTaken": "There's already a role with this name.",
+    "closesBeforeOpens": "Closing time must be after opening time.",
+    "badHoliday": "Use one date per line, as YYYY-MM-DD."
   },
   "clients": {
     "description": "Villa owners, family offices and property managers you work for.",
@@ -1086,7 +1088,8 @@
   "sla": {
     "met": "Met",
     "breached": "Breached",
-    "pending": "Due"
+    "pending": "Due",
+    "paused": "Paused"
   },
   "contracts": {
     "description": "Maintenance agreements with response and resolution targets. Work orders are linked to the matching contract automatically.",
@@ -1135,7 +1138,15 @@
     "deleteConfirm": "Delete this contract? Its work orders stay, but lose the SLA link.",
     "pickClientFirst": "Choose the client first.",
     "ownedVillas": "Owned",
-    "managedVillas": "Managed for other owners"
+    "managedVillas": "Managed for other owners",
+    "businessHoursOnly": "Count business hours only",
+    "businessHoursOnlyHint": "Targets run only during the company's business hours (Settings → Organization), skipping nights, closed days and holidays.",
+    "pauseOnHold": "Pause while on hold",
+    "pauseOnHoldHint": "The clock stops while the job is on hold (e.g. waiting for the client or parts) and resumes when work continues.",
+    "slaClock": "SLA clock",
+    "clockAlways": "Around the clock",
+    "clockBusiness": "Business hours",
+    "clockPauses": "pauses on hold"
   },
   "reports": {
     "description": "Performance, SLA, costs, technicians and equipment reliability.",
@@ -1506,5 +1517,13 @@
     "otherCompanies": "This person also belongs to another company, so the account can't be erased from here. Deactivating them removes their access to this company.",
     "archiveFirst": "Archive the client first.",
     "portalUsers": "This client still has active portal users. Deactivate and erase them first."
+  },
+  "businessHours": {
+    "title": "Business hours",
+    "hint": "Used by service contracts that count response and resolution times in business hours only. Times are in the company's time zone.",
+    "from": "opens",
+    "to": "closes",
+    "holidays": "Holidays",
+    "holidaysHint": "Days the SLA clock doesn't run, one per line (YYYY-MM-DD)."
   }
 }

@@ -1,5 +1,5 @@
 import { useTranslations } from "next-intl";
-import { Cable, Camera, CircleCheck, Clock, Cpu, Lightbulb, Network, ShieldCheck, Speaker, TriangleAlert, Wrench, Zap, ChevronsUp, ChevronUp, Equal, ChevronDown, type LucideIcon } from "lucide-react";
+import { Cable, Camera, CircleCheck, CirclePause, Clock, Cpu, Lightbulb, Network, ShieldCheck, Speaker, TriangleAlert, Wrench, Zap, ChevronsUp, ChevronUp, Equal, ChevronDown, type LucideIcon } from "lucide-react";
 import type { AssetStatus, Criticality, Priority, PurchaseOrderStatus, SystemType, WorkOrderStatus } from "@/generated/prisma/enums";
 import { cn } from "@/lib/utils";
 
@@ -96,10 +96,11 @@ const SLA_STYLE = {
   met: { icon: CircleCheck, className: "bg-green-50 text-green-700" },
   breached: { icon: TriangleAlert, className: "bg-red-50 text-red-700" },
   pending: { icon: Clock, className: "bg-amber-50 text-amber-800" },
+  paused: { icon: CirclePause, className: "bg-gray-100 text-gray-700" },
 } as const;
 
 /** SLA outcome with icon + word (never colour alone); nothing for "not applicable". */
-export function SlaBadge({ state, prefix }: { state: "met" | "breached" | "pending" | "na"; prefix?: string }) {
+export function SlaBadge({ state, prefix }: { state: "met" | "breached" | "pending" | "paused" | "na"; prefix?: string }) {
   const t = useTranslations("sla");
   if (state === "na") return null;
   const { icon: Icon, className } = SLA_STYLE[state];

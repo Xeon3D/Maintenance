@@ -2,7 +2,7 @@ import { getTranslations } from "next-intl/server";
 import { getContext } from "@/lib/context";
 import { parseReportFilters } from "@/lib/report-filters";
 import { assetReport, costReport, slaReport, technicianReport, woScope } from "@/lib/reports";
-import { slaStates } from "@/lib/sla";
+import { SLA_STATUS_LOGS, slaCalendar, slaStates } from "@/lib/sla";
 import { workOrderCosts } from "@/lib/work-orders";
 import { csvResponse, toCsv, type Cell } from "@/lib/csv";
 
@@ -31,7 +31,8 @@ export async function GET(req: Request, { params }: RouteContext<"/reports/expor
         include: {
           villa: { select: { name: true, client: { select: { name: true } } } },
           asset: { select: { name: true } },
-          contract: { select: { name: true, responseTimeHours: true, resolutionTimeHours: true } },
+          contract: { select: { name: true, responseTimeHours: true, resolutionTimeHours: true, businessHoursOnly: true, pauseOnHold: true } },
+          statusLogs: SLA_STATUS_LOGS,
           timeEntries: { select: { minutes: true, hourlyRate: true } },
           parts: { select: { quantity: true, unitCost: true } },
           otherCosts: { select: { amount: true } },
@@ -46,7 +47,7 @@ export async function GET(req: Request, { params }: RouteContext<"/reports/expor
       ];
       rows = wos.map((w) => {
         const c = workOrderCosts(w);
-        const s = w.contract ? slaStates(w, w.contract, now) : null;
+        const s = w.contract ? slaStates(w, w.contract, now, slaCalendar(ctx.organization)) : null;
         return [
           w.number, w.title, t(`woType.${w.type}`), t(`woStatus.${w.status}`), t(`priority.${w.priority}`), sys(w.system),
           w.villa?.client.name, w.villa?.name, w.asset?.name, when(w.createdAt), when(w.firstResponseAt), when(w.completedAt),

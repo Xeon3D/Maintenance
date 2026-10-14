@@ -31,10 +31,10 @@ function tzOffset(d: Date, timeZone: string): number {
 }
 
 /** Instant → its wall-clock time in the zone, expressed as a UTC Date ("floating" time). */
-const toWall = (d: Date, tz: string) => new Date(d.getTime() + tzOffset(d, tz));
+export const toWall = (d: Date, tz: string) => new Date(d.getTime() + tzOffset(d, tz));
 
 /** Floating wall-clock time → the real instant in the zone. */
-function fromWall(w: Date, tz: string) {
+export function fromWall(w: Date, tz: string) {
   let guess = w.getTime() - tzOffset(w, tz);
   guess = w.getTime() - tzOffset(new Date(guess), tz); // second pass settles DST boundaries
   return new Date(guess);

@@ -227,7 +227,9 @@
     "logoTooLarge": "O logótipo não pode ter mais de 2 MB.",
     "logoType": "Use uma imagem PNG ou JPEG.",
     "managerIsOwner": "A gestão tem de ser um cliente diferente do proprietário.",
-    "roleNameTaken": "Já existe uma função com este nome."
+    "roleNameTaken": "Já existe uma função com este nome.",
+    "closesBeforeOpens": "A hora de fecho tem de ser depois da hora de abertura.",
+    "badHoliday": "Indique uma data por linha, no formato AAAA-MM-DD."
   },
   "clients": {
     "description": "Proprietários, family offices e gestores de propriedades para quem trabalha.",
@@ -1086,7 +1088,8 @@
   "sla": {
     "met": "Cumprido",
     "breached": "Falhado",
-    "pending": "Em prazo"
+    "pending": "Em prazo",
+    "paused": "Em pausa"
   },
   "contracts": {
     "description": "Acordos de manutenção com tempos de resposta e de resolução. As ordens de trabalho são associadas automaticamente ao contrato correspondente.",
@@ -1135,7 +1138,15 @@
     "deleteConfirm": "Eliminar este contrato? As ordens de trabalho mantêm-se, mas deixam de ter SLA associado.",
     "pickClientFirst": "Escolha primeiro o cliente.",
     "ownedVillas": "Próprias",
-    "managedVillas": "Geridas para outros proprietários"
+    "managedVillas": "Geridas para outros proprietários",
+    "businessHoursOnly": "Contar apenas horário laboral",
+    "businessHoursOnlyHint": "Os prazos só contam durante o horário de funcionamento da empresa (Definições → Organização), sem noites, dias de fecho nem feriados.",
+    "pauseOnHold": "Pausar quando em espera",
+    "pauseOnHoldHint": "O relógio para enquanto o trabalho está em espera (por exemplo, à espera do cliente ou de material) e retoma quando o trabalho continua.",
+    "slaClock": "Relógio do SLA",
+    "clockAlways": "24 horas por dia",
+    "clockBusiness": "Horário laboral",
+    "clockPauses": "pausa quando em espera"
   },
   "reports": {
     "description": "Desempenho, SLA, custos, técnicos e fiabilidade dos equipamentos.",
@@ -1506,5 +1517,13 @@
     "otherCompanies": "Esta pessoa pertence também a outra empresa, por isso a conta não pode ser apagada aqui. Desativá-la remove o acesso a esta empresa.",
     "archiveFirst": "Arquive primeiro o cliente.",
     "portalUsers": "Este cliente ainda tem utilizadores do portal ativos. Desative-os e apague-os primeiro."
+  },
+  "businessHours": {
+    "title": "Horário de funcionamento",
+    "hint": "Usado pelos contratos de serviço que contam os tempos de resposta e resolução apenas em horário laboral. As horas estão no fuso horário da empresa.",
+    "from": "abre",
+    "to": "fecha",
+    "holidays": "Feriados",
+    "holidaysHint": "Dias em que o relógio do SLA não conta, um por linha (AAAA-MM-DD)."
   }
 }

@@ -5,7 +5,7 @@ import { AlertTriangle } from "lucide-react";
 import { Card, PageHeader } from "@/components/ui";
 import { BackLink } from "@/components/back-link";
 import { PriorityText, SlaBadge, SystemBadge, WorkOrderStatusBadge } from "@/components/badges";
-import { slaStates } from "@/lib/sla";
+import { slaCalendar, slaStates } from "@/lib/sla";
 import { getContext } from "@/lib/context";
 import { fileUrl } from "@/lib/storage";
 import { ACTIVE_STATUSES, workOrderCosts } from "@/lib/work-orders";
@@ -40,7 +40,7 @@ export default async function WorkOrderPage({ params }: PageProps<"/work-orders/
       parts: { include: { part: { select: { name: true, unit: true } }, stockLocation: { select: { name: true } } }, orderBy: { id: "asc" } },
       attachments: { where: { commentId: null, workOrderItemId: null }, orderBy: { createdAt: "asc" } },
       request: { select: { id: true, number: true } },
-      contract: { select: { id: true, name: true, responseTimeHours: true, resolutionTimeHours: true } },
+      contract: { select: { id: true, name: true, responseTimeHours: true, resolutionTimeHours: true, businessHoursOnly: true, pauseOnHold: true } },
     },
   });
   if (!wo) notFound();
@@ -85,7 +85,7 @@ export default async function WorkOrderPage({ params }: PageProps<"/work-orders/
   const money = (n: number) => format.number(n, { style: "currency", currency: ctx.organization.currency });
   const costs = workOrderCosts(wo);
   const dt = (d: Date) => format.dateTime(d, { dateStyle: "medium", timeStyle: "short" });
-  const sla = wo.contract ? slaStates(wo, wo.contract, now) : null;
+  const sla = wo.contract ? slaStates(wo, wo.contract, now, slaCalendar(ctx.organization)) : null;
   const myRunning = wo.timeEntries.find((e) => e.userId === ctx.user.id && !e.endedAt);
 
   // Activity: comments and status changes, oldest first.
@@ -117,8 +117,8 @@ export default async function WorkOrderPage({ params }: PageProps<"/work-orders/
     [t("wo.completedBy"), wo.completedBy && wo.completedAt && `${wo.completedBy.name} · ${dt(wo.completedAt)}`],
     [t("wo.fromRequest"), wo.request && `#${wo.request.number}`],
     [t("contracts.contract"), wo.contract && <Link href={`/contracts/${wo.contract.id}`} className="hover:text-brand">{wo.contract.name}</Link>],
-    [t("contracts.respondBy"), sla?.responseDue && <span className="flex flex-wrap items-center gap-1.5">{dt(sla.responseDue)} <SlaBadge state={sla.response} /></span>],
-    [t("contracts.resolveBy"), sla?.resolutionDue && <span className="flex flex-wrap items-center gap-1.5">{dt(sla.resolutionDue)} <SlaBadge state={sla.resolution} /></span>],
+    [t("contracts.respondBy"), sla && (sla.responseDue || sla.response === "paused") && <span className="flex flex-wrap items-center gap-1.5">{sla.responseDue && dt(sla.responseDue)} <SlaBadge state={sla.response} /></span>],
+    [t("contracts.resolveBy"), sla && (sla.resolutionDue || sla.resolution === "paused") && <span className="flex flex-wrap items-center gap-1.5">{sla.resolutionDue && dt(sla.resolutionDue)} <SlaBadge state={sla.resolution} /></span>],
   ];
 
   return (

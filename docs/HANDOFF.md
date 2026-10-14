@@ -479,7 +479,10 @@ markers), Message, VerificationToken (password reset).
   `relinkClientWorkOrders`, so earlier jobs are (re)attributed.
 - **SLA** (`slaStates`): calendar hours from WO creation. Response = `firstResponseAt` (or completion);
   resolution = completion. States met/breached/pending/na; compliance counts only decided ones.
-  **No business-hours calendar or pause-on-hold** — likely the next thing a real client asks for.
+  Per contract, `businessHoursOnly` counts only the company's business hours (Settings → Organization: hours per
+  weekday + holidays, in the org time zone) and `pauseOnHold` stops the clock while ON_HOLD (periods from
+  `WorkOrderStatusLog`; load them with `SLA_STATUS_LOGS` and pass `slaCalendar(org)` to `slaStates`). Maths in
+  `src/lib/sla-clock.ts` (tested); a job on hold before its target shows "Paused" with no due date.
   The WO page shows respond-by / resolve-by with `<SlaBadge>` (icon + word).
 - **Reports** (`/reports/*`, `reports.view` = owner/admin/manager/viewer): one URL-driven filter row
   (`src/lib/report-filters.ts`: 30d/90d/12m/ytd/custom ≤3y, client, villa, system) scopes every tab
