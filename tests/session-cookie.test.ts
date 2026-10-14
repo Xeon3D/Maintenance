@@ -98,8 +98,18 @@ describe("clearing a stale session", () => {
     const { NextRequest } = await import("next/server");
     const { GET } = await import("@/app/session/clear/route");
     const res = GET(new NextRequest("http://app.test/session/clear", { headers: { cookie: "authjs.session-token=abc; active_org=o1; __Secure-authjs.session-token=def" } }));
-    expect(res.headers.get("location")).toBe("http://app.test/login");
+    expect(res.headers.get("location")).toBe("/login"); // relative: behind a proxy req.url is the internal address
     const cleared = res.headers.getSetCookie().map((c) => c.split("=")[0]);
     expect(cleared.sort()).toEqual(["__Secure-authjs.session-token", "authjs.session-token"]);
+  });
+});
+
+describe("in-app redirects", () => {
+  it("are relative and never leave the app", async () => {
+    const { redirectTo } = await import("@/lib/redirect");
+    expect(redirectTo("/login").headers.get("location")).toBe("/login");
+    expect(redirectTo("//evil.example/x").headers.get("location")).toBe("/");
+    expect(redirectTo("https://evil.example").headers.get("location")).toBe("/");
+    expect(redirectTo("/a", 303).status).toBe(303);
   });
 });
