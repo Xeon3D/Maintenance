@@ -34,7 +34,8 @@ Owners and admins see *Settings → Server*; it asks for the server password (un
 because it acts on the whole installation rather than one company:
 
 - **Software name** — replaces "VillaOps" on the sign-in page, browser tab, installed app and e-mails.
-- **Updates** — shows the installed and latest version (from this repo's GitHub releases). *Update to x.y.z*
+- **Updates** — shows the installed and latest version (from the GitHub releases of
+  [`malves-dc/Maintenance`](https://github.com/malves-dc/Maintenance/releases); `UPDATE_REPO` overrides it). *Update to x.y.z*
   makes a backup, then asks the `updater` service ([Watchtower](https://github.com/nicholas-fedor/watchtower))
   to pull `xeon3d/maintenance:latest` and recreate only the app container; database changes are applied
   as it starts. *Install updates automatically* does the same every day at the backup hour.
@@ -92,3 +93,16 @@ Demo users (password `demo1234`): `owner@`, `manager@`, `tech.network@`, `tech.e
 | `npm run typecheck` / `lint` / `test` | Checks |
 | `npm run db:migrate` | Create a migration after editing `prisma/schema.prisma` |
 | `npm run db:studio` | Browse the database |
+
+## Releasing
+
+Releases are built and published by GitHub Actions (`.github/workflows/release.yml`):
+
+1. Bump `version` in `package.json` and `package-lock.json` (`npm version 0.4.0 --no-git-tag-version`), commit, merge to `main`.
+2. Tag and push: `git tag v0.4.0 && git push origin v0.4.0`.
+3. The workflow runs the checks, pushes `xeon3d/maintenance:0.4.0` and `:latest` to Docker Hub, and then creates
+   the GitHub release, which installed servers see as "update available" (Settings → Server).
+
+One-time setup: repository secrets `DOCKERHUB_USERNAME` and `DOCKERHUB_TOKEN` (a Docker Hub access token with
+Read & Write), and optionally a `DOCKERHUB_IMAGE` variable to publish under another image name (servers then need
+`APP_IMAGE` and the compose `image:` changed to match).
