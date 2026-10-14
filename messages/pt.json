@@ -1907,6 +1907,26 @@
       }
     }
   },
+  "help": {
+    "title": "Ajuda",
+    "description": "Como funciona cada área da aplicação, com guias passo a passo. O botão ? no fundo do menu abre a ajuda da página em que está.",
+    "searchPlaceholder": "Pesquisar na ajuda…",
+    "results": "{count, plural, one {# resultado} other {# resultados}} para “{q}”",
+    "noResults": "Nada encontrado para “{q}”",
+    "noResultsHint": "Experimente menos palavras ou palavras diferentes, ou percorra os temas.",
+    "allTopics": "Todos os temas de ajuda",
+    "openArea": "Abrir esta área",
+    "onThisPage": "Nesta página",
+    "thisPage": "Ajuda para esta página",
+    "groups": {
+      "start": "Para começar",
+      "operations": "Operações",
+      "sites": "Locais e equipamentos",
+      "supply": "Aprovisionamento",
+      "insights": "Análise",
+      "settings": "Definições"
+    }
+  },
   "audit": {
     "description": "Quem fez o quê, quando e a partir de onde. Guardado durante o período definido em Definições → Empresa → Conservação de dados.",
     "searchPlaceholder": "Procurar nome, ação, endereço…",

@@ -596,6 +596,23 @@ markers), Message, VerificationToken (password reset).
   must not oversell); offline viewing of already-uploaded photos; chat offline. iOS needs the app
   added to the home screen for push and keeps storage less reliably.
 
+### In-app help (added 2026-10-14)
+- `/help` (index with grouped topics + server-side search `?q=`) and `/help/[slug]` (article, "On this page" TOC,
+  "Open this area"). The **?** link in the sidebar footer / mobile top bar opens the article for the current page
+  (`helpHref()` in `src/lib/help.ts`, longest path prefix). Topics are filtered with the same permission as their nav item.
+- Registry + a small Markdown subset parser in `src/lib/help.ts` (pure, tested in `tests/help.test.ts`); one file per
+  article in `src/content/help/<slug>.ts` with `{ en, pt }` text and its `shots`, listed in `src/content/help/index.ts`.
+  Articles are content, not UI strings, so they are **not** in `messages/*.json` (that would ship them to every page);
+  only the help chrome is (`help.*`). A new area needs a topic in `HELP_TOPICS` + an article (the test enforces both).
+- **Keep articles in step with the UI**: when a screen changes, update its article (both languages).
+- Screenshots: `public/help-shots/<locale>/<name>.png`, taken by `npm run help:shots [slug|shot …]` (Playwright,
+  signs in as the demo owner, light theme, Lisbon time zone). Take them on a throwaway DB, not the dev one:
+  a compose stack with its own Postgres + `next dev -p 3300` on this repo (reuse the dev `node_modules` volume),
+  then `prisma migrate deploy`, `tsx prisma/seed.ts`, `tsx scripts/help-sample-data.ts` (realistic WOs, requests,
+  PM, meters, procedures, chat). Run the capture from the dev container (it has Chromium) with
+  `HELP_BASE_URL=http://localhost:3300 HELP_HOST_RULES="MAP localhost:3300 host.docker.internal:3300"` (next dev only
+  hydrates for its own origin). The test fails if an article uses a screenshot that doesn't exist.
+
 ### Audit log, van restock, scanning (added 2026-10-14)
 - **Audit trail:** `tenantDb(orgId, actor)` (`lib/db/tenant.ts`) passes every write on the models in
   `AUDITED` (`lib/db/audit-trail.ts`) through `withAuditTrail`: it loads the row(s) first, runs the write, then
