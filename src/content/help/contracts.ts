@@ -70,6 +70,7 @@ Saving or deleting a contract re-checks all of the client's work orders, includi
 - Everyone in the company can see contracts and their compliance.
 - **Super Admin**, **Administrator** and **Manager** can create, edit and delete contracts (permission **Service contracts**).
 - The **Monthly fee** is only shown to roles with **See costs**. Someone without it can still edit the contract; the stored fee is kept.
+- **Urgent surcharge** (also only with **See costs**): the extra cost of this contract's urgent work orders, a fixed amount plus a percentage of labour. Leave both empty to use the company's ([Settings → Organization](/help/organization)); 0 means none, for example on a premium contract.
 `,
   pt: `# Contratos de manutenção
 
@@ -135,6 +136,7 @@ Guardar ou eliminar um contrato volta a verificar todas as ordens de trabalho do
 - Todas as pessoas da empresa podem ver os contratos e o seu cumprimento.
 - **Super Admin**, **Administrador** e **Gestor** podem criar, editar e eliminar contratos (permissão **Contratos de serviço**).
 - A **Mensalidade** só é mostrada às funções com **Ver custos**. Quem não a tiver pode editar o contrato na mesma; a mensalidade guardada mantém-se.
+- **Custo extra de urgência** (também só com **Ver custos**): o custo extra das ordens de trabalho urgentes deste contrato, um valor fixo mais uma percentagem da mão de obra. Deixe ambos vazios para usar o da empresa ([Definições → Empresa](/help/organization)); 0 significa nenhum, por exemplo num contrato premium.
 `,
 };
 

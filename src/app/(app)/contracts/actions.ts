@@ -23,6 +23,9 @@ const contractSchema = z
     resolutionTimeHours: hours(),
     includedVisits: optInt().refine((v) => v === null || (v >= 0 && v <= 365)),
     monthlyFee: optNumber().refine((v) => v === null || (v >= 0 && v <= 10_000_000)),
+    // Urgent surcharge for this contract; both empty = the company's (Settings → Organization).
+    urgentFee: optNumber().refine((v) => v === null || (v >= 0 && v <= 1_000_000)),
+    urgentPercent: optInt().refine((v) => v === null || (v >= 0 && v <= 500)),
     notes: optStr(5000),
   })
   .refine((c) => !c.endDate || c.endDate >= c.startDate, { path: ["endDate"], message: "endBeforeStart" })
@@ -36,9 +39,9 @@ export async function saveContractAction(id: string | null, _: FormResult, form:
   const parsed = parseForm(contractSchema, form);
   if (parsed.error) return parsed.error;
   const systems = z.array(enumOf(SystemType)).parse(form.getAll("systems"));
-  const { monthlyFee, ...fields } = parsed.data;
-  // Without "See costs" the fee isn't shown in the form, so it is left as it was.
-  const data = { ...fields, ...(ctx.can("costs.view") ? { monthlyFee } : {}), systems, businessHoursOnly: form.get("businessHoursOnly") === "on", pauseOnHold: form.get("pauseOnHold") === "on" };
+  const { monthlyFee, urgentFee, urgentPercent, ...fields } = parsed.data;
+  // Without "See costs" the fee and surcharge aren't shown in the form, so they are left as they were.
+  const data = { ...fields, ...(ctx.can("costs.view") ? { monthlyFee, urgentFee, urgentPercent } : {}), systems, businessHoursOnly: form.get("businessHoursOnly") === "on", pauseOnHold: form.get("pauseOnHold") === "on" };
 
   // The client must be ours, and a villa must be one it owns or manages.
   const client = await ctx.db.client.findUnique({ where: { id: data.clientId }, select: { id: true } });

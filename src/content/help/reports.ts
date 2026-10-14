@@ -44,7 +44,7 @@ For work under a service contract: how many jobs were **Under contract**, the sh
 
 ### Costs
 
-**Total cost** split into **Labour**, **Parts** and **Other**; **Cost by villa** (stacked bars); **Cost by client** with the **Contract fees** for the period and the **Margin** (fees minus the cost of the work, in red when negative); and **Cost by system**.
+**Total cost** split into **Labour**, **Parts**, **Other** and **Urgent surcharge**; **Cost by villa** (stacked bars); **Cost by client** with the **Contract fees** for the period and the **Margin** (fees minus the cost of the work, in red when negative); and **Cost by system**.
 
 ### Technicians
 
@@ -115,7 +115,7 @@ Para o trabalho abrangido por um contrato de manutenção: o número de ordens d
 
 ### Custos
 
-O **Custo total** dividido em **Mão de obra**, **Peças** e **Outros**; o **Custo por moradia** (barras empilhadas); o **Custo por cliente** com as **Mensalidades** do período e a **Margem** (mensalidades menos o custo do trabalho, a vermelho quando é negativa); e o **Custo por sistema**.
+O **Custo total** dividido em **Mão de obra**, **Peças**, **Outros** e **Custo extra de urgência**; o **Custo por moradia** (barras empilhadas); o **Custo por cliente** com as **Mensalidades** do período e a **Margem** (mensalidades menos o custo do trabalho, a vermelho quando é negativa); e o **Custo por sistema**.
 
 ### Técnicos
 

@@ -546,7 +546,8 @@
     "timeSpent": "Time spent",
     "hours": "{hours} h",
     "other": "Other costs",
-    "timeBilled": "Time billed"
+    "timeBilled": "Time billed",
+    "urgent": "Urgent surcharge"
   },
   "files": {
     "title": "Photos & files",
@@ -582,7 +583,9 @@
   "report": {
     "title": "Service report",
     "photos": "Photos",
-    "seePhotos": "See photos"
+    "seePhotos": "See photos",
+    "service": "Service",
+    "urgentService": "Urgent"
   },
   "procedures": {
     "description": "Reusable checklists your team follows on site. Use them in work orders and preventive schedules.",
@@ -2129,7 +2132,9 @@
       "direction": "Direction",
       "parts": "Parts",
       "note": "Note",
-      "timeRounding": "Time billing blocks"
+      "timeRounding": "Time billing blocks",
+      "urgentFee": "Urgent surcharge (fixed)",
+      "urgentPercent": "Urgent surcharge (%)"
     }
   },
   "van": {
@@ -2177,5 +2182,15 @@
     "hint": "Each technician's time on a work order is rounded up to whole blocks for labour cost and the service report (e.g. 34 minutes bill as 1 hour with 30-minute blocks). The time logged is kept as it is.",
     "none": "No rounding (minutes logged)",
     "block": "{minutes} minutes"
+  },
+  "urgent": {
+    "title": "Urgent work orders",
+    "hint": "Work orders with Urgent priority cost extra: a fixed amount plus a percentage of their labour (leave both at 0 for none). A service contract can set its own. The service report shows \"Service: Urgent\", without amounts.",
+    "fee": "Fixed amount ({currency})",
+    "percent": "Percentage of labour (%)",
+    "contractTitle": "Urgent surcharge",
+    "contractHint": "Extra cost of this contract's urgent work orders. Leave both empty to use the company's (Settings → Organization); 0 means no surcharge.",
+    "none": "None",
+    "fromCompany": "{value} (company's)"
   }
 }

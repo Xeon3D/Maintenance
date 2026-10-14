@@ -59,6 +59,8 @@ The company has a public privacy notice, linked from request forms, the client p
 
 **Bill time in blocks of** sets how work-order time is charged: each technician's time on a work order is rounded up to whole blocks of 15, 30 (the default) or 60 minutes, or not rounded. With 30-minute blocks, 34 minutes bill as 1 hour. It applies to labour cost, billed hours in the reports and the time on the service report. The time each person logged is kept as it is and still counts for utilisation.
 
+**Urgent work orders** sets the extra cost of work orders with Urgent priority: a **Fixed amount** plus a **Percentage of labour**. For example, 50 + 20% on a job with 80 of labour adds 66. Leave both at 0 for no surcharge. A [service contract](/help/contracts) can set its own. The surcharge shows in the work order's costs and the cost reports, and the client's service report says **Service: Urgent**, without amounts.
+
 ## Service report copies
 
 When someone e-mails a service report from a work order, the client is offered as a recipient. The **Service report copies** section adds company recipients that are offered every time, besides the client:
@@ -138,6 +140,8 @@ A **Conservação de dados** define durante quanto tempo se guardam os registos 
 ## Faturação do tempo
 
 **Faturar o tempo em blocos de** define como é cobrado o tempo das ordens de trabalho: o tempo de cada técnico numa ordem de trabalho é arredondado para cima a blocos inteiros de 15, 30 (por defeito) ou 60 minutos, ou não é arredondado. Com blocos de 30 minutos, 34 minutos são faturados como 1 hora. Aplica-se ao custo de mão de obra, às horas faturadas nos relatórios e ao tempo no relatório de serviço. O tempo que cada pessoa registou mantém-se e continua a contar para a utilização.
+
+**Ordens de trabalho urgentes** define o custo extra das ordens de trabalho com prioridade Urgente: um **Valor fixo** mais uma **Percentagem da mão de obra**. Por exemplo, 50 + 20% num trabalho com 80 de mão de obra acrescenta 66. Deixe ambos a 0 para não haver custo extra. Cada [contrato de manutenção](/help/contracts) pode ter o seu. O custo extra aparece nos custos da ordem de trabalho e nos relatórios de custos, e o relatório de serviço do cliente indica **Serviço: Urgente**, sem valores.
 
 ## Cópias dos relatórios de serviço
 

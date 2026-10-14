@@ -9,6 +9,7 @@ import { SlaBadge, SystemBadge, WorkOrderStatusBadge } from "@/components/badges
 import { getContext } from "@/lib/context";
 import { compliance, contractYear, SLA_STATUS_LOGS, slaCalendar, slaStates } from "@/lib/sla";
 import { cn } from "@/lib/utils";
+import { urgentRuleFor, type UrgentRule } from "@/lib/urgent-surcharge";
 import { deleteContractAction } from "../actions";
 import { ContractStatusBadge } from "../status-badge";
 
@@ -48,6 +49,13 @@ export default async function ContractPage({ params }: PageProps<"/contracts/[id
   const resolution = compliance(inWindow.map((x) => x.s.resolution));
   const pct = (p: number | null) => (p === null ? "—" : format.number(p, { style: "percent" }));
   const date = (d: Date) => format.dateTime(d, { dateStyle: "medium", timeZone: "UTC" });
+  /** "50 € + 20%" for urgent work orders; marked as the company's when the contract doesn't set its own. */
+  const urgentText = (rule: UrgentRule, own: boolean) => {
+    const value =
+      [rule.fee ? format.number(rule.fee, { style: "currency", currency: ctx.organization.currency }) : null, rule.percent ? `${rule.percent}%` : null].filter(Boolean).join(" + ") ||
+      t("urgent.none");
+    return own ? value : t("urgent.fromCompany", { value });
+  };
   const dt = (d: Date) => format.dateTime(d, { dateStyle: "short", timeStyle: "short" });
   const canManage = ctx.can("contracts.manage");
 
@@ -60,7 +68,10 @@ export default async function ContractPage({ params }: PageProps<"/contracts/[id
     [t("contracts.slaClock"), [contract.businessHoursOnly ? t("contracts.clockBusiness") : t("contracts.clockAlways"), contract.pauseOnHold && t("contracts.clockPauses")].filter(Boolean).join(" · ")],
     [t("contracts.includedVisits"), contract.includedVisits ?? "—"],
     ...(ctx.can("costs.view")
-      ? ([[t("contracts.monthlyFee"), contract.monthlyFee != null ? format.number(Number(contract.monthlyFee), { style: "currency", currency: ctx.organization.currency }) : "—"]] as [string, React.ReactNode][])
+      ? ([
+          [t("contracts.monthlyFee"), contract.monthlyFee != null ? format.number(Number(contract.monthlyFee), { style: "currency", currency: ctx.organization.currency }) : "—"],
+          [t("urgent.contractTitle"), urgentText(urgentRuleFor(ctx.organization, contract), contract.urgentFee != null || contract.urgentPercent != null)],
+        ] as [string, React.ReactNode][])
       : []),
     [
       t("contracts.systems"),

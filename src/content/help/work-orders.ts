@@ -160,6 +160,7 @@ The **Costs** panel adds up what the job cost:
 
 - **Labour**: the billed time (each technician's time rounded up to the company's blocks), at the hourly rate of each person's role.
 - **Parts**: the parts used, at their unit cost.
+- **Urgent surcharge**, on work orders with Urgent priority: the fixed amount plus the percentage of labour set in [Settings → Organization](/help/organization) or in the work order's contract.
 - Other costs added with **Add cost** (a description and an amount, for example crane hire or parking).
 - **Total**.
 
@@ -365,6 +366,7 @@ O painel **Custos** soma o que o trabalho custou:
 
 - **Mão de obra**: o tempo faturado (o tempo de cada técnico arredondado aos blocos da empresa), ao preço por hora da função de cada pessoa.
 - **Peças**: as peças usadas, ao custo unitário.
+- **Custo extra de urgência**, nas ordens de trabalho com prioridade Urgente: o valor fixo mais a percentagem da mão de obra definidos em [Definições → Empresa](/help/organization) ou no contrato da ordem de trabalho.
 - Outros custos acrescentados com **Adicionar custo** (uma descrição e um valor, por exemplo aluguer de grua ou estacionamento).
 - **Total**.
 

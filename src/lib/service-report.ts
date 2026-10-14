@@ -9,6 +9,7 @@ import { letterhead } from "@/lib/letterhead";
 import { INTL_LOCALE, type Locale } from "@/i18n/config";
 import { ServiceReport, type ReportData } from "@/app/(app)/work-orders/[id]/report/report-pdf";
 import { billedTime, timeRoundingOf } from "@/lib/billing-time";
+import { urgentApplies, urgentRuleFor } from "@/lib/urgent-surcharge";
 
 // The client-facing PDF service report of a work order (no costs). Used by the download route and by
 // e-mailing (lib/report-email.ts). `where` scopes the work order (tenant + portal rules are the caller's);
@@ -38,6 +39,7 @@ export async function renderServiceReport(ctx: Pick<AppContext, "db" | "organiza
       timeEntries: { where: { minutes: { not: null } }, include: { user: { select: { name: true } } }, orderBy: { startedAt: "asc" } },
       attachments: { where: { mimeType: { in: [...PDF_IMAGE_TYPES] } }, orderBy: { createdAt: "asc" } },
       parts: { include: { part: { select: { name: true, sku: true, unit: true } } }, orderBy: { id: "asc" } },
+      contract: { select: { urgentFee: true, urgentPercent: true } },
     },
   });
   if (!wo) return null;
@@ -85,6 +87,8 @@ export async function renderServiceReport(ctx: Pick<AppContext, "db" | "organiza
     [t("wo.asset"), asset],
     [t("assets.system"), wo.system && t(`systems.${wo.system}`)],
     [t("wo.type"), t(`woType.${wo.type}`)],
+    // Billed as urgent (the surcharge applies): the client sees it, without amounts.
+    [t("report.service"), urgentApplies(wo.priority, urgentRuleFor(ctx.organization, wo.contract)) ? t("report.urgentService") : null],
     [t("common.status"), t(`woStatus.${wo.status}`)],
     [t("wo.technicians"), wo.assignees.map((a) => a.user.name).join(", ")],
     [t("wo.createdAt"), dt(wo.createdAt)],

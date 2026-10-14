@@ -546,7 +546,8 @@
     "timeSpent": "Tempo gasto",
     "hours": "{hours} h",
     "other": "Outros custos",
-    "timeBilled": "Tempo faturado"
+    "timeBilled": "Tempo faturado",
+    "urgent": "Custo extra de urgência"
   },
   "files": {
     "title": "Fotografias e ficheiros",
@@ -582,7 +583,9 @@
   "report": {
     "title": "Relatório de serviço",
     "photos": "Fotografias",
-    "seePhotos": "Ver fotografias"
+    "seePhotos": "Ver fotografias",
+    "service": "Serviço",
+    "urgentService": "Urgente"
   },
   "procedures": {
     "description": "Checklists reutilizáveis que a equipa segue em obra. Use-as em ordens de trabalho e planos preventivos.",
@@ -2129,7 +2132,9 @@
       "direction": "Sentido",
       "parts": "Peças",
       "note": "Nota",
-      "timeRounding": "Blocos de faturação do tempo"
+      "timeRounding": "Blocos de faturação do tempo",
+      "urgentFee": "Custo extra de urgência (fixo)",
+      "urgentPercent": "Custo extra de urgência (%)"
     }
   },
   "van": {
@@ -2177,5 +2182,15 @@
     "hint": "O tempo de cada técnico numa ordem de trabalho é arredondado para cima a blocos inteiros no custo de mão de obra e no relatório de serviço (p. ex. 34 minutos são faturados como 1 hora com blocos de 30 minutos). O tempo registado mantém-se tal como foi registado.",
     "none": "Sem arredondamento (minutos registados)",
     "block": "{minutes} minutos"
+  },
+  "urgent": {
+    "title": "Ordens de trabalho urgentes",
+    "hint": "As ordens de trabalho com prioridade Urgente têm um custo extra: um valor fixo mais uma percentagem da sua mão de obra (deixe ambos a 0 para não haver). Cada contrato de manutenção pode ter o seu. O relatório de serviço indica \"Serviço: Urgente\", sem valores.",
+    "fee": "Valor fixo ({currency})",
+    "percent": "Percentagem da mão de obra (%)",
+    "contractTitle": "Custo extra de urgência",
+    "contractHint": "Custo extra das ordens de trabalho urgentes deste contrato. Deixe ambos vazios para usar o da empresa (Definições → Empresa); 0 significa sem custo extra.",
+    "none": "Nenhum",
+    "fromCompany": "{value} (da empresa)"
   }
 }
