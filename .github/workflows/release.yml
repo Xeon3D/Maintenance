@@ -5,7 +5,7 @@ name: Release
 #   2. only then creates the GitHub release — installed servers treat a new release as "update available"
 #      and their updater pulls :latest, so the image must already be there.
 # Needs repository secrets DOCKERHUB_USERNAME and DOCKERHUB_TOKEN (a Docker Hub access token with
-# Read & Write). The image name defaults to xeon3d/maintenance; override with the DOCKERHUB_IMAGE variable.
+# Read & Write). The image name defaults to malvesdc/maintenance; override with the DOCKERHUB_IMAGE variable.
 
 on:
   push:
@@ -24,7 +24,7 @@ concurrency:
   cancel-in-progress: false
 
 env:
-  IMAGE: ${{ vars.DOCKERHUB_IMAGE || 'xeon3d/maintenance' }}
+  IMAGE: ${{ vars.DOCKERHUB_IMAGE || 'malvesdc/maintenance' }}
   TAG: ${{ inputs.tag || github.ref_name }}
 
 jobs:

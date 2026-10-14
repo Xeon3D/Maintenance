@@ -6,9 +6,9 @@ State as of **2026-09-29**, phase 9 of 10 done (see `git log` for the commit). R
 `docs/ODOO_INTEGRATION.md` (waiting on the decisions in its §10).
 
 **Repository:** `malves-dc/Maintenance` since 2026-10-14 (a fork of the original `Xeon3D/Maintenance`, which has the
-v0.1.0–v0.3.0 releases). Public Docker Hub image `xeon3d/maintenance`, published by `.github/workflows/release.yml`
-on every `vX.Y.Z` tag (it was built by hand with Docker Desktop up to v0.3.0). Servers on v0.3.0 or older still check
-`Xeon3D/Maintenance` for updates: update them once by hand (or set `UPDATE_REPO=malves-dc/Maintenance`).
+v0.1.0–v0.3.0 releases, recreated here). Docker Hub image `malvesdc/maintenance` (up to v0.3.0 it was `xeon3d/maintenance`), published by `.github/workflows/release.yml`
+on every `vX.Y.Z` tag (it was built by hand with Docker Desktop up to v0.3.0). Servers on v0.3.0 or older run
+`xeon3d/maintenance` and check `Xeon3D/Maintenance`: change their compose `image:` to `malvesdc/maintenance:latest` once.
 The user runs it on a ZimaOS server behind Nginx Proxy Manager as an **open public demo** (nothing
 locked down, by choice) with a password-protected **factory reset**. 0.2.0 added **Settings → Server**
 (software name, one-click updates, scheduled backups with restore); see "Docker & releases" and
@@ -124,7 +124,7 @@ are mostly UI and logic plus small additive migrations.
   `DATA_DIR/secrets.env`, then `process.exit(0)` so Docker restarts it and the entrypoint re-runs migrations.
   Scheduler: `runServerJobs()` every minute from `src/instrumentation-node.ts`; period keys in `BACKUP_DIR/.state.json`.
 - Updates (`src/lib/updates.ts`): GitHub `releases/latest` (6 h cache) vs `APP_VERSION`; "Update now" =
-  `pre-update` backup + `POST $UPDATER_URL/v1/update?image=xeon3d/maintenance&async=true` with the token the
+  `pre-update` backup + `POST $UPDATER_URL/v1/update?image=malvesdc/maintenance&async=true` with the token the
   entrypoint writes to `DATA_DIR/updater-token` (Watchtower reads it from its read-only mount). Watchtower
   fork `nickfedor/watchtower` (the original containrrr one is archived); HTTP API mode disables its polling.
 - Tested 2026-09-29 in a local compose stack: scheduled + manual backups, download, upload (valid/invalid),
