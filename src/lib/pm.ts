@@ -60,7 +60,8 @@ async function schedulerCtx(organizationId: string, createdById: string | null):
       orderBy: { createdAt: "asc" },
     }));
   if (!author) return null;
-  return { organization, user: author.user, db: tenantDb(organizationId) };
+  // Audited as the system (no user): the scheduler, not a person, creates these work orders.
+  return { organization, user: author.user, db: tenantDb(organizationId, { userId: null, ip: null }) };
 }
 
 /**

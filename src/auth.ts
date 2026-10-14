@@ -4,6 +4,7 @@ import bcrypt from "bcryptjs";
 import { z } from "zod";
 import { prisma } from "@/lib/db/client";
 import { addressFrom, loginBlocked, recordLoginFailure, recordLoginSuccess } from "@/lib/login-limit";
+import { auditUser } from "@/lib/audit";
 import { authConfig } from "./auth.config";
 
 const credentialsSchema = z.object({
@@ -26,14 +27,22 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         if (!parsed.success) return null;
         const { email, password } = parsed.data;
         const address = addressFrom(request.headers);
-        if (loginBlocked(email, address)) throw new TooManyAttempts();
+        // Attempts on existing accounts go to the audit log of each of the account's companies.
+        const ip = address === "unknown" ? null : address;
+        if (loginBlocked(email, address)) {
+          const blocked = await prisma.user.findUnique({ where: { email }, select: { id: true } });
+          if (blocked) await auditUser(blocked.id, "auth.signInBlocked", undefined, ip);
+          throw new TooManyAttempts();
+        }
         const user = await prisma.user.findUnique({ where: { email } });
         const ok = !!user?.passwordHash && (await bcrypt.compare(password, user.passwordHash));
         if (!ok || !user) {
           recordLoginFailure(email, address);
+          if (user) await auditUser(user.id, "auth.signInFailed", undefined, ip);
           return null;
         }
         recordLoginSuccess(email);
+        await auditUser(user.id, "auth.signIn", undefined, ip);
         return { id: user.id, email: user.email, name: user.name };
       },
     }),

@@ -117,7 +117,8 @@
     "scan": "Ler código",
     "server": "Servidor",
     "roles": "Funções",
-    "categories": "Categorias"
+    "categories": "Categorias",
+    "audit": "Registo de auditoria"
   },
   "roles": {
     "OWNER": "Super Admin",
@@ -857,7 +858,9 @@
     "sameLocation": "Escolha dois locais diferentes.",
     "notEditable": "Esta nota de encomenda não pode ser alterada no estado atual.",
     "overReceive": "Não pode receber mais do que o que está em falta numa linha.",
-    "noLines": "Nada deste fornecedor está com stock baixo."
+    "noLines": "Nada deste fornecedor está com stock baixo.",
+    "notYourVan": "Só pode repor a sua própria carrinha.",
+    "tooManySerials": "Há mais números de série do que unidades usadas."
   },
   "locationType": {
     "WAREHOUSE": "Armazém",
@@ -1287,7 +1290,19 @@
     "notFound": "Nada corresponde a “{code}”.",
     "again": "Ler código",
     "scanPart": "Ler código de barras",
-    "partNotFound": "Nenhuma peça com o código de barras ou referência “{code}”."
+    "partNotFound": "Nenhuma peça com o código de barras ou referência “{code}”.",
+    "titleSerial": "Ler número de série",
+    "titleMac": "Ler endereço MAC",
+    "hintSerial": "Aponte para a etiqueta: um código de barras é lido de imediato. Para texto impresso, enquadre-o na caixa e toque em Ler texto.",
+    "hintMac": "Aponte para a etiqueta: um código de barras é lido de imediato. Para texto impresso, enquadre o MAC na caixa e toque em Ler texto.",
+    "readText": "Ler texto",
+    "ocrLoading": "A preparar o leitor de texto (na primeira vez descarrega cerca de 15 MB)…",
+    "ocrReading": "A ler a etiqueta…",
+    "ocrPick": "Toque no valor certo:",
+    "ocrNothing": "Não encontrei nenhum código. Aproxime a câmara, com o texto dentro da caixa, e tente outra vez.",
+    "ocrFailed": "O leitor de texto não arrancou neste dispositivo. Escreva o valor em baixo.",
+    "ocrRetry": "Tentar outra vez",
+    "scanField": "Ler com a câmara"
   },
   "field": {
     "title": "App de campo",
@@ -1745,6 +1760,12 @@
         "label": "Faturação",
         "hint": "Faturação. Reservada para o módulo de faturação e a integração com a contabilidade (ainda sem ecrãs)."
       }
+    },
+    "audit": {
+      "view": {
+        "label": "Registo de auditoria",
+        "hint": "Ver quem fez o quê e a partir de onde: inícios de sessão, alterações e eliminações, utilizadores e permissões, operações do servidor."
+      }
     }
   },
   "reportEmail": {
@@ -1885,5 +1906,241 @@
         "body": "Podemos atualizar estes termos; a versão em vigor está sempre nesta página, e continuar a usar o sistema significa aceitá-la. Estes termos regem-se pela lei portuguesa. Questões: {contact}."
       }
     }
+  },
+  "audit": {
+    "description": "Quem fez o quê, quando e a partir de onde. Guardado durante o período definido em Definições → Empresa → Conservação de dados.",
+    "searchPlaceholder": "Procurar nome, ação, endereço…",
+    "category": "Categoria",
+    "allCategories": "Todas as categorias",
+    "categories": {
+      "security": "Segurança",
+      "users": "Utilizadores e permissões",
+      "records": "Registos",
+      "server": "Servidor"
+    },
+    "user": "Utilizador",
+    "allUsers": "Todos",
+    "system": "Sistema",
+    "removedUser": "Utilizador removido",
+    "entity": "Tipo",
+    "allEntities": "Todos os tipos",
+    "from": "De",
+    "to": "Até",
+    "when": "Quando",
+    "what": "O quê",
+    "target": "Item",
+    "ip": "Endereço",
+    "detailsColumn": "Detalhes",
+    "details": "{count, plural, one {# detalhe} other {# detalhes}}",
+    "empty": "Ainda não há nada registado.",
+    "open": "abrir",
+    "relations": "Itens ligados",
+    "hidden": "(oculto)",
+    "yes": "Sim",
+    "no": "Não",
+    "verbs": {
+      "create": "Criou: {entity}",
+      "update": "Alterou: {entity}",
+      "delete": "Eliminou: {entity}"
+    },
+    "entities": {
+      "WorkOrder": "ordem de trabalho",
+      "Request": "pedido",
+      "Client": "cliente",
+      "Villa": "moradia",
+      "villa": "moradia",
+      "Area": "zona",
+      "Asset": "ativo",
+      "asset": "ativo",
+      "ServiceContract": "contrato",
+      "Procedure": "procedimento",
+      "Category": "categoria",
+      "PMSchedule": "plano preventivo",
+      "Meter": "contador",
+      "Part": "peça",
+      "StockLocation": "local de stock",
+      "Vendor": "fornecedor",
+      "PurchaseOrder": "encomenda",
+      "Team": "equipa",
+      "JobRole": "função personalizada",
+      "Membership": "membro",
+      "Invitation": "convite",
+      "Attachment": "anexo",
+      "Organization": "empresa",
+      "User": "utilizador",
+      "Server": "servidor"
+    },
+    "actions": {
+      "auth": {
+        "signIn": "Iniciou sessão",
+        "signInFailed": "Início de sessão falhado (palavra-passe errada)",
+        "signInBlocked": "Início de sessão bloqueado (demasiadas tentativas)",
+        "signOut": "Terminou sessão",
+        "passwordChanged": "Alterou a palavra-passe",
+        "passwordChangeFailed": "Alteração de palavra-passe falhada (palavra-passe atual errada)",
+        "passwordResetRequested": "Pediu um link para repor a palavra-passe",
+        "passwordReset": "Repôs a palavra-passe com um link"
+      },
+      "server": {
+        "unlock": "Desbloqueou Definições → Servidor",
+        "unlockFailed": "Palavra-passe do servidor errada",
+        "unlockBlocked": "Palavra-passe do servidor bloqueada (demasiadas tentativas)",
+        "settings": "Alterou o nome do software",
+        "backupSchedule": "Alterou o agendamento dos backups / atualizações automáticas",
+        "backup": "Fez um backup",
+        "backupDelete": "Apagou um backup",
+        "backupDownload": "Descarregou um backup",
+        "backupUpload": "Carregou um backup",
+        "restore": "Iniciou um restauro",
+        "restored": "Restaurou um backup",
+        "update": "Iniciou uma atualização do software",
+        "email": "Alterou as definições de email",
+        "backupCopies": "Alterou as cópias dos backups",
+        "cloudConnect": "Ligou uma pasta na cloud",
+        "cloudDisconnect": "Desligou uma pasta na cloud",
+        "factoryReset": "Reposição de fábrica",
+        "factoryResetFailed": "Reposição de fábrica: palavra-passe errada"
+      },
+      "organization": {
+        "update": "Alterou as definições da empresa",
+        "logo": "Alterou o logótipo da empresa",
+        "roleRates": "Alterou os custos das funções",
+        "permissions": "Alterou as permissões das funções"
+      },
+      "villa": {
+        "secrets": {
+          "view": "Viu os códigos de acesso da moradia",
+          "update": "Alterou os códigos de acesso da moradia"
+        }
+      },
+      "asset": {
+        "secrets": {
+          "view": "Viu as credenciais do equipamento",
+          "update": "Alterou as credenciais do equipamento"
+        }
+      },
+      "user": {
+        "erased": "Apagou os dados de uma pessoa"
+      },
+      "client": {
+        "anonymized": "Anonimizou um cliente"
+      },
+      "workOrder": {
+        "reportSent": "Enviou o relatório de serviço por email"
+      },
+      "stock": {
+        "transfer": "Movimentou stock",
+        "vanRestock": "Repôs a carrinha"
+      }
+    },
+    "fields": {
+      "name": "Nome",
+      "title": "Título",
+      "description": "Descrição",
+      "status": "Estado",
+      "priority": "Prioridade",
+      "type": "Tipo",
+      "system": "Sistema",
+      "role": "Função",
+      "access": "Nível de acesso",
+      "active": "Ativo",
+      "email": "Email",
+      "phone": "Telefone",
+      "address": "Morada",
+      "notes": "Notas",
+      "dueDate": "Prazo",
+      "startDate": "Início",
+      "completedAt": "Concluída",
+      "villaId": "Moradia",
+      "assetId": "Ativo",
+      "clientId": "Cliente",
+      "teamId": "Equipa",
+      "vendorId": "Fornecedor",
+      "jobRoleId": "Função personalizada",
+      "assignees": "Atribuídos",
+      "categories": "Categorias",
+      "items": "Lista de verificação",
+      "lines": "Linhas",
+      "permissions": "Permissões",
+      "hourlyRate": "Custo por hora",
+      "unitCost": "Custo unitário",
+      "minQuantity": "Quantidade mínima",
+      "quantity": "Quantidade",
+      "sku": "Referência",
+      "barcode": "Código de barras",
+      "serialNumber": "N.º de série",
+      "macAddress": "Endereço MAC",
+      "ipAddress": "Endereço IP",
+      "firmware": "Firmware",
+      "manufacturer": "Fabricante",
+      "model": "Modelo",
+      "archivedAt": "Arquivado",
+      "credentialsEnc": "Credenciais do equipamento",
+      "accessCodesEnc": "Códigos de acesso",
+      "provider": "Fornecedor do serviço",
+      "account": "Conta",
+      "from": "De",
+      "to": "Para",
+      "by": "Por",
+      "count": "Registos",
+      "version": "Versão",
+      "removed": "Removido",
+      "cleared": "Apagado",
+      "appName": "Nome do software",
+      "backups": "Agendamento dos backups",
+      "autoUpdate": "Atualizações automáticas",
+      "roleRates": "Custos das funções",
+      "retention": "Conservação de dados",
+      "businessHours": "Horário laboral",
+      "reportRecipients": "Destinatários dos relatórios",
+      "brandColor": "Cor da marca",
+      "timezone": "Fuso horário",
+      "privacyNotice": "Aviso de privacidade",
+      "part": "Peça",
+      "warehouse": "Armazém",
+      "van": "Carrinha",
+      "direction": "Sentido",
+      "parts": "Peças",
+      "note": "Nota"
+    }
+  },
+  "van": {
+    "title": "A minha carrinha",
+    "description": "O que está na sua carrinha, e carregar peças de um armazém ou devolvê-las.",
+    "noVan": "Não tem nenhuma carrinha",
+    "noVanHint": "Peça a quem gere o inventário que crie um local de stock do tipo carrinha (Peças → Locais de stock) e que lho atribua.",
+    "noWarehouse": "Ainda não há nenhum armazém de onde carregar.",
+    "choose": "Carrinha",
+    "open": "Abrir",
+    "inVanHint": "Uma quantidade a vermelho está abaixo do mínimo da carrinha (definido na página da peça).",
+    "empty": "Ainda não há nada nesta carrinha.",
+    "part": "Peça",
+    "inVan": "Na carrinha",
+    "min": "Mínimo",
+    "restock": "Carregar ou devolver",
+    "direction": "Sentido",
+    "load": "Carregar do armazém",
+    "unload": "Devolver ao armazém",
+    "fromWarehouse": "Do armazém",
+    "toWarehouse": "Para o armazém",
+    "addPart": "Adicionar peça…",
+    "nothingToAdd": "Não há peças disponíveis aí",
+    "fillShort": "Adicionar o que falta ({count})",
+    "available": "Disponível: {qty} {unit}",
+    "note": "Nota",
+    "notePlaceholder": "Opcional, p. ex. kit para o trabalho na Quinta do Lago",
+    "submitLoad": "{count, plural, =0 {Carregar} one {Carregar # peça} other {Carregar # peças}}",
+    "submitUnload": "{count, plural, =0 {Devolver} one {Devolver # peça} other {Devolver # peças}}",
+    "done": "{count, plural, one {# peça movimentada.} other {# peças movimentadas.}}",
+    "quantity": "Quantidade"
+  },
+  "serials": {
+    "label": "Números de série",
+    "short": "N/S",
+    "placeholder": "N.º de série (opcional)",
+    "full": "Um número de série por unidade",
+    "add": "Adicionar número de série",
+    "scan": "Ler número de série com a câmara",
+    "remove": "Remover {serial}"
   }
 }

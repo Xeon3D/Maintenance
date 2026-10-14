@@ -423,7 +423,7 @@ markers), Message, VerificationToken (password reset).
 - `NextIntlClientProvider` ships every message to the client (fine now; scope it later for performance).
 - Staff can't create a request manually (they create WOs directly). Probably fine.
 - The public QR form has no CAPTCHA; it relies on a honeypot plus DB-count rate limits.
-- `AuditLog` only covers secrets so far; phase 8/10 may want broader auditing and a viewer UI.
+- Audit log (Settings → Audit log, permission `audit.view`): see "Audit log, van restock, scanning" in §8.
 - Playwright e2e smoke tests in `e2e/` (`npm run test:e2e`; against a running server with `E2E_BASE_URL=http://localhost:3000`); CI job `e2e` builds and runs them on a seeded Postgres.
 - `next-auth` is a v5 beta.
 
@@ -595,6 +595,33 @@ markers), Message, VerificationToken (password reset).
   Chromium-only; we sync whenever the app is open); parts usage, new WOs and requests offline (stock
   must not oversell); offline viewing of already-uploaded photos; chat offline. iOS needs the app
   added to the home screen for push and keeps storage less reliably.
+
+### Audit log, van restock, scanning (added 2026-10-14)
+- **Audit trail:** `tenantDb(orgId, actor)` (`lib/db/tenant.ts`) passes every write on the models in
+  `AUDITED` (`lib/db/audit-trail.ts`) through `withAuditTrail`: it loads the row(s) first, runs the write, then
+  logs `<entity>.create|update|delete` with a `label` (name / #number, kept after deletion) and, for updates,
+  `changes` `{field: [old, new]}` from `changesOf()` (`lib/audit.ts`). Relations a form rewrites wholesale
+  (assignees `{deleteMany, create:[{userId}]}`, categories `{set}`) are compared and shown as names, or dropped
+  when unchanged. Secret-looking fields (`*Enc`, password, token, hash) are masked. `getContext()` passes the
+  user + IP; the PM scheduler passes `{userId: null}` ("System"); public QR pages pass no actor (not logged).
+  Logging never throws (`writeAudit`). A write inside a transaction that later rolls back is still logged.
+- **Explicit events:** `audit(ctx, action, …)` / `auditUser(userId, action)` (every company of the user) for
+  sign-in ok / failed / blocked, sign-out, password change / reset, server unlock, organization settings and
+  role permissions (diff per role), and all Settings → Server operations (`server.*`, incl. backup download /
+  upload, restore — re-written into the restored database as `server.restored` — and factory reset).
+- **Viewer:** `/settings/audit` (+ CSV `/api/export/audit`), filters in `lib/audit-filter.ts` (days in the
+  company time zone), text in `lib/audit-text.ts` (`audit.actions.*` are nested by the action's dots: next-intl
+  reads dots as nesting). Retention: Settings → Organization → Data retention (`auditMonths`).
+- **Van restock:** `/parts/van` + `restockVan()` (`lib/inventory.ts`): a technician (`inventory.use`) moves parts
+  between a warehouse and their own van in one transaction (all lines or none; `notYourVan` otherwise; managers:
+  any van). Logged as TRANSFER movements and `stock.vanRestock`.
+- **Scanner:** `components/scanner.tsx` uses BarcodeDetector when it reads 1D codes, else ZXing
+  (`@zxing/library`, iPhone/Firefox/Windows). `purpose="serial" | "mac"` adds "Read text": OCR with
+  tesseract.js, served from `public/ocr` (copied from node_modules by `scripts/copy-ocr.mjs` in predev/prebuild;
+  not committed; CSP has `'wasm-unsafe-eval'`). `lib/scan-codes.ts` normalises MACs and picks serial candidates.
+  `ScanField` (asset serial / MAC, part barcode), `SerialList` (serial numbers of units used on a WO,
+  `WorkOrderPart.serialNumbers`, shown in the service report). The scanner renders in a portal (it is opened
+  inside forms). `/api/scan` also finds assets by MAC in any notation.
 
 ### Phase 10 — SaaS layer
 Stripe checkout and portal (`Subscription`), plan limits (seats, villas, storage), trial expiry

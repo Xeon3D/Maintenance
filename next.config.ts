@@ -9,9 +9,10 @@ const dev = process.env.NODE_ENV !== "production";
 // streams its hydration data inline and the theme boot script runs before paint (nonces would force
 // every page to render dynamically and break the cached offline field app). Images may come from
 // https sources only for release notes in Settings → Server. Dev needs eval and the HMR websocket.
+// 'wasm-unsafe-eval' lets the OCR engine (public/ocr) compile WebAssembly; it does not allow JS eval.
 const csp = [
   "default-src 'self'",
-  `script-src 'self' 'unsafe-inline'${dev ? " 'unsafe-eval'" : ""}`,
+  `script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval'${dev ? " 'unsafe-eval'" : ""}`,
   "style-src 'self' 'unsafe-inline'",
   "img-src 'self' data: blob: https:",
   "font-src 'self' data:",

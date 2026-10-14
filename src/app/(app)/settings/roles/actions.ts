@@ -8,6 +8,7 @@ import { optNumber, parseForm, str, type FormResult } from "@/lib/forms";
 import { CUSTOM_ROLE_ACCESS, RATED_ROLES, type RoleRates } from "@/lib/roles";
 import { builtInRoleToStore, customRoleToStore, EDITABLE_ROLES, GRANTABLE, isEditableRole, parseRolePermissions, rolePermissionsFor, type RolePermissions } from "@/lib/rbac";
 import { Prisma } from "@/generated/prisma/client";
+import { audit, changesOf } from "@/lib/audit";
 
 const rate = () => optNumber().refine((v) => v === null || (v >= 0 && v <= 100_000), "invalid");
 
@@ -23,6 +24,8 @@ export async function saveRoleRatesAction(_: FormResult, form: FormData): Promis
   }
   // Organization isn't a tenant-scoped model; scope by id explicitly.
   await prisma.organization.update({ where: { id: ctx.organization.id }, data: { roleRates: rates } });
+  const { changes } = changesOf({ roleRates: ctx.organization.roleRates }, { roleRates: rates });
+  if (Object.keys(changes).length) await audit(ctx, "organization.roleRates", "Organization", ctx.organization.id, { changes });
   revalidatePath("/settings", "layout");
   return { ok: true };
 }
@@ -67,6 +70,19 @@ export async function deleteJobRoleAction(id: string) {
 
 // ── Permissions (Super Admin only)
 
+/** Logs what each built-in role gained and lost (custom roles are logged by the audit trail as JobRole changes). */
+async function auditPermissionChanges(ctx: Awaited<ReturnType<typeof requireOwner>>, before: RolePermissions, after: RolePermissions) {
+  const roles: Record<string, { added: string[]; removed: string[] }> = {};
+  for (const r of EDITABLE_ROLES) {
+    const was = rolePermissionsFor(r, before);
+    const now = rolePermissionsFor(r, after);
+    const added = now.filter((p) => !was.includes(p));
+    const removed = was.filter((p) => !now.includes(p));
+    if (added.length || removed.length) roles[r] = { added, removed };
+  }
+  if (Object.keys(roles).length) await audit(ctx, "organization.permissions", "Organization", ctx.organization.id, { roles });
+}
+
 /**
  * Saves the permission matrix. Checkboxes are named "role:<ROLE>" / "job:<id>" with a permission as value.
  * A role left equal to its default (or a custom role equal to its access level) is stored as "no override",
@@ -84,6 +100,7 @@ export async function saveRolePermissionsAction(_: FormResult, form: FormData): 
   }
   // Organization isn't a tenant-scoped model; scope by id explicitly.
   await prisma.organization.update({ where: { id: ctx.organization.id }, data: { rolePermissions: Object.keys(overrides).length ? overrides : Prisma.DbNull } });
+  await auditPermissionChanges(ctx, before, overrides);
 
   for (const j of await ctx.db.jobRole.findMany({ select: { id: true, access: true, permissions: true } })) {
     if (!form.has(`present:job:${j.id}`) || !isEditableRole(j.access)) continue; // created after the page was opened: leave it alone
@@ -98,6 +115,7 @@ export async function saveRolePermissionsAction(_: FormResult, form: FormData): 
 export async function resetRolePermissionsAction() {
   const ctx = await requireOwner();
   await prisma.organization.update({ where: { id: ctx.organization.id }, data: { rolePermissions: Prisma.DbNull } });
+  await auditPermissionChanges(ctx, parseRolePermissions(ctx.organization.rolePermissions), {});
   await ctx.db.jobRole.updateMany({ data: { permissions: Prisma.DbNull } });
   revalidatePath("/", "layout");
 }

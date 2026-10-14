@@ -20,6 +20,12 @@ import { mkdtemp, rm, stat, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { cloudTarget, removeCloudCopy } from "@/lib/backup-copies";
+import { audit, changesOf, requestIp, writeAudit } from "@/lib/audit";
+import { prisma } from "@/lib/db/client";
+
+/** Server operations are logged in the company of the admin who did them. */
+const serverAudit = (ctx: { organization: { id: string }; user: { id: string } }, action: string, meta?: Record<string, unknown>) =>
+  audit(ctx, `server.${action}`, "Server", "-", meta as never);
 import { CLOUD_PROVIDERS, cleanFolder, COPY_KINDS, MAX_EMAIL_MB, type BackupCopies, type CloudProvider } from "@/lib/backup-copies-settings";
 
 const PAGE = "/settings/server";
@@ -34,6 +40,7 @@ function failure(e: unknown): NonNullable<FormResult> {
 export async function unlockAction(_: FormResult, form: FormData): Promise<FormResult> {
   const ctx = await requirePermission("org.manage");
   const result = await unlockServerAdmin(ctx.user.id, String(form.get("password") ?? ""));
+  if (result !== "disabled") await serverAudit(ctx, result === "ok" ? "unlock" : result === "blocked" ? "unlockBlocked" : "unlockFailed");
   if (result === "blocked") return { error: "server.errors.tooManyAttempts" };
   if (result !== "ok") return { error: "server.errors.wrongPassword" };
   revalidatePath(PAGE);
@@ -47,10 +54,13 @@ export async function lockAction() {
 }
 
 export async function saveGeneralAction(_: FormResult, form: FormData): Promise<FormResult> {
-  await requireServerAdmin();
+  const ctx = await requireServerAdmin();
   const parsed = parseForm(z.object({ appName: optStr(40) }), form);
   if (parsed.error) return parsed.error;
+  const before = await getServerSettings();
   await updateServerSettings({ appName: parsed.data.appName });
+  const { changes } = changesOf({ appName: before.appName }, { appName: parsed.data.appName });
+  if (Object.keys(changes).length) await serverAudit(ctx, "settings", { changes });
   revalidatePath("/", "layout");
   return { ok: true };
 }
@@ -64,12 +74,13 @@ const scheduleSchema = z.object({
 });
 
 export async function saveScheduleAction(_: FormResult, form: FormData): Promise<FormResult> {
-  await requireServerAdmin();
+  const ctx = await requireServerAdmin();
   const parsed = parseForm(scheduleSchema, form);
   if (parsed.error) return parsed.error;
   const d = parsed.data;
   const on = (k: string) => form.get(k) === "on";
-  await updateServerSettings({
+  const before = await getServerSettings();
+  const next = {
     backups: normalizeSchedule({
       hourly: { enabled: on("hourly"), keep: d.hourlyKeep },
       daily: { enabled: on("daily"), keep: d.dailyKeep },
@@ -78,15 +89,19 @@ export async function saveScheduleAction(_: FormResult, form: FormData): Promise
       timezone: d.timezone,
     }),
     autoUpdate: on("autoUpdate") && updaterConfigured(),
-  });
+  };
+  await updateServerSettings(next);
+  const { changes } = changesOf({ backups: before.backups, autoUpdate: before.autoUpdate }, next);
+  if (Object.keys(changes).length) await serverAudit(ctx, "backupSchedule", { changes });
   revalidatePath(PAGE);
   return { ok: true };
 }
 
 export async function backupNowAction(): Promise<FormResult> {
-  await requireServerAdmin();
+  const ctx = await requireServerAdmin();
   try {
-    await createBackup("manual");
+    const name = await createBackup("manual");
+    await serverAudit(ctx, "backup", { name });
   } catch (e) {
     return failure(e);
   }
@@ -95,8 +110,9 @@ export async function backupNowAction(): Promise<FormResult> {
 }
 
 export async function deleteBackupAction(name: string) {
-  await requireServerAdmin();
+  const ctx = await requireServerAdmin();
   await deleteBackup(name).catch(() => undefined);
+  await serverAudit(ctx, "backupDelete", { name });
   void removeCloudCopy(name); // when mirroring deletes to the cloud folder
   revalidatePath(PAGE);
 }
@@ -106,8 +122,10 @@ export type RestoreResult = (NonNullable<FormResult> & { restarting?: boolean; o
 export async function restoreBackupAction(name: string): Promise<RestoreResult> {
   const ctx = await requireServerAdmin();
   try {
+    await serverAudit(ctx, "restore", { name }); // kept in the safety backup taken before the restore
     const { overridden } = await restoreBackup(name);
     console.warn(`[server-admin] restore of ${name} by ${ctx.user.email}`);
+    await auditRestored(name, ctx.user);
     // The data was replaced: this session's account may not exist in the backup. Sign in again afterwards.
     const jar = await cookies();
     for (const { name: cookie } of jar.getAll()) {
@@ -135,6 +153,7 @@ export async function updateNowAction(): Promise<FormResult> {
     return failure(e);
   }
   console.warn(`[server-admin] update to ${status.latest?.version} requested by ${ctx.user.email}`);
+  await serverAudit(ctx, "update", { from: status.current, to: status.latest?.version ?? null });
   return { ok: true };
 }
 
@@ -198,9 +217,23 @@ export async function saveEmailAction(_: EmailResult, form: FormData): Promise<E
   }
 
   await updateServerSettings({ email: read.settings });
+  const emailChanges = changesOf(emailSummary(current), emailSummary(read.settings)).changes;
+  if (Object.keys(emailChanges).length) await serverAudit(ctx, "email", { changes: emailChanges });
   revalidatePath(PAGE);
   return { ok: true };
 }
+
+/** E-mail settings as flat fields for the audit log (secret fields are masked by their name). */
+const emailSummary = (e: EmailSettings) => ({
+  provider: e.provider,
+  from: e.from,
+  smtpHost: e.smtp.host,
+  smtpPort: e.smtp.port,
+  smtpSecurity: e.smtp.security,
+  smtpUser: e.smtp.user,
+  smtpPasswordEnc: e.smtp.passwordEnc,
+  resendKeyEnc: e.resend.apiKeyEnc,
+});
 
 // ── Backup copies (e-mail / cloud)
 
@@ -257,7 +290,7 @@ function copiesFromForm(form: FormData, current: BackupCopies): { copies: Backup
 
 /** Saves the copy settings; with intent=testEmail / testCloud it checks that channel with what is in the form. */
 export async function saveBackupCopiesAction(_: CopiesResult, form: FormData): Promise<CopiesResult> {
-  await requireServerAdmin();
+  const ctx = await requireServerAdmin();
   const current = (await getServerSettings()).backupCopies;
   const read = copiesFromForm(form, current);
   if ("fieldErrors" in read) return { error: "validation", fieldErrors: read.fieldErrors };
@@ -296,13 +329,50 @@ export async function saveBackupCopiesAction(_: CopiesResult, form: FormData): P
   }
 
   await updateServerSettings({ backupCopies: read.copies });
+  const copyChanges = changesOf(copiesSummary(current), copiesSummary(read.copies)).changes;
+  if (Object.keys(copyChanges).length) await serverAudit(ctx, "backupCopies", { changes: copyChanges });
   revalidatePath(PAGE);
   return { ok: true };
 }
 
+/** The copy settings as flat fields for the audit log (secret fields are masked by their name). */
+const copiesSummary = (c: BackupCopies) => ({
+  emailEnabled: c.email.enabled,
+  emailTo: c.email.to.join(", "),
+  emailKinds: c.email.kinds.join(", "),
+  emailEncryptedOnly: c.email.encryptedOnly,
+  emailMaxMb: c.email.maxMb,
+  cloudProvider: c.cloud.provider,
+  cloudKinds: c.cloud.kinds.join(", "),
+  cloudFolder: c.cloud.folder,
+  mirrorDeletes: c.cloud.mirrorDeletes,
+  onedriveTenant: c.cloud.onedrive.tenant,
+  onedriveClientId: c.cloud.onedrive.clientId,
+  onedriveClientSecretEnc: c.cloud.onedrive.clientSecretEnc,
+  onedriveSiteUrl: c.cloud.onedrive.siteUrl,
+  gdriveClientId: c.cloud.gdrive.clientId,
+  gdriveClientSecretEnc: c.cloud.gdrive.clientSecretEnc,
+  webdavUrl: c.cloud.webdav.url,
+  webdavUser: c.cloud.webdav.user,
+  webdavPasswordEnc: c.cloud.webdav.passwordEnc,
+});
+
+/**
+ * The restore replaced the database, audit log included: the entry is written into the restored companies so
+ * it is not lost (as the admin when their account exists in the backup, else without a user).
+ */
+async function auditRestored(name: string, admin: { id: string; email: string }) {
+  const ip = await requestIp();
+  const known = await prisma.user.findUnique({ where: { id: admin.id }, select: { id: true } }).catch(() => null);
+  for (const o of await prisma.organization.findMany({ select: { id: true } }).catch(() => [])) {
+    await writeAudit({ organizationId: o.id, userId: known?.id ?? null, action: "server.restored", entityType: "Server", entityId: "-", meta: { name, by: admin.email }, ip });
+  }
+}
+
 /** Forgets the stored OneDrive / Google sign-in. */
 export async function disconnectCloudAction(provider: "onedrive" | "gdrive") {
-  await requireServerAdmin();
+  const ctx = await requireServerAdmin();
+  await serverAudit(ctx, "cloudDisconnect", { provider });
   const s = (await getServerSettings()).backupCopies;
   const cloud =
     provider === "onedrive"

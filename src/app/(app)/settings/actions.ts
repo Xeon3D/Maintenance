@@ -26,6 +26,7 @@ const STAFF_REPORT_ROLES: string[] = ["ADMIN", "MANAGER", "TECHNICIAN", "ACCOUNT
 import { erasedName, eraseMember, ErasureError } from "@/lib/erasure";
 import { emailLayout, sendEmail } from "@/lib/email";
 import { background } from "@/lib/notify";
+import { audit, changesOf } from "@/lib/audit";
 
 export type ActionState = { ok?: boolean; error?: string; inviteUrl?: string; inviteEmail?: string } | undefined;
 
@@ -79,6 +80,8 @@ export async function updateOrgAction(_: FormResult, form: FormData): Promise<Fo
   const data = { ...rest, brandColor: normalizeHex(rest.brandColor), retention: { notificationsDays, auditMonths, requestersMonths, chatMonths }, businessHours: bh.hours, reportRecipients };
   // Organization isn't a tenant-scoped model; scope by id explicitly.
   await prisma.organization.update({ where: { id: ctx.organization.id }, data });
+  const { changes } = changesOf(ctx.organization as unknown as Record<string, unknown>, data);
+  if (Object.keys(changes).length) await audit(ctx, "organization.update", "Organization", ctx.organization.id, { changes });
   revalidatePath("/", "layout");
   return { ok: true };
 }
@@ -105,6 +108,7 @@ export async function uploadLogoAction(_: FormResult, form: FormData): Promise<F
   const ref = await putObject(`${ctx.organization.id}/branding/logo-${randomBytes(6).toString("hex")}.${ext}`, buf);
   const previous = ctx.organization.logoUrl;
   await prisma.organization.update({ where: { id: ctx.organization.id }, data: { logoUrl: ref } });
+  await audit(ctx, "organization.logo", "Organization", ctx.organization.id, { removed: false });
   if (previous) await deleteObject(previous).catch(() => undefined);
   revalidatePath("/", "layout");
   return { ok: true };
@@ -114,6 +118,7 @@ export async function removeLogoAction() {
   const ctx = await requirePermission("org.manage");
   const previous = ctx.organization.logoUrl;
   await prisma.organization.update({ where: { id: ctx.organization.id }, data: { logoUrl: null } });
+  await audit(ctx, "organization.logo", "Organization", ctx.organization.id, { removed: true });
   if (previous) await deleteObject(previous).catch(() => undefined);
   revalidatePath("/", "layout");
 }

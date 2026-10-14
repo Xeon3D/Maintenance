@@ -5,6 +5,7 @@ import { SystemType } from "@/generated/prisma/enums";
 import type { Part } from "@/generated/prisma/client";
 import type { AppContext } from "@/lib/context";
 import { savePartAction } from "./actions";
+import { ScanField } from "@/components/scan-field";
 
 export async function PartForm({ ctx, part, defaults }: { ctx: AppContext; part?: Part; defaults?: { vendorId?: string } }) {
   const t = await getTranslations();
@@ -24,7 +25,7 @@ export async function PartForm({ ctx, part, defaults }: { ctx: AppContext; part?
           <Input name="sku" defaultValue={part?.sku ?? ""} className="font-mono" />
         </Field>
         <Field label={t("parts.barcode")}>
-          <Input name="barcode" defaultValue={part?.barcode ?? ""} className="font-mono" />
+          <ScanField name="barcode" defaultValue={part?.barcode} className="font-mono" />
         </Field>
         <Field label={t("assets.system")}>
           <Select name="system" defaultValue={part?.system ?? ""}>

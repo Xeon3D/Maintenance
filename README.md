@@ -94,6 +94,26 @@ npm run dev            # http://localhost:3000
 
 `.env` needs `DATABASE_URL`, `AUTH_SECRET`, `AUTH_TRUST_HOST`, `FIELD_ENCRYPTION_KEY` (32 random bytes, base64), `UPLOAD_DIR` and `CRON_SECRET`. Optional: `APP_URL`, `VAPID_PUBLIC_KEY`/`VAPID_PRIVATE_KEY`, `RESEND_API_KEY`/`EMAIL_FROM`, `SERVER_ADMIN_PASSWORD`, `FACTORY_RESET_PASSWORD`, `SEED_DEMO`, `DEMO_MODE` (public demo banner), `BACKUP_PASSWORD` (encrypts backups), `APP_NAME` (default software name). Dev keeps server settings in `./.data` and backups in `./backups` (backups need `pg_dump`/`pg_restore`/`psql`/`tar` on PATH, so in practice only in Docker).
 
+## Audit log
+
+*Settings → Audit log* (Super Admin and Admins by default; the *Audit log* permission in Settings → Roles) shows who
+did what, when and from which address: sign-ins (and failed ones), password changes, every creation, change (old →
+new value of each field) and deletion of work orders, clients, villas, assets, parts, purchase orders, contracts,
+users and roles, permission changes, and every Settings → Server operation (backups, downloads, restores,
+updates, e-mail and cloud settings). Secret values are never logged. Filter by category, person, type and dates,
+and export to CSV. Entries are kept for the period set in Settings → Organization → Data retention.
+
+## Vans and scanning
+
+- **My van** (Parts → My van): technicians see their van's stock and what is under its minimum, and load parts from
+  a warehouse or return them (several at once, by list, "add what's short" or camera), without needing inventory
+  management rights. All lines move or none; it is logged.
+- **Camera:** part barcodes, asset labels (QR), and on serial-number / MAC fields also the label's printed text
+  (*Read text*, OCR, offering the likely values to pick). Works on iPhone too. The OCR engine is served by the app
+  itself from `public/ocr` (copied from `node_modules` by `scripts/copy-ocr.mjs` before `dev` / `build`); the first
+  use downloads about 15 MB to the device.
+- Parts used on a work order can carry the serial numbers of the units installed; they appear on the service report.
+
 ## Preventive maintenance scheduler
 
 Time-based schedules generate work orders when they come due (minus their lead days).

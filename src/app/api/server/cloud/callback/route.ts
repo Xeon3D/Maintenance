@@ -6,6 +6,7 @@ import { decryptField, encryptField } from "@/lib/crypto";
 import { onedriveConnect } from "@/lib/cloud/onedrive";
 import { gdriveConnect } from "@/lib/cloud/gdrive";
 import { cloudRedirectUri } from "@/lib/cloud/oauth-paths";
+import { audit } from "@/lib/audit";
 
 // Where Microsoft / Google send the admin back after authorising: stores the (encrypted) refresh token.
 export async function GET(req: Request) {
@@ -14,12 +15,13 @@ export async function GET(req: Request) {
     redirectTo(`/settings/server?cloud=${result}${detail ? `&detail=${encodeURIComponent(detail.slice(0, 200))}` : ""}#backup-copies`);
   // The server-admin unlock cookie is SameSite=Strict, so it isn't sent on the redirect back from Microsoft /
   // Google. The signed `state` stands in for it: it was issued to this user, unlocked, within the last 15 minutes.
-  let userId: string;
+  let ctx: Awaited<ReturnType<typeof requirePermission>>;
   try {
-    userId = (await requirePermission("org.manage")).user.id;
+    ctx = await requirePermission("org.manage");
   } catch {
     return back("locked");
   }
+  const userId = ctx.user.id;
   const provider = checkOauthState(url.searchParams.get("state") ?? "", userId);
   if (!provider) return back("badState");
   const error = url.searchParams.get("error_description") ?? url.searchParams.get("error");
@@ -46,5 +48,7 @@ export async function GET(req: Request) {
   } catch (e) {
     return back("failed", e instanceof Error ? e.message : String(e));
   }
+  const now = (await getServerSettings()).backupCopies.cloud;
+  await audit(ctx, "server.cloudConnect", "Server", "-", { provider, account: provider === "onedrive" ? now.onedrive.account : now.gdrive.account });
   return back("connected");
 }

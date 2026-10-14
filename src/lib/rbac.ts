@@ -8,6 +8,7 @@ export const PERMISSIONS = {
   "billing.manage": ["OWNER", "ACCOUNTANT"], // invoicing (no screens yet; for a future billing module / Odoo)
   "costs.view": ["OWNER", "ADMIN", "MANAGER", "TECHNICIAN", "VIEWER", "ACCOUNTANT"], // labour, parts and totals, contract fees
   "users.manage": ["OWNER", "ADMIN"],
+  "audit.view": ["OWNER", "ADMIN"], // Settings → Audit log: who did what, from where
   "teams.manage": ["OWNER", "ADMIN", "MANAGER"],
   "clients.manage": ["OWNER", "ADMIN", "MANAGER"],
   "contracts.manage": ["OWNER", "ADMIN", "MANAGER"],
@@ -43,7 +44,7 @@ export const STAFF_BASE: Permission[] = ["internal.view"];
 
 /** Permissions shown in Settings → Roles, by section. */
 export const PERMISSION_GROUPS: { key: string; permissions: Permission[] }[] = [
-  { key: "admin", permissions: ["org.manage", "users.manage", "teams.manage"] },
+  { key: "admin", permissions: ["org.manage", "users.manage", "teams.manage", "audit.view"] },
   { key: "work", permissions: ["workOrders.create", "workOrders.execute", "workOrders.manage", "workOrders.sendReport", "requests.create", "requests.approve", "pm.manage", "procedures.manage"] },
   { key: "sites", permissions: ["clients.manage", "contracts.manage", "assets.manage", "secrets.view"] },
   { key: "supply", permissions: ["inventory.use", "inventory.manage", "vendors.manage", "purchasing.manage", "purchasing.approve"] },

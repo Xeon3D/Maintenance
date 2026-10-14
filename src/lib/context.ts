@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/db/client";
 import { tenantDb } from "@/lib/db/tenant";
+import { requestIp } from "@/lib/audit";
 import { effectivePermissions, type Permission } from "@/lib/rbac";
 import { hourlyRateFor, parseRoleRates } from "@/lib/roles";
 
@@ -48,7 +49,7 @@ export const getContext = cache(async () => {
     role: membership.role,
     /** Cost per hour of this member's time (from their role); null when not set or not billable. */
     hourlyRate: hourlyRateFor(membership, parseRoleRates(membership.organization.roleRates)),
-    db: tenantDb(membership.organizationId),
+    db: tenantDb(membership.organizationId, { userId: user.id, ip: await requestIp() }),
     permissions,
     can: (p: Permission) => permissions.has(p),
   };
