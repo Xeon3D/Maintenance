@@ -15,6 +15,19 @@ export function toCsv(header: string[], rows: Cell[][]) {
   return "﻿" + [header, ...rows].map((r) => r.map(cell).join(",")).join("\r\n") + "\r\n";
 }
 
+/** A header; `money(label)` marks a column of labour, parts, totals or fees, which needs "See costs" (costs.view). */
+export type Column = string | { money: string };
+export const money = (label: string): Column => ({ money: label });
+
+/** Header labels and rows, with the money columns dropped unless `showMoney`. */
+export function moneyColumns(header: Column[], rows: Cell[][], showMoney: boolean) {
+  const keep = header.flatMap((h, i) => (showMoney || typeof h === "string" ? [i] : []));
+  return {
+    header: keep.map((i) => { const h = header[i]; return typeof h === "string" ? h : h.money; }),
+    rows: rows.map((r) => keep.map((i) => r[i])),
+  };
+}
+
 export function csvResponse(filename: string, body: string) {
   return new Response(body, {
     headers: {
