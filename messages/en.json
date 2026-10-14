@@ -1907,6 +1907,26 @@
       }
     }
   },
+  "help": {
+    "title": "Help",
+    "description": "How each area of the app works, with step-by-step guides. The ? button at the bottom of the menu opens the help for the page you're on.",
+    "searchPlaceholder": "Search the help…",
+    "results": "{count, plural, one {# result} other {# results}} for “{q}”",
+    "noResults": "Nothing found for “{q}”",
+    "noResultsHint": "Try fewer or different words, or browse the topics.",
+    "allTopics": "All help topics",
+    "openArea": "Open this area",
+    "onThisPage": "On this page",
+    "thisPage": "Help for this page",
+    "groups": {
+      "start": "Start here",
+      "operations": "Operations",
+      "sites": "Sites & equipment",
+      "supply": "Supply",
+      "insights": "Insights",
+      "settings": "Settings"
+    }
+  },
   "audit": {
     "description": "Who did what, when and from where. Kept for the period set in Settings → Organization → Data retention.",
     "searchPlaceholder": "Search name, action, address…",

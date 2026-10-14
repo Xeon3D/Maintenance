@@ -8,6 +8,7 @@ import { NotificationBell } from "@/components/notifications/bell";
 import {
   BadgeCheck,
   Building2,
+  CircleHelp,
   CalendarClock,
   ChartColumn,
   ChevronsUpDown,
@@ -43,6 +44,7 @@ import type { Theme } from "@/lib/theme";
 import { signOutAction, switchOrgAction } from "@/app/(auth)/actions";
 import { cn } from "@/lib/utils";
 import type { NavGroup } from "./nav";
+import { helpHref } from "@/lib/help";
 
 const ICONS: Record<string, LucideIcon> = {
   BadgeCheck,
@@ -88,6 +90,7 @@ export function Sidebar({ appName, theme, groups, user, org, orgs, unreadNotific
   const [open, setOpen] = useState(false);
   const [orgMenu, setOrgMenu] = useState(false);
   const [pending, start] = useTransition();
+  const help = helpHref(pathname);
 
   const content = (
     <div className="flex h-full flex-col">
@@ -172,6 +175,15 @@ export function Sidebar({ appName, theme, groups, user, org, orgs, unreadNotific
             <div className="truncate text-sm font-medium">{user.name}</div>
             <div className="truncate text-xs text-muted">{user.role}</div>
           </Link>
+          <Link
+            href={help}
+            onClick={() => setOpen(false)}
+            title={t("help.thisPage")}
+            aria-label={t("help.thisPage")}
+            className="rounded-md p-2 text-muted hover:bg-gray-100 hover:text-foreground"
+          >
+            <CircleHelp className="size-4" />
+          </Link>
           <NotificationBell key={unreadNotifications} initial={unreadNotifications} href="/notifications" />
           <form action={signOutAction}>
             <button title={t("common.signOut")} className="rounded-md p-2 text-muted hover:bg-gray-100 hover:text-foreground">
@@ -197,6 +209,9 @@ export function Sidebar({ appName, theme, groups, user, org, orgs, unreadNotific
         <span className="flex-1 truncate font-medium">{org.name}</span>
         <Link href="/scan" aria-label={t("nav.scan")} className="rounded-md p-2 text-muted hover:bg-gray-100">
           <ScanLine className="size-4" />
+        </Link>
+        <Link href={help} aria-label={t("help.thisPage")} className="rounded-md p-2 text-muted hover:bg-gray-100">
+          <CircleHelp className="size-4" />
         </Link>
         <NotificationBell key={unreadNotifications} initial={unreadNotifications} href="/notifications" />
       </div>
