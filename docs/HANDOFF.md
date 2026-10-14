@@ -381,7 +381,7 @@ markers), Message, VerificationToken (password reset).
 - Staff can't create a request manually (they create WOs directly). Probably fine.
 - The public QR form has no CAPTCHA; it relies on a honeypot plus DB-count rate limits.
 - `AuditLog` only covers secrets so far; phase 8/10 may want broader auditing and a viewer UI.
-- No Playwright e2e yet (listed in the roadmap stack).
+- Playwright e2e smoke tests in `e2e/` (`npm run test:e2e`; against a running server with `E2E_BASE_URL=http://localhost:3000`); CI job `e2e` builds and runs them on a seeded Postgres.
 - `next-auth` is a v5 beta.
 
 ---

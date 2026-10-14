@@ -94,5 +94,6 @@ Demo users (password `demo1234`): `owner@`, `manager@`, `tech.network@`, `tech.e
 |---|---|
 | `npm run dev` | Dev server |
 | `npm run typecheck` / `lint` / `test` | Checks |
+| `npm run test:e2e` | Playwright smoke tests (needs `npm run build` and a seeded DB, or `E2E_BASE_URL` pointing at a running server) |
 | `npm run db:migrate` | Create a migration after editing `prisma/schema.prisma` |
 | `npm run db:studio` | Browse the database |

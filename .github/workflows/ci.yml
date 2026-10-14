@@ -18,3 +18,41 @@ jobs:
       - run: npm run typecheck
       - run: npm run lint
       - run: npm test
+
+  e2e:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_USER: maintenance
+          POSTGRES_PASSWORD: maintenance
+          POSTGRES_DB: maintenance
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U maintenance" --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      DATABASE_URL: postgresql://maintenance:maintenance@localhost:5432/maintenance
+      AUTH_SECRET: ci-only-auth-secret-not-used-anywhere-else
+      AUTH_TRUST_HOST: "true"
+      FIELD_ENCRYPTION_KEY: MDEyMzQ1Njc4OWFiY2RlZjAxMjM0NTY3ODlhYmNkZWY=
+      CRON_SECRET: ci-only
+      UPLOAD_DIR: ./uploads
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npx prisma migrate deploy
+      - run: npx prisma db seed
+      - run: npm run build
+      - run: npx playwright install --with-deps chromium
+      - run: npm run test:e2e
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright-traces
+          path: test-results/
+          retention-days: 7
