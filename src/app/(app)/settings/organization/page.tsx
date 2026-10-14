@@ -7,6 +7,7 @@ import { getContext } from "@/lib/context";
 import { brandColor, DEFAULT_BRAND, logoSrc } from "@/lib/branding";
 import { TIMEZONES } from "@/lib/timezones";
 import { privacyPath } from "@/lib/privacy";
+import { parseRetention, RETENTION_KEYS, RETENTION_MAX } from "@/lib/retention-rules";
 import { updateOrgAction } from "../actions";
 import { BrandColorField, LogoUploader } from "./form";
 
@@ -19,6 +20,7 @@ export default async function OrgSettingsPage() {
   if (!ctx.can("org.manage")) notFound();
   const t = await getTranslations();
   const o = ctx.organization;
+  const retention = parseRetention(o.retention);
 
   return (
     <>
@@ -75,6 +77,18 @@ export default async function OrgSettingsPage() {
                 {t("privacy.view")}
               </Link>
             </p>
+            <div>
+              <h3 className="text-sm font-medium">{t("retention.title")}</h3>
+              <p className="mb-3 text-xs text-muted">{t("retention.hint")}</p>
+              <div className="grid gap-4 sm:grid-cols-2">
+                {RETENTION_KEYS.map((k) => (
+                  <Field key={k} label={t(`retention.${k}`)}>
+                    <Input name={k} type="number" min={0} max={RETENTION_MAX[k]} step={1} required defaultValue={retention[k]} className="w-28" />
+                    <FieldError name={k} />
+                  </Field>
+                ))}
+              </div>
+            </div>
 
             <h2 className="border-t border-border pt-5 font-medium">{t("company.regional")}</h2>
             <div className="grid gap-4 sm:grid-cols-3">

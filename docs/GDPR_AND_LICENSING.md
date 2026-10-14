@@ -52,7 +52,7 @@ lawyer or DPO confirm the conclusions before relying on them, especially before 
 
 ### 1.4 Gaps, by priority
 
-**Progress (2026-10-14):** ✅ 1 privacy notice (`/privacy/<slug>`, custom text in Settings → Organization, linked from the QR form, sign-in, portal, profile and e-mails); ✅ 2 sign-in limit (10 failures per account / 30 per address in 15 min); ✅ 3 "Download my data" (JSON, profile page; staff export of a client is still open); ✅ 7 security headers (`next.config.ts`); ✅ 8 demo banner (`DEMO_MODE=true`). Still open: 4, 5, 6 and the admin items 9–11.
+**Progress (2026-10-14):** ✅ 1 privacy notice (`/privacy/<slug>`, custom text in Settings → Organization, linked from the QR form, sign-in, portal, profile and e-mails); ✅ 2 sign-in limit (10 failures per account / 30 per address in 15 min); ✅ 3 "Download my data" (JSON, profile page; staff export of a client is still open); ✅ 4 erasure (Settings → Users "Erase data" for deactivated members; "Erase personal data" on archived clients; work history kept under a placeholder name); ✅ 5 retention (per-company periods in Settings → Organization, applied daily; sync log 30 days, expired tokens/invitations fixed); ✅ 6 encrypted backups (`BACKUP_PASSWORD`); ✅ 7 security headers (`next.config.ts`); ✅ 8 demo banner (`DEMO_MODE=true`). Still open: the admin items 9–11, and erasing a person who belongs to several companies.
 
 | # | Gap | GDPR article | Fix | Effort |
 |---|---|---|---|---|

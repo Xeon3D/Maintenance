@@ -6,6 +6,7 @@ import { prisma } from "@/lib/db/client";
 import { clearAllObjects, uploadRoot } from "@/lib/storage";
 import { dataDir, getServerSettings } from "@/lib/server-settings";
 import { APP_VERSION } from "@/lib/version";
+import { backupPassword, BackupCryptoError, decryptFile, encryptFile, isEncrypted } from "@/lib/backup-crypto";
 import { checkForUpdate, triggerUpdate, updaterConfigured } from "@/lib/updates";
 import {
   backupFileName,
@@ -27,7 +28,10 @@ const SECRET_KEYS = ["AUTH_SECRET", "FIELD_ENCRYPTION_KEY", "CRON_SECRET", "VAPI
 const FORMAT = 1;
 
 export class BackupError extends Error {
-  constructor(public code: "unavailable" | "busy" | "notFound" | "invalidBackup" | "backupNewer" | "failed", detail?: string) {
+  constructor(
+    public code: "unavailable" | "busy" | "notFound" | "invalidBackup" | "backupNewer" | "failed" | "encryptedNoPassword" | "wrongBackupPassword",
+    detail?: string,
+  ) {
     super(detail ? `${code}: ${detail}` : code);
   }
 }
@@ -99,7 +103,7 @@ const formatEnv = (vars: Record<string, string>) =>
     .map(([k, v]) => `${k}=${v}`)
     .join("\n") + "\n";
 
-export type BackupInfo = { name: string; kind: BackupKind; createdAt: Date; version: string; size: number };
+export type BackupInfo = { name: string; kind: BackupKind; createdAt: Date; version: string; size: number; encrypted: boolean };
 
 export async function listBackups(): Promise<BackupInfo[]> {
   const names = await readdir(backupDir()).catch(() => [] as string[]);
@@ -108,7 +112,7 @@ export async function listBackups(): Promise<BackupInfo[]> {
     const b = parseBackupName(name);
     if (!b) continue;
     const s = await stat(path.join(backupDir(), name)).catch(() => null);
-    if (s) out.push({ ...b, size: s.size });
+    if (s) out.push({ ...b, size: s.size, encrypted: await isEncrypted(path.join(backupDir(), name)).catch(() => false) });
   }
   return out.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
 }
@@ -141,10 +145,16 @@ async function doBackup(kind: BackupKind) {
     // Upload files go in under uploads/ ("./x" → "uploads/x").
     await run("tar", ["-czf", part, "--transform", "s,^\\.,uploads,", "-C", stage, "manifest.json", "database.dump", "secrets.env", "-C", uploads, "."]);
     await chmod(part, 0o600); // holds the encryption keys
+    const password = backupPassword();
+    if (password) {
+      await encryptFile(part, `${part}.enc`, password);
+      await rename(`${part}.enc`, part);
+    }
     await rename(part, path.join(dir, name));
   } finally {
     await rm(stage, { recursive: true, force: true });
     await rm(part, { force: true });
+    await rm(`${part}.enc`, { force: true });
   }
   await prune();
   return name;
@@ -166,10 +176,24 @@ export async function deleteBackup(name: string) {
 
 type Manifest = { app: string; format: number; version: string; kind: string; createdAt: string; migrations: string[] };
 
+/** Runs `fn` on the plain .tar.gz: the file itself, or a temporary decrypted copy of an encrypted backup. */
+async function withPlainArchive<T>(file: string, fn: (plain: string) => Promise<T>): Promise<T> {
+  if (!(await isEncrypted(file))) return fn(file);
+  const plain = path.join(backupDir(), `.decrypt-${path.basename(file)}-${Date.now()}`);
+  try {
+    await decryptFile(file, plain, backupPassword());
+    return await fn(plain);
+  } catch (e) {
+    throw e instanceof BackupCryptoError ? new BackupError(e.code) : e;
+  } finally {
+    await rm(plain, { force: true });
+  }
+}
+
 async function extract(file: string) {
   const stage = await mkdtemp(path.join(backupDir(), ".restore-"));
   try {
-    await run("tar", ["-xzf", file, "-C", stage, "--no-same-owner", "--no-same-permissions"]);
+    await withPlainArchive(file, (plain) => run("tar", ["-xzf", plain, "-C", stage, "--no-same-owner", "--no-same-permissions"]));
     const manifest = JSON.parse(await readFile(path.join(stage, "manifest.json"), "utf8")) as Manifest;
     if (manifest.app !== "maintenance" || manifest.format !== FORMAT || !Array.isArray(manifest.migrations)) throw new BackupError("invalidBackup");
     return { stage, manifest };
@@ -180,7 +204,11 @@ async function extract(file: string) {
 }
 
 /** Validates an archive (readable gzip/tar with a database dump) and returns its manifest, without unpacking it. */
-export async function inspectBackup(file: string) {
+export function inspectBackup(file: string) {
+  return withPlainArchive(file, inspectPlain);
+}
+
+async function inspectPlain(file: string) {
   const members = await output("tar", ["-tzf", file]).catch(() => "");
   const names = new Set(members.split("\n").map((n) => n.replace(/^\.\//, "")));
   if (!names.has("manifest.json") || !names.has("database.dump")) throw new BackupError("invalidBackup");

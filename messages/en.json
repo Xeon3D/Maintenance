@@ -1424,10 +1424,15 @@
       "noUpdate": "There's no newer version to install.",
       "updaterNotConfigured": "The updater service isn't set up (see docker-compose.yml).",
       "updateInProgress": "An update is already running.",
-      "updaterError": "The updater service didn't accept the request. Check that it is running."
+      "updaterError": "The updater service didn't accept the request. Check that it is running.",
+      "encryptedNoPassword": "This backup is encrypted. Set BACKUP_PASSWORD on this server to the password it was made with.",
+      "wrongBackupPassword": "This backup can't be decrypted: it was made with a different BACKUP_PASSWORD, or the file is damaged."
     },
     "whatsNew": "What's new",
-    "noNotes": "No release notes."
+    "noNotes": "No release notes.",
+    "encrypted": "Encrypted",
+    "encryptionOn": "New backups are encrypted with BACKUP_PASSWORD (AES-256). Keep that password safe: without it they can't be restored.",
+    "encryptionOff": "Backups aren't encrypted. Set BACKUP_PASSWORD in the server environment to encrypt new ones (recommended when copies leave the server)."
   },
   "theme": {
     "label": "Appearance",
@@ -1478,5 +1483,28 @@
         "body": "You may ask to access, correct or erase your data, to restrict or object to its processing, and to receive it in a portable format. Users can download their data from their profile. You may also complain to your data protection authority (in Portugal, the CNPD)."
       }
     }
+  },
+  "retention": {
+    "title": "Data retention",
+    "hint": "Older records are deleted (or, for request forms, the contact details removed) once a day. 0 keeps them forever.",
+    "notificationsDays": "Notifications (days)",
+    "auditMonths": "Security log (months)",
+    "requestersMonths": "QR requester contact details (months after the decision)",
+    "chatMonths": "Chat messages (months)"
+  },
+  "erasure": {
+    "formerUser": "Former user",
+    "formerClient": "Former client",
+    "erased": "Erased",
+    "erase": "Erase data",
+    "eraseHint": "Remove this person's name, e-mail, phone and sign-in; their work history stays, without their name.",
+    "eraseConfirm": "Erase this person's personal data? Their name, e-mail, phone, password and notifications are removed for good, and they can no longer sign in. Jobs and time they logged stay, under \"Former user\". This can't be undone.",
+    "anonymize": "Erase personal data",
+    "anonymizeHint": "Remove this client's name, contact details, tax number, notes and contacts; villas and jobs stay.",
+    "anonymizeConfirm": "Erase this client's personal data? The name, e-mail, phone, tax number, billing address, notes and all contacts are removed for good. Villas, jobs and contracts stay, under \"Former client\". This can't be undone.",
+    "deactivateFirst": "Deactivate the member first.",
+    "otherCompanies": "This person also belongs to another company, so the account can't be erased from here. Deactivating them removes their access to this company.",
+    "archiveFirst": "Archive the client first.",
+    "portalUsers": "This client still has active portal users. Deactivate and erase them first."
   }
 }

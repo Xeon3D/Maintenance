@@ -7,7 +7,7 @@ import { BackLink } from "@/components/back-link";
 import { ActionForm, FieldError } from "@/components/action-form";
 import { Field, Input } from "@/components/ui";
 import { ArchiveButton } from "@/components/archive-button";
-import { DeleteContactButton } from "./client";
+import { AnonymizeClientButton, DeleteContactButton } from "./client";
 import { ContractStatusBadge } from "../../contracts/status-badge";
 import { getContext } from "@/lib/context";
 import { addContactAction, setClientArchivedAction } from "../actions";
@@ -47,6 +47,7 @@ export default async function ClientPage({ params }: PageProps<"/clients/[id]">)
         actions={
           canManage && (
             <>
+              {client.archivedAt && !client.anonymizedAt && <AnonymizeClientButton clientId={client.id} />}
               <ArchiveButton archived={!!client.archivedAt} action={setClientArchivedAction.bind(null, client.id)} />
               <Link href={`/clients/${client.id}/edit`}>
                 <Button variant="secondary">
@@ -58,7 +59,7 @@ export default async function ClientPage({ params }: PageProps<"/clients/[id]">)
           )
         }
       />
-      {client.archivedAt && <Badge className="mb-4">{t("common.archived")}</Badge>}
+      {client.archivedAt && <Badge className="mb-4">{client.anonymizedAt ? t("erasure.erased") : t("common.archived")}</Badge>}
 
       <div className="grid gap-6 lg:grid-cols-[1fr_360px]">
         <div className="space-y-6">

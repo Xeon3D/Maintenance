@@ -183,6 +183,8 @@ model User {
   isSuperAdmin      Boolean  @default(false)
   // { [notificationType]: { email?: boolean, push?: boolean } }; missing keys use the defaults in lib/notify.
   notificationPrefs Json?
+  // Set when the account was erased (GDPR art. 17): name/e-mail replaced, sign-in impossible, history kept.
+  erasedAt          DateTime?
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
 
@@ -228,6 +230,8 @@ model Organization {
   address       String?
   brandColor    String? // #rrggbb; must keep white text readable (checked on save)
   reportFooter  String? // printed at the foot of PDFs (licences, IBAN, insurance…)
+  // Retention periods, e.g. {"notificationsDays": 90}; missing keys use the defaults in lib/retention-rules.
+  retention     Json?
   privacyNotice String? // custom privacy notice (plain text) shown at /privacy/<slug>; null = built-in template
   // Cost per hour of the built-in roles, e.g. {"TECHNICIAN": 45}; custom roles carry their own (JobRole).
   roleRates     Json?
@@ -378,6 +382,7 @@ model Client {
   billingAddress String?
   notes          String?
   archivedAt     DateTime?
+  anonymizedAt   DateTime? // contact details erased (GDPR art. 17); name replaced, jobs kept
   createdAt      DateTime   @default(now())
   updatedAt      DateTime   @updatedAt
 

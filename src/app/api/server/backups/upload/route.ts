@@ -4,7 +4,7 @@ import path from "node:path";
 import { randomBytes } from "node:crypto";
 import { Readable, Transform } from "node:stream";
 import { pipeline } from "node:stream/promises";
-import { backupDir, backupsAvailable, inspectBackup } from "@/lib/backups";
+import { backupDir, backupsAvailable, BackupError, inspectBackup } from "@/lib/backups";
 import { backupFileName } from "@/lib/backup-schedule";
 import { requireServerAdmin } from "@/lib/server-admin";
 
@@ -42,6 +42,9 @@ export async function PUT(req: Request) {
   } catch (e) {
     await rm(tmp, { force: true });
     const tooLarge = e instanceof Error && e.message === "tooLarge";
-    return new Response(tooLarge ? "Too large" : "Invalid backup", { status: tooLarge ? 413 : 400 });
+    if (tooLarge) return new Response("Too large", { status: 413 });
+    // Password problems get their own message; anything else is an invalid file.
+    const code = e instanceof BackupError && (e.code === "encryptedNoPassword" || e.code === "wrongBackupPassword") ? e.code : "invalidBackup";
+    return Response.json({ error: code }, { status: 400 });
   }
 }

@@ -18,6 +18,8 @@ import en from "../../../../messages/en.json";
 import pt from "../../../../messages/pt.json";
 import { appOrigin } from "@/lib/qr";
 import { privacyPath } from "@/lib/privacy";
+import { RETENTION_MAX } from "@/lib/retention-rules";
+import { erasedName, eraseMember, ErasureError } from "@/lib/erasure";
 import { emailLayout, sendEmail } from "@/lib/email";
 import { background } from "@/lib/notify";
 
@@ -40,6 +42,10 @@ const orgSchema = z.object({
   ),
   reportFooter: optStr(500),
   privacyNotice: optStr(20000),
+  notificationsDays: z.coerce.number().int().min(0).max(RETENTION_MAX.notificationsDays),
+  auditMonths: z.coerce.number().int().min(0).max(RETENTION_MAX.auditMonths),
+  requestersMonths: z.coerce.number().int().min(0).max(RETENTION_MAX.requestersMonths),
+  chatMonths: z.coerce.number().int().min(0).max(RETENTION_MAX.chatMonths),
   timezone: z.string().trim().min(1).max(64),
   currency: z.string().trim().length(3).toUpperCase(),
   defaultLocale: z.enum(LOCALES),
@@ -49,7 +55,8 @@ export async function updateOrgAction(_: FormResult, form: FormData): Promise<Fo
   const ctx = await requirePermission("org.manage");
   const parsed = parseForm(orgSchema, form);
   if (parsed.error) return parsed.error;
-  const data = { ...parsed.data, brandColor: normalizeHex(parsed.data.brandColor) };
+  const { notificationsDays, auditMonths, requestersMonths, chatMonths, ...rest } = parsed.data;
+  const data = { ...rest, brandColor: normalizeHex(rest.brandColor), retention: { notificationsDays, auditMonths, requestersMonths, chatMonths } };
   // Organization isn't a tenant-scoped model; scope by id explicitly.
   await prisma.organization.update({ where: { id: ctx.organization.id }, data });
   revalidatePath("/", "layout");
@@ -227,4 +234,20 @@ export async function removeTeamMemberAction(teamId: string, userId: string) {
   await assertOwned(ctx.db, "team", [teamId]);
   await ctx.db.teamMember.deleteMany({ where: { teamId, userId } });
   revalidatePath("/settings/teams");
+}
+
+// ── Erasure (GDPR art. 17)
+
+export async function eraseMemberAction(membershipId: string): Promise<{ error?: string }> {
+  const ctx = await requirePermission("users.manage");
+  const m = await ctx.db.membership.findUnique({ where: { id: membershipId }, select: { userId: true } });
+  if (!m) return { error: "forbidden" };
+  try {
+    await eraseMember(ctx, membershipId, erasedName(ctx.organization.defaultLocale, "user", m.userId));
+  } catch (e) {
+    if (e instanceof ErasureError) return { error: e.message };
+    throw e;
+  }
+  revalidatePath("/settings/users");
+  return {};
 }

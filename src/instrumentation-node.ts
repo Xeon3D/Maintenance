@@ -13,6 +13,25 @@ async function startServerJobs() {
   const tick = () => runServerJobs().catch((e) => console.error("[server-jobs]", e));
   g.__serverJobs = setInterval(tick, 60_000);
   setTimeout(tick, 30_000);
+  startRetention();
+}
+
+// Retention clean-up (src/lib/retention.ts): shortly after start, then once a day.
+async function startRetention() {
+  const { runRetention } = await import("@/lib/retention");
+  const g = globalThis as unknown as { __retention?: NodeJS.Timeout };
+  if (g.__retention) clearInterval(g.__retention); // dev hot reload
+  const tick = async () => {
+    try {
+      const r = await runRetention();
+      const removed = Object.entries(r).filter(([, n]) => n > 0);
+      if (removed.length) console.log(`[retention] ${removed.map(([k, n]) => `${k}: ${n}`).join(", ")}`);
+    } catch (e) {
+      console.error("[retention] clean-up failed", e);
+    }
+  };
+  g.__retention = setInterval(tick, 24 * 60 * 60_000);
+  setTimeout(tick, 2 * 60_000);
 }
 
 // Docker/demo servers: with SEED_DEMO=true an empty database gets the demo organization on first start.

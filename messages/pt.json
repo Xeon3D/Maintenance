@@ -1424,10 +1424,15 @@
       "noUpdate": "Não há nenhuma versão mais recente para instalar.",
       "updaterNotConfigured": "O serviço de atualização não está configurado (ver docker-compose.yml).",
       "updateInProgress": "Já está a decorrer uma atualização.",
-      "updaterError": "O serviço de atualização não aceitou o pedido. Verifique se está a funcionar."
+      "updaterError": "O serviço de atualização não aceitou o pedido. Verifique se está a funcionar.",
+      "encryptedNoPassword": "Esta cópia está encriptada. Defina neste servidor a BACKUP_PASSWORD com que foi feita.",
+      "wrongBackupPassword": "Não é possível desencriptar esta cópia: foi feita com outra BACKUP_PASSWORD, ou o ficheiro está danificado."
     },
     "whatsNew": "Novidades",
-    "noNotes": "Sem notas de versão."
+    "noNotes": "Sem notas de versão.",
+    "encrypted": "Encriptada",
+    "encryptionOn": "As novas cópias são encriptadas com a BACKUP_PASSWORD (AES-256). Guarde bem essa palavra-passe: sem ela não podem ser repostas.",
+    "encryptionOff": "As cópias de segurança não estão encriptadas. Defina BACKUP_PASSWORD no ambiente do servidor para encriptar as novas (recomendado quando há cópias fora do servidor)."
   },
   "theme": {
     "label": "Aspeto",
@@ -1478,5 +1483,28 @@
         "body": "Pode pedir o acesso, a retificação ou o apagamento dos seus dados, a limitação ou oposição ao tratamento, e recebê-los num formato portável. Os utilizadores podem descarregar os seus dados no perfil. Pode também apresentar reclamação à autoridade de proteção de dados (em Portugal, a CNPD)."
       }
     }
+  },
+  "retention": {
+    "title": "Conservação de dados",
+    "hint": "Os registos mais antigos são apagados (ou, nos formulários de pedido, os contactos removidos) uma vez por dia. 0 guarda-os para sempre.",
+    "notificationsDays": "Notificações (dias)",
+    "auditMonths": "Registo de segurança (meses)",
+    "requestersMonths": "Contactos de quem fez pedidos por QR (meses após a decisão)",
+    "chatMonths": "Mensagens de chat (meses)"
+  },
+  "erasure": {
+    "formerUser": "Antigo utilizador",
+    "formerClient": "Antigo cliente",
+    "erased": "Apagado",
+    "erase": "Apagar dados",
+    "eraseHint": "Remove o nome, e-mail, telefone e acesso desta pessoa; o histórico de trabalho fica, sem o nome.",
+    "eraseConfirm": "Apagar os dados pessoais desta pessoa? O nome, e-mail, telefone, palavra-passe e notificações são removidos definitivamente e deixa de poder iniciar sessão. Os trabalhos e o tempo registado ficam, como \"Antigo utilizador\". Não é possível desfazer.",
+    "anonymize": "Apagar dados pessoais",
+    "anonymizeHint": "Remove o nome, contactos, NIF, notas e pessoas de contacto deste cliente; as moradias e os trabalhos ficam.",
+    "anonymizeConfirm": "Apagar os dados pessoais deste cliente? O nome, e-mail, telefone, NIF, morada de faturação, notas e todas as pessoas de contacto são removidos definitivamente. As moradias, trabalhos e contratos ficam, como \"Antigo cliente\". Não é possível desfazer.",
+    "deactivateFirst": "Desative primeiro o membro.",
+    "otherCompanies": "Esta pessoa pertence também a outra empresa, por isso a conta não pode ser apagada aqui. Desativá-la remove o acesso a esta empresa.",
+    "archiveFirst": "Arquive primeiro o cliente.",
+    "portalUsers": "Este cliente ainda tem utilizadores do portal ativos. Desative-os e apague-os primeiro."
   }
 }
