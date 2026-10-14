@@ -3,6 +3,7 @@ import { mkdir, readFile, rename, stat, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { DEFAULT_BACKUP_SCHEDULE, normalizeSchedule, type BackupSchedule } from "@/lib/backup-schedule";
 import { DEFAULT_EMAIL, normalizeEmailSettings, type EmailSettings } from "@/lib/email-settings";
+import { DEFAULT_BACKUP_COPIES, normalizeBackupCopies, type BackupCopies } from "@/lib/backup-copies-settings";
 
 // Server-wide settings (not per company): software name, backup schedule, automatic updates, e-mail delivery.
 // Kept in a JSON file in DATA_DIR so they survive a factory reset and a database restore.
@@ -14,9 +15,10 @@ export type ServerSettings = {
   backups: BackupSchedule;
   autoUpdate: boolean;
   email: EmailSettings;
+  backupCopies: BackupCopies;
 };
 
-const DEFAULTS: ServerSettings = { appName: null, backups: DEFAULT_BACKUP_SCHEDULE, autoUpdate: false, email: DEFAULT_EMAIL };
+const DEFAULTS: ServerSettings = { appName: null, backups: DEFAULT_BACKUP_SCHEDULE, autoUpdate: false, email: DEFAULT_EMAIL, backupCopies: DEFAULT_BACKUP_COPIES };
 
 export const dataDir = () => path.resolve(process.env.DATA_DIR ?? "./.data");
 const file = () => path.join(dataDir(), "server-settings.json");
@@ -33,6 +35,7 @@ export async function getServerSettings(): Promise<ServerSettings> {
       backups: normalizeSchedule(raw.backups),
       autoUpdate: raw.autoUpdate === true,
       email: normalizeEmailSettings(raw.email),
+      backupCopies: normalizeBackupCopies(raw.backupCopies),
     };
     cached = { mtime: mtimeMs, value };
     return value;

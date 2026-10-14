@@ -141,6 +141,15 @@ restart `next dev` after adding a file. `npx playwright install --with-deps chro
   restore (data + files back, restart, migrations), lock/unlock, and a real Watchtower recreate. To force
   "update available" in a test, set `UPDATE_REPO` to a repo with a higher release number.
 - `/api/server/backups/upload` is excluded from the proxy matcher (no 16 MB buffer) and checks access itself.
+- **Backup copies** (`lib/backup-copies.ts`, settings in `lib/backup-copies-settings.ts` → `ServerSettings.backupCopies`):
+  `doBackup()` calls `copyBackup(file, kind, removed)` after pruning — in the background, but awaited (≤10 min) for
+  `pre-update` since the container is replaced next. E-mail via `sendEmail` with the file attached (`emailPlan`:
+  attach / tooBig / notEncrypted / skip). Cloud targets in `lib/cloud/` (`CloudTarget`: upload in parts, list,
+  remove): Graph upload sessions (10 MiB), Drive resumable uploads (8 MiB, `drive.file` scope → the app creates the
+  folder), WebDAV PUT/MKCOL/PROPFIND. OAuth: `/api/server/cloud/connect` → provider → `/api/server/cloud/callback`
+  (signed `state` stands in for the SameSite=Strict server-admin cookie). Client secrets / refresh tokens / passwords
+  stored with `encryptField`; Microsoft rotates refresh tokens (`onRefresh` saves them). Last results in
+  `DATA_DIR/backup-copies-status.json`. Only names matching the backup pattern are ever deleted remotely.
 
 ### Tooling gotchas that already cost time
 - **Don't patch TS/TSX through PowerShell double-quoted strings.** The backtick is PowerShell's
