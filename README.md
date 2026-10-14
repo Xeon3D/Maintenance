@@ -39,6 +39,9 @@ Owners and admins see *Settings → Server*; it asks for the server password (un
 because it acts on the whole installation rather than one company:
 
 - **Software name** — replaces "VillaOps" on the sign-in page, browser tab, installed app and e-mails.
+- **E-mail** — how invitations, password resets, notifications and service reports are sent: an **SMTP account**
+  (Microsoft 365, Google Workspace, the domain's mail server…) or **Resend** (API key), with a *Send test e-mail*
+  button. Passwords and keys are stored encrypted. Left on *Environment variables*, `RESEND_API_KEY`/`EMAIL_FROM` are used.
 - **Updates** — shows the installed and latest version (from the GitHub releases of
   [`malves-dc/Maintenance`](https://github.com/malves-dc/Maintenance/releases); `UPDATE_REPO` overrides it). *Update to x.y.z*
   makes a backup, then asks the `updater` service ([Watchtower](https://github.com/nicholas-fedor/watchtower))

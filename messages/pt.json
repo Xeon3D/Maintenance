@@ -234,7 +234,8 @@
     "closesBeforeOpens": "A hora de fecho tem de ser depois da hora de abertura.",
     "badHoliday": "Indique uma data por linha, no formato AAAA-MM-DD.",
     "categoryTaken": "Já existe uma categoria com este nome.",
-    "badEmails": "Um ou mais endereços não são endereços de e-mail válidos."
+    "badEmails": "Um ou mais endereços não são endereços de e-mail válidos.",
+    "badFrom": "Indique um endereço, ou um nome e endereço: Empresa '<'nome@empresa.pt'>'."
   },
   "clients": {
     "description": "Proprietários, family offices e gestores de propriedades para quem trabalha.",
@@ -1448,7 +1449,55 @@
     "noNotes": "Sem notas de versão.",
     "encrypted": "Encriptada",
     "encryptionOn": "As novas cópias são encriptadas com a BACKUP_PASSWORD (AES-256). Guarde bem essa palavra-passe: sem ela não podem ser repostas.",
-    "encryptionOff": "As cópias de segurança não estão encriptadas. Defina BACKUP_PASSWORD no ambiente do servidor para encriptar as novas (recomendado quando há cópias fora do servidor)."
+    "encryptionOff": "As cópias de segurança não estão encriptadas. Defina BACKUP_PASSWORD no ambiente do servidor para encriptar as novas (recomendado quando há cópias fora do servidor).",
+    "email": {
+      "title": "E-mail",
+      "hint": "Como a app envia convites, recuperação de palavra-passe, notificações e relatórios de serviço. Neste momento:",
+      "statusSmtp": "SMTP através de {host}.",
+      "statusResend": "Resend (chave gravada aqui).",
+      "statusResendEnv": "Resend (RESEND_API_KEY no ambiente).",
+      "statusNone": "não configurado — os e-mails não são enviados.",
+      "provider": "Enviar através de",
+      "providers": {
+        "smtp": "Conta SMTP",
+        "resend": "Resend",
+        "env": "Variáveis de ambiente"
+      },
+      "providerHints": {
+        "smtp": "Qualquer caixa de correio: Microsoft 365, Google Workspace, o servidor de correio do seu domínio…",
+        "resend": "O serviço de envio Resend, com uma chave de API.",
+        "env": "Como até agora: RESEND_API_KEY e EMAIL_FROM no docker-compose."
+      },
+      "from": "Remetente",
+      "fromHint": "O endereço de onde saem os e-mails, opcionalmente com um nome: Manutenção '<'manutencao@empresa.pt'>'. Com SMTP costuma ser a própria caixa de correio.",
+      "smtpHost": "Servidor SMTP",
+      "smtpPort": "Porta",
+      "smtpSecurity": "Segurança",
+      "security": {
+        "starttls": "STARTTLS (normalmente 587)",
+        "ssl": "SSL/TLS (normalmente 465)",
+        "none": "Nenhuma (não recomendado)"
+      },
+      "smtpUser": "Utilizador",
+      "smtpPassword": "Palavra-passe",
+      "secretHint": "Guardada encriptada.",
+      "secretSaved": "Gravada (encriptada). Deixe vazio para a manter.",
+      "clearPassword": "Remover a palavra-passe gravada",
+      "smtpTips": "Microsoft 365: smtp.office365.com, 587, STARTTLS; o SMTP AUTH tem de estar ativo na caixa de correio. Google: smtp.gmail.com, 587, STARTTLS, com uma palavra-passe de aplicação. Servidor do seu domínio: veja as definições de correio.",
+      "resendKey": "Chave de API",
+      "resendHint": "Em resend.com → API Keys; o domínio do remetente tem de estar verificado lá.",
+      "envActive": "RESEND_API_KEY e EMAIL_FROM estão definidas no ambiente, por isso o e-mail sai através do Resend.",
+      "envNone": "Não há variáveis de e-mail no ambiente: os e-mails não são enviados. Escolha SMTP ou Resend acima.",
+      "testTo": "Enviar um teste para",
+      "testHint": "Usa o que está no formulário, mesmo antes de gravar.",
+      "test": "Enviar e-mail de teste",
+      "testing": "A enviar…",
+      "testSent": "E-mail de teste enviado para {to}. Veja a caixa de entrada (e a pasta de spam).",
+      "testFailed": "O teste falhou:",
+      "testNeedsProvider": "Escolha SMTP ou Resend para enviar um teste.",
+      "testSubject": "{app}: e-mail de teste",
+      "testBody": "Esta é uma mensagem de teste. Se a está a ler, o e-mail da app de manutenção está a funcionar."
+    }
   },
   "theme": {
     "label": "Aspeto",
@@ -1707,7 +1756,7 @@
     "sending": "A enviar…",
     "sent": "Enviado.",
     "lastSent": "Último envio {at} para {count, plural, one {# endereço} other {# endereços}}.",
-    "notConfigured": "O e-mail não está configurado neste servidor (RESEND_API_KEY e EMAIL_FROM), por isso o relatório não pode ser enviado.",
+    "notConfigured": "O e-mail não está configurado neste servidor (Definições → Servidor → E-mail), por isso o relatório não pode ser enviado.",
     "noRecipients": "Escolha ou escreva pelo menos um endereço.",
     "source": {
       "client": "Cliente",

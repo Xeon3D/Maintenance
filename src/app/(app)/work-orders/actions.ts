@@ -368,7 +368,7 @@ export async function clearSignOffAction(woId: string) {
  */
 export async function sendReportAction(woId: string, _: FormResult, form: FormData): Promise<FormResult> {
   const ctx = await requirePermission("workOrders.sendReport");
-  if (!emailConfigured()) return { error: "reportEmail.notConfigured" };
+  if (!(await emailConfigured())) return { error: "reportEmail.notConfigured" };
   const found = await reportRecipients(ctx, woId);
   if (!found) return { error: "somethingWrong" };
   const offered = new Set(found.recipients.map((r) => r.email));

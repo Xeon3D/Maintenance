@@ -2,8 +2,9 @@ import "server-only";
 import { mkdir, readFile, rename, stat, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { DEFAULT_BACKUP_SCHEDULE, normalizeSchedule, type BackupSchedule } from "@/lib/backup-schedule";
+import { DEFAULT_EMAIL, normalizeEmailSettings, type EmailSettings } from "@/lib/email-settings";
 
-// Server-wide settings (not per company): software name, backup schedule, automatic updates.
+// Server-wide settings (not per company): software name, backup schedule, automatic updates, e-mail delivery.
 // Kept in a JSON file in DATA_DIR so they survive a factory reset and a database restore.
 
 export const DEFAULT_APP_NAME = "VillaOps";
@@ -12,9 +13,10 @@ export type ServerSettings = {
   appName: string | null;
   backups: BackupSchedule;
   autoUpdate: boolean;
+  email: EmailSettings;
 };
 
-const DEFAULTS: ServerSettings = { appName: null, backups: DEFAULT_BACKUP_SCHEDULE, autoUpdate: false };
+const DEFAULTS: ServerSettings = { appName: null, backups: DEFAULT_BACKUP_SCHEDULE, autoUpdate: false, email: DEFAULT_EMAIL };
 
 export const dataDir = () => path.resolve(process.env.DATA_DIR ?? "./.data");
 const file = () => path.join(dataDir(), "server-settings.json");
@@ -30,6 +32,7 @@ export async function getServerSettings(): Promise<ServerSettings> {
       appName: typeof raw.appName === "string" && raw.appName.trim() ? raw.appName.trim().slice(0, 40) : null,
       backups: normalizeSchedule(raw.backups),
       autoUpdate: raw.autoUpdate === true,
+      email: normalizeEmailSettings(raw.email),
     };
     cached = { mtime: mtimeMs, value };
     return value;

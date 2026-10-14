@@ -5,10 +5,15 @@ import { z } from "zod";
 import { requirePermission } from "@/lib/context";
 import { optStr, parseForm, type FormResult } from "@/lib/forms";
 import { lockServerAdmin, requireServerAdmin, unlockServerAdmin } from "@/lib/server-admin";
-import { updateServerSettings } from "@/lib/server-settings";
+import { getAppName, getServerSettings, updateServerSettings } from "@/lib/server-settings";
 import { normalizeSchedule, validTimezone } from "@/lib/backup-schedule";
 import { BackupError, createBackup, deleteBackup, restartSoon, restoreBackup, updateNow } from "@/lib/backups";
 import { checkForUpdate, updaterConfigured } from "@/lib/updates";
+import { getTranslations } from "next-intl/server";
+import { encryptField } from "@/lib/crypto";
+import { emailLayout, sendTestEmail } from "@/lib/email";
+import { EMAIL_PROVIDERS, SMTP_SECURITY, validFrom, type EmailProvider, type EmailSettings, type SmtpSecurity } from "@/lib/email-settings";
+import { isEmail } from "@/lib/report-recipients";
 
 const PAGE = "/settings/server";
 
@@ -120,3 +125,66 @@ export async function updateNowAction(): Promise<FormResult> {
   return { ok: true };
 }
 
+
+// ── E-mail delivery
+
+export type EmailResult = { ok?: boolean; error?: string; fieldErrors?: Record<string, string>; detail?: string; tested?: string } | undefined;
+
+/**
+ * Reads the e-mail form. Secret fields left blank keep the stored value, so the password/API key never has
+ * to be sent back to the browser. Returns field errors (message keys) when the chosen provider is incomplete.
+ */
+function emailFromForm(form: FormData, current: EmailSettings): { settings: EmailSettings } | { fieldErrors: Record<string, string> } {
+  const get = (k: string) => String(form.get(k) ?? "").trim();
+  const provider = (EMAIL_PROVIDERS as readonly string[]).includes(get("provider")) ? (get("provider") as EmailProvider) : "env";
+  const port = Number(get("smtpPort") || 587);
+  const password = get("smtpPassword");
+  const apiKey = get("resendKey");
+  const settings: EmailSettings = {
+    provider,
+    from: get("from").slice(0, 300),
+    smtp: {
+      host: get("smtpHost").slice(0, 255),
+      port: Number.isInteger(port) && port > 0 && port < 65536 ? port : 587,
+      security: (SMTP_SECURITY as readonly string[]).includes(get("smtpSecurity")) ? (get("smtpSecurity") as SmtpSecurity) : "starttls",
+      user: get("smtpUser").slice(0, 300),
+      passwordEnc: form.get("smtpPasswordClear") === "on" ? null : password ? encryptField(password) : current.smtp.passwordEnc,
+    },
+    resend: { apiKeyEnc: apiKey ? encryptField(apiKey) : current.resend.apiKeyEnc },
+  };
+  const errors: Record<string, string> = {};
+  if (provider !== "env" && !validFrom(settings.from)) errors.from = "badFrom";
+  if (provider === "smtp" && !settings.smtp.host) errors.smtpHost = "too_small";
+  if (provider === "smtp" && !(Number.isInteger(port) && port > 0 && port < 65536)) errors.smtpPort = "invalid";
+  if (provider === "resend" && !settings.resend.apiKeyEnc) errors.resendKey = "too_small";
+  return Object.keys(errors).length ? { fieldErrors: errors } : { settings };
+}
+
+/** Saves the e-mail settings, or (button "Send test e-mail") sends a test with what is in the form. */
+export async function saveEmailAction(_: EmailResult, form: FormData): Promise<EmailResult> {
+  const ctx = await requireServerAdmin();
+  const current = (await getServerSettings()).email;
+  const read = emailFromForm(form, current);
+  if ("fieldErrors" in read) return { error: "validation", fieldErrors: read.fieldErrors };
+
+  if (form.get("intent") === "test") {
+    const to = String(form.get("testTo") ?? "").trim() || ctx.user.email;
+    if (!isEmail(to)) return { error: "validation", fieldErrors: { testTo: "invalid_format" } };
+    if (read.settings.provider === "env") return { error: "server.email.testNeedsProvider" };
+    const t = await getTranslations("server.email");
+    try {
+      await sendTestEmail(read.settings, to, {
+        subject: t("testSubject", { app: await getAppName() }),
+        ...emailLayout({ org: await getAppName(), heading: t("testSubject", { app: await getAppName() }), paragraphs: [t("testBody")] }),
+      });
+    } catch (e) {
+      // Shown to the server admin only: the provider's own message is what helps fix the settings.
+      return { error: "server.email.testFailed", detail: e instanceof Error ? e.message.slice(0, 300) : String(e) };
+    }
+    return { ok: true, tested: to };
+  }
+
+  await updateServerSettings({ email: read.settings });
+  revalidatePath(PAGE);
+  return { ok: true };
+}

@@ -31,7 +31,8 @@ services:
       FACTORY_RESET_PASSWORD: ""
       # Encrypts new backups (AES-256). Keep it safe: encrypted backups can't be restored without it.
       BACKUP_PASSWORD: ""
-      # Optional e-mail delivery through Resend; without it e-mails are only logged.
+      # E-mail is set up in Settings → Server → E-mail (SMTP account or Resend). These two are only
+      # used when that is left on "Environment variables"; without either, e-mails are only logged.
       RESEND_API_KEY: ""
       EMAIL_FROM: ""
       # Watchtower sidecar that installs updates (see "updater" below).

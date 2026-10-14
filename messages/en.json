@@ -234,7 +234,8 @@
     "closesBeforeOpens": "Closing time must be after opening time.",
     "badHoliday": "Use one date per line, as YYYY-MM-DD.",
     "categoryTaken": "There's already a category with this name.",
-    "badEmails": "One or more addresses aren't valid e-mail addresses."
+    "badEmails": "One or more addresses aren't valid e-mail addresses.",
+    "badFrom": "Use an address, or a name and address: Company '<'name@company.com'>'."
   },
   "clients": {
     "description": "Villa owners, family offices and property managers you work for.",
@@ -1448,7 +1449,55 @@
     "noNotes": "No release notes.",
     "encrypted": "Encrypted",
     "encryptionOn": "New backups are encrypted with BACKUP_PASSWORD (AES-256). Keep that password safe: without it they can't be restored.",
-    "encryptionOff": "Backups aren't encrypted. Set BACKUP_PASSWORD in the server environment to encrypt new ones (recommended when copies leave the server)."
+    "encryptionOff": "Backups aren't encrypted. Set BACKUP_PASSWORD in the server environment to encrypt new ones (recommended when copies leave the server).",
+    "email": {
+      "title": "E-mail",
+      "hint": "How the app sends invitations, password resets, notifications and service reports. Now:",
+      "statusSmtp": "SMTP via {host}.",
+      "statusResend": "Resend (key saved here).",
+      "statusResendEnv": "Resend (RESEND_API_KEY in the environment).",
+      "statusNone": "not set up — e-mails aren't sent.",
+      "provider": "Send through",
+      "providers": {
+        "smtp": "SMTP account",
+        "resend": "Resend",
+        "env": "Environment variables"
+      },
+      "providerHints": {
+        "smtp": "Any mailbox: Microsoft 365, Google Workspace, your domain's mail server…",
+        "resend": "Resend's sending service, with an API key.",
+        "env": "As before: RESEND_API_KEY and EMAIL_FROM in docker-compose."
+      },
+      "from": "Sender",
+      "fromHint": "The address e-mails come from, optionally with a name: Maintenance '<'maintenance@company.com'>'. With SMTP it is usually the mailbox itself.",
+      "smtpHost": "SMTP server",
+      "smtpPort": "Port",
+      "smtpSecurity": "Security",
+      "security": {
+        "starttls": "STARTTLS (usually 587)",
+        "ssl": "SSL/TLS (usually 465)",
+        "none": "None (not recommended)"
+      },
+      "smtpUser": "Username",
+      "smtpPassword": "Password",
+      "secretHint": "Stored encrypted.",
+      "secretSaved": "Saved (encrypted). Leave empty to keep it.",
+      "clearPassword": "Remove the saved password",
+      "smtpTips": "Microsoft 365: smtp.office365.com, 587, STARTTLS; SMTP AUTH must be enabled for the mailbox. Google: smtp.gmail.com, 587, STARTTLS, with an app password. Your domain's server: see its mail settings.",
+      "resendKey": "API key",
+      "resendHint": "From resend.com → API Keys; the sender's domain must be verified there.",
+      "envActive": "RESEND_API_KEY and EMAIL_FROM are set in the environment, so e-mail goes out through Resend.",
+      "envNone": "No e-mail variables are set in the environment: e-mails aren't sent. Choose SMTP or Resend above.",
+      "testTo": "Send a test to",
+      "testHint": "Uses what is in the form, even before you save.",
+      "test": "Send test e-mail",
+      "testing": "Sending…",
+      "testSent": "Test e-mail sent to {to}. Check the inbox (and the spam folder).",
+      "testFailed": "The test failed:",
+      "testNeedsProvider": "Choose SMTP or Resend to send a test.",
+      "testSubject": "{app}: test e-mail",
+      "testBody": "This is a test message. If you are reading it, e-mail from the maintenance app is working."
+    }
   },
   "theme": {
     "label": "Appearance",
@@ -1707,7 +1756,7 @@
     "sending": "Sending…",
     "sent": "Sent.",
     "lastSent": "Last sent {at} to {count, plural, one {# address} other {# addresses}}.",
-    "notConfigured": "E-mail isn't set up on this server (RESEND_API_KEY and EMAIL_FROM), so the report can't be sent.",
+    "notConfigured": "E-mail isn't set up on this server (Settings → Server → E-mail), so the report can't be sent.",
     "noRecipients": "Choose or type at least one address.",
     "source": {
       "client": "Client",
