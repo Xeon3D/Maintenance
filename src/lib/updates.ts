@@ -7,8 +7,8 @@ import { dataDir } from "@/lib/server-settings";
 // Update check against the project's GitHub releases, and the trigger for the Watchtower sidecar
 // ("updater" in docker-compose.yml) that pulls the new image and recreates only the app container.
 
-const REPO = () => process.env.UPDATE_REPO || "Xeon3D/Maintenance";
-const IMAGE = () => process.env.APP_IMAGE || "xeon3d/maintenance";
+const REPO = () => process.env.UPDATE_REPO || "malves-dc/Maintenance";
+const IMAGE = () => process.env.APP_IMAGE || "malvesdc/maintenance";
 const CHECK_TTL = 6 * 3_600_000;
 
 export type ReleaseInfo = { version: string; url: string; html: string; publishedAt: string | null };

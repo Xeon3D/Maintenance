@@ -5,7 +5,9 @@ network, security & CCTV, A/V and lighting. See [docs/ROADMAP.md](docs/ROADMAP.m
 
 ## Install with Docker (ZimaOS, any Docker host)
 
-The image is published as [`xeon3d/maintenance`](https://hub.docker.com/r/xeon3d/maintenance) (linux/amd64).
+The image is published as [`malvesdc/maintenance`](https://hub.docker.com/r/malvesdc/maintenance) (linux/amd64).
+Up to 0.3.0 it was `xeon3d/maintenance`: on those servers change the compose `image:` line to
+`malvesdc/maintenance:latest` once, then update (see "Updating from 0.3.0" below).
 [`docker-compose.yml`](docker-compose.yml) runs it with PostgreSQL and an updater:
 
 1. **ZimaOS:** App Store → *Custom Install* → *Import* and paste `docker-compose.yml`
@@ -37,9 +39,10 @@ Owners and admins see *Settings → Server*; it asks for the server password (un
 because it acts on the whole installation rather than one company:
 
 - **Software name** — replaces "VillaOps" on the sign-in page, browser tab, installed app and e-mails.
-- **Updates** — shows the installed and latest version (from this repo's GitHub releases). *Update to x.y.z*
+- **Updates** — shows the installed and latest version (from the GitHub releases of
+  [`malves-dc/Maintenance`](https://github.com/malves-dc/Maintenance/releases); `UPDATE_REPO` overrides it). *Update to x.y.z*
   makes a backup, then asks the `updater` service ([Watchtower](https://github.com/nicholas-fedor/watchtower))
-  to pull `xeon3d/maintenance:latest` and recreate only the app container; database changes are applied
+  to pull `malvesdc/maintenance:latest` and recreate only the app container; database changes are applied
   as it starts. *Install updates automatically* does the same every day at the backup hour.
   The updater never updates on its own and only touches the labelled app container.
 - **Backups** — hourly / daily / monthly schedules, each keeping its last *N*; *Back up now*; download,
@@ -49,6 +52,13 @@ because it acts on the whole installation rather than one company:
   the app restarts afterwards. Backups go to `/backups` — map it to another disk, and download copies
   off the server now and then. Backups made by a newer version can't be restored on an older one.
   With `BACKUP_PASSWORD` set, new backups are encrypted (a lock icon marks them) and restore/upload decrypt them.
+
+### Updating from 0.3.0
+
+From 0.3.1 the image is `malvesdc/maintenance` and updates come from the `malves-dc/Maintenance` releases, so a
+0.3.0 server is moved over once by hand. In the app's compose (ZimaOS: the app's settings), change
+`image: xeon3d/maintenance:latest` to `image: malvesdc/maintenance:latest` and save (or run `docker compose pull`
+and `docker compose up -d`). The data stays where it is; from then on, updates come from Settings → Server.
 
 ### Updating from 0.1.0
 
@@ -97,3 +107,16 @@ Demo users (password `demo1234`): `owner@`, `manager@`, `tech.network@`, `tech.e
 | `npm run test:e2e` | Playwright smoke tests (needs `npm run build` and a seeded DB, or `E2E_BASE_URL` pointing at a running server) |
 | `npm run db:migrate` | Create a migration after editing `prisma/schema.prisma` |
 | `npm run db:studio` | Browse the database |
+
+## Releasing
+
+Releases are built and published by GitHub Actions (`.github/workflows/release.yml`):
+
+1. Bump `version` in `package.json` and `package-lock.json` (`npm version 0.4.0 --no-git-tag-version`), commit, merge to `main`.
+2. Tag and push: `git tag v0.4.0 && git push origin v0.4.0`.
+3. The workflow runs the checks, pushes `malvesdc/maintenance:0.4.0` and `:latest` to Docker Hub, and then creates
+   the GitHub release, which installed servers see as "update available" (Settings → Server).
+
+One-time setup: repository secrets `DOCKERHUB_USERNAME` and `DOCKERHUB_TOKEN` (a Docker Hub access token with
+Read & Write), and optionally a `DOCKERHUB_IMAGE` variable to publish under another image name (servers then need
+`APP_IMAGE` and the compose `image:` changed to match).

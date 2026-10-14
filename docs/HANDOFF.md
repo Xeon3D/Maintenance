@@ -5,8 +5,10 @@ State as of **2026-09-29**, phase 9 of 10 done (see `git log` for the commit). R
 **on hold**: the app runs for one company for now. Next candidate work: the Odoo integration in
 `docs/ODOO_INTEGRATION.md` (waiting on the decisions in its §10).
 
-**Released as v0.2.0** (v0.1.0 before): public GitHub repo `Xeon3D/Maintenance`, public Docker Hub image
-`xeon3d/maintenance` (built and pushed from this PC with Docker Desktop; `gh` is logged in as Xeon3D).
+**Repository:** `malves-dc/Maintenance` since 2026-10-14 (a fork of the original `Xeon3D/Maintenance`, which has the
+v0.1.0–v0.3.0 releases, recreated here). Docker Hub image `malvesdc/maintenance` (up to v0.3.0 it was `xeon3d/maintenance`), published by `.github/workflows/release.yml`
+on every `vX.Y.Z` tag (it was built by hand with Docker Desktop up to v0.3.0). Servers on v0.3.0 or older run
+`xeon3d/maintenance` and check `Xeon3D/Maintenance`: change their compose `image:` to `malvesdc/maintenance:latest` once.
 The user runs it on a ZimaOS server behind Nginx Proxy Manager as an **open public demo** (nothing
 locked down, by choice) with a password-protected **factory reset**. 0.2.0 added **Settings → Server**
 (software name, one-click updates, scheduled backups with restore); see "Docker & releases" and
@@ -112,9 +114,10 @@ restart `next dev` after adding a file. `npx playwright install --with-deps chro
 - Test a build: copy `docker-compose.yml` to the scratchpad, map port 3200, use named volumes, set
   `FACTORY_RESET_PASSWORD` via a `.env` next to it, `docker compose up -d`, then `down -v` afterwards.
 - Release: bump `version` in `package.json` (+ lock file; it is the app's version and what the update check
-  compares), `docker build -t xeon3d/maintenance:<v> -t xeon3d/maintenance:latest .`, push both tags **before**
-  `git tag v<v>` + `gh release create` (the release is what installed servers see as "update available", and
-  the updater pulls `:latest`). ZimaOS is x86-64, so amd64 only. Compose uses `:latest`.
+  compares), merge, then push a `vX.Y.Z` tag. `release.yml` checks the tag matches, runs the checks, pushes
+  `:<v>` and `:latest` (amd64 only: ZimaOS is x86-64) and only then creates the GitHub release (the release is what
+  installed servers see as "update available", and the updater pulls `:latest`). Secrets: `DOCKERHUB_USERNAME`,
+  `DOCKERHUB_TOKEN`. Update checks read `malves-dc/Maintenance` releases (`UPDATE_REPO` overrides).
 
 ### Server administration (Settings → Server, v0.2.0)
 - Gate: `src/lib/server-admin.ts`. Needs `org.manage` **and** the server password (`SERVER_ADMIN_PASSWORD`,
@@ -129,7 +132,7 @@ restart `next dev` after adding a file. `npx playwright install --with-deps chro
   `DATA_DIR/secrets.env`, then `process.exit(0)` so Docker restarts it and the entrypoint re-runs migrations.
   Scheduler: `runServerJobs()` every minute from `src/instrumentation-node.ts`; period keys in `BACKUP_DIR/.state.json`.
 - Updates (`src/lib/updates.ts`): GitHub `releases/latest` (6 h cache) vs `APP_VERSION`; "Update now" =
-  `pre-update` backup + `POST $UPDATER_URL/v1/update?image=xeon3d/maintenance&async=true` with the token the
+  `pre-update` backup + `POST $UPDATER_URL/v1/update?image=malvesdc/maintenance&async=true` with the token the
   entrypoint writes to `DATA_DIR/updater-token` (Watchtower reads it from its read-only mount). Watchtower
   fork `nickfedor/watchtower` (the original containrrr one is archived); HTTP API mode disables its polling.
 - Tested 2026-09-29 in a local compose stack: scheduled + manual backups, download, upload (valid/invalid),

@@ -6,7 +6,7 @@ name: maintenance
 services:
   app:
     # "latest" lets Settings → Server install new versions with one click (through the updater below).
-    image: xeon3d/maintenance:latest
+    image: malvesdc/maintenance:latest
     restart: unless-stopped
     depends_on:
       db:
@@ -36,6 +36,9 @@ services:
       EMAIL_FROM: ""
       # Watchtower sidecar that installs updates (see "updater" below).
       UPDATER_URL: http://updater:8080
+      # GitHub repository whose releases Settings → Server offers as updates (versions up to 0.3.0
+      # checked Xeon3D/Maintenance; setting it here also points those at the current repository).
+      UPDATE_REPO: malves-dc/Maintenance
       # AUTH_SECRET, FIELD_ENCRYPTION_KEY, CRON_SECRET and VAPID keys are generated on first start
       # and kept in /data/secrets.env. Set them here only to override.
     volumes:
