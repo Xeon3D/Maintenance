@@ -22,7 +22,7 @@ import { copyStatus } from "@/lib/backup-copies";
 import { cloudRedirectUri } from "@/lib/cloud/oauth-paths";
 
 // Results of coming back from Microsoft / Google (Settings → Server → Backup copies → Connect).
-const CLOUD_RESULTS = ["connected", "denied", "failed", "badState", "locked", "noRefresh", "missingApp"];
+const CLOUD_RESULTS = ["connected", "denied", "failed", "badState", "locked", "noRefresh", "noDriveScope", "missingApp"];
 
 export const generateMetadata = titled("nav.server");
 

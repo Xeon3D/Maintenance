@@ -6,6 +6,7 @@ export type WoCtx = Pick<AppContext, "db" | "organization" | "user">;
 import { assertOwned, nextNumber } from "@/lib/db/tenant";
 import { notify, notifyExternal } from "@/lib/notify";
 import { contractFor } from "@/lib/contracts";
+import { effectivePermissions } from "@/lib/rbac";
 import type { ChecklistItemType, Priority, SystemType, WorkOrderStatus, WorkOrderType } from "@/generated/prisma/enums";
 
 export const ACTIVE_STATUSES: WorkOrderStatus[] = ["OPEN", "IN_PROGRESS", "ON_HOLD"];
@@ -70,12 +71,31 @@ export async function resolveRefs(ctx: WoCtx, input: WorkOrderInput) {
 }
 
 /** Assignees must be active, non-client members of the org. */
+/** Active members who can carry out work orders (with the company's permission settings), by name: the assignee choices. */
+export async function assignableUsers(db: WoCtx["db"]) {
+  const rows = await db.membership.findMany({
+    where: { active: true, role: { not: "REQUESTER" } },
+    select: { role: true, jobRole: { select: { permissions: true } }, organization: { select: { rolePermissions: true } }, user: { select: { id: true, name: true } } },
+  });
+  return rows
+    .filter((r) => effectivePermissions(r.role, r.organization.rolePermissions, r.jobRole?.permissions).has("workOrders.execute"))
+    .map((r) => r.user)
+    .sort((a, b) => a.name.localeCompare(b.name));
+}
+
 export async function validateAssignees(ctx: WoCtx, ids: string[] = []) {
   const unique = [...new Set(ids)];
   if (unique.length === 0) return unique;
-  const n = await ctx.db.membership.count({ where: { userId: { in: unique }, active: true, role: { not: "REQUESTER" } } });
-  if (n !== unique.length) throw new WorkOrderError("invalidAssignee");
+  const allowed = new Set((await assignableUsers(ctx.db)).map((u) => u.id));
+  if (!unique.every((id) => allowed.has(id))) throw new WorkOrderError("invalidAssignee");
   return unique;
+}
+
+/** Drops ids that can no longer be assigned (left the company, or their role lost "carry out work orders"). */
+export async function stillAssignable(ctx: WoCtx, ids: string[]) {
+  if (ids.length === 0) return ids;
+  const allowed = new Set((await assignableUsers(ctx.db)).map((u) => u.id));
+  return ids.filter((id) => allowed.has(id));
 }
 
 /** Categories must be the org's own (they are connected, which the tenant guard doesn't check). */

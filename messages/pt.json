@@ -1840,6 +1840,7 @@
       "badState": "A ligação expirou. Desbloqueie Definições → Servidor e ligue novamente.",
       "locked": "Inicie sessão na app e ligue novamente.",
       "noRefresh": "A conta não concedeu acesso offline. Ligue novamente e aceite todas as permissões.",
+      "noDriveScope": "O acesso ao Google Drive não foi concedido. Ligue novamente e, no ecrã da Google, marque a permissão do Google Drive (ou \"Selecionar tudo\").",
       "missingApp": "Grave primeiro o ID e o segredo do cliente."
     },
     "mail": {
@@ -1850,6 +1851,39 @@
       "notEncrypted": "Foi feito um backup: {name} ({size}). Não vai em anexo porque só são enviados backups encriptados e este não está.",
       "testSubject": "{app}: teste de envio de backups",
       "testBody": "Isto é um teste. Os backups vão ser enviados para este endereço."
+    }
+  },
+  "terms": {
+    "title": "Termos de utilização",
+    "sections": {
+      "service": {
+        "title": "O serviço",
+        "body": "Este sistema de manutenção é operado pela {company} para planear, executar e documentar a manutenção dos imóveis e sistemas a seu cargo, e para permitir aos seus clientes comunicar avarias e acompanhar os trabalhos feitos. Estes termos aplicam-se a todos os que iniciam sessão ou usam as suas páginas públicas (como o formulário de pedido por QR)."
+      },
+      "accounts": {
+        "title": "Contas",
+        "body": "As contas são criadas pela {company} ou por convite. Não partilhe a sua palavra-passe e avise-nos de imediato se suspeitar que outra pessoa usou a sua conta. Podemos suspender ou encerrar contas mal utilizadas ou que deixem de ser necessárias, por exemplo no fim de um contrato ou de uma relação de trabalho."
+      },
+      "use": {
+        "title": "Utilização aceitável",
+        "body": "Use o sistema apenas para o seu fim: pedidos de manutenção, ordens de trabalho e a comunicação relacionada. Não tente aceder a dados a que não lhe foi dado acesso, perturbar o seu funcionamento ou segurança, carregar conteúdos ilícitos ou malware, nem usá-lo para enviar mensagens não solicitadas."
+      },
+      "content": {
+        "title": "Os seus conteúdos",
+        "body": "Os pedidos, fotografias, comentários, assinaturas e outros conteúdos que acrescentar continuam a ser seus; autoriza a {company} a guardá-los e usá-los para prestar e documentar o serviço. Garanta que pode partilhar o que carrega (por exemplo, fotografias de propriedade alheia). Os códigos de acesso e as credenciais de equipamentos são confidenciais e não podem ser transmitidos a terceiros."
+      },
+      "privacy": {
+        "title": "Dados pessoais",
+        "body": "Os dados pessoais são tratados conforme descrito no aviso de privacidade da {company}."
+      },
+      "availability": {
+        "title": "Disponibilidade e responsabilidade",
+        "body": "Procuramos manter o sistema disponível e os seus dados com cópias de segurança, mas é fornecido tal como está e pode ser interrompido para manutenção ou por factos alheios ao nosso controlo. Os serviços de manutenção em si regem-se pelo acordo entre a {company} e cada cliente; na medida permitida por lei, a {company} não responde por danos indiretos resultantes da utilização, ou da impossibilidade de utilização, do sistema."
+      },
+      "law": {
+        "title": "Alterações, lei aplicável e contacto",
+        "body": "Podemos atualizar estes termos; a versão em vigor está sempre nesta página, e continuar a usar o sistema significa aceitá-la. Estes termos regem-se pela lei portuguesa. Questões: {contact}."
+      }
     }
   }
 }

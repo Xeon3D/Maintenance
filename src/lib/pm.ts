@@ -2,7 +2,7 @@ import "server-only";
 import { prisma } from "@/lib/db/client";
 import { tenantDb } from "@/lib/db/tenant";
 import { nextOccurrence, type Recurrence } from "@/lib/pm-schedule";
-import { createWorkOrder, type WoCtx } from "@/lib/work-orders";
+import { createWorkOrder, stillAssignable, type WoCtx } from "@/lib/work-orders";
 import type { PMSchedule } from "@/generated/prisma/client";
 
 const DAY = 86_400_000;
@@ -40,7 +40,8 @@ export async function generateWorkOrder(ctx: WoCtx, s: ScheduleWithAssignees, du
     procedureId: s.procedureId,
     pmScheduleId: s.id,
     estimatedMinutes: s.estimatedMinutes,
-    assigneeIds: s.assignees.map((a) => a.userId),
+    // A schedule outlives its people: skip anyone who can no longer be assigned instead of failing.
+    assigneeIds: await stillAssignable(ctx, s.assignees.map((a) => a.userId)),
     startDate: s.leadDays > 0 ? new Date(dueDate.getTime() - s.leadDays * DAY) : null,
     dueDate,
   });

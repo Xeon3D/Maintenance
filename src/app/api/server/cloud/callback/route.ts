@@ -37,6 +37,7 @@ export async function GET(req: Request) {
     } else if (provider === "gdrive") {
       const app = { clientId: s.cloud.gdrive.clientId, clientSecret: s.cloud.gdrive.clientSecretEnc ? decryptField(s.cloud.gdrive.clientSecretEnc) : "" };
       const r = await gdriveConnect(app, code, redirectUri);
+      if (!r.driveGranted) return back("noDriveScope");
       if (!r.refreshToken) return back("noRefresh");
       await updateServerSettings({
         backupCopies: { ...s, cloud: { ...s.cloud, provider: "gdrive", gdrive: { ...s.cloud.gdrive, refreshTokenEnc: encryptField(r.refreshToken), account: r.account, folderId: null, folderPath: null } } },

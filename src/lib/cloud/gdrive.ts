@@ -31,15 +31,20 @@ async function token(app: GoogleApp, params: Record<string, string>) {
     headers: { "Content-Type": "application/x-www-form-urlencoded" },
     body: new URLSearchParams({ client_id: app.clientId, client_secret: app.clientSecret, ...params }),
   });
-  return (await (await check(res, "Google sign-in")).json()) as { access_token: string; refresh_token?: string };
+  return (await (await check(res, "Google sign-in")).json()) as { access_token: string; refresh_token?: string; scope?: string };
 }
 
-/** Code from the sign-in redirect → refresh token + the account's e-mail. */
+const DRIVE_FILE = "https://www.googleapis.com/auth/drive.file";
+
+/**
+ * Code from the sign-in redirect → refresh token + the account's e-mail. Google lets the person untick each
+ * permission, so `driveGranted` says whether Drive access was actually given.
+ */
 export async function gdriveConnect(app: GoogleApp, code: string, redirectUri: string) {
   const t = await token(app, { grant_type: "authorization_code", code, redirect_uri: redirectUri });
   const res = await fetch("https://openidconnect.googleapis.com/v1/userinfo", { headers: { Authorization: `Bearer ${t.access_token}` } });
   const me = (await (await check(res, "Google account")).json()) as { email?: string };
-  return { refreshToken: t.refresh_token ?? "", account: me.email ?? null };
+  return { refreshToken: t.refresh_token ?? "", account: me.email ?? null, driveGranted: (t.scope ?? "").split(" ").includes(DRIVE_FILE) };
 }
 
 /** Escapes a value for a Drive search query (single-quoted strings). */

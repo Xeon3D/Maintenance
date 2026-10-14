@@ -8,7 +8,7 @@ import { prisma } from "@/lib/db/client";
 
 export default async function AuthLayout({ children }: { children: React.ReactNode }) {
   const t = await getTranslations();
-  // /privacy resolves to the company's notice only on a single-company server (see privacy/page.tsx).
+  // /privacy and /terms resolve to the company's pages only on a single-company server (see privacy/page.tsx).
   const singleCompany = (await prisma.organization.count()) === 1;
   return (
     <div className="flex min-h-screen flex-col items-center justify-center px-4 py-12">
@@ -23,9 +23,12 @@ export default async function AuthLayout({ children }: { children: React.ReactNo
           <ThemeToggle initial={await getTheme()} />
         </div>
         {singleCompany && (
-          <p className="mt-4 text-center text-xs">
+          <p className="mt-4 flex justify-center gap-4 text-xs">
             <Link href="/privacy" className="text-muted hover:text-brand">
               {t("privacy.title")}
+            </Link>
+            <Link href="/terms" className="text-muted hover:text-brand">
+              {t("terms.title")}
             </Link>
           </p>
         )}

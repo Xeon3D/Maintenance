@@ -58,8 +58,9 @@ because it acts on the whole installation rather than one company:
   An older backup restores on a newer version: its database is brought up to date by the migrations at restart.
 - **Backup copies** — as each backup is made, e-mail it (up to 5 addresses; choose which kinds, whether only
   encrypted ones are sent, and the largest attachment — bigger ones send a notice instead) and/or copy it to a cloud
-  folder: **OneDrive / SharePoint**, **Google Drive** (both need an OAuth app registered once; the page shows the
-  redirect URI and the steps) or **WebDAV** (Nextcloud, NAS…). Backups the schedule removes are removed from the
+  folder: **OneDrive / SharePoint** (work accounts), **Google Drive** (both need an OAuth app registered once; the page
+  shows the redirect URI and the steps; for the app's privacy policy and terms of service links use
+  `https://<APP_URL>/privacy` and `https://<APP_URL>/terms`) or **WebDAV** (Nextcloud, NAS…). Backups the schedule removes are removed from the
   folder too (optional). *Send test e-mail* and *Test upload* check the settings; the last result is shown.
 
 ### Updating from 0.3.0
