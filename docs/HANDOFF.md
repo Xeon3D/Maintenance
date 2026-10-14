@@ -378,7 +378,6 @@ markers), Message, VerificationToken (password reset).
 
 **Smaller**
 - `NextIntlClientProvider` ships every message to the client (fine now; scope it later for performance).
-- CSV asset import inserts one row at a time (slow near the 2,000-row limit).
 - Staff can't create a request manually (they create WOs directly). Probably fine.
 - The public QR form has no CAPTCHA; it relies on a honeypot plus DB-count rate limits.
 - `AuditLog` only covers secrets so far; phase 8/10 may want broader auditing and a viewer UI.

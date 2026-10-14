@@ -1,4 +1,5 @@
 import "server-only";
+import { randomBytes } from "node:crypto";
 import Papa from "papaparse";
 import type { AppContext } from "@/lib/context";
 import { Criticality, SystemType } from "@/generated/prisma/enums";
@@ -170,42 +171,59 @@ export async function planImport(ctx: AppContext, csv: string): Promise<ImportPl
   return plan;
 }
 
-/** Writes a validated plan: creates missing areas, then assets in file order (so parents exist first). */
+const CHUNK = 500;
+
+/** A cuid-shaped id ("c" + 24 base-36 characters), assigned up front so children can point at parents. */
+export function newId() {
+  const bytes = randomBytes(24);
+  return "c" + Array.from(bytes, (b) => (b % 36).toString(36)).join("");
+}
+
+function chunks<T>(rows: T[]) {
+  const out: T[][] = [];
+  for (let i = 0; i < rows.length; i += CHUNK) out.push(rows.slice(i, i + CHUNK));
+  return out;
+}
+
+/**
+ * Writes a validated plan in a few batched inserts: missing areas, then assets in file order with ids
+ * assigned up front (a parent always comes before its children, so each chunk's parents already exist
+ * or are in the same statement), then their status-log rows.
+ */
 export async function commitImport(ctx: AppContext, plan: ImportPlan) {
   const orgId = ctx.organization.id;
+  const key = (villaId: string, name: string) => `${villaId}|${norm(name)}`;
   return ctx.db.$transaction(
     async (tx) => {
       const areaIds = new Map<string, string>();
-      const key = (villaId: string, name: string) => `${villaId}|${norm(name)}`;
       for (const a of await tx.area.findMany({ where: { organizationId: orgId }, select: { id: true, villaId: true, name: true } })) {
         areaIds.set(key(a.villaId, a.name), a.id);
       }
-      for (const a of plan.newAreas) {
-        const created = await tx.area.create({ data: { organizationId: orgId, villaId: a.villaId, name: a.name, kind: "ROOM" } });
-        areaIds.set(key(a.villaId, a.name), created.id);
-      }
+      const newAreas = plan.newAreas.map((a) => ({ id: newId(), organizationId: orgId, villaId: a.villaId, name: a.name, kind: "ROOM" as const }));
+      for (const c of chunks(newAreas)) await tx.area.createMany({ data: c });
+      for (const a of newAreas) areaIds.set(key(a.villaId, a.name), a.id);
 
       const assetIds = new Map<string, string>();
-      for (const a of await tx.asset.findMany({
-        where: { organizationId: orgId, archivedAt: null },
-        select: { id: true, villaId: true, name: true },
-      })) {
+      for (const a of await tx.asset.findMany({ where: { organizationId: orgId, archivedAt: null }, select: { id: true, villaId: true, name: true } })) {
         assetIds.set(key(a.villaId, a.name), a.id);
       }
-
-      for (const row of plan.rows) {
+      // Resolve parents in file order: a name refers to the latest earlier row with it, else an existing asset.
+      const assets = plan.rows.map((row) => {
         const { villaId } = row.data;
-        const created = await tx.asset.create({
-          data: {
-            ...row.data,
-            organizationId: orgId,
-            areaId: row.areaName ? (areaIds.get(key(villaId, row.areaName)) ?? null) : null,
-            parentId: row.parentName ? (assetIds.get(key(villaId, row.parentName)) ?? null) : null,
-            statusLogs: { create: { status: row.data.status, userId: ctx.user.id, note: "CSV import" } },
-          },
-        });
-        assetIds.set(key(villaId, created.name), created.id);
-      }
+        const id = newId();
+        const data = {
+          ...row.data,
+          id,
+          organizationId: orgId,
+          areaId: row.areaName ? (areaIds.get(key(villaId, row.areaName)) ?? null) : null,
+          parentId: row.parentName ? (assetIds.get(key(villaId, row.parentName)) ?? null) : null,
+        };
+        assetIds.set(key(villaId, row.data.name), id);
+        return data;
+      });
+      for (const c of chunks(assets)) await tx.asset.createMany({ data: c });
+      const logs = assets.map((a) => ({ assetId: a.id, status: a.status, userId: ctx.user.id, note: "CSV import" }));
+      for (const c of chunks(logs)) await tx.assetStatusLog.createMany({ data: c });
       return plan.rows.length;
     },
     { timeout: 120_000 },
