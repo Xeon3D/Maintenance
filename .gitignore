@@ -58,3 +58,6 @@ next-env.d.ts
 # playwright
 /test-results/
 /playwright-report/
+
+# OCR engine copied from node_modules by scripts/copy-ocr.mjs
+/public/ocr/

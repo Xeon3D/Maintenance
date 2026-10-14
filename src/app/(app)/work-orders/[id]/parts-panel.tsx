@@ -7,9 +7,10 @@ import { ScanLine, Undo2 } from "lucide-react";
 import { Scanner } from "@/components/scanner";
 import { ActionForm, FieldError } from "@/components/action-form";
 import { Input, Select } from "@/components/ui";
+import { SerialList } from "@/components/serial-list";
 import { addPartAction, returnPartAction } from "../actions";
 
-export type UsedPart = { id: string; partId: string; name: string; qty: string; location: string | null; cost: string | null };
+export type UsedPart = { id: string; partId: string; name: string; qty: string; location: string | null; cost: string | null; serials: string[] };
 export type PartOption = { id: string; name: string; sku: string | null; barcode: string | null; unit: string; compatible: boolean; stock: Record<string, number> };
 
 export function PartsPanel({
@@ -35,6 +36,7 @@ export function PartsPanel({
   const [partId, setPartId] = useState("");
   const [locationId, setLocationId] = useState(defaultLocationId ?? locations[0]?.id ?? "");
   const [scanning, setScanning] = useState(false);
+  const [qty, setQty] = useState("1");
   const [unknownCode, setUnknownCode] = useState<string | null>(null);
   // A scanned barcode or SKU picks the part.
   const onScan = (code: string) => {
@@ -72,6 +74,11 @@ export function PartsPanel({
                   {u.name}
                 </Link>
                 {u.location && <span className="block text-xs text-muted">{u.location}</span>}
+                {u.serials.length > 0 && (
+                  <span className="block font-mono text-xs text-muted" title={t("serials.label")}>
+                    {t("serials.short")} {u.serials.join(", ")}
+                  </span>
+                )}
               </span>
               <span className="flex shrink-0 items-center gap-1">
                 <span className="text-right tabular-nums">
@@ -115,13 +122,14 @@ export function PartsPanel({
                 ))}
               </Select>
               <div className="flex items-center gap-2">
-                <Input name="quantity" type="number" step="any" min={0} defaultValue={1} required className="w-24" aria-label={t("stock.quantity")} />
+                <Input name="quantity" type="number" step="any" min={0} value={qty} onChange={(e) => setQty(e.target.value)} required className="w-24" aria-label={t("stock.quantity")} />
                 {part && <span className="text-xs text-muted">{part.unit}</span>}
                 {available !== null && (
                   <span className={available > 0 ? "text-xs text-muted" : "text-xs text-danger"}>{t("woParts.available", { qty: available })}</span>
                 )}
               </div>
               <FieldError name="quantity" />
+              <SerialList key={partId} name="serials" max={Number(qty) || 1} />
             </ActionForm>
           )
         ) : (

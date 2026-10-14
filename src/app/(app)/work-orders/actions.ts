@@ -314,8 +314,9 @@ export async function addPartAction(woId: string, _: FormResult, form: FormData)
   const parsed = parseForm(partUseSchema, form);
   if (parsed.error) return parsed.error;
   const { partId, locationId, quantity } = parsed.data;
+  const serials = String(form.get("serials") ?? "").split(/[\n,;]+/);
   try {
-    await consumePart(ctx, woId, partId, locationId, quantity);
+    await consumePart(ctx, woId, partId, locationId, quantity, serials);
   } catch (e) {
     if (e instanceof InventoryError) return { error: `stock.${e.code}` };
     throw e;

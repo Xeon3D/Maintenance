@@ -7,6 +7,7 @@ import { requireUser } from "@/lib/context";
 import { prisma } from "@/lib/db/client";
 import { optStr, parseForm, str, type FormResult } from "@/lib/forms";
 import { clearResetTokens } from "@/lib/password-reset";
+import { auditUser } from "@/lib/audit";
 import { sendPush } from "@/lib/push";
 import { NOTIFICATION_TYPES, type Channels, type NotificationType } from "@/lib/notification-types";
 
@@ -32,10 +33,12 @@ export async function changePasswordAction(_: FormResult, form: FormData): Promi
   const parsed = parseForm(passwordSchema, form);
   if (parsed.error) return parsed.error;
   if (user.passwordHash && !(await bcrypt.compare(parsed.data.current, user.passwordHash))) {
+    await auditUser(user.id, "auth.passwordChangeFailed");
     return { error: "validation", fieldErrors: { current: "wrongPassword" } };
   }
   await prisma.user.update({ where: { id: user.id }, data: { passwordHash: await bcrypt.hash(parsed.data.password, 12) } });
   await clearResetTokens(user.id);
+  await auditUser(user.id, "auth.passwordChanged");
   return { ok: true };
 }
 

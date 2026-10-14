@@ -7,6 +7,7 @@ import { pipeline } from "node:stream/promises";
 import { backupDir, backupsAvailable, BackupError, inspectBackup } from "@/lib/backups";
 import { backupFileName } from "@/lib/backup-schedule";
 import { requireServerAdmin } from "@/lib/server-admin";
+import { audit } from "@/lib/audit";
 
 // Receives a backup archive (e.g. from another server) as the raw request body and streams it to disk.
 // This route is left out of the proxy matcher so large files aren't buffered; it checks access itself.
@@ -14,8 +15,9 @@ import { requireServerAdmin } from "@/lib/server-admin";
 const MAX_BYTES = Number(process.env.BACKUP_UPLOAD_MAX_MB || 10_240) * 1024 * 1024;
 
 export async function PUT(req: Request) {
+  let ctx: Awaited<ReturnType<typeof requireServerAdmin>>;
   try {
-    await requireServerAdmin();
+    ctx = await requireServerAdmin();
   } catch {
     return new Response("Forbidden", { status: 403 });
   }
@@ -38,6 +40,7 @@ export async function PUT(req: Request) {
     const name = backupFileName("uploaded", new Date(), manifest.version);
     await chmod(tmp, 0o600);
     await rename(tmp, path.join(backupDir(), name));
+    await audit(ctx, "server.backupUpload", "Server", "-", { name, version: manifest.version });
     return Response.json({ name });
   } catch (e) {
     await rm(tmp, { force: true });

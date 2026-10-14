@@ -24,6 +24,7 @@ import {
   MessagesSquare,
   Package,
   ScanLine,
+  ScrollText,
   Server,
   ShoppingCart,
   Smartphone,
@@ -67,6 +68,7 @@ const ICONS: Record<string, LucideIcon> = {
   Users,
   UsersRound,
   Tags,
+  ScrollText,
   Server,
 };
 

@@ -760,6 +760,7 @@ model WorkOrderPart {
   stockLocationId String?
   quantity        Decimal @db.Decimal(12, 3)
   unitCost        Decimal @db.Decimal(12, 2)
+  serialNumbers   String[] @default([]) // of the units installed (scanned or typed), up to the quantity
 
   workOrder     WorkOrder      @relation(fields: [workOrderId], references: [id], onDelete: Cascade)
   part          Part           @relation(fields: [partId], references: [id])

@@ -117,7 +117,8 @@
     "scan": "Scan",
     "server": "Server",
     "roles": "Roles",
-    "categories": "Categories"
+    "categories": "Categories",
+    "audit": "Audit log"
   },
   "roles": {
     "OWNER": "Super Admin",
@@ -857,7 +858,9 @@
     "sameLocation": "Choose two different locations.",
     "notEditable": "This purchase order can't be changed in its current status.",
     "overReceive": "You can't receive more than is still outstanding on a line.",
-    "noLines": "Nothing from this vendor is low on stock."
+    "noLines": "Nothing from this vendor is low on stock.",
+    "notYourVan": "You can only restock your own van.",
+    "tooManySerials": "More serial numbers than units used."
   },
   "locationType": {
     "WAREHOUSE": "Warehouse",
@@ -1287,7 +1290,19 @@
     "notFound": "Nothing matches “{code}”.",
     "again": "Scan",
     "scanPart": "Scan barcode",
-    "partNotFound": "No part with barcode or SKU “{code}”."
+    "partNotFound": "No part with barcode or SKU “{code}”.",
+    "titleSerial": "Read serial number",
+    "titleMac": "Read MAC address",
+    "hintSerial": "Point at the label: a barcode is read straight away. For printed text, fit it in the box and tap Read text.",
+    "hintMac": "Point at the label: a barcode is read straight away. For printed text, fit the MAC in the box and tap Read text.",
+    "readText": "Read text",
+    "ocrLoading": "Preparing the text reader (the first time it downloads about 15 MB)…",
+    "ocrReading": "Reading the label…",
+    "ocrPick": "Tap the right value:",
+    "ocrNothing": "No code found. Hold the camera closer, with the text inside the box, and try again.",
+    "ocrFailed": "The text reader couldn't start here. Type the value below.",
+    "ocrRetry": "Try again",
+    "scanField": "Read with the camera"
   },
   "field": {
     "title": "Field app",
@@ -1745,6 +1760,12 @@
         "label": "Billing",
         "hint": "Invoicing. Reserved for the billing module and accounting integration (no screens yet)."
       }
+    },
+    "audit": {
+      "view": {
+        "label": "Audit log",
+        "hint": "See who did what and from where: sign-ins, changes and deletions, users and permissions, server operations."
+      }
     }
   },
   "reportEmail": {
@@ -1885,5 +1906,241 @@
         "body": "We may update these terms; the current version is always on this page, and continuing to use the system means accepting it. These terms are governed by Portuguese law. Questions: {contact}."
       }
     }
+  },
+  "audit": {
+    "description": "Who did what, when and from where. Kept for the period set in Settings → Organization → Data retention.",
+    "searchPlaceholder": "Search name, action, address…",
+    "category": "Category",
+    "allCategories": "All categories",
+    "categories": {
+      "security": "Security",
+      "users": "Users & permissions",
+      "records": "Records",
+      "server": "Server"
+    },
+    "user": "User",
+    "allUsers": "Everyone",
+    "system": "System",
+    "removedUser": "Removed user",
+    "entity": "Type",
+    "allEntities": "All types",
+    "from": "From",
+    "to": "To",
+    "when": "When",
+    "what": "What",
+    "target": "Item",
+    "ip": "Address",
+    "detailsColumn": "Details",
+    "details": "{count, plural, one {# detail} other {# details}}",
+    "empty": "Nothing logged yet.",
+    "open": "open",
+    "relations": "Linked items",
+    "hidden": "(hidden)",
+    "yes": "Yes",
+    "no": "No",
+    "verbs": {
+      "create": "Created {entity}",
+      "update": "Changed {entity}",
+      "delete": "Deleted {entity}"
+    },
+    "entities": {
+      "WorkOrder": "work order",
+      "Request": "request",
+      "Client": "client",
+      "Villa": "villa",
+      "villa": "villa",
+      "Area": "area",
+      "Asset": "asset",
+      "asset": "asset",
+      "ServiceContract": "contract",
+      "Procedure": "procedure",
+      "Category": "category",
+      "PMSchedule": "preventive schedule",
+      "Meter": "meter",
+      "Part": "part",
+      "StockLocation": "stock location",
+      "Vendor": "vendor",
+      "PurchaseOrder": "purchase order",
+      "Team": "team",
+      "JobRole": "custom role",
+      "Membership": "member",
+      "Invitation": "invitation",
+      "Attachment": "attachment",
+      "Organization": "company",
+      "User": "user",
+      "Server": "server"
+    },
+    "actions": {
+      "auth": {
+        "signIn": "Signed in",
+        "signInFailed": "Sign-in failed (wrong password)",
+        "signInBlocked": "Sign-in blocked (too many attempts)",
+        "signOut": "Signed out",
+        "passwordChanged": "Changed their password",
+        "passwordChangeFailed": "Password change failed (wrong current password)",
+        "passwordResetRequested": "Asked for a password reset link",
+        "passwordReset": "Reset their password with a link"
+      },
+      "server": {
+        "unlock": "Unlocked Settings → Server",
+        "unlockFailed": "Wrong server password",
+        "unlockBlocked": "Server password blocked (too many attempts)",
+        "settings": "Changed the software name",
+        "backupSchedule": "Changed the backup schedule / automatic updates",
+        "backup": "Made a backup",
+        "backupDelete": "Deleted a backup",
+        "backupDownload": "Downloaded a backup",
+        "backupUpload": "Uploaded a backup",
+        "restore": "Started a restore",
+        "restored": "Restored a backup",
+        "update": "Started a software update",
+        "email": "Changed the e-mail settings",
+        "backupCopies": "Changed the backup copies",
+        "cloudConnect": "Connected a cloud folder",
+        "cloudDisconnect": "Disconnected a cloud folder",
+        "factoryReset": "Factory reset",
+        "factoryResetFailed": "Factory reset: wrong password"
+      },
+      "organization": {
+        "update": "Changed the company settings",
+        "logo": "Changed the company logo",
+        "roleRates": "Changed the role costs",
+        "permissions": "Changed role permissions"
+      },
+      "villa": {
+        "secrets": {
+          "view": "Viewed the villa's access codes",
+          "update": "Changed the villa's access codes"
+        }
+      },
+      "asset": {
+        "secrets": {
+          "view": "Viewed the device credentials",
+          "update": "Changed the device credentials"
+        }
+      },
+      "user": {
+        "erased": "Erased a person's data"
+      },
+      "client": {
+        "anonymized": "Anonymised a client"
+      },
+      "workOrder": {
+        "reportSent": "E-mailed the service report"
+      },
+      "stock": {
+        "transfer": "Moved stock",
+        "vanRestock": "Restocked their van"
+      }
+    },
+    "fields": {
+      "name": "Name",
+      "title": "Title",
+      "description": "Description",
+      "status": "Status",
+      "priority": "Priority",
+      "type": "Type",
+      "system": "System",
+      "role": "Role",
+      "access": "Access level",
+      "active": "Active",
+      "email": "E-mail",
+      "phone": "Phone",
+      "address": "Address",
+      "notes": "Notes",
+      "dueDate": "Due",
+      "startDate": "Start",
+      "completedAt": "Completed",
+      "villaId": "Villa",
+      "assetId": "Asset",
+      "clientId": "Client",
+      "teamId": "Team",
+      "vendorId": "Vendor",
+      "jobRoleId": "Custom role",
+      "assignees": "Assignees",
+      "categories": "Categories",
+      "items": "Checklist",
+      "lines": "Lines",
+      "permissions": "Permissions",
+      "hourlyRate": "Cost per hour",
+      "unitCost": "Unit cost",
+      "minQuantity": "Minimum quantity",
+      "quantity": "Quantity",
+      "sku": "SKU",
+      "barcode": "Barcode",
+      "serialNumber": "Serial number",
+      "macAddress": "MAC address",
+      "ipAddress": "IP address",
+      "firmware": "Firmware",
+      "manufacturer": "Manufacturer",
+      "model": "Model",
+      "archivedAt": "Archived",
+      "credentialsEnc": "Device credentials",
+      "accessCodesEnc": "Access codes",
+      "provider": "Provider",
+      "account": "Account",
+      "from": "From",
+      "to": "To",
+      "by": "By",
+      "count": "Records",
+      "version": "Version",
+      "removed": "Removed",
+      "cleared": "Cleared",
+      "appName": "Software name",
+      "backups": "Backup schedule",
+      "autoUpdate": "Automatic updates",
+      "roleRates": "Role costs",
+      "retention": "Data retention",
+      "businessHours": "Business hours",
+      "reportRecipients": "Report recipients",
+      "brandColor": "Brand colour",
+      "timezone": "Time zone",
+      "privacyNotice": "Privacy notice",
+      "part": "Part",
+      "warehouse": "Warehouse",
+      "van": "Van",
+      "direction": "Direction",
+      "parts": "Parts",
+      "note": "Note"
+    }
+  },
+  "van": {
+    "title": "My van",
+    "description": "What's in your van, and loading parts from a warehouse or returning them.",
+    "noVan": "You don't have a van",
+    "noVanHint": "Ask whoever manages the inventory to create a van stock location (Parts → Stock locations) and assign it to you.",
+    "noWarehouse": "There is no warehouse to load from yet.",
+    "choose": "Van",
+    "open": "Open",
+    "inVanHint": "A red quantity is below the van's minimum (set on the part's page).",
+    "empty": "Nothing in this van yet.",
+    "part": "Part",
+    "inVan": "In van",
+    "min": "Minimum",
+    "restock": "Load or return",
+    "direction": "Direction",
+    "load": "Load from warehouse",
+    "unload": "Return to warehouse",
+    "fromWarehouse": "From warehouse",
+    "toWarehouse": "To warehouse",
+    "addPart": "Add a part…",
+    "nothingToAdd": "No parts available there",
+    "fillShort": "Add what's short ({count})",
+    "available": "Available: {qty} {unit}",
+    "note": "Note",
+    "notePlaceholder": "Optional, e.g. kit for the Quinta do Lago job",
+    "submitLoad": "{count, plural, =0 {Load} one {Load # part} other {Load # parts}}",
+    "submitUnload": "{count, plural, =0 {Return} one {Return # part} other {Return # parts}}",
+    "done": "{count, plural, one {# part moved.} other {# parts moved.}}",
+    "quantity": "Quantity"
+  },
+  "serials": {
+    "label": "Serial numbers",
+    "short": "S/N",
+    "placeholder": "Serial number (optional)",
+    "full": "One serial per unit",
+    "add": "Add serial number",
+    "scan": "Read serial number with the camera",
+    "remove": "Remove {serial}"
   }
 }

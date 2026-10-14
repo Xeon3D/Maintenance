@@ -20,6 +20,7 @@ import { getAppName } from "@/lib/server-settings";
 import { emailLayout, sendEmail } from "@/lib/email";
 import { background } from "@/lib/notify";
 import { clearResetTokens, createResetToken, userForResetToken } from "@/lib/password-reset";
+import { auditUser, writeAudit } from "@/lib/audit";
 import { checkFactoryResetPassword, factoryReset, factoryResetBlocked, factoryResetEnabled, recordFactoryResetFailure } from "@/lib/factory-reset";
 
 export type FormState = { error?: string } | undefined;
@@ -89,6 +90,7 @@ export async function requestResetAction(_: FormState, form: FormData): Promise<
   if (!email.success) return { error: "invalidEmail" };
   const user = await prisma.user.findUnique({ where: { email: email.data } });
   if (user) {
+    await auditUser(user.id, "auth.passwordResetRequested");
     const raw = await createResetToken(user.id);
     if (raw) {
       const url = `${await appOrigin()}/reset-password/${raw}`;
@@ -110,10 +112,13 @@ export async function resetPasswordAction(_: FormState, form: FormData): Promise
   if (!user) return { error: "resetExpired" };
   await prisma.user.update({ where: { id: user.id }, data: { passwordHash: await bcrypt.hash(parsed.data.password, 12) } });
   await clearResetTokens(user.id);
+  await auditUser(user.id, "auth.passwordReset");
   redirect("/login?reset=1");
 }
 
 export async function signOutAction() {
+  const session = await auth();
+  if (session?.user?.id) await auditUser(session.user.id, "auth.signOut");
   await signOut({ redirectTo: "/login" });
 }
 
@@ -136,6 +141,14 @@ export async function switchOrgAction(organizationId: string) {
 
 // ── Factory reset (demo/test servers; see src/lib/factory-reset.ts)
 
+/** A server-wide event with no signed-in user (the factory reset page is public). */
+async function auditEveryCompany(action: string, client: string) {
+  const ip = client === "unknown" ? null : client;
+  for (const o of await prisma.organization.findMany({ select: { id: true } })) {
+    await writeAudit({ organizationId: o.id, userId: null, action, entityType: "Server", entityId: "-", ip });
+  }
+}
+
 export async function factoryResetAction(_: FormState, form: FormData): Promise<FormState> {
   if (!factoryResetEnabled()) return { error: "somethingWrong" };
   const h = await headers();
@@ -144,10 +157,13 @@ export async function factoryResetAction(_: FormState, form: FormData): Promise<
   const password = form.get("password");
   if (typeof password !== "string" || !checkFactoryResetPassword(password)) {
     recordFactoryResetFailure(client);
+    await auditEveryCompany("server.factoryResetFailed", client);
     return { error: "wrongResetPassword" };
   }
   console.warn(`[factory-reset] requested from ${client}`);
   await factoryReset();
+  // Everything was erased: the entry goes into the recreated companies' (empty) logs.
+  await auditEveryCompany("server.factoryReset", client);
   (await cookies()).delete(ACTIVE_ORG_COOKIE);
   await signOut({ redirectTo: "/login?factory=1" }); // the signed-in user no longer exists
 }

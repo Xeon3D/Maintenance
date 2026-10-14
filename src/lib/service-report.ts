@@ -88,6 +88,7 @@ export async function renderServiceReport(ctx: Pick<AppContext, "db" | "organiza
       total: t("time.total"),
       photos: t("report.photos"),
       parts: t("woParts.title"),
+      serials: t("serials.short"),
       signoff: t("signoff.title"),
       clientAbsent: t("signoff.absentNote"),
     },
@@ -108,7 +109,7 @@ export async function renderServiceReport(ctx: Pick<AppContext, "db" | "organiza
     ),
     time: wo.timeEntries.map((e) => ({ who: e.user.name, when: format.dateTime(e.startedAt, { dateStyle: "short" }), duration: duration(e.minutes!), note: e.note })),
     // Parts used (quantities only: the report is client-facing, so no costs).
-    parts: wo.parts.map((p) => ({ name: p.part.name, sku: p.part.sku, qty: `${format.number(Number(p.quantity))} ${p.part.unit}` })),
+    parts: wo.parts.map((p) => ({ name: p.part.name, sku: p.part.sku, qty: `${format.number(Number(p.quantity))} ${p.part.unit}`, serials: p.serialNumbers })),
     totalTime: duration(wo.timeEntries.reduce((s, e) => s + (e.minutes ?? 0), 0)),
     photos: (await Promise.all(photoAtts.map((a) => getObject(a.url).catch(() => null)))).filter((b): b is Buffer => !!b),
     signature:

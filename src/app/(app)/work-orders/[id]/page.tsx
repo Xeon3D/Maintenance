@@ -273,6 +273,7 @@ export default async function WorkOrderPage({ params }: PageProps<"/work-orders/
                 qty: `${format.number(Number(p.quantity))} ${p.part.unit}`,
                 location: p.stockLocation?.name ?? null,
                 cost: money(Number(p.quantity) * Number(p.unitCost)),
+                serials: p.serialNumbers,
               }))}
               options={partOptions.map((p) => ({
                 id: p.id,

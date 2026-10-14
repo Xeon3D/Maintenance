@@ -9,6 +9,7 @@ import { dateInput } from "@/lib/forms";
 import { descendantsOf, flattenTree } from "@/lib/tree";
 import { AssetStatus, Criticality, SystemType } from "@/generated/prisma/enums";
 import { DateInput } from "@/components/date-input";
+import { ScanField } from "@/components/scan-field";
 
 type Ref = { id: string; name: string; villaId: string; parentId: string | null };
 
@@ -143,7 +144,7 @@ export function AssetFields({
             <Input name="model" defaultValue={asset.model ?? ""} />
           </Field>
           <Field label={t("assets.serialNumber")}>
-            <Input name="serialNumber" defaultValue={asset.serialNumber ?? ""} className="font-mono" />
+            <ScanField purpose="serial" name="serialNumber" defaultValue={asset.serialNumber} className="font-mono" />
           </Field>
         </div>
       </Section>
@@ -155,7 +156,7 @@ export function AssetFields({
             <FieldError name="ipAddress" />
           </Field>
           <Field label={t("assets.macAddress")}>
-            <Input name="macAddress" defaultValue={asset.macAddress ?? ""} className="font-mono" placeholder="AA:BB:CC:DD:EE:FF" />
+            <ScanField purpose="mac" name="macAddress" defaultValue={asset.macAddress} className="font-mono" placeholder="AA:BB:CC:DD:EE:FF" />
             <FieldError name="macAddress" />
           </Field>
           <Field label={t("assets.vlan")}>
