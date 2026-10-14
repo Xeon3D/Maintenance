@@ -4,7 +4,7 @@ import { useTransition } from "react";
 import { useTranslations } from "next-intl";
 import { UserX, X } from "lucide-react";
 import { Button } from "@/components/ui";
-import { anonymizeClientAction, deleteContactAction } from "../actions";
+import { anonymizeClientAction, deleteContactAction, setContactReportsAction } from "../actions";
 
 export function DeleteContactButton({ clientId, contactId }: { clientId: string; contactId: string }) {
   const t = useTranslations("common");
@@ -41,5 +41,23 @@ export function AnonymizeClientButton({ clientId }: { clientId: string }) {
       <UserX className="size-4" />
       {t("erasure.anonymize")}
     </Button>
+  );
+}
+
+/** Toggles whether a contact is copied on e-mailed service reports. */
+export function ContactReportsToggle({ clientId, contactId, on }: { clientId: string; contactId: string; on: boolean }) {
+  const t = useTranslations("reportEmail");
+  const [pending, start] = useTransition();
+  return (
+    <button
+      type="button"
+      disabled={pending}
+      aria-pressed={on}
+      title={t("contactToggleHint")}
+      onClick={() => start(() => setContactReportsAction(clientId, contactId, !on))}
+      className={on ? "mt-1 rounded-full bg-brand/10 px-2 py-0.5 text-xs font-medium text-brand" : "mt-1 rounded-full border border-border px-2 py-0.5 text-xs text-muted hover:text-foreground"}
+    >
+      {on ? t("contactOn") : t("contactOff")}
+    </button>
   );
 }

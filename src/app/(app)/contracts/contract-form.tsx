@@ -90,10 +90,12 @@ export async function ContractForm({ ctx, contract, defaults }: { ctx: AppContex
         </div>
       </fieldset>
 
-      <Field label={t("contracts.monthlyFee")}>
-        <Input name="monthlyFee" type="number" min={0} step="0.01" defaultValue={contract?.monthlyFee != null ? Number(contract.monthlyFee) : ""} className="sm:max-w-48" />
-        <FieldError name="monthlyFee" />
-      </Field>
+      {ctx.can("costs.view") && (
+        <Field label={t("contracts.monthlyFee")}>
+          <Input name="monthlyFee" type="number" min={0} step="0.01" defaultValue={contract?.monthlyFee != null ? Number(contract.monthlyFee) : ""} className="sm:max-w-48" />
+          <FieldError name="monthlyFee" />
+        </Field>
+      )}
 
       <fieldset>
         <legend className="mb-1 text-sm font-medium">{t("contracts.systems")}</legend>

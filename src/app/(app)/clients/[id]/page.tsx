@@ -7,7 +7,7 @@ import { BackLink } from "@/components/back-link";
 import { ActionForm, FieldError } from "@/components/action-form";
 import { Field, Input } from "@/components/ui";
 import { ArchiveButton } from "@/components/archive-button";
-import { AnonymizeClientButton, DeleteContactButton } from "./client";
+import { AnonymizeClientButton, ContactReportsToggle, DeleteContactButton } from "./client";
 import { ContractStatusBadge } from "../../contracts/status-badge";
 import { getContext } from "@/lib/context";
 import { addContactAction, setClientArchivedAction } from "../actions";
@@ -206,12 +206,19 @@ export default async function ClientPage({ params }: PageProps<"/clients/[id]">)
                         {c.email}
                       </a>
                     )}
+                    {c.email && canManage && <ContactReportsToggle clientId={client.id} contactId={c.id} on={c.receivesReports} />}
+                    {c.email && !canManage && c.receivesReports && <div className="text-xs text-muted">{t("reportEmail.contactOn")}</div>}
                   </div>
                   {canManage && <DeleteContactButton clientId={client.id} contactId={c.id} />}
                 </li>
               ))}
               {client.contacts.length === 0 && <li className="text-sm text-muted">—</li>}
             </ul>
+            {client.reportEmails.length > 0 && (
+              <p className="mb-4 text-xs text-muted">
+                {t("reportEmail.clientEmails")}: {client.reportEmails.join(", ")}
+              </p>
+            )}
             {canManage && (
               <details className="rounded-md border border-border p-3 [&_summary]:cursor-pointer">
                 <summary className="text-sm font-medium">{t("clients.addContact")}</summary>
@@ -229,6 +236,10 @@ export default async function ClientPage({ params }: PageProps<"/clients/[id]">)
                   <Field label={t("common.email")}>
                     <Input name="email" type="email" />
                   </Field>
+                  <label className="flex items-center gap-2 text-sm">
+                    <input type="checkbox" name="receivesReports" className="size-4 accent-brand" />
+                    {t("reportEmail.contactCheckbox")}
+                  </label>
                 </ActionForm>
               </details>
             )}

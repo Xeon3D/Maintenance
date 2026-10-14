@@ -14,6 +14,8 @@ import { StatusBar } from "./status-bar";
 import { Checklist } from "./checklist";
 import { CommentBox, CostsPanel, Gallery, SignOff, TimeTracker, WorkOrderActions } from "./panels";
 import { PartsPanel } from "./parts-panel";
+import { SendReportPanel } from "./send-report";
+import { reportRecipients } from "@/lib/report-email";
 
 export default async function WorkOrderPage({ params }: PageProps<"/work-orders/[id]">) {
   const { id } = await params;
@@ -86,6 +88,7 @@ export default async function WorkOrderPage({ params }: PageProps<"/work-orders/
   const money = (n: number) => format.number(n, { style: "currency", currency: ctx.organization.currency });
   const costs = workOrderCosts(wo);
   const dt = (d: Date) => format.dateTime(d, { dateStyle: "medium", timeStyle: "short" });
+  const reportEmail = ctx.can("workOrders.sendReport") ? await reportRecipients(ctx, wo.id) : null;
   const sla = wo.contract ? slaStates(wo, wo.contract, now, slaCalendar(ctx.organization)) : null;
   const myRunning = wo.timeEntries.find((e) => e.userId === ctx.user.id && !e.endedAt);
 
@@ -286,6 +289,7 @@ export default async function WorkOrderPage({ params }: PageProps<"/work-orders/
             />
           </Card>
 
+          {ctx.can("costs.view") && (
           <Card className="p-5">
             <h2 className="mb-3 font-medium">{t("costs.title")}</h2>
             <CostsPanel
@@ -295,6 +299,7 @@ export default async function WorkOrderPage({ params }: PageProps<"/work-orders/
               summary={{ labor: money(costs.labor), parts: costs.parts ? money(costs.parts) : null, other: money(costs.other), total: money(costs.total) }}
             />
           </Card>
+          )}
 
           <Card className="p-5">
             <h2 className="mb-3 font-medium">{t("signoff.title")}</h2>
@@ -310,6 +315,18 @@ export default async function WorkOrderPage({ params }: PageProps<"/work-orders/
               }
             />
           </Card>
+
+          {reportEmail && (
+            <Card className="p-5">
+              <h2 className="mb-1 font-medium">{t("reportEmail.title")}</h2>
+              <p className="mb-3 text-xs text-muted">{t("reportEmail.hint")}</p>
+              <SendReportPanel
+                woId={wo.id}
+                recipients={reportEmail.recipients}
+                lastSent={reportEmail.wo.reportSentAt ? { at: dt(reportEmail.wo.reportSentAt), count: reportEmail.wo.reportSentTo.length } : null}
+              />
+            </Card>
+          )}
         </div>
       </div>
     </>

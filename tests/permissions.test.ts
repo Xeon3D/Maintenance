@@ -4,10 +4,10 @@ import { ALL_PERMISSIONS, builtInRoleToStore, customRoleToStore, defaultPermissi
 const sorted = (s: Iterable<string>) => [...s].sort();
 
 describe("configurable permissions", () => {
-  it("lists every permission once in Settings → Roles, except the fixed ones", () => {
+  it("lists every permission once in Settings → Roles, except staff-app access", () => {
     const shown = PERMISSION_GROUPS.flatMap((g) => g.permissions);
     expect(new Set(shown).size).toBe(shown.length);
-    expect(sorted([...shown, "internal.view", "billing.manage"])).toEqual(sorted(ALL_PERMISSIONS));
+    expect(sorted([...shown, "internal.view"])).toEqual(sorted(ALL_PERMISSIONS));
   });
 
   it("keeps today's defaults when nothing is changed", () => {
@@ -27,9 +27,9 @@ describe("configurable permissions", () => {
     expect(effectivePermissions("MANAGER", overrides).has("workOrders.manage")).toBe(true); // other roles untouched
   });
 
-  it("never grants billing or anything unknown, and keeps the client role fixed", () => {
-    const tampered = { ADMIN: ["billing.manage", "nonsense", "org.manage"], REQUESTER: ["workOrders.manage"] };
-    expect(effectivePermissions("ADMIN", tampered).has("billing.manage")).toBe(false);
+  it("never grants anything unknown, and keeps the client role fixed", () => {
+    const tampered = { ADMIN: ["internal.view", "nonsense", "org.manage"], REQUESTER: ["workOrders.manage"] };
+    expect(effectivePermissions("ADMIN", tampered).has("billing.manage")).toBe(false); // not in its list
     expect(effectivePermissions("ADMIN", tampered).has("org.manage")).toBe(true);
     expect(sorted(effectivePermissions("REQUESTER", tampered))).toEqual(["requests.create"]);
     expect(parseRolePermissions(tampered)).toEqual({ ADMIN: ["org.manage"] });
@@ -42,7 +42,7 @@ describe("configurable permissions", () => {
   });
 
   it("describes a role's current list for the matrix", () => {
-    expect(rolePermissionsFor("VIEWER", {})).toEqual(["reports.view"]);
+    expect(sorted(rolePermissionsFor("VIEWER", {}))).toEqual(["costs.view", "reports.view"]);
     expect(rolePermissionsFor("VIEWER", { VIEWER: ["reports.view", "assets.manage"] })).toEqual(["reports.view", "assets.manage"]);
     expect(GRANTABLE).not.toContain("internal.view");
   });
@@ -66,5 +66,17 @@ describe("saving the matrix", () => {
     expect(customRoleToStore(null, ["workOrders.execute"], tech, tech)).toEqual(["workOrders.execute"]);
     expect(customRoleToStore(["workOrders.execute"], ["workOrders.execute"], tech, tech)).toEqual(["workOrders.execute"]);
     expect(customRoleToStore(["workOrders.execute"], techChanged, tech, techChanged)).toBeNull();
+  });
+});
+
+describe("accountant", () => {
+  it("defaults to reports, costs and billing, and billing can be given to other roles", () => {
+    expect(sorted(effectivePermissions("ACCOUNTANT", null))).toEqual(["billing.manage", "costs.view", "internal.view", "reports.view"]);
+    expect(effectivePermissions("MANAGER", { MANAGER: ["billing.manage"] }).has("billing.manage")).toBe(true);
+  });
+
+  it("can lose costs like any other role", () => {
+    expect(effectivePermissions("TECHNICIAN", { TECHNICIAN: ["workOrders.execute"] }).has("costs.view")).toBe(false);
+    expect(effectivePermissions("TECHNICIAN", null).has("costs.view")).toBe(true); // today's behaviour by default
   });
 });

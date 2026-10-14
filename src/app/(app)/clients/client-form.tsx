@@ -39,6 +39,10 @@ export async function ClientForm({ client }: { client?: Client }) {
       <Field label={t("clients.billingAddress")}>
         <Textarea name="billingAddress" defaultValue={client?.billingAddress ?? ""} className="min-h-16" />
       </Field>
+      <Field label={t("reportEmail.clientEmails")} hint={t("reportEmail.clientEmailsHint")}>
+        <Textarea name="reportEmails" defaultValue={client?.reportEmails?.join("\n") ?? ""} className="min-h-16" placeholder="office@example.com" />
+        <FieldError name="reportEmails" />
+      </Field>
       <Field label={t("common.notes")}>
         <Textarea name="notes" defaultValue={client?.notes ?? ""} />
       </Field>

@@ -89,7 +89,7 @@ export default async function ContractsPage({ searchParams }: PageProps<"/contra
                 <th>{t("common.status")}</th>
                 <th>{t("contracts.period")}</th>
                 <th>{t("contracts.sla")}</th>
-                <th className="text-right">{t("contracts.monthlyFee")}</th>
+                {ctx.can("costs.view") && <th className="text-right">{t("contracts.monthlyFee")}</th>}
               </tr>
             </thead>
             <tbody>
@@ -114,7 +114,7 @@ export default async function ContractsPage({ searchParams }: PageProps<"/contra
                       ? t("contracts.slaShort", { response: c.responseTimeHours ?? "—", resolution: c.resolutionTimeHours ?? "—" })
                       : "—"}
                   </td>
-                  <td className="text-right tabular-nums">{c.monthlyFee != null ? money(Number(c.monthlyFee)) : "—"}</td>
+                  {ctx.can("costs.view") && <td className="text-right tabular-nums">{c.monthlyFee != null ? money(Number(c.monthlyFee)) : "—"}</td>}
                 </tr>
               ))}
             </tbody>

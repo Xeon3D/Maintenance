@@ -136,7 +136,8 @@
       "MANAGER": "By default: plans and assigns work, manages clients, stock and purchasing.",
       "TECHNICIAN": "By default: does the work — work orders, checklists, time, parts.",
       "VIEWER": "By default: observer — sees everything, changes nothing.",
-      "REQUESTER": "Client portal: their villas and requests only."
+      "REQUESTER": "Client portal: their villas and requests only.",
+      "ACCOUNTANT": "By default: reports, costs and billing; no field work."
     },
     "notBillable": "No cost (doesn't log time)",
     "custom": "Custom roles",
@@ -149,7 +150,8 @@
     "costPerHour": "Cost per hour",
     "delete": "Delete",
     "deleteConfirm": "Delete the role \"{name}\"? {count, plural, =0 {} one {The # person in it keeps the same access under the built-in role.} other {The # people in it keep the same access under the built-in role.}}",
-    "customGroup": "Custom roles"
+    "customGroup": "Custom roles",
+    "ACCOUNTANT": "Accountant"
   },
   "systems": {
     "ELECTRICAL": "Electrical",
@@ -231,7 +233,8 @@
     "roleNameTaken": "There's already a role with this name.",
     "closesBeforeOpens": "Closing time must be after opening time.",
     "badHoliday": "Use one date per line, as YYYY-MM-DD.",
-    "categoryTaken": "There's already a category with this name."
+    "categoryTaken": "There's already a category with this name.",
+    "badEmails": "One or more addresses aren't valid e-mail addresses."
   },
   "clients": {
     "description": "Villa owners, family offices and property managers you work for.",
@@ -1564,7 +1567,8 @@
     "work": "Work",
     "sites": "Clients, villas and assets",
     "supply": "Stock and purchasing",
-    "insights": "Reports"
+    "insights": "Reports",
+    "finance": "Finance"
   },
   "perm": {
     "org": {
@@ -1597,6 +1601,10 @@
       "manage": {
         "label": "Manage all work orders",
         "hint": "Assign, edit and delete anyone's work orders; categories."
+      },
+      "sendReport": {
+        "label": "Send service reports",
+        "hint": "E-mail the PDF service report to the client and other recipients."
       }
     },
     "requests": {
@@ -1676,6 +1684,53 @@
         "label": "Reports",
         "hint": "Dashboards, SLA, costs and exports."
       }
+    },
+    "costs": {
+      "view": {
+        "label": "See costs",
+        "hint": "Labour, parts and totals on work orders and requests, cost reports and contract fees."
+      }
+    },
+    "billing": {
+      "manage": {
+        "label": "Billing",
+        "hint": "Invoicing. Reserved for the billing module and accounting integration (no screens yet)."
+      }
     }
+  },
+  "reportEmail": {
+    "title": "E-mail the service report",
+    "hint": "Sends the PDF service report (no costs) to each address separately.",
+    "noDefaults": "No default recipients: add the client's e-mail, report contacts or company copies, or type addresses below.",
+    "extra": "Other addresses (one per line)",
+    "send": "Send report",
+    "sending": "Sending…",
+    "sent": "Sent.",
+    "lastSent": "Last sent {at} to {count, plural, one {# address} other {# addresses}}.",
+    "notConfigured": "E-mail isn't set up on this server (RESEND_API_KEY and EMAIL_FROM), so the report can't be sent.",
+    "noRecipients": "Choose or type at least one address.",
+    "source": {
+      "client": "Client",
+      "contact": "Client contact",
+      "clientExtra": "Client copy",
+      "company": "Company copy"
+    },
+    "clientEmails": "Service report copies",
+    "clientEmailsHint": "Extra addresses offered when e-mailing this client's service reports (e.g. a family office), one per line.",
+    "contactCheckbox": "Receives service reports",
+    "contactOn": "Receives reports",
+    "contactOff": "No reports",
+    "contactToggleHint": "Whether this contact is offered when e-mailing service reports",
+    "companyTitle": "Service report copies",
+    "companyHint": "Offered as recipients whenever a service report is e-mailed, besides the client. The sender can untick them.",
+    "companyRoles": "Everyone in these roles",
+    "companyPeople": "These people",
+    "companyEmails": "These addresses",
+    "onePerLine": "One per line.",
+    "subject": "Service report #{number}: {title}",
+    "body": "Please find attached the service report for work order #{number}, \"{title}\".",
+    "bodyVilla": "Please find attached the service report for work order #{number}, \"{title}\", at {villa}.",
+    "signature": "Kind regards,\n{company}",
+    "privacy": "Privacy notice"
   }
 }

@@ -36,7 +36,9 @@ export async function saveContractAction(id: string | null, _: FormResult, form:
   const parsed = parseForm(contractSchema, form);
   if (parsed.error) return parsed.error;
   const systems = z.array(enumOf(SystemType)).parse(form.getAll("systems"));
-  const data = { ...parsed.data, systems, businessHoursOnly: form.get("businessHoursOnly") === "on", pauseOnHold: form.get("pauseOnHold") === "on" };
+  const { monthlyFee, ...fields } = parsed.data;
+  // Without "See costs" the fee isn't shown in the form, so it is left as it was.
+  const data = { ...fields, ...(ctx.can("costs.view") ? { monthlyFee } : {}), systems, businessHoursOnly: form.get("businessHoursOnly") === "on", pauseOnHold: form.get("pauseOnHold") === "on" };
 
   // The client must be ours, and a villa must be one it owns or manages.
   const client = await ctx.db.client.findUnique({ where: { id: data.clientId }, select: { id: true } });

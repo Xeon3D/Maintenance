@@ -6,7 +6,11 @@ import path from "node:path";
 // (no SDK, so another provider is a small change here). Without them, development writes each email
 // to .mail/ as an HTML file you can open; production logs a warning and drops it.
 
-export type Email = { to: string; subject: string; html: string; text: string };
+export type Attachment = { filename: string; content: Buffer };
+export type Email = { to: string; subject: string; html: string; text: string; attachments?: Attachment[] };
+
+/** Whether e-mail can actually go out (always "yes" in development, where it lands in .mail/). */
+export const emailConfigured = () => (!!process.env.RESEND_API_KEY && !!process.env.EMAIL_FROM) || process.env.NODE_ENV !== "production";
 
 const DEV_OUTBOX = path.join(process.cwd(), ".mail");
 
@@ -17,7 +21,14 @@ export async function sendEmail(email: Email) {
     const res = await fetch("https://api.resend.com/emails", {
       method: "POST",
       headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
-      body: JSON.stringify({ from, to: [email.to], subject: email.subject, html: email.html, text: email.text }),
+      body: JSON.stringify({
+        from,
+        to: [email.to],
+        subject: email.subject,
+        html: email.html,
+        text: email.text,
+        ...(email.attachments?.length ? { attachments: email.attachments.map((a) => ({ filename: a.filename, content: a.content.toString("base64") })) } : {}),
+      }),
     });
     if (!res.ok) throw new Error(`Email provider error ${res.status}: ${(await res.text()).slice(0, 300)}`);
     return;
@@ -30,6 +41,7 @@ export async function sendEmail(email: Email) {
   const slug = email.subject.toLowerCase().replace(/[^a-z0-9]+/g, "-").slice(0, 50);
   const file = path.join(DEV_OUTBOX, `${new Date().toISOString().replace(/[:.]/g, "-")}-${slug}.html`);
   await writeFile(file, `<!-- To: ${esc(email.to)} | Subject: ${esc(email.subject)} -->\n${email.html}`);
+  for (const a of email.attachments ?? []) await writeFile(file.replace(/\.html$/, `-${a.filename}`), a.content);
   console.log(`[email] dev outbox: ${email.to} · ${email.subject} → ${path.relative(process.cwd(), file)}`);
 }
 

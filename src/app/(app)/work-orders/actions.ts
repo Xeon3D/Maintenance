@@ -20,6 +20,9 @@ import {
   WorkOrderError,
 } from "@/lib/work-orders";
 import { ChecklistItemType, Priority, SystemType, WorkOrderStatus, WorkOrderType } from "@/generated/prisma/enums";
+import { emailConfigured } from "@/lib/email";
+import { reportRecipients, sendServiceReport } from "@/lib/report-email";
+import { MAX_EXTRA, parseEmailList } from "@/lib/report-recipients";
 
 const path = (id: string) => `/work-orders/${id}`;
 
@@ -355,4 +358,27 @@ export async function clearSignOffAction(woId: string) {
   }
   await ctx.db.workOrder.update({ where: { id: woId }, data: { signatureUrl: null, signedByName: null, signedAt: null } });
   revalidatePath(path(woId));
+}
+
+// ── Service report by e-mail
+
+/**
+ * Sends the PDF service report. Ticked addresses must come from the work order's default recipients
+ * (recomputed here, so the form can't add hidden ones); extra addresses are typed by the sender.
+ */
+export async function sendReportAction(woId: string, _: FormResult, form: FormData): Promise<FormResult> {
+  const ctx = await requirePermission("workOrders.sendReport");
+  if (!emailConfigured()) return { error: "reportEmail.notConfigured" };
+  const found = await reportRecipients(ctx, woId);
+  if (!found) return { error: "somethingWrong" };
+  const offered = new Set(found.recipients.map((r) => r.email));
+  const ticked = form.getAll("to").map(String).filter((e) => offered.has(e));
+  const extra = parseEmailList(String(form.get("extra") ?? ""));
+  if (extra.invalid.length) return { error: "validation", fieldErrors: { extra: "badEmails" } };
+  if (extra.emails.length > MAX_EXTRA) return { error: "validation", fieldErrors: { extra: "too_big" } };
+  const to = [...new Set([...ticked, ...extra.emails])];
+  if (to.length === 0) return { error: "reportEmail.noRecipients" };
+  await sendServiceReport(ctx, woId, to);
+  revalidatePath(path(woId));
+  return { ok: true };
 }
