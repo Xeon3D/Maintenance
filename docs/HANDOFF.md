@@ -300,7 +300,8 @@ markers), Message, VerificationToken (password reset).
 
 **Exist but have no UI yet (the remaining phases):**
 - **Phase 10:** `Subscription` (a trial is created at sign-up).
-- **Not on any phase yet** (mention to the user): `Category` (WO categories). Email verification
+- **Work-order categories** (`Category`, M2M): Settings → Categories (`workOrders.manage`), chips on the WO form/list/detail, `?category=` list filter.
+- **Not on any phase yet** (mention to the user): email verification
   at sign-up isn't done either.
 
 **Built in phase 8 (no migration):** `ServiceContract` UI; `WorkOrder.contractId` is now set automatically.

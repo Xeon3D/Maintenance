@@ -59,6 +59,7 @@ export const NAV: NavGroup[] = [
       { href: "/settings/users", labelKey: "users", icon: "UserCog", permission: "users.manage", ready: true },
       { href: "/settings/roles", labelKey: "roles", icon: "BadgeCheck", permission: "users.manage", ready: true },
       { href: "/settings/teams", labelKey: "teams", icon: "UsersRound", permission: "teams.manage", ready: true },
+      { href: "/settings/categories", labelKey: "categories", icon: "Tags", permission: "workOrders.manage", ready: true },
       { href: "/settings/server", labelKey: "server", icon: "Server", permission: "org.manage", ready: true },
     ],
   },

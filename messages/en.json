@@ -116,7 +116,8 @@
     "field": "Field app (offline)",
     "scan": "Scan",
     "server": "Server",
-    "roles": "Roles"
+    "roles": "Roles",
+    "categories": "Categories"
   },
   "roles": {
     "OWNER": "Owner",
@@ -229,7 +230,8 @@
     "managerIsOwner": "The manager must be a different client from the owner.",
     "roleNameTaken": "There's already a role with this name.",
     "closesBeforeOpens": "Closing time must be after opening time.",
-    "badHoliday": "Use one date per line, as YYYY-MM-DD."
+    "badHoliday": "Use one date per line, as YYYY-MM-DD.",
+    "categoryTaken": "There's already a category with this name."
   },
   "clients": {
     "description": "Villa owners, family offices and property managers you work for.",
@@ -1525,5 +1527,16 @@
     "to": "closes",
     "holidays": "Holidays",
     "holidaysHint": "Days the SLA clock doesn't run, one per line (YYYY-MM-DD)."
+  },
+  "categories": {
+    "title": "Categories",
+    "description": "Labels for work orders, such as Warranty, Billable or Callout. Filter the work order list by them.",
+    "new": "New category",
+    "none": "No categories yet.",
+    "placeholder": "e.g. Warranty",
+    "color": "Colour",
+    "uses": "{n, plural, =0 {Not used} one {# work order} other {# work orders}}",
+    "deleteConfirm": "Delete this category? It is removed from its work orders; the work orders stay.",
+    "all": "All categories"
   }
 }

@@ -16,6 +16,7 @@ import {
   resolveRefs,
   stopRunningTimers,
   validateAssignees,
+  validateCategories,
   WorkOrderError,
 } from "@/lib/work-orders";
 import { ChecklistItemType, Priority, SystemType, WorkOrderStatus, WorkOrderType } from "@/generated/prisma/enums";
@@ -64,7 +65,8 @@ export async function saveWorkOrderAction(id: string | null, _: FormResult, form
   const { estimatedHours, ...data } = parsed.data;
   const assigneeIds = form.getAll("assigneeIds").map(String).filter(Boolean);
   const fields = { ...data, estimatedMinutes: estimatedHours === null ? null : Math.round(estimatedHours * 60) };
-  const input = { ...fields, assigneeIds };
+  const categoryIds = form.getAll("categoryIds").map(String).filter(Boolean);
+  const input = { ...fields, assigneeIds, categoryIds };
 
   let woId = id;
   try {
@@ -72,6 +74,7 @@ export async function saveWorkOrderAction(id: string | null, _: FormResult, form
       const before = await editableWorkOrder(ctx, id);
       const refs = await resolveRefs(ctx, input);
       const ids = await validateAssignees(ctx, assigneeIds);
+      const cats = await validateCategories(ctx, categoryIds);
       const wo = await ctx.db.workOrder.update({
         where: { id },
         data: {
@@ -80,7 +83,9 @@ export async function saveWorkOrderAction(id: string | null, _: FormResult, form
           ...refs,
           // Villa or system may have changed: re-pick the covering contract (as of when the job was opened).
           contractId: await contractFor(ctx.db, refs.villaId, refs.system, before.createdAt),
-          assignees: { deleteMany: {}, create: ids.map((userId) => ({ userId })) } },
+          assignees: { deleteMany: {}, create: ids.map((userId) => ({ userId })) },
+          categories: { set: cats.map((c) => ({ id: c })) },
+        },
       });
       const had = new Set(before.assignees.map((a) => a.userId));
       await notifyAssigned(ctx, wo, ids.filter((u) => !had.has(u)));

@@ -4,7 +4,7 @@ import { getFormatter, getTranslations } from "next-intl/server";
 import { AlertTriangle } from "lucide-react";
 import { Card, PageHeader } from "@/components/ui";
 import { BackLink } from "@/components/back-link";
-import { PriorityText, SlaBadge, SystemBadge, WorkOrderStatusBadge } from "@/components/badges";
+import { CategoryChip, PriorityText, SlaBadge, SystemBadge, WorkOrderStatusBadge } from "@/components/badges";
 import { slaCalendar, slaStates } from "@/lib/sla";
 import { getContext } from "@/lib/context";
 import { fileUrl } from "@/lib/storage";
@@ -41,6 +41,7 @@ export default async function WorkOrderPage({ params }: PageProps<"/work-orders/
       attachments: { where: { commentId: null, workOrderItemId: null }, orderBy: { createdAt: "asc" } },
       request: { select: { id: true, number: true } },
       contract: { select: { id: true, name: true, responseTimeHours: true, resolutionTimeHours: true, businessHoursOnly: true, pauseOnHold: true } },
+      categories: { select: { id: true, name: true, color: true }, orderBy: { name: "asc" } },
     },
   });
   if (!wo) notFound();
@@ -112,6 +113,7 @@ export default async function WorkOrderPage({ params }: PageProps<"/work-orders/
     ],
     [t("wo.estimatedHours"), wo.estimatedMinutes != null && `${+(wo.estimatedMinutes / 60).toFixed(2)} h`],
     [t("wo.team"), wo.team && (<span className="inline-flex items-center gap-1.5"><span className="size-2 rounded-full" style={{ backgroundColor: wo.team.color }} />{wo.team.name}</span>)],
+    [t("categories.title"), wo.categories.length > 0 && <span className="flex flex-wrap gap-1">{wo.categories.map((c) => <CategoryChip key={c.id} name={c.name} color={c.color} />)}</span>],
     [t("wo.assignees"), wo.assignees.map((a) => a.user.name).join(", ") || <span className="text-muted">{t("wo.unassigned")}</span>],
     [t("wo.createdBy"), `${wo.createdBy.name} · ${dt(wo.createdAt)}`],
     [t("wo.completedBy"), wo.completedBy && wo.completedAt && `${wo.completedBy.name} · ${dt(wo.completedAt)}`],

@@ -137,3 +137,12 @@ export function PriorityText({ priority }: { priority: Priority }) {
     </span>
   );
 }
+/** Work-order category label with its colour dot (the name carries the meaning, not the colour). */
+export function CategoryChip({ name, color }: { name: string; color: string }) {
+  return (
+    <span className="inline-flex items-center gap-1 rounded-full border border-border px-2 py-0.5 text-xs text-muted">
+      <span className="size-2 rounded-full" style={{ backgroundColor: color }} />
+      {name}
+    </span>
+  );
+}

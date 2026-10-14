@@ -116,7 +116,8 @@
     "field": "App de campo (offline)",
     "scan": "Ler código",
     "server": "Servidor",
-    "roles": "Funções"
+    "roles": "Funções",
+    "categories": "Categorias"
   },
   "roles": {
     "OWNER": "Proprietário",
@@ -229,7 +230,8 @@
     "managerIsOwner": "A gestão tem de ser um cliente diferente do proprietário.",
     "roleNameTaken": "Já existe uma função com este nome.",
     "closesBeforeOpens": "A hora de fecho tem de ser depois da hora de abertura.",
-    "badHoliday": "Indique uma data por linha, no formato AAAA-MM-DD."
+    "badHoliday": "Indique uma data por linha, no formato AAAA-MM-DD.",
+    "categoryTaken": "Já existe uma categoria com este nome."
   },
   "clients": {
     "description": "Proprietários, family offices e gestores de propriedades para quem trabalha.",
@@ -1525,5 +1527,16 @@
     "to": "fecha",
     "holidays": "Feriados",
     "holidaysHint": "Dias em que o relógio do SLA não conta, um por linha (AAAA-MM-DD)."
+  },
+  "categories": {
+    "title": "Categorias",
+    "description": "Etiquetas para ordens de trabalho, como Garantia, Faturável ou Chamada. Filtre a lista de ordens de trabalho por elas.",
+    "new": "Nova categoria",
+    "none": "Ainda não há categorias.",
+    "placeholder": "p. ex. Garantia",
+    "color": "Cor",
+    "uses": "{n, plural, =0 {Sem uso} one {# ordem de trabalho} other {# ordens de trabalho}}",
+    "deleteConfirm": "Eliminar esta categoria? É removida das ordens de trabalho; as ordens de trabalho ficam.",
+    "all": "Todas as categorias"
   }
 }
