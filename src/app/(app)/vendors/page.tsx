@@ -9,8 +9,9 @@ import { SystemBadge } from "@/components/badges";
 import { getContext } from "@/lib/context";
 import { pageOf, PAGE_SIZE, searchWhere, sp } from "@/lib/list";
 import { SystemType, VendorType } from "@/generated/prisma/enums";
+import { titled } from "@/lib/metadata";
 
-export const metadata = { title: "Vendors" };
+export const generateMetadata = titled("nav.vendors");
 
 export default async function VendorsPage({ searchParams }: PageProps<"/vendors">) {
   const ctx = await getContext();

@@ -7,14 +7,16 @@ import { getContext } from "@/lib/context";
 import { isServerAdmin, serverAdminEnabled } from "@/lib/server-admin";
 import { DEFAULT_APP_NAME, getServerSettings } from "@/lib/server-settings";
 import { backupsAvailable, busyState, listBackups } from "@/lib/backups";
+import { backupPassword } from "@/lib/backup-crypto";
 import { checkForUpdate, updaterConfigured } from "@/lib/updates";
 import { factoryResetEnabled } from "@/lib/factory-reset";
 import { TIMEZONES } from "@/lib/timezones";
 import { SCHEDULED_KINDS } from "@/lib/backup-schedule";
 import { checkUpdatesAction, lockAction, saveGeneralAction, saveScheduleAction, unlockAction } from "./actions";
 import { BackupNowButton, BackupsTable, UpdateButton, UploadBackup } from "./panel";
+import { titled } from "@/lib/metadata";
 
-export const metadata = { title: "Server" };
+export const generateMetadata = titled("nav.server");
 
 export default async function ServerSettingsPage() {
   const ctx = await getContext();
@@ -142,6 +144,7 @@ export default async function ServerSettingsPage() {
           <div className="p-6 pb-4">
             <h2 className="mb-1 font-medium">{t("server.backups")}</h2>
             <p className="text-sm text-muted">{t("server.backupsHint")}</p>
+            <p className="mt-1 text-xs text-muted">{backupPassword() ? t("server.encryptionOn") : t("server.encryptionOff")}</p>
             {!available && <p className="mt-3 rounded-md bg-amber-50 px-3 py-2 text-sm text-amber-900">{t("server.backupsUnavailable")}</p>}
             {busy && <p className="mt-3 rounded-md bg-blue-50 px-3 py-2 text-sm text-blue-900">{t(`server.busy.${busy.op}`)}</p>}
           </div>

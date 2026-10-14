@@ -21,7 +21,7 @@ export function LoginForm({ next, reset, factory, canFactoryReset }: { next?: st
       <h1 className="mb-5 text-lg font-semibold">{t("signInTitle")}</h1>
       {reset && <p className="mb-4 rounded-md bg-green-50 px-3 py-2 text-sm text-green-800">{t("resetDone")}</p>}
       {factory && <p className="mb-4 rounded-md bg-green-50 px-3 py-2 text-sm text-green-800">{t("factoryResetDone")}</p>}
-      <form onSubmit={action} className="space-y-4">
+      <form method="post" onSubmit={action} className="space-y-4">
         <input type="hidden" name="next" value={next ?? ""} />
         <Field label={t("email")}>
           <Input name="email" type="email" autoComplete="email" required autoFocus />
@@ -66,6 +66,7 @@ export function FactoryResetForm() {
       <h1 className="mb-2 text-lg font-semibold">{t("factoryResetTitle")}</h1>
       <p className="mb-5 text-sm text-muted">{t("factoryResetBody")}</p>
       <form
+        method="post"
         onSubmit={(e) => {
           if (!confirm(t("factoryResetConfirm"))) return e.preventDefault();
           action(e);
@@ -97,7 +98,7 @@ export function SignupForm({ next, withCompany, email }: { next?: string; withCo
   return (
     <Card className="p-6">
       <h1 className="mb-5 text-lg font-semibold">{withCompany ? t("signUpTitle") : t("signUp")}</h1>
-      <form onSubmit={action} className="space-y-4">
+      <form method="post" onSubmit={action} className="space-y-4">
         <input type="hidden" name="next" value={next ?? ""} />
         {withCompany && (
           <Field label={t("companyName")}>
@@ -140,7 +141,7 @@ export function ForgotPasswordForm() {
       ) : (
         <>
           <p className="mb-5 text-sm text-muted">{t("forgotHint")}</p>
-          <form onSubmit={action} className="space-y-4">
+          <form method="post" onSubmit={action} className="space-y-4">
             <Field label={t("email")}>
               <Input name="email" type="email" autoComplete="email" required autoFocus />
             </Field>
@@ -168,7 +169,7 @@ export function ResetPasswordForm({ token, email }: { token: string; email: stri
     <Card className="p-6">
       <h1 className="mb-2 text-lg font-semibold">{t("resetTitle")}</h1>
       <p className="mb-5 text-sm text-muted">{email}</p>
-      <form onSubmit={action} className="space-y-4">
+      <form method="post" onSubmit={action} className="space-y-4">
         <input type="hidden" name="token" value={token} />
         <Field label={t("newPassword")} hint={t("passwordRule")}>
           <Input name="password" type="password" autoComplete="new-password" minLength={8} required autoFocus />

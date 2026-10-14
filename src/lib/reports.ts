@@ -1,7 +1,7 @@
 import "server-only";
 import type { AppContext } from "@/lib/context";
 import type { ReportFilters } from "@/lib/report-filters";
-import { compliance, slaStates, type SlaState } from "@/lib/sla";
+import { compliance, SLA_STATUS_LOGS, slaCalendar, slaStates, type SlaState } from "@/lib/sla";
 import { countByBucket, hoursBetween, mean, median, pmCompliance, sumBy, timeInStatus, workingDays } from "@/lib/report-math";
 import { ACTIVE_STATUSES, workOrderCosts } from "@/lib/work-orders";
 import { villaAccess } from "@/lib/portal-scope";
@@ -47,7 +47,8 @@ export async function overview(ctx: Ctx, f: ReportFilters, now = new Date()) {
         createdAt: true,
         firstResponseAt: true,
         completedAt: true,
-        contract: { select: { responseTimeHours: true, resolutionTimeHours: true } },
+        contract: { select: { responseTimeHours: true, resolutionTimeHours: true, businessHoursOnly: true, pauseOnHold: true } },
+        statusLogs: SLA_STATUS_LOGS,
         ...costSelect,
       },
     }),
@@ -61,7 +62,8 @@ export async function overview(ctx: Ctx, f: ReportFilters, now = new Date()) {
 
   const repairs = completed.filter((w) => REACTIVE_TYPES.includes(w.type));
   const responses = opened.filter((w) => REACTIVE_TYPES.includes(w.type) && w.firstResponseAt).map((w) => hoursBetween(w.createdAt, w.firstResponseAt!));
-  const sla = opened.filter((w) => w.contract).map((w) => slaStates(w, w.contract, now));
+  const calendar = slaCalendar(ctx.organization);
+  const sla = opened.filter((w) => w.contract).map((w) => slaStates(w, w.contract, now, calendar));
   const cost = opened.reduce((s, w) => s + workOrderCosts(w).total, 0);
   const trend = countByBucket({ opened: opened.map((w) => w.createdAt), completed: completed.map((w) => w.completedAt) }, f.from, f.to);
 
@@ -137,11 +139,13 @@ export async function slaReport(ctx: Ctx, f: ReportFilters, now = new Date()) {
       firstResponseAt: true,
       completedAt: true,
       villa: { select: { name: true } },
-      contract: { select: { id: true, name: true, responseTimeHours: true, resolutionTimeHours: true, client: { select: { name: true } } } },
+      contract: { select: { id: true, name: true, responseTimeHours: true, resolutionTimeHours: true, businessHoursOnly: true, pauseOnHold: true, client: { select: { name: true } } } },
+      statusLogs: SLA_STATUS_LOGS,
     },
     orderBy: { createdAt: "desc" },
   });
-  const judged = wos.map((w) => ({ ...w, sla: slaStates(w, w.contract, now) }));
+  const calendar = slaCalendar(ctx.organization);
+  const judged = wos.map((w) => ({ ...w, sla: slaStates(w, w.contract, now, calendar) }));
   const byContract = new Map<string, { name: string; client: string; response: SlaState[]; resolution: SlaState[] }>();
   for (const w of judged) {
     const c = w.contract!;

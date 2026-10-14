@@ -1,14 +1,22 @@
+import Link from "next/link";
 import { notFound } from "next/navigation";
-import { getTranslations } from "next-intl/server";
+import { getFormatter, getTranslations } from "next-intl/server";
 import { Card, Field, Input, PageHeader, Select, Textarea } from "@/components/ui";
 import { ActionForm, FieldError } from "@/components/action-form";
 import { getContext } from "@/lib/context";
 import { brandColor, DEFAULT_BRAND, logoSrc } from "@/lib/branding";
 import { TIMEZONES } from "@/lib/timezones";
+import { privacyPath } from "@/lib/privacy";
+import { parseRetention, RETENTION_KEYS, RETENTION_MAX } from "@/lib/retention-rules";
+import { parseBusinessHours } from "@/lib/sla-clock";
+
+// Monday first, Sunday last (day numbers: 0 = Sunday).
+const WEEK = [1, 2, 3, 4, 5, 6, 0];
 import { updateOrgAction } from "../actions";
 import { BrandColorField, LogoUploader } from "./form";
+import { titled } from "@/lib/metadata";
 
-export const metadata = { title: "Organization" };
+export const generateMetadata = titled("nav.organization");
 
 const CURRENCIES = ["EUR", "GBP", "USD", "AED", "BRL", "CHF"];
 
@@ -17,6 +25,11 @@ export default async function OrgSettingsPage() {
   if (!ctx.can("org.manage")) notFound();
   const t = await getTranslations();
   const o = ctx.organization;
+  const retention = parseRetention(o.retention);
+  const hours = parseBusinessHours(o.businessHours);
+  const format = await getFormatter();
+  // 2026-10-04 is a Sunday: day d of the week is 4 + d October.
+  const weekday = (d: number) => format.dateTime(new Date(Date.UTC(2026, 9, 4 + d, 12)), { weekday: "long", timeZone: "UTC" });
 
   return (
     <>
@@ -64,6 +77,28 @@ export default async function OrgSettingsPage() {
               <Textarea name="reportFooter" defaultValue={o.reportFooter ?? ""} className="min-h-16" maxLength={500} />
             </Field>
 
+            <h2 className="border-t border-border pt-5 font-medium">{t("privacy.title")}</h2>
+            <Field label={t("privacy.customNotice")} hint={t("privacy.customNoticeHint")}>
+              <Textarea name="privacyNotice" defaultValue={o.privacyNotice ?? ""} className="min-h-40" maxLength={20000} />
+            </Field>
+            <p className="-mt-2 text-xs">
+              <Link href={privacyPath(o)} target="_blank" className="font-medium text-brand">
+                {t("privacy.view")}
+              </Link>
+            </p>
+            <div>
+              <h3 className="text-sm font-medium">{t("retention.title")}</h3>
+              <p className="mb-3 text-xs text-muted">{t("retention.hint")}</p>
+              <div className="grid gap-4 sm:grid-cols-2">
+                {RETENTION_KEYS.map((k) => (
+                  <Field key={k} label={t(`retention.${k}`)}>
+                    <Input name={k} type="number" min={0} max={RETENTION_MAX[k]} step={1} required defaultValue={retention[k]} className="w-28" />
+                    <FieldError name={k} />
+                  </Field>
+                ))}
+              </div>
+            </div>
+
             <h2 className="border-t border-border pt-5 font-medium">{t("company.regional")}</h2>
             <div className="grid gap-4 sm:grid-cols-3">
               <Field label={t("settings.timezone")}>
@@ -87,6 +122,30 @@ export default async function OrgSettingsPage() {
                 </Select>
               </Field>
             </div>
+
+            <h2 className="border-t border-border pt-5 font-medium">{t("businessHours.title")}</h2>
+            <p className="-mt-2 text-xs text-muted">{t("businessHours.hint")}</p>
+            <div className="space-y-2">
+              {WEEK.map((d) => {
+                const h = hours.days[d];
+                return (
+                  <div key={d} className="flex flex-wrap items-center gap-3 text-sm">
+                    <label className="flex w-36 items-center gap-2">
+                      <input type="checkbox" name={`open${d}`} defaultChecked={!!h} className="size-4 accent-brand" />
+                      {weekday(d)}
+                    </label>
+                    <Input name={`start${d}`} type="time" defaultValue={h?.start ?? "09:00"} className="w-28" aria-label={`${weekday(d)} ${t("businessHours.from")}`} />
+                    <span className="text-muted">–</span>
+                    <Input name={`end${d}`} type="time" defaultValue={h?.end ?? "18:00"} className="w-28" aria-label={`${weekday(d)} ${t("businessHours.to")}`} />
+                    <FieldError name={`end${d}`} />
+                  </div>
+                );
+              })}
+            </div>
+            <Field label={t("businessHours.holidays")} hint={t("businessHours.holidaysHint")}>
+              <Textarea name="holidays" defaultValue={hours.holidays.join("\n")} className="min-h-24 font-mono" placeholder="2026-12-25" />
+              <FieldError name="holidays" />
+            </Field>
           </ActionForm>
         </Card>
 

@@ -11,8 +11,9 @@ import { searchWhere, sp } from "@/lib/list";
 import { localizeTemplate, PROCEDURE_TEMPLATES } from "@/lib/procedure-templates";
 import { SystemType } from "@/generated/prisma/enums";
 import { TemplatePicker } from "./template-picker";
+import { titled } from "@/lib/metadata";
 
-export const metadata = { title: "Procedures" };
+export const generateMetadata = titled("nav.procedures");
 
 export default async function ProceduresPage({ searchParams }: PageProps<"/procedures">) {
   const ctx = await getContext();

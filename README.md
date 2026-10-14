@@ -16,6 +16,9 @@ The image is published as [`xeon3d/maintenance`](https://hub.docker.com/r/xeon3d
    - `FACTORY_RESET_PASSWORD`: set it to enable the **Factory reset** page; leave empty to disable.
      If `SERVER_ADMIN_PASSWORD` is empty, this one also unlocks Settings → Server.
    - `SEED_DEMO`: `"true"` creates the demo company on an empty database; set `"false"` for real use.
+   - `DEMO_MODE`: `"true"` on a public demo shows a banner asking people not to enter real personal data.
+   - `BACKUP_PASSWORD`: encrypts new backups (AES-256-GCM). Store it somewhere safe: an encrypted backup can only be
+     restored on a server with the same password.
    - Change the PostgreSQL password (in both places) for anything beyond a demo.
    - If port 3000 is taken, change only the left number of `"3000:3000"` (e.g. `"3001:3000"`).
 3. **Nginx Proxy Manager:** add a Proxy Host for your domain forwarding (scheme `http`) to the
@@ -45,6 +48,7 @@ because it acts on the whole installation rather than one company:
   Before a restore the current state is backed up automatically (and put back if the restore fails);
   the app restarts afterwards. Backups go to `/backups` — map it to another disk, and download copies
   off the server now and then. Backups made by a newer version can't be restored on an older one.
+  With `BACKUP_PASSWORD` set, new backups are encrypted (a lock icon marks them) and restore/upload decrypt them.
 
 ### Updating from 0.1.0
 
@@ -68,7 +72,7 @@ npm run db:seed        # demo org — sign in as owner@demo.test / demo1234
 npm run dev            # http://localhost:3000
 ```
 
-`.env` needs `DATABASE_URL`, `AUTH_SECRET`, `AUTH_TRUST_HOST`, `FIELD_ENCRYPTION_KEY` (32 random bytes, base64), `UPLOAD_DIR` and `CRON_SECRET`. Optional: `APP_URL`, `VAPID_PUBLIC_KEY`/`VAPID_PRIVATE_KEY`, `RESEND_API_KEY`/`EMAIL_FROM`, `SERVER_ADMIN_PASSWORD`, `FACTORY_RESET_PASSWORD`, `SEED_DEMO`, `APP_NAME` (default software name). Dev keeps server settings in `./.data` and backups in `./backups` (backups need `pg_dump`/`pg_restore`/`psql`/`tar` on PATH, so in practice only in Docker).
+`.env` needs `DATABASE_URL`, `AUTH_SECRET`, `AUTH_TRUST_HOST`, `FIELD_ENCRYPTION_KEY` (32 random bytes, base64), `UPLOAD_DIR` and `CRON_SECRET`. Optional: `APP_URL`, `VAPID_PUBLIC_KEY`/`VAPID_PRIVATE_KEY`, `RESEND_API_KEY`/`EMAIL_FROM`, `SERVER_ADMIN_PASSWORD`, `FACTORY_RESET_PASSWORD`, `SEED_DEMO`, `DEMO_MODE` (public demo banner), `BACKUP_PASSWORD` (encrypts backups), `APP_NAME` (default software name). Dev keeps server settings in `./.data` and backups in `./backups` (backups need `pg_dump`/`pg_restore`/`psql`/`tar` on PATH, so in practice only in Docker).
 
 ## Preventive maintenance scheduler
 
@@ -90,5 +94,6 @@ Demo users (password `demo1234`): `owner@`, `manager@`, `tech.network@`, `tech.e
 |---|---|
 | `npm run dev` | Dev server |
 | `npm run typecheck` / `lint` / `test` | Checks |
+| `npm run test:e2e` | Playwright smoke tests (needs `npm run build` and a seeded DB, or `E2E_BASE_URL` pointing at a running server) |
 | `npm run db:migrate` | Create a migration after editing `prisma/schema.prisma` |
 | `npm run db:studio` | Browse the database |

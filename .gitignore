@@ -54,3 +54,7 @@ next-env.d.ts
 # server data (dev): settings, secrets, backups
 /.data/
 /backups/
+
+# playwright
+/test-results/
+/playwright-report/

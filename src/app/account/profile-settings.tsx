@@ -1,14 +1,17 @@
+import Link from "next/link";
 import { getTranslations } from "next-intl/server";
+import { Download } from "lucide-react";
 import { ActionForm, FieldError } from "@/components/action-form";
 import { Card, Field, Input } from "@/components/ui";
 import { requireUser } from "@/lib/context";
 import { vapidPublicKey } from "@/lib/push";
+import { privacyPath } from "@/lib/privacy";
 import { NOTIFICATION_TYPES, PORTAL_TYPES, prefsOf, type Channels } from "@/lib/notification-types";
 import { changePasswordAction, updateProfileAction } from "./actions";
 import { NotificationPrefs, PushControl } from "./notification-settings";
 
 /** Profile, password and notification settings; `portal` limits the notification list to what clients get. */
-export async function ProfileSettings({ portal = false }: { portal?: boolean }) {
+export async function ProfileSettings({ portal = false, org }: { portal?: boolean; org: { slug: string } }) {
   const user = await requireUser();
   const t = await getTranslations();
   const types = portal ? PORTAL_TYPES : NOTIFICATION_TYPES.filter((x) => x !== "REQUEST_UPDATE");
@@ -64,6 +67,20 @@ export async function ProfileSettings({ portal = false }: { portal?: boolean }) 
           <h2 className="mb-1 font-medium">{t("profile.notifications")}</h2>
           <p className="mb-3 text-sm text-muted">{t("profile.notificationsHint")}</p>
           <NotificationPrefs types={types} initial={prefs} />
+        </Card>
+        <Card className="p-5">
+          <h2 className="mb-1 font-medium">{t("privacy.yourData")}</h2>
+          <p className="mb-3 text-sm text-muted">{t("privacy.yourDataHint")}</p>
+          <div className="flex flex-wrap items-center gap-4 text-sm">
+            {/* A download, not a page: a plain link so the browser saves the file. */}
+            <a href="/api/account/export" className="inline-flex items-center gap-1.5 font-medium text-brand">
+              <Download className="size-4" />
+              {t("privacy.download")}
+            </a>
+            <Link href={privacyPath(org)} className="text-muted hover:text-brand">
+              {t("privacy.title")}
+            </Link>
+          </div>
         </Card>
       </div>
     </div>

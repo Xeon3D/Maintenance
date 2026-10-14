@@ -9,6 +9,7 @@ import { Button } from "@/components/ui";
 import { getPortalContext } from "@/lib/portal";
 import { signOutAction } from "@/app/(auth)/actions";
 import { brandStyle, logoSrc } from "@/lib/branding";
+import { privacyPath } from "@/lib/privacy";
 
 export default async function PortalLayout({ children }: { children: React.ReactNode }) {
   const ctx = await getPortalContext();
@@ -52,6 +53,11 @@ export default async function PortalLayout({ children }: { children: React.React
         </div>
       </header>
       <main className="mx-auto max-w-4xl px-4 py-6">{children}</main>
+      <footer className="pb-6 text-center text-xs">
+        <Link href={privacyPath(ctx.organization)} className="text-muted hover:text-brand">
+          {t("privacy.title")}
+        </Link>
+      </footer>
       {/* Mobile: the main action is always one tap away. */}
       <Link
         href="/portal/requests/new"

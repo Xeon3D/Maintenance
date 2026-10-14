@@ -10,8 +10,9 @@ import { getContext } from "@/lib/context";
 import { sp } from "@/lib/list";
 import { isOutOfRange } from "@/lib/meters";
 import { ReadingInput } from "./reading-input";
+import { titled } from "@/lib/metadata";
 
-export const metadata = { title: "Meters" };
+export const generateMetadata = titled("nav.meters");
 
 export default async function MetersPage({ searchParams }: PageProps<"/meters">) {
   const ctx = await getContext();

@@ -4,7 +4,7 @@ import { useState, useTransition } from "react";
 import { useActionForm } from "@/lib/use-action-form";
 import { useTranslations } from "next-intl";
 import { Button, Field, FormError, Input, Select } from "@/components/ui";
-import { inviteUserAction, revokeInviteAction, updateMemberAction } from "../actions";
+import { eraseMemberAction, inviteUserAction, revokeInviteAction, updateMemberAction } from "../actions";
 
 /** Built-in roles, then the company's custom roles (value "job:<id>"). Labels come from the server. */
 export type RoleOptions = { builtIn: { value: string; label: string }[]; custom: { value: string; label: string }[] };
@@ -109,6 +109,23 @@ export function MemberControls({ id, role, active, roleOptions }: { id: string; 
       >
         {active ? t("settings.deactivate") : t("settings.reactivate")}
       </Button>
+      {!active && (
+        <Button
+          size="sm"
+          variant="ghost"
+          disabled={pending}
+          title={t("erasure.eraseHint")}
+          onClick={() =>
+            confirm(t("erasure.eraseConfirm")) &&
+            start(async () => {
+              const r = await eraseMemberAction(id);
+              if (r.error) alert(t.has(r.error) ? t(r.error) : t("common.somethingWrong"));
+            })
+          }
+        >
+          {t("erasure.erase")}
+        </Button>
+      )}
     </div>
   );
 }

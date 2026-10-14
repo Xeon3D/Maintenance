@@ -7,6 +7,7 @@ import { requirePermission } from "@/lib/context";
 import { assertOwned } from "@/lib/db/tenant";
 import { enumOf, optStr, parseForm, str, type FormResult } from "@/lib/forms";
 import { ClientType } from "@/generated/prisma/enums";
+import { anonymizeClient, erasedName, ErasureError } from "@/lib/erasure";
 
 const clientSchema = z.object({
   name: str(150),
@@ -66,4 +67,18 @@ export async function deleteContactAction(clientId: string, contactId: string) {
   await assertOwned(ctx.db, "client", [clientId]);
   await ctx.db.clientContact.deleteMany({ where: { id: contactId, clientId } });
   revalidatePath(`/clients/${clientId}`);
+}
+
+/** GDPR erasure of an archived client: contact details and contacts go, villas and jobs stay. */
+export async function anonymizeClientAction(id: string): Promise<{ error?: string }> {
+  const ctx = await requirePermission("clients.manage");
+  try {
+    await anonymizeClient(ctx, id, erasedName(ctx.organization.defaultLocale, "client", id));
+  } catch (e) {
+    if (e instanceof ErasureError) return { error: e.message };
+    throw e;
+  }
+  revalidatePath("/clients");
+  revalidatePath(`/clients/${id}`);
+  return {};
 }

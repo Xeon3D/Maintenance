@@ -12,8 +12,9 @@ import { pageOf, PAGE_SIZE, sp } from "@/lib/list";
 import { cn } from "@/lib/utils";
 import { RequestStatus } from "@/generated/prisma/enums";
 import type { Prisma } from "@/generated/prisma/client";
+import { titled } from "@/lib/metadata";
 
-export const metadata = { title: "Requests" };
+export const generateMetadata = titled("nav.requests");
 
 export default async function RequestsPage({ searchParams }: PageProps<"/requests">) {
   const ctx = await getContext();

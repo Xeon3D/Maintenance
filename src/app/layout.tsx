@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import { NextIntlClientProvider } from "next-intl";
 import { getLocale } from "next-intl/server";
 import { ServiceWorkerRegistrar } from "@/components/service-worker";
+import { DemoBanner } from "@/components/demo-banner";
 import { getAppName } from "@/lib/server-settings";
 import { getTheme } from "@/lib/theme-server";
 import { THEME_BOOT_SCRIPT } from "@/lib/theme";
@@ -37,6 +38,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
         <script dangerouslySetInnerHTML={{ __html: THEME_BOOT_SCRIPT }} />
       </head>
       <body className="min-h-full font-sans">
+        <DemoBanner />
         <NextIntlClientProvider>{children}</NextIntlClientProvider>
         <ServiceWorkerRegistrar />
       </body>

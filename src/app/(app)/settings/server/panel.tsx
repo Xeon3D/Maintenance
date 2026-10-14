@@ -3,7 +3,7 @@
 import { useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { Download, RotateCcw, Trash2, Upload } from "lucide-react";
+import { Download, Lock, RotateCcw, Trash2, Upload } from "lucide-react";
 import { Badge, Button, FormError, Table } from "@/components/ui";
 import type { FormResult } from "@/lib/forms";
 import { backupNowAction, deleteBackupAction, restoreBackupAction, updateNowAction } from "./actions";
@@ -115,7 +115,12 @@ export function UploadBackup({ disabled }: { disabled?: boolean }) {
     xhr.upload.onprogress = (e) => e.lengthComputable && setState((s) => ({ ...s, progress: Math.round((e.loaded / e.total) * 100) }));
     xhr.onload = () => {
       const ok = xhr.status >= 200 && xhr.status < 300;
-      setState({ busy: false, progress: 0, error: ok ? null : xhr.status === 413 ? t("errors.tooLarge") : t("errors.invalidBackup") });
+      let code = "invalidBackup";
+      try {
+        code = (JSON.parse(xhr.responseText) as { error?: string }).error ?? code;
+      } catch {}
+      const message = t.has(`errors.${code}`) ? t(`errors.${code}`) : t("errors.invalidBackup");
+      setState({ busy: false, progress: 0, error: ok ? null : xhr.status === 413 ? t("errors.tooLarge") : message });
       if (input.current) input.current.value = "";
       router.refresh();
     };
@@ -135,7 +140,7 @@ export function UploadBackup({ disabled }: { disabled?: boolean }) {
   );
 }
 
-export type BackupRow = { name: string; kind: string; createdAt: string; version: string; size: number };
+export type BackupRow = { name: string; kind: string; createdAt: string; version: string; size: number; encrypted: boolean };
 
 const KIND_STYLE: Record<string, string> = {
   manual: "bg-blue-50 text-blue-800",
@@ -196,6 +201,7 @@ export function BackupsTable({ rows, current, canRestore, timezone }: { rows: Ba
               <td className="whitespace-nowrap">{fmt.format(new Date(r.createdAt))}</td>
               <td>
                 <Badge className={KIND_STYLE[r.kind]}>{t(`kinds.${r.kind}` as never)}</Badge>
+                {r.encrypted && <Lock className="ml-1.5 inline size-3.5 text-muted" aria-label={t("encrypted")} />}
               </td>
               <td className={r.version === current ? "" : "text-muted"}>{r.version}</td>
               <td className="whitespace-nowrap text-right tabular-nums">{size(r.size)}</td>

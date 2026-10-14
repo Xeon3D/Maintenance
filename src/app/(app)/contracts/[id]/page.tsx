@@ -7,7 +7,7 @@ import { BackLink } from "@/components/back-link";
 import { ConfirmIconButton } from "@/components/confirm-button";
 import { SlaBadge, SystemBadge, WorkOrderStatusBadge } from "@/components/badges";
 import { getContext } from "@/lib/context";
-import { compliance, contractYear, slaStates } from "@/lib/sla";
+import { compliance, contractYear, SLA_STATUS_LOGS, slaCalendar, slaStates } from "@/lib/sla";
 import { cn } from "@/lib/utils";
 import { deleteContractAction } from "../actions";
 import { ContractStatusBadge } from "../status-badge";
@@ -33,7 +33,7 @@ export default async function ContractPage({ params }: PageProps<"/contracts/[id
   const [recent, visits, linkedTotal] = await Promise.all([
     ctx.db.workOrder.findMany({
       where: { contractId: id },
-      select: { id: true, number: true, title: true, status: true, system: true, createdAt: true, firstResponseAt: true, completedAt: true, villa: { select: { name: true } } },
+      select: { id: true, number: true, title: true, status: true, system: true, createdAt: true, firstResponseAt: true, completedAt: true, villa: { select: { name: true } }, statusLogs: SLA_STATUS_LOGS },
       orderBy: { createdAt: "desc" },
       take: 200,
     }),
@@ -41,7 +41,8 @@ export default async function ContractPage({ params }: PageProps<"/contracts/[id
     ctx.db.workOrder.count({ where: { contractId: id } }),
   ]);
 
-  const judged = recent.map((w) => ({ w, s: slaStates(w, contract, now) }));
+  const calendar = slaCalendar(ctx.organization);
+  const judged = recent.map((w) => ({ w, s: slaStates(w, contract, now, calendar) }));
   const inWindow = judged.filter((x) => x.w.createdAt >= since);
   const response = compliance(inWindow.map((x) => x.s.response));
   const resolution = compliance(inWindow.map((x) => x.s.resolution));
@@ -56,6 +57,7 @@ export default async function ContractPage({ params }: PageProps<"/contracts/[id
     [t("contracts.period"), `${date(contract.startDate)} – ${contract.endDate ? date(contract.endDate) : t("contracts.openEnded")}`],
     [t("contracts.responseHours"), contract.responseTimeHours != null ? t("contracts.hours", { n: contract.responseTimeHours }) : "—"],
     [t("contracts.resolutionHours"), contract.resolutionTimeHours != null ? t("contracts.hours", { n: contract.resolutionTimeHours }) : "—"],
+    [t("contracts.slaClock"), [contract.businessHoursOnly ? t("contracts.clockBusiness") : t("contracts.clockAlways"), contract.pauseOnHold && t("contracts.clockPauses")].filter(Boolean).join(" · ")],
     [t("contracts.includedVisits"), contract.includedVisits ?? "—"],
     [t("contracts.monthlyFee"), contract.monthlyFee != null ? format.number(Number(contract.monthlyFee), { style: "currency", currency: ctx.organization.currency }) : "—"],
     [

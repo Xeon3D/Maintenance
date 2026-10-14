@@ -71,6 +71,22 @@ export async function ContractForm({ ctx, contract, defaults }: { ctx: AppContex
             <FieldError name="includedVisits" />
           </Field>
         </div>
+        <div className="mt-4 space-y-2 text-sm">
+          <label className="flex items-start gap-2">
+            <input type="checkbox" name="businessHoursOnly" defaultChecked={contract?.businessHoursOnly ?? false} className="mt-0.5 size-4 accent-brand" />
+            <span>
+              {t("contracts.businessHoursOnly")}
+              <span className="block text-xs text-muted">{t("contracts.businessHoursOnlyHint")}</span>
+            </span>
+          </label>
+          <label className="flex items-start gap-2">
+            <input type="checkbox" name="pauseOnHold" defaultChecked={contract?.pauseOnHold ?? true} className="mt-0.5 size-4 accent-brand" />
+            <span>
+              {t("contracts.pauseOnHold")}
+              <span className="block text-xs text-muted">{t("contracts.pauseOnHoldHint")}</span>
+            </span>
+          </label>
+        </div>
       </fieldset>
 
       <Field label={t("contracts.monthlyFee")}>

@@ -29,7 +29,8 @@ and lighting. The user chose, and does not want re-litigated:
 1. Build a whole phase, including translations, tests and browser verification.
 2. Run `typecheck`, `lint` and `test`, then verify in the preview browser (details in §6).
 3. Commit at the end of the phase (the message style is in `git log`), ending with the
-   `Co-Authored-By: Claude …` trailer. The repo-local git identity is `xeon4 <xeon4d@gmail.com>`.
+   `Co-Authored-By: Claude …` trailer. The repo-local git identity is `Marcos Alves <malves@diniscoelho.pt>`
+   (since 2026-10-14; older commits are `xeon4`).
 4. Send a short summary covering: what's new, what was tested, what was fixed along the way,
    and things to know. Then ask whether to continue with the next phase.
 
@@ -57,6 +58,13 @@ are mostly UI and logic plus small additive migrations.
 ---
 
 ## 3. Environment (Windows 11)
+
+**Docker-only machines (2026-10-14):** a PC without Node can develop entirely in containers: a compose stack
+with `postgres:17-alpine` and `node:24-bookworm-slim` (repo bind-mounted at `/app`, named volumes for
+`node_modules` and `.next`, `WATCHPACK_POLLING=true`, port 3000), `.env` pointing at `db:5432`, and every
+`npm`/`npx` command run with `docker compose exec`. Turbopack misses **new** files over the Windows bind mount:
+restart `next dev` after adding a file. `npx playwright install --with-deps chromium` works in that container.
+
 
 - **Node 24** was installed after the Claude app started, so the app's inherited PATH lacks it.
   - PowerShell: prefix commands with
@@ -218,7 +226,7 @@ are mostly UI and logic plus small additive migrations.
   `node scripts/merge-messages.mjs en <file>` (and the same for `pt`).
 - ICU plurals are used, e.g. `pm.every.MONTHLY` has `=3 {Quarterly}`. Don't create a key that is
   also a namespace: `pm.every` vs `pm.every.DAILY` broke once.
-- Known gap: `metadata.title` strings are English-only.
+- Browser titles: `export const generateMetadata = titled("nav.x")` (`src/lib/metadata.ts`), never a static English `metadata.title`.
 
 ### Files and secrets
 - **Storage:** `src/lib/storage.ts` (`putObject/getObject/deleteObject`). Refs look like
@@ -300,7 +308,8 @@ markers), Message, VerificationToken (password reset).
 
 **Exist but have no UI yet (the remaining phases):**
 - **Phase 10:** `Subscription` (a trial is created at sign-up).
-- **Not on any phase yet** (mention to the user): `Category` (WO categories). Email verification
+- **Work-order categories** (`Category`, M2M): Settings → Categories (`workOrders.manage`), chips on the WO form/list/detail, `?category=` list filter.
+- **Not on any phase yet** (mention to the user): email verification
   at sign-up isn't done either.
 
 **Built in phase 8 (no migration):** `ServiceContract` UI; `WorkOrder.contractId` is now set automatically.
@@ -376,13 +385,11 @@ markers), Message, VerificationToken (password reset).
 5. **The user should rotate the Neon password.** `.env` then needs the new URL.
 
 **Smaller**
-- Browser `<title>`s are English-only (`export const metadata` in pages; switch to `generateMetadata` with translations).
 - `NextIntlClientProvider` ships every message to the client (fine now; scope it later for performance).
-- CSV asset import inserts one row at a time (slow near the 2,000-row limit).
 - Staff can't create a request manually (they create WOs directly). Probably fine.
 - The public QR form has no CAPTCHA; it relies on a honeypot plus DB-count rate limits.
 - `AuditLog` only covers secrets so far; phase 8/10 may want broader auditing and a viewer UI.
-- No Playwright e2e yet (listed in the roadmap stack).
+- Playwright e2e smoke tests in `e2e/` (`npm run test:e2e`; against a running server with `E2E_BASE_URL=http://localhost:3000`); CI job `e2e` builds and runs them on a seeded Postgres.
 - `next-auth` is a v5 beta.
 
 ---
@@ -390,8 +397,7 @@ markers), Message, VerificationToken (password reset).
 ## 8. Plan for the next phases
 
 ### Phase 6 — Inventory & purchasing (✅ done; notes for later)
-- Not done, possible follow-ups: barcode scanning (phase 9 PWA), editing PO lines in place (delete +
-  re-add today), PO emailing to the vendor (phase 7 email), technicians restocking their own van
+- Not done, possible follow-ups: barcode scanning (phase 9 PWA), PO emailing to the vendor (phase 7 email), technicians restocking their own van
   (transfers need `inventory.manage`), a stock-valuation report (phase 8).
 - Deleting a WO keeps its stock movements (parts were physically used); only "return" puts stock back.
 
@@ -479,7 +485,10 @@ markers), Message, VerificationToken (password reset).
   `relinkClientWorkOrders`, so earlier jobs are (re)attributed.
 - **SLA** (`slaStates`): calendar hours from WO creation. Response = `firstResponseAt` (or completion);
   resolution = completion. States met/breached/pending/na; compliance counts only decided ones.
-  **No business-hours calendar or pause-on-hold** — likely the next thing a real client asks for.
+  Per contract, `businessHoursOnly` counts only the company's business hours (Settings → Organization: hours per
+  weekday + holidays, in the org time zone) and `pauseOnHold` stops the clock while ON_HOLD (periods from
+  `WorkOrderStatusLog`; load them with `SLA_STATUS_LOGS` and pass `slaCalendar(org)` to `slaStates`). Maths in
+  `src/lib/sla-clock.ts` (tested); a job on hold before its target shows "Paused" with no due date.
   The WO page shows respond-by / resolve-by with `<SlaBadge>` (icon + word).
 - **Reports** (`/reports/*`, `reports.view` = owner/admin/manager/viewer): one URL-driven filter row
   (`src/lib/report-filters.ts`: 30d/90d/12m/ytd/custom ≤3y, client, villa, system) scopes every tab

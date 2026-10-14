@@ -74,7 +74,7 @@
     "factoryResetConfirm": "Apagar TODOS os dados deste servidor e repor a demonstração? Não é possível anular.",
     "factoryResetDone": "O servidor foi reposto com os dados de demonstração. Inicie sessão com owner@demo.test / demo1234.",
     "wrongResetPassword": "Palavra-passe de reposição incorreta.",
-    "tooManyAttempts": "Demasiadas tentativas. Tente novamente dentro de 15 minutos."
+    "tooManyAttempts": "Demasiadas tentativas de início de sessão falhadas. Aguarde 15 minutos e tente novamente, ou reponha a palavra-passe."
   },
   "onboarding": {
     "title": "Crie a sua organização",
@@ -116,7 +116,8 @@
     "field": "App de campo (offline)",
     "scan": "Ler código",
     "server": "Servidor",
-    "roles": "Funções"
+    "roles": "Funções",
+    "categories": "Categorias"
   },
   "roles": {
     "OWNER": "Proprietário",
@@ -227,7 +228,10 @@
     "logoTooLarge": "O logótipo não pode ter mais de 2 MB.",
     "logoType": "Use uma imagem PNG ou JPEG.",
     "managerIsOwner": "A gestão tem de ser um cliente diferente do proprietário.",
-    "roleNameTaken": "Já existe uma função com este nome."
+    "roleNameTaken": "Já existe uma função com este nome.",
+    "closesBeforeOpens": "A hora de fecho tem de ser depois da hora de abertura.",
+    "badHoliday": "Indique uma data por linha, no formato AAAA-MM-DD.",
+    "categoryTaken": "Já existe uma categoria com este nome."
   },
   "clients": {
     "description": "Proprietários, family offices e gestores de propriedades para quem trabalha.",
@@ -1002,7 +1006,8 @@
     "inviteCta": "Aceitar convite",
     "resetSubject": "Redefinir a palavra-passe",
     "resetBody": "Foi pedida a redefinição da palavra-passe desta conta. Se foi você, use o botão abaixo dentro de uma hora. Caso contrário, pode ignorar este email.",
-    "resetCta": "Escolher nova palavra-passe"
+    "resetCta": "Escolher nova palavra-passe",
+    "privacy": "Aviso de privacidade"
   },
   "notifications": {
     "title": "Notificações",
@@ -1085,7 +1090,8 @@
   "sla": {
     "met": "Cumprido",
     "breached": "Falhado",
-    "pending": "Em prazo"
+    "pending": "Em prazo",
+    "paused": "Em pausa"
   },
   "contracts": {
     "description": "Acordos de manutenção com tempos de resposta e de resolução. As ordens de trabalho são associadas automaticamente ao contrato correspondente.",
@@ -1134,7 +1140,15 @@
     "deleteConfirm": "Eliminar este contrato? As ordens de trabalho mantêm-se, mas deixam de ter SLA associado.",
     "pickClientFirst": "Escolha primeiro o cliente.",
     "ownedVillas": "Próprias",
-    "managedVillas": "Geridas para outros proprietários"
+    "managedVillas": "Geridas para outros proprietários",
+    "businessHoursOnly": "Contar apenas horário laboral",
+    "businessHoursOnlyHint": "Os prazos só contam durante o horário de funcionamento da empresa (Definições → Organização), sem noites, dias de fecho nem feriados.",
+    "pauseOnHold": "Pausar quando em espera",
+    "pauseOnHoldHint": "O relógio para enquanto o trabalho está em espera (por exemplo, à espera do cliente ou de material) e retoma quando o trabalho continua.",
+    "slaClock": "Relógio do SLA",
+    "clockAlways": "24 horas por dia",
+    "clockBusiness": "Horário laboral",
+    "clockPauses": "pausa quando em espera"
   },
   "reports": {
     "description": "Desempenho, SLA, custos, técnicos e fiabilidade dos equipamentos.",
@@ -1423,15 +1437,106 @@
       "noUpdate": "Não há nenhuma versão mais recente para instalar.",
       "updaterNotConfigured": "O serviço de atualização não está configurado (ver docker-compose.yml).",
       "updateInProgress": "Já está a decorrer uma atualização.",
-      "updaterError": "O serviço de atualização não aceitou o pedido. Verifique se está a funcionar."
+      "updaterError": "O serviço de atualização não aceitou o pedido. Verifique se está a funcionar.",
+      "encryptedNoPassword": "Esta cópia está encriptada. Defina neste servidor a BACKUP_PASSWORD com que foi feita.",
+      "wrongBackupPassword": "Não é possível desencriptar esta cópia: foi feita com outra BACKUP_PASSWORD, ou o ficheiro está danificado."
     },
     "whatsNew": "Novidades",
-    "noNotes": "Sem notas de versão."
+    "noNotes": "Sem notas de versão.",
+    "encrypted": "Encriptada",
+    "encryptionOn": "As novas cópias são encriptadas com a BACKUP_PASSWORD (AES-256). Guarde bem essa palavra-passe: sem ela não podem ser repostas.",
+    "encryptionOff": "As cópias de segurança não estão encriptadas. Defina BACKUP_PASSWORD no ambiente do servidor para encriptar as novas (recomendado quando há cópias fora do servidor)."
   },
   "theme": {
     "label": "Aspeto",
     "light": "Claro",
     "dark": "Escuro",
     "system": "Igual ao dispositivo"
+  },
+  "demo": {
+    "banner": "Demonstração pública: não introduza dados pessoais reais. Tudo é apagado a cada reposição."
+  },
+  "privacy": {
+    "title": "Aviso de privacidade",
+    "qrNotice": "Os seus dados são usados apenas para tratar este pedido e para o contactar sobre ele.",
+    "contactFallback": "os contactos indicados acima",
+    "yourData": "Os seus dados",
+    "yourDataHint": "Descarregue uma cópia de tudo o que está guardado sobre si (JSON), ou leia como os seus dados são usados.",
+    "download": "Descarregar os meus dados",
+    "customNotice": "Aviso de privacidade personalizado",
+    "customNoticeHint": "Texto simples; deixe uma linha em branco entre parágrafos. Deixe vazio para usar o aviso incluído, preenchido com os dados da empresa acima. É público e tem ligação nos formulários de pedido, no portal do cliente e nos e-mails.",
+    "view": "Ver o aviso público",
+    "default": {
+      "controller": {
+        "title": "Responsável pelo tratamento",
+        "body": "A {company} é a responsável pelo tratamento dos dados pessoais neste sistema de manutenção. Para qualquer questão sobre os seus dados, contacte-nos: {contact}."
+      },
+      "data": {
+        "title": "Que dados recolhemos",
+        "body": "Contactos (nome, e-mail, telefone) de clientes, contactos das moradias, colaboradores e pessoas que comunicam avarias; moradas e notas de acesso das propriedades que mantemos; pedidos de manutenção, ordens de trabalho, fotografias, assinaturas de clientes e mensagens; no caso dos colaboradores, o tempo registado nos trabalhos; e registos técnicos, como inícios de sessão e registos de segurança."
+      },
+      "purposes": {
+        "title": "Para que os usamos",
+        "body": "Para prestar os serviços de manutenção acordados com os nossos clientes (execução de contrato), responder a pedidos e avarias comunicados, planear e documentar o nosso trabalho, cumprir obrigações legais como a faturação e a conservação de registos, e manter o sistema seguro (interesse legítimo)."
+      },
+      "recipients": {
+        "title": "Quem os recebe",
+        "body": "Apenas os nossos colaboradores que deles precisam para o seu trabalho, e prestadores de serviços que alojam o sistema ou enviam e-mails em nosso nome, ao abrigo de um acordo de tratamento de dados. Não vendemos os seus dados nem os usamos para publicidade."
+      },
+      "retention": {
+        "title": "Durante quanto tempo os guardamos",
+        "body": "Enquanto lhe prestarmos serviços e, depois, pelos prazos exigidos por lei (por exemplo, registos contabilísticos). Os dados que deixem de ser necessários são apagados ou anonimizados."
+      },
+      "security": {
+        "title": "Como os protegemos",
+        "body": "O acesso é limitado por função, as palavras-passe são guardadas cifradas (hash), os códigos de acesso e credenciais de equipamentos são encriptados e cada consulta fica registada, e as ligações são encriptadas."
+      },
+      "rights": {
+        "title": "Os seus direitos",
+        "body": "Pode pedir o acesso, a retificação ou o apagamento dos seus dados, a limitação ou oposição ao tratamento, e recebê-los num formato portável. Os utilizadores podem descarregar os seus dados no perfil. Pode também apresentar reclamação à autoridade de proteção de dados (em Portugal, a CNPD)."
+      }
+    }
+  },
+  "retention": {
+    "title": "Conservação de dados",
+    "hint": "Os registos mais antigos são apagados (ou, nos formulários de pedido, os contactos removidos) uma vez por dia. 0 guarda-os para sempre.",
+    "notificationsDays": "Notificações (dias)",
+    "auditMonths": "Registo de segurança (meses)",
+    "requestersMonths": "Contactos de quem fez pedidos por QR (meses após a decisão)",
+    "chatMonths": "Mensagens de chat (meses)"
+  },
+  "erasure": {
+    "formerUser": "Antigo utilizador",
+    "formerClient": "Antigo cliente",
+    "erased": "Apagado",
+    "erase": "Apagar dados",
+    "eraseHint": "Remove o nome, e-mail, telefone e acesso desta pessoa; o histórico de trabalho fica, sem o nome.",
+    "eraseConfirm": "Apagar os dados pessoais desta pessoa? O nome, e-mail, telefone, palavra-passe e notificações são removidos definitivamente e deixa de poder iniciar sessão. Os trabalhos e o tempo registado ficam, como \"Antigo utilizador\". Não é possível desfazer.",
+    "anonymize": "Apagar dados pessoais",
+    "anonymizeHint": "Remove o nome, contactos, NIF, notas e pessoas de contacto deste cliente; as moradias e os trabalhos ficam.",
+    "anonymizeConfirm": "Apagar os dados pessoais deste cliente? O nome, e-mail, telefone, NIF, morada de faturação, notas e todas as pessoas de contacto são removidos definitivamente. As moradias, trabalhos e contratos ficam, como \"Antigo cliente\". Não é possível desfazer.",
+    "deactivateFirst": "Desative primeiro o membro.",
+    "otherCompanies": "Esta pessoa pertence também a outra empresa, por isso a conta não pode ser apagada aqui. Desativá-la remove o acesso a esta empresa.",
+    "archiveFirst": "Arquive primeiro o cliente.",
+    "portalUsers": "Este cliente ainda tem utilizadores do portal ativos. Desative-os e apague-os primeiro."
+  },
+  "businessHours": {
+    "title": "Horário de funcionamento",
+    "hint": "Usado pelos contratos de serviço que contam os tempos de resposta e resolução apenas em horário laboral. As horas estão no fuso horário da empresa.",
+    "from": "abre",
+    "to": "fecha",
+    "holidays": "Feriados",
+    "holidaysHint": "Dias em que o relógio do SLA não conta, um por linha (AAAA-MM-DD)."
+  },
+  "categories": {
+    "title": "Categorias",
+    "description": "Etiquetas para ordens de trabalho, como Garantia, Faturável ou Chamada. Filtre a lista de ordens de trabalho por elas.",
+    "new": "Nova categoria",
+    "none": "Ainda não há categorias.",
+    "placeholder": "p. ex. Garantia",
+    "color": "Cor",
+    "uses": "{n, plural, =0 {Sem uso} one {# ordem de trabalho} other {# ordens de trabalho}}",
+    "deleteConfirm": "Eliminar esta categoria? É removida das ordens de trabalho; as ordens de trabalho ficam.",
+    "all": "Todas as categorias"
   }
 }

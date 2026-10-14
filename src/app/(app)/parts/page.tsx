@@ -12,8 +12,9 @@ import { lowStockParts } from "@/lib/inventory";
 import { isLowStock, onHand } from "@/lib/inventory-math";
 import { SystemType } from "@/generated/prisma/enums";
 import { ReorderButton } from "./reorder-button";
+import { titled } from "@/lib/metadata";
 
-export const metadata = { title: "Parts & inventory" };
+export const generateMetadata = titled("nav.parts");
 
 export default async function PartsPage({ searchParams }: PageProps<"/parts">) {
   const ctx = await getContext();

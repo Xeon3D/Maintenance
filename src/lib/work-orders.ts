@@ -44,6 +44,7 @@ export type WorkOrderInput = {
   startDate?: Date | null;
   estimatedMinutes?: number | null;
   assigneeIds?: string[];
+  categoryIds?: string[];
   clientVisible?: boolean;
   items?: ChecklistItemInput[];
 };
@@ -77,9 +78,21 @@ export async function validateAssignees(ctx: WoCtx, ids: string[] = []) {
   return unique;
 }
 
+/** Categories must be the org's own (they are connected, which the tenant guard doesn't check). */
+export async function validateCategories(ctx: WoCtx, ids: string[] = []) {
+  const unique = [...new Set(ids)];
+  try {
+    await assertOwned(ctx.db, "category", unique);
+  } catch {
+    throw new WorkOrderError("invalidRef");
+  }
+  return unique;
+}
+
 export async function createWorkOrder(ctx: WoCtx, input: WorkOrderInput) {
   const refs = await resolveRefs(ctx, input);
   const assigneeIds = await validateAssignees(ctx, input.assigneeIds);
+  const categoryIds = await validateCategories(ctx, input.categoryIds);
 
   let items = input.items ?? [];
   if (input.procedureId && items.length === 0) {
@@ -110,6 +123,7 @@ export async function createWorkOrder(ctx: WoCtx, input: WorkOrderInput) {
       clientVisible: input.clientVisible ?? true,
       createdById: ctx.user.id,
       assignees: { create: assigneeIds.map((userId) => ({ userId })) },
+      categories: { connect: categoryIds.map((id) => ({ id })) },
       items: {
         create: items.map((it, i) => ({
           sortOrder: i,

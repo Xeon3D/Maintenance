@@ -74,7 +74,7 @@
     "factoryResetConfirm": "Erase ALL data on this server and restore the demo? This cannot be undone.",
     "factoryResetDone": "The server was reset to the demo data. Sign in with owner@demo.test / demo1234.",
     "wrongResetPassword": "Wrong reset password.",
-    "tooManyAttempts": "Too many attempts. Try again in 15 minutes."
+    "tooManyAttempts": "Too many failed sign-in attempts. Wait 15 minutes and try again, or reset your password."
   },
   "onboarding": {
     "title": "Create your organization",
@@ -116,7 +116,8 @@
     "field": "Field app (offline)",
     "scan": "Scan",
     "server": "Server",
-    "roles": "Roles"
+    "roles": "Roles",
+    "categories": "Categories"
   },
   "roles": {
     "OWNER": "Owner",
@@ -227,7 +228,10 @@
     "logoTooLarge": "The logo must be 2 MB or smaller.",
     "logoType": "Use a PNG or JPEG image.",
     "managerIsOwner": "The manager must be a different client from the owner.",
-    "roleNameTaken": "There's already a role with this name."
+    "roleNameTaken": "There's already a role with this name.",
+    "closesBeforeOpens": "Closing time must be after opening time.",
+    "badHoliday": "Use one date per line, as YYYY-MM-DD.",
+    "categoryTaken": "There's already a category with this name."
   },
   "clients": {
     "description": "Villa owners, family offices and property managers you work for.",
@@ -1002,7 +1006,8 @@
     "inviteCta": "Accept invitation",
     "resetSubject": "Reset your password",
     "resetBody": "Someone asked to reset the password for this account. If it was you, use the button below within an hour. If not, you can ignore this email.",
-    "resetCta": "Choose a new password"
+    "resetCta": "Choose a new password",
+    "privacy": "Privacy notice"
   },
   "notifications": {
     "title": "Notifications",
@@ -1085,7 +1090,8 @@
   "sla": {
     "met": "Met",
     "breached": "Breached",
-    "pending": "Due"
+    "pending": "Due",
+    "paused": "Paused"
   },
   "contracts": {
     "description": "Maintenance agreements with response and resolution targets. Work orders are linked to the matching contract automatically.",
@@ -1134,7 +1140,15 @@
     "deleteConfirm": "Delete this contract? Its work orders stay, but lose the SLA link.",
     "pickClientFirst": "Choose the client first.",
     "ownedVillas": "Owned",
-    "managedVillas": "Managed for other owners"
+    "managedVillas": "Managed for other owners",
+    "businessHoursOnly": "Count business hours only",
+    "businessHoursOnlyHint": "Targets run only during the company's business hours (Settings → Organization), skipping nights, closed days and holidays.",
+    "pauseOnHold": "Pause while on hold",
+    "pauseOnHoldHint": "The clock stops while the job is on hold (e.g. waiting for the client or parts) and resumes when work continues.",
+    "slaClock": "SLA clock",
+    "clockAlways": "Around the clock",
+    "clockBusiness": "Business hours",
+    "clockPauses": "pauses on hold"
   },
   "reports": {
     "description": "Performance, SLA, costs, technicians and equipment reliability.",
@@ -1423,15 +1437,106 @@
       "noUpdate": "There's no newer version to install.",
       "updaterNotConfigured": "The updater service isn't set up (see docker-compose.yml).",
       "updateInProgress": "An update is already running.",
-      "updaterError": "The updater service didn't accept the request. Check that it is running."
+      "updaterError": "The updater service didn't accept the request. Check that it is running.",
+      "encryptedNoPassword": "This backup is encrypted. Set BACKUP_PASSWORD on this server to the password it was made with.",
+      "wrongBackupPassword": "This backup can't be decrypted: it was made with a different BACKUP_PASSWORD, or the file is damaged."
     },
     "whatsNew": "What's new",
-    "noNotes": "No release notes."
+    "noNotes": "No release notes.",
+    "encrypted": "Encrypted",
+    "encryptionOn": "New backups are encrypted with BACKUP_PASSWORD (AES-256). Keep that password safe: without it they can't be restored.",
+    "encryptionOff": "Backups aren't encrypted. Set BACKUP_PASSWORD in the server environment to encrypt new ones (recommended when copies leave the server)."
   },
   "theme": {
     "label": "Appearance",
     "light": "Light",
     "dark": "Dark",
     "system": "Same as device"
+  },
+  "demo": {
+    "banner": "Public demo: don't enter real personal data. Everything here is erased at every reset."
+  },
+  "privacy": {
+    "title": "Privacy notice",
+    "qrNotice": "Your details are used only to handle this request and to contact you about it.",
+    "contactFallback": "the contact details above",
+    "yourData": "Your data",
+    "yourDataHint": "Download a copy of everything stored about you (JSON), or read how your data is used.",
+    "download": "Download my data",
+    "customNotice": "Custom privacy notice",
+    "customNoticeHint": "Plain text; leave a blank line between paragraphs. Leave empty to use the built-in notice, filled in with the company details above. It is public and linked from request forms, the client portal and e-mails.",
+    "view": "View the public notice",
+    "default": {
+      "controller": {
+        "title": "Who is responsible",
+        "body": "{company} is the controller of the personal data processed in this maintenance system. For any question about your data, contact us: {contact}."
+      },
+      "data": {
+        "title": "What we collect",
+        "body": "Contact details (name, e-mail, phone) of clients, villa contacts, staff and people who report a fault; addresses and access notes of the properties we maintain; maintenance requests, work orders, photos, client signatures and messages; for staff, time logged on jobs; and technical records such as sign-in and security logs."
+      },
+      "purposes": {
+        "title": "Why we use it",
+        "body": "To provide the maintenance services agreed with our clients (performance of a contract), to answer requests and faults reported to us, to plan and document our work, to meet legal obligations such as invoicing and record keeping, and to keep the system secure (legitimate interest)."
+      },
+      "recipients": {
+        "title": "Who receives it",
+        "body": "Only our staff who need it for their work, and service providers that host the system or deliver e-mails on our behalf under a data processing agreement. We do not sell your data or use it for advertising."
+      },
+      "retention": {
+        "title": "How long we keep it",
+        "body": "For as long as we provide services to you and afterwards for the periods required by law (for example, accounting records). Data no longer needed is deleted or anonymised."
+      },
+      "security": {
+        "title": "How we protect it",
+        "body": "Access is restricted by role, passwords are stored hashed, access codes and device credentials are encrypted and every view of them is logged, and connections are encrypted."
+      },
+      "rights": {
+        "title": "Your rights",
+        "body": "You may ask to access, correct or erase your data, to restrict or object to its processing, and to receive it in a portable format. Users can download their data from their profile. You may also complain to your data protection authority (in Portugal, the CNPD)."
+      }
+    }
+  },
+  "retention": {
+    "title": "Data retention",
+    "hint": "Older records are deleted (or, for request forms, the contact details removed) once a day. 0 keeps them forever.",
+    "notificationsDays": "Notifications (days)",
+    "auditMonths": "Security log (months)",
+    "requestersMonths": "QR requester contact details (months after the decision)",
+    "chatMonths": "Chat messages (months)"
+  },
+  "erasure": {
+    "formerUser": "Former user",
+    "formerClient": "Former client",
+    "erased": "Erased",
+    "erase": "Erase data",
+    "eraseHint": "Remove this person's name, e-mail, phone and sign-in; their work history stays, without their name.",
+    "eraseConfirm": "Erase this person's personal data? Their name, e-mail, phone, password and notifications are removed for good, and they can no longer sign in. Jobs and time they logged stay, under \"Former user\". This can't be undone.",
+    "anonymize": "Erase personal data",
+    "anonymizeHint": "Remove this client's name, contact details, tax number, notes and contacts; villas and jobs stay.",
+    "anonymizeConfirm": "Erase this client's personal data? The name, e-mail, phone, tax number, billing address, notes and all contacts are removed for good. Villas, jobs and contracts stay, under \"Former client\". This can't be undone.",
+    "deactivateFirst": "Deactivate the member first.",
+    "otherCompanies": "This person also belongs to another company, so the account can't be erased from here. Deactivating them removes their access to this company.",
+    "archiveFirst": "Archive the client first.",
+    "portalUsers": "This client still has active portal users. Deactivate and erase them first."
+  },
+  "businessHours": {
+    "title": "Business hours",
+    "hint": "Used by service contracts that count response and resolution times in business hours only. Times are in the company's time zone.",
+    "from": "opens",
+    "to": "closes",
+    "holidays": "Holidays",
+    "holidaysHint": "Days the SLA clock doesn't run, one per line (YYYY-MM-DD)."
+  },
+  "categories": {
+    "title": "Categories",
+    "description": "Labels for work orders, such as Warranty, Billable or Callout. Filter the work order list by them.",
+    "new": "New category",
+    "none": "No categories yet.",
+    "placeholder": "e.g. Warranty",
+    "color": "Colour",
+    "uses": "{n, plural, =0 {Not used} one {# work order} other {# work orders}}",
+    "deleteConfirm": "Delete this category? It is removed from its work orders; the work orders stay.",
+    "all": "All categories"
   }
 }

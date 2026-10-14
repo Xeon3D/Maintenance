@@ -22,11 +22,15 @@ services:
       APP_URL: https://maintenance.example.com
       # Create the demo company (owner@demo.test / demo1234) when the database is empty.
       SEED_DEMO: "true"
+      # Public demo server: shows a banner on every page asking people not to enter real personal data.
+      DEMO_MODE: "false"
       # Server password: unlocks Settings → Server (software name, updates, backups).
       SERVER_ADMIN_PASSWORD: ""
       # Enables the "Factory reset" page (erases everything, restores the demo). Leave empty to disable.
       # If SERVER_ADMIN_PASSWORD is empty, this password also unlocks Settings → Server.
       FACTORY_RESET_PASSWORD: ""
+      # Encrypts new backups (AES-256). Keep it safe: encrypted backups can't be restored without it.
+      BACKUP_PASSWORD: ""
       # Optional e-mail delivery through Resend; without it e-mails are only logged.
       RESEND_API_KEY: ""
       EMAIL_FROM: ""

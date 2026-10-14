@@ -32,6 +32,7 @@ import {
   UserRound,
   Users,
   UsersRound,
+  Tags,
   X,
   type LucideIcon,
 } from "lucide-react";
@@ -65,6 +66,7 @@ const ICONS: Record<string, LucideIcon> = {
   UserRound,
   Users,
   UsersRound,
+  Tags,
   Server,
 };
 

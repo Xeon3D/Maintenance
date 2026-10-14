@@ -28,6 +28,7 @@ export function woFilter(params: Params, userId: string, opts: { ignoreStatus?: 
   if (system && system in SystemType) where.system = system as SystemType;
   if (sp(params, "villaId")) where.villaId = sp(params, "villaId");
   if (sp(params, "assetId")) where.assetId = sp(params, "assetId");
+  if (sp(params, "category")) where.categories = { some: { id: sp(params, "category") } };
   if (assignee === "me") where.assignees = { some: { userId } };
   else if (assignee === "unassigned") where.assignees = { none: {} };
   else if (assignee) where.assignees = { some: { userId: assignee } };

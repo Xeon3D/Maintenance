@@ -6,8 +6,9 @@ import { getContext } from "@/lib/context";
 import { CUSTOM_ROLE_ACCESS, parseRoleRates, RATED_ROLES } from "@/lib/roles";
 import { saveJobRoleAction, saveRoleRatesAction } from "./actions";
 import { DeleteJobRoleButton } from "./delete-button";
+import { titled } from "@/lib/metadata";
 
-export const metadata = { title: "Roles" };
+export const generateMetadata = titled("nav.roles");
 
 export default async function RolesPage() {
   const ctx = await getContext();

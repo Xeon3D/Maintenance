@@ -25,6 +25,7 @@ export type WODefaults = {
   startDate?: string | null;
   estimatedMinutes?: number | null;
   assigneeIds?: string[];
+  categoryIds?: string[];
   clientVisible?: boolean;
 };
 
@@ -36,6 +37,7 @@ export function WorkOrderFields({
   teams,
   people,
   procedures,
+  categories = [],
 }: {
   wo: WODefaults;
   villas: { id: string; name: string; code: string | null }[];
@@ -44,6 +46,7 @@ export function WorkOrderFields({
   teams: { id: string; name: string; memberIds: string[] }[];
   people: { id: string; name: string }[];
   procedures?: { id: string; name: string }[]; // offered when creating
+  categories?: { id: string; name: string; color: string }[];
 }) {
   const t = useTranslations();
   const [villaId, setVillaId] = useState(wo.villaId ?? "");
@@ -237,6 +240,24 @@ export function WorkOrderFields({
           ))}
         </div>
       </fieldset>
+
+      {categories.length > 0 && (
+        <fieldset>
+          <legend className="mb-1.5 text-sm font-medium">{t("categories.title")}</legend>
+          <div className="flex flex-wrap gap-2">
+            {categories.map((c) => (
+              <label
+                key={c.id}
+                className="flex cursor-pointer items-center gap-1.5 rounded-full border border-border px-3 py-1 text-sm hover:bg-gray-50 has-[:checked]:border-brand has-[:checked]:bg-brand/10 has-[:checked]:text-brand has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-brand/40"
+              >
+                <input type="checkbox" name="categoryIds" value={c.id} defaultChecked={wo.categoryIds?.includes(c.id)} className="sr-only" />
+                <span className="size-2.5 rounded-full" style={{ backgroundColor: c.color }} />
+                {c.name}
+              </label>
+            ))}
+          </div>
+        </fieldset>
+      )}
     </>
   );
 }

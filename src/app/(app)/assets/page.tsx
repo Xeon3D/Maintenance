@@ -10,8 +10,9 @@ import { getContext } from "@/lib/context";
 import { assetFilter } from "./filter";
 import { pageOf, PAGE_SIZE, sp } from "@/lib/list";
 import { AssetStatus, SystemType } from "@/generated/prisma/enums";
+import { titled } from "@/lib/metadata";
 
-export const metadata = { title: "Assets" };
+export const generateMetadata = titled("nav.assets");
 
 export default async function AssetsPage({ searchParams }: PageProps<"/assets">) {
   const ctx = await getContext();
