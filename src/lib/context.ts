@@ -5,7 +5,7 @@ import { redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/db/client";
 import { tenantDb } from "@/lib/db/tenant";
-import { can, type Permission } from "@/lib/rbac";
+import { effectivePermissions, type Permission } from "@/lib/rbac";
 import { hourlyRateFor, parseRoleRates } from "@/lib/roles";
 
 export const ACTIVE_ORG_COOKIE = "active_org";
@@ -35,6 +35,8 @@ export const getContext = cache(async () => {
 
   const wanted = (await cookies()).get(ACTIVE_ORG_COOKIE)?.value;
   const membership = memberships.find((m) => m.organizationId === wanted) ?? memberships[0];
+  // The company's permission settings (Settings → Roles) applied to this member's role / custom role.
+  const permissions = effectivePermissions(membership.role, membership.organization.rolePermissions, membership.jobRole?.permissions);
 
   return {
     user,
@@ -45,7 +47,8 @@ export const getContext = cache(async () => {
     /** Cost per hour of this member's time (from their role); null when not set or not billable. */
     hourlyRate: hourlyRateFor(membership, parseRoleRates(membership.organization.roleRates)),
     db: tenantDb(membership.organizationId),
-    can: (p: Permission) => can(membership.role, p),
+    permissions,
+    can: (p: Permission) => permissions.has(p),
   };
 });
 
@@ -55,5 +58,12 @@ export type AppContext = Awaited<ReturnType<typeof getContext>>;
 export async function requirePermission(permission: Permission) {
   const ctx = await getContext();
   if (!ctx.can(permission)) throw new Error("Forbidden");
+  return ctx;
+}
+
+/** For changing permissions (Settings → Roles): only the Super Admin (role OWNER). */
+export async function requireOwner() {
+  const ctx = await getContext();
+  if (ctx.role !== "OWNER") throw new Error("Forbidden");
   return ctx;
 }
