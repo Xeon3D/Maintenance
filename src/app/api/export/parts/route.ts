@@ -18,7 +18,7 @@ export async function GET() {
   ]);
   const header = [
     t("common.name"), t("parts.sku"), t("parts.barcode"), t("assets.system"), t("assets.manufacturer"), t("assets.model"), t("parts.unit"),
-    t("parts.unitCost"), t("parts.minQuantity"), t("parts.vendor"), t("parts.onHand"), t("parts.stockValue"), t("parts.low"),
+    t("parts.unitCost"), t("parts.purchaseCost"), t("parts.minQuantity"), t("parts.vendor"), t("parts.onHand"), t("parts.stockValue"), t("parts.low"),
     ...locations.map((l) => l.name),
   ];
   const rows = parts.map((p) => {
@@ -26,7 +26,7 @@ export async function GET() {
     const qty = onHand(stock);
     return [
       p.name, p.sku, p.barcode, p.system ? t(`systems.${p.system}`) : null, p.manufacturer, p.model, p.unit,
-      Number(p.unitCost), Number(p.minQuantity), p.vendor?.name, qty, Math.round(qty * Number(p.unitCost) * 100) / 100,
+      Number(p.unitCost), Number(p.purchaseCost), Number(p.minQuantity), p.vendor?.name, qty, Math.round(qty * Number(p.purchaseCost) * 100) / 100,
       isLowStock({ minQuantity: p.minQuantity, stock }) ? "✓" : "",
       ...locations.map((l) => Number(stock.find((s) => s.locationId === l.id)?.quantity ?? 0)),
     ];

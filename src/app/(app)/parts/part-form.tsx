@@ -56,9 +56,13 @@ export async function PartForm({ ctx, part, defaults }: { ctx: AppContext; part?
           </datalist>
           <FieldError name="unit" />
         </Field>
-        <Field label={t("parts.unitCost")}>
+        <Field label={t("parts.unitCost")} hint={t("parts.unitCostHint")}>
           <Input name="unitCost" type="number" step="0.01" min={0} defaultValue={part ? Number(part.unitCost) : ""} placeholder="0.00" />
           <FieldError name="unitCost" />
+        </Field>
+        <Field label={t("parts.purchaseCost")} hint={t("parts.purchaseCostHint")}>
+          <Input name="purchaseCost" type="number" step="0.01" min={0} defaultValue={part ? Number(part.purchaseCost) : ""} placeholder="0.00" />
+          <FieldError name="purchaseCost" />
         </Field>
         <Field label={t("parts.minQuantity")} hint={t("parts.minQuantityHint")}>
           <Input name="minQuantity" type="number" step="any" min={0} defaultValue={part ? Number(part.minQuantity) : 0} />

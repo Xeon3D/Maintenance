@@ -5,6 +5,7 @@ import { compliance, SLA_STATUS_LOGS, slaCalendar, slaStates, type SlaState } fr
 import { countByBucket, hoursBetween, mean, median, pmCompliance, sumBy, timeInStatus, workingDays } from "@/lib/report-math";
 import { ACTIVE_STATUSES, workOrderCosts } from "@/lib/work-orders";
 import { billedTime, timeRoundingOf } from "@/lib/billing-time";
+import { urgentRuleFor } from "@/lib/urgent-surcharge";
 import { villaAccess } from "@/lib/portal-scope";
 import type { Prisma } from "@/generated/prisma/client";
 import type { Priority, SystemType, WorkOrderType } from "@/generated/prisma/enums";
@@ -29,7 +30,10 @@ export function woScope(f: ReportFilters): Prisma.WorkOrderWhereInput {
 
 const inRange = (f: ReportFilters) => ({ gte: f.from, lte: f.to });
 
+const URGENT_FIELDS = { urgentFee: true, urgentPercent: true } as const;
 const costSelect = {
+  priority: true,
+  contract: { select: URGENT_FIELDS },
   timeEntries: { select: { userId: true, minutes: true, hourlyRate: true } },
   parts: { select: { quantity: true, unitCost: true } },
   otherCosts: { select: { amount: true } },
@@ -48,9 +52,9 @@ export async function overview(ctx: Ctx, f: ReportFilters, now = new Date()) {
         createdAt: true,
         firstResponseAt: true,
         completedAt: true,
-        contract: { select: { responseTimeHours: true, resolutionTimeHours: true, businessHoursOnly: true, pauseOnHold: true } },
         statusLogs: SLA_STATUS_LOGS,
         ...costSelect,
+        contract: { select: { responseTimeHours: true, resolutionTimeHours: true, businessHoursOnly: true, pauseOnHold: true, ...URGENT_FIELDS } },
       },
     }),
     ctx.db.workOrder.findMany({ where: { ...scope, status: "DONE", completedAt: inRange(f) }, select: { type: true, createdAt: true, completedAt: true } }),
@@ -66,7 +70,7 @@ export async function overview(ctx: Ctx, f: ReportFilters, now = new Date()) {
   const calendar = slaCalendar(ctx.organization);
   const sla = opened.filter((w) => w.contract).map((w) => slaStates(w, w.contract, now, calendar));
   const block = timeRoundingOf(ctx.organization.timeRounding);
-  const cost = opened.reduce((s, w) => s + workOrderCosts(w, block).total, 0);
+  const cost = opened.reduce((s, w) => s + workOrderCosts(w, block, urgentRuleFor(ctx.organization, w.contract)).total, 0);
   const trend = countByBucket({ opened: opened.map((w) => w.createdAt), completed: completed.map((w) => w.completedAt) }, f.from, f.to);
 
   return {
@@ -199,17 +203,18 @@ export async function costReport(ctx: Ctx, f: ReportFilters) {
     }),
   ]);
   const block = timeRoundingOf(ctx.organization.timeRounding);
-  const rows = wos.map((w) => ({ ...w, cost: workOrderCosts(w, block) }));
+  const rows = wos.map((w) => ({ ...w, cost: workOrderCosts(w, block, urgentRuleFor(ctx.organization, w.contract)) }));
   type Row = (typeof rows)[number];
   const group = (key: (r: Row) => { id: string; name: string } | null) => {
-    const m = new Map<string, { id: string; name: string; labor: number; parts: number; other: number; total: number; count: number }>();
+    const m = new Map<string, { id: string; name: string; labor: number; parts: number; other: number; urgent: number; total: number; count: number }>();
     for (const r of rows) {
       const k = key(r);
       if (!k) continue;
-      const g = m.get(k.id) ?? { ...k, labor: 0, parts: 0, other: 0, total: 0, count: 0 };
+      const g = m.get(k.id) ?? { ...k, labor: 0, parts: 0, other: 0, urgent: 0, total: 0, count: 0 };
       g.labor += r.cost.labor;
       g.parts += r.cost.parts;
       g.other += r.cost.other;
+      g.urgent += r.cost.urgent;
       g.total += r.cost.total;
       g.count += 1;
       m.set(k.id, g);
@@ -226,12 +231,10 @@ export async function costReport(ctx: Ctx, f: ReportFilters) {
     if (end > start) fees.set(c.clientId, (fees.get(c.clientId) ?? 0) + (Number(c.monthlyFee) * (end.getTime() - start.getTime())) / monthMs);
   }
 
-  const totals = rows.reduce((s, r) => ({ labor: s.labor + r.cost.labor, parts: s.parts + r.cost.parts, other: s.other + r.cost.other, total: s.total + r.cost.total }), {
-    labor: 0,
-    parts: 0,
-    other: 0,
-    total: 0,
-  });
+  const totals = rows.reduce(
+    (s, r) => ({ labor: s.labor + r.cost.labor, parts: s.parts + r.cost.parts, other: s.other + r.cost.other, urgent: s.urgent + r.cost.urgent, total: s.total + r.cost.total }),
+    { labor: 0, parts: 0, other: 0, urgent: 0, total: 0 },
+  );
   return {
     totals,
     rows,

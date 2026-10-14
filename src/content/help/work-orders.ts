@@ -80,11 +80,11 @@ To change a work order later, open it and click **Edit**. If you change the vill
 
 ## The work order page
 
-![A work order: status, checklist and activity on the left; details, time, files, parts, costs and sign-off on the right](work-orders-detail)
+![A work order: status, checklist and activity on the left; details, time, files, parts, amounts to bill and sign-off on the right](work-orders-detail)
 
 At the top are the title, the status, the system, the priority and, if it applies, **Overdue**. The buttons on the right open the **Service report** (PDF), **Edit** the work order and delete it.
 
-On the right, the details card sums up the job: villa, client, area, asset, type, dates, team, categories, who it's assigned to, who created and completed it, the request it came from and the contract. Below it are the panels for time, photos and files, parts, costs, client sign-off and e-mailing the report.
+On the right, the details card sums up the job: villa, client, area, asset, type, dates, team, categories, who it's assigned to, who created and completed it, the request it came from and the contract. Below it are the panels for time, photos and files, parts, amounts to bill, client sign-off and e-mailing the report.
 
 ## Statuses
 
@@ -154,16 +154,17 @@ The **Parts used** panel takes parts out of stock for the job:
 
 The stock goes down straight away. The serial numbers are shown under the part (**S/N**) on the work order and in the service report. If a part wasn't used after all, the return button (**Return to stock**) puts it back. People who can place purchase orders also see **Order parts**, which starts a purchase order for this job. See [Parts](/help/parts) and [Purchase orders](/help/purchase-orders).
 
-## Costs
+## Amounts to bill
 
-The **Costs** panel adds up what the job cost:
+The **Amounts to bill** panel adds up what the job is charged to the client:
 
-- **Labour**: the billed time (each technician's time rounded up to the company's blocks), at the hourly rate of each person's role.
-- **Parts**: the parts used, at their unit cost.
-- Other costs added with **Add cost** (a description and an amount, for example crane hire or parking).
+- **Labour**: the billed time (each technician's time rounded up to the company's blocks), at the price per hour of each person's role.
+- **Parts**: the parts used, at their sale price.
+- **Urgent fee**, on work orders with Urgent priority: the fixed amount plus the percentage of labour set in [Settings → Organization](/help/organization) or in the work order's contract.
+- **Other charges** added with **Add charge** (a description and an amount, for example crane hire or parking).
 - **Total**.
 
-Costs stay internal: they are never shown to the client or printed on the service report.
+These amounts stay internal: they are never shown to the client or printed on the service report.
 
 ## Client sign-off
 
@@ -177,7 +178,7 @@ If nobody is there to sign, tick **Client absent** instead. The signature can be
 
 ## The service report
 
-**Service report** opens a PDF for the client with the job details, description, checklist answers, the time billed per technician, parts used (with their serial numbers), photos and the signature (or a note that the client was absent). It never includes costs.
+**Service report** opens a PDF for the client with the job details, description, checklist answers, the time billed per technician, parts used (with their serial numbers), photos and the signature (or a note that the client was absent). It never includes amounts.
 
 To send it, use the **E-mail the service report** panel:
 
@@ -207,8 +208,8 @@ Categories are coloured labels such as Warranty, Billable or Callout. Tick them 
 ## Who can do what
 
 - **Super Admin**, **Administrator** and **Manager**: everything, including editing and deleting any work order and e-mailing service reports.
-- **Technician**: creates work orders, edits those they created or are assigned to, and carries out any job: status, checklist, comments, time, photos, parts, costs and sign-off.
-- **Accountant** and **Viewer**: can see work orders (including costs) and download the PDF report, but can't change anything.
+- **Technician**: creates work orders, edits those they created or are assigned to, and carries out any job: status, checklist, comments, time, photos, parts, charges and sign-off.
+- **Accountant** and **Viewer**: can see work orders (including amounts) and download the PDF report, but can't change anything.
 - **Clients** don't use this page: they see the jobs visible to them in the client portal.
 
 > Technicians in the field can do all of this offline in the [Field app](/help/field-app).
@@ -285,11 +286,11 @@ Para alterar uma ordem de trabalho mais tarde, abra-a e clique em **Editar**. Se
 
 ## A página da ordem de trabalho
 
-![Uma ordem de trabalho: estado, checklist e atividade à esquerda; detalhes, tempo, ficheiros, peças, custos e aprovação à direita](work-orders-detail)
+![Uma ordem de trabalho: estado, checklist e atividade à esquerda; detalhes, tempo, ficheiros, peças, valores a faturar e aprovação à direita](work-orders-detail)
 
 No topo estão o título, o estado, o sistema, a prioridade e, se for o caso, **Em atraso**. Os botões à direita abrem o **Relatório de serviço** (PDF), permitem **Editar** a ordem de trabalho e eliminá-la.
 
-À direita, o cartão de detalhes resume o trabalho: moradia, cliente, área, equipamento, tipo, datas, equipa, categorias, a quem está atribuída, quem a criou e concluiu, o pedido de origem e o contrato. Por baixo estão os painéis de tempo, fotografias e ficheiros, peças, custos, aprovação do cliente e envio do relatório por e-mail.
+À direita, o cartão de detalhes resume o trabalho: moradia, cliente, área, equipamento, tipo, datas, equipa, categorias, a quem está atribuída, quem a criou e concluiu, o pedido de origem e o contrato. Por baixo estão os painéis de tempo, fotografias e ficheiros, peças, valores a faturar, aprovação do cliente e envio do relatório por e-mail.
 
 ## Estados
 
@@ -359,16 +360,17 @@ O painel **Peças usadas** retira peças do stock para o trabalho:
 
 O stock desce de imediato. Os números de série aparecem por baixo da peça (**N/S**) na ordem de trabalho e no relatório de serviço. Se afinal uma peça não foi usada, o botão de devolução (**Devolver ao stock**) repõe-na. Quem pode fazer encomendas vê também **Encomendar peças**, que inicia uma encomenda para este trabalho. Veja [Peças](/help/parts) e [Encomendas](/help/purchase-orders).
 
-## Custos
+## Valores a faturar
 
-O painel **Custos** soma o que o trabalho custou:
+O painel **Valores a faturar** soma o que é cobrado ao cliente pelo trabalho:
 
 - **Mão de obra**: o tempo faturado (o tempo de cada técnico arredondado aos blocos da empresa), ao preço por hora da função de cada pessoa.
-- **Peças**: as peças usadas, ao custo unitário.
-- Outros custos acrescentados com **Adicionar custo** (uma descrição e um valor, por exemplo aluguer de grua ou estacionamento).
+- **Peças**: as peças usadas, ao preço de venda.
+- **Taxa de urgência**, nas ordens de trabalho com prioridade Urgente: o valor fixo mais a percentagem da mão de obra definidos em [Definições → Empresa](/help/organization) ou no contrato da ordem de trabalho.
+- **Outros valores** acrescentados com **Adicionar valor** (uma descrição e um valor, por exemplo aluguer de grua ou estacionamento).
 - **Total**.
 
-Os custos são internos: nunca são mostrados ao cliente nem impressos no relatório de serviço.
+Estes valores são internos: nunca são mostrados ao cliente nem impressos no relatório de serviço.
 
 ## Aprovação do cliente
 
@@ -382,7 +384,7 @@ Se não estiver ninguém para assinar, marque **Cliente ausente**. A assinatura 
 
 ## O relatório de serviço
 
-**Relatório de serviço** abre um PDF para o cliente com os dados do trabalho, a descrição, as respostas da checklist, o tempo faturado de cada técnico, as peças usadas (com os números de série), as fotografias e a assinatura (ou a indicação de que o cliente estava ausente). Nunca inclui custos.
+**Relatório de serviço** abre um PDF para o cliente com os dados do trabalho, a descrição, as respostas da checklist, o tempo faturado de cada técnico, as peças usadas (com os números de série), as fotografias e a assinatura (ou a indicação de que o cliente estava ausente). Nunca inclui valores.
 
 Para o enviar, use o painel **Enviar o relatório de serviço por e-mail**:
 
@@ -412,8 +414,8 @@ As categorias são etiquetas coloridas como Garantia, Faturável ou Chamada. Mar
 ## Quem pode fazer o quê
 
 - **Super Admin**, **Administrador** e **Gestor**: tudo, incluindo editar e eliminar qualquer ordem de trabalho e enviar relatórios de serviço por e-mail.
-- **Técnico**: cria ordens de trabalho, edita as que criou ou que lhe estão atribuídas e executa qualquer trabalho: estado, checklist, comentários, tempo, fotografias, peças, custos e aprovação.
-- **Contabilista** e **Observador**: veem as ordens de trabalho (incluindo custos) e descarregam o relatório em PDF, mas não alteram nada.
+- **Técnico**: cria ordens de trabalho, edita as que criou ou que lhe estão atribuídas e executa qualquer trabalho: estado, checklist, comentários, tempo, fotografias, peças, valores e aprovação.
+- **Contabilista** e **Observador**: veem as ordens de trabalho (incluindo valores) e descarregam o relatório em PDF, mas não alteram nada.
 - Os **clientes** não usam esta página: veem os trabalhos visíveis para eles no portal do cliente.
 
 > Os técnicos no terreno podem fazer tudo isto offline na [App de campo](/help/field-app).

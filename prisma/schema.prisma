@@ -238,6 +238,8 @@ model Organization {
   // Permissions of the built-in staff roles, e.g. {"MANAGER": ["workOrders.manage", …]}; a missing role uses the defaults in lib/rbac.
   rolePermissions Json?
   timeRounding   Int      @default(30) // billing period in minutes: each technician's time on a work order is rounded up to it (0 = none)
+  urgentFee      Decimal  @default(0) @db.Decimal(12, 2) // extra cost of an urgent work order: fixed amount…
+  urgentPercent  Int      @default(0) // …plus this % of its labour (both 0 = no surcharge); a contract can override
   // Who also gets e-mailed service reports: {"userIds": […], "roles": ["ACCOUNTANT", "job:<id>"], "emails": […]}.
   reportRecipients Json?
   privacyNotice String? // custom privacy notice (plain text) shown at /privacy/<slug>; null = built-in template
@@ -554,6 +556,8 @@ model ServiceContract {
   pauseOnHold         Boolean        @default(false) // SLA clock stops while the job is on hold
   includedVisits      Int? // preventive visits per year
   monthlyFee          Decimal?       @db.Decimal(12, 2)
+  urgentFee           Decimal?       @db.Decimal(12, 2) // urgent surcharge for this contract's work orders; both null = the company's
+  urgentPercent       Int?
   systems             SystemType[]
   notes               String?
   createdAt           DateTime       @default(now())
@@ -936,7 +940,8 @@ model Part {
   manufacturer   String?
   model          String?
   unit           String      @default("pcs")
-  unitCost       Decimal     @default(0) @db.Decimal(12, 2)
+  unitCost       Decimal     @default(0) @db.Decimal(12, 2) // sale price: what a unit is charged at on work orders
+  purchaseCost   Decimal     @default(0) @db.Decimal(12, 2) // what a unit costs from the vendor: purchase orders, stock value
   minQuantity    Decimal     @default(0) @db.Decimal(12, 3) // org-wide reorder point
   vendorId       String?
   imageUrl       String?

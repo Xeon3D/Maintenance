@@ -56,6 +56,8 @@ const orgSchema = z.object({
   currency: z.string().trim().length(3).toUpperCase(),
   defaultLocale: z.enum(LOCALES),
   timeRounding: z.coerce.number().int().refine((v) => (TIME_ROUNDING_OPTIONS as readonly number[]).includes(v), "invalid"),
+  urgentFee: z.coerce.number().finite().min(0).max(1_000_000),
+  urgentPercent: z.coerce.number().int().min(0).max(500),
 });
 
 export async function updateOrgAction(_: FormResult, form: FormData): Promise<FormResult> {

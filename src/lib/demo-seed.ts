@@ -185,7 +185,8 @@ export async function seedDemo(prisma: PrismaClient) {
   ] as const;
   for (const s of spares) {
     const part = await prisma.part.create({
-      data: { organizationId: org.id, name: s.name, sku: s.sku, system: s.system, unitCost: s.unitCost, minQuantity: s.min, vendorId: s.vendorId },
+      // Bought at about 65% of the sale price.
+      data: { organizationId: org.id, name: s.name, sku: s.sku, system: s.system, unitCost: s.unitCost, purchaseCost: Math.round(s.unitCost * 65) / 100, minQuantity: s.min, vendorId: s.vendorId },
     });
     for (const [loc, quantity] of s.stock) {
       await prisma.partStock.create({ data: { partId: part.id, locationId: loc.id, quantity } });

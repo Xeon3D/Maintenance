@@ -8,6 +8,7 @@ import { notify, notifyExternal } from "@/lib/notify";
 import { contractFor } from "@/lib/contracts";
 import { effectivePermissions } from "@/lib/rbac";
 import { billedTime, type TimeEntryLike } from "@/lib/billing-time";
+import { NO_SURCHARGE, urgentSurcharge, type UrgentRule } from "@/lib/urgent-surcharge";
 import type { ChecklistItemType, Priority, SystemType, WorkOrderStatus, WorkOrderType } from "@/generated/prisma/enums";
 
 export const ACTIVE_STATUSES: WorkOrderStatus[] = ["OPEN", "IN_PROGRESS", "ON_HOLD"];
@@ -255,14 +256,18 @@ export async function stopRunningTimers(ctx: WoCtx, workOrderId: string, at = ne
  */
 export function workOrderCosts(
   wo: {
+    priority?: string | null;
     timeEntries: TimeEntryLike[];
     otherCosts: { amount: unknown }[];
     parts?: { quantity: unknown; unitCost: unknown }[];
   },
   block: number,
+  /** The urgent surcharge that applies to this work order (see lib/urgent-surcharge.ts); none when omitted. */
+  urgentRule: UrgentRule = NO_SURCHARGE,
 ) {
   const time = billedTime(wo.timeEntries, block);
   const other = wo.otherCosts.reduce((s, c) => s + Number(c.amount), 0);
   const parts = (wo.parts ?? []).reduce((s, p) => s + Number(p.quantity) * Number(p.unitCost), 0);
-  return { minutes: time.minutes, billedMinutes: time.billed, labor: time.labor, parts, other, total: time.labor + parts + other };
+  const urgent = urgentSurcharge(wo.priority, time.labor, urgentRule);
+  return { minutes: time.minutes, billedMinutes: time.billed, labor: time.labor, parts, other, urgent, total: time.labor + parts + other + urgent };
 }

@@ -107,7 +107,7 @@ export async function addLineAction(poId: string, _: FormResult, form: FormData)
     const text = description ?? part?.name;
     if (!text) throw new InventoryError("invalidRef");
     await ctx.db.purchaseOrderLine.create({
-      data: { purchaseOrderId: po.id, partId: part?.id ?? null, description: text, quantity, unitCost: unitCost ?? Number(part?.unitCost ?? 0) },
+      data: { purchaseOrderId: po.id, partId: part?.id ?? null, description: text, quantity, unitCost: unitCost ?? Number(part?.purchaseCost ?? 0) }, // a PO line is at the vendor's price
     });
     revalidatePath(path(poId));
   });

@@ -151,6 +151,20 @@ export default async function OrgSettingsPage() {
                 </Select>
               </Field>
             </div>
+            <div>
+              <p className="mb-2 text-sm font-medium">{t("urgent.title")}</p>
+              <p className="mb-3 text-xs text-muted">{t("urgent.hint")}</p>
+              <div className="grid gap-4 sm:grid-cols-2">
+                <Field label={t("urgent.fee", { currency: o.currency })}>
+                  <Input name="urgentFee" type="number" min={0} step="0.01" defaultValue={Number(o.urgentFee)} />
+                  <FieldError name="urgentFee" />
+                </Field>
+                <Field label={t("urgent.percent")}>
+                  <Input name="urgentPercent" type="number" min={0} max={500} step={1} defaultValue={o.urgentPercent} />
+                  <FieldError name="urgentPercent" />
+                </Field>
+              </div>
+            </div>
 
             <h2 className="border-t border-border pt-5 font-medium">{t("reportEmail.companyTitle")}</h2>
             <p className="-mt-2 text-xs text-muted">{t("reportEmail.companyHint")}</p>

@@ -97,6 +97,23 @@ export async function ContractForm({ ctx, contract, defaults }: { ctx: AppContex
         </Field>
       )}
 
+      {ctx.can("costs.view") && (
+        <fieldset>
+          <legend className="mb-1 text-sm font-medium">{t("urgent.contractTitle")}</legend>
+          <p className="mb-2 text-xs text-muted">{t("urgent.contractHint")}</p>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <Field label={t("urgent.fee", { currency: ctx.organization.currency })}>
+              <Input name="urgentFee" type="number" min={0} step="0.01" defaultValue={contract?.urgentFee != null ? Number(contract.urgentFee) : ""} placeholder={String(Number(ctx.organization.urgentFee))} />
+              <FieldError name="urgentFee" />
+            </Field>
+            <Field label={t("urgent.percent")}>
+              <Input name="urgentPercent" type="number" min={0} max={500} step={1} defaultValue={contract?.urgentPercent ?? ""} placeholder={String(ctx.organization.urgentPercent)} />
+              <FieldError name="urgentPercent" />
+            </Field>
+          </div>
+        </fieldset>
+      )}
+
       <fieldset>
         <legend className="mb-1 text-sm font-medium">{t("contracts.systems")}</legend>
         <p className="mb-2 text-xs text-muted">{t("contracts.systemsHint")}</p>

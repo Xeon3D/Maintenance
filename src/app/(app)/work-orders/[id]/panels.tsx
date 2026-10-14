@@ -162,7 +162,7 @@ export function CostsPanel({
 }: {
   woId: string;
   costs: { id: string; description: string; amount: string }[];
-  summary: { labor: string; parts: string | null; other: string; total: string };
+  summary: { labor: string; parts: string | null; other: string; total: string; urgent: { amount: string; rule: string } | null };
   canExecute: boolean;
 }) {
   const t = useTranslations();
@@ -178,6 +178,14 @@ export function CostsPanel({
         <div className="flex justify-between">
           <span className="text-muted">{t("costs.parts")}</span>
           <span className="tabular-nums">{summary.parts}</span>
+        </div>
+      )}
+      {summary.urgent && (
+        <div className="flex justify-between gap-2">
+          <span className="text-muted">
+            {t("costs.urgent")} <span className="text-xs">({summary.urgent.rule})</span>
+          </span>
+          <span className="tabular-nums">{summary.urgent.amount}</span>
         </div>
       )}
       {costs.map((c) => (

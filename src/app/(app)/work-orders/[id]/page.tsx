@@ -10,6 +10,7 @@ import { getContext } from "@/lib/context";
 import { fileUrl } from "@/lib/storage";
 import { ACTIVE_STATUSES, workOrderCosts } from "@/lib/work-orders";
 import { billedTime, timeRoundingOf } from "@/lib/billing-time";
+import { urgentApplies, urgentRuleFor } from "@/lib/urgent-surcharge";
 import { cn } from "@/lib/utils";
 import { StatusBar } from "./status-bar";
 import { Checklist } from "./checklist";
@@ -43,7 +44,7 @@ export default async function WorkOrderPage({ params }: PageProps<"/work-orders/
       parts: { include: { part: { select: { name: true, unit: true } }, stockLocation: { select: { name: true } } }, orderBy: { id: "asc" } },
       attachments: { where: { commentId: null, workOrderItemId: null }, orderBy: { createdAt: "asc" } },
       request: { select: { id: true, number: true } },
-      contract: { select: { id: true, name: true, responseTimeHours: true, resolutionTimeHours: true, businessHoursOnly: true, pauseOnHold: true } },
+      contract: { select: { id: true, name: true, responseTimeHours: true, resolutionTimeHours: true, businessHoursOnly: true, pauseOnHold: true, urgentFee: true, urgentPercent: true } },
       categories: { select: { id: true, name: true, color: true }, orderBy: { name: "asc" } },
     },
   });
@@ -88,7 +89,8 @@ export default async function WorkOrderPage({ params }: PageProps<"/work-orders/
 
   const money = (n: number) => format.number(n, { style: "currency", currency: ctx.organization.currency });
   const block = timeRoundingOf(ctx.organization.timeRounding);
-  const costs = workOrderCosts(wo, block);
+  const urgentRule = urgentRuleFor(ctx.organization, wo.contract);
+  const costs = workOrderCosts(wo, block, urgentRule);
   const dt = (d: Date) => format.dateTime(d, { dateStyle: "medium", timeStyle: "short" });
   const reportEmail = ctx.can("workOrders.sendReport") ? await reportRecipients(ctx, wo.id) : null;
   const sla = wo.contract ? slaStates(wo, wo.contract, now, slaCalendar(ctx.organization)) : null;
@@ -312,7 +314,15 @@ export default async function WorkOrderPage({ params }: PageProps<"/work-orders/
               woId={wo.id}
               canExecute={canExecute}
               costs={wo.otherCosts.map((c) => ({ id: c.id, description: c.description, amount: money(Number(c.amount)) }))}
-              summary={{ labor: money(costs.labor), parts: costs.parts ? money(costs.parts) : null, other: money(costs.other), total: money(costs.total) }}
+              summary={{
+                labor: money(costs.labor),
+                parts: costs.parts ? money(costs.parts) : null,
+                other: money(costs.other),
+                total: money(costs.total),
+                urgent: urgentApplies(wo.priority, urgentRule)
+                  ? { amount: money(costs.urgent), rule: [urgentRule.fee ? money(urgentRule.fee) : null, urgentRule.percent ? `${urgentRule.percent}%` : null].filter(Boolean).join(" + ") }
+                  : null,
+              }}
             />
           </Card>
           )}

@@ -16,7 +16,7 @@ Invite people to your company, choose their role, and deactivate or erase them w
 The page has three parts:
 
 - **Invite user**: the form for new invitations.
-- **The list of people**, with their **Name** and e-mail, **Role** (and, for client users, the client they belong to), **Cost per hour**, **Status** and **Actions**.
+- **The list of people**, with their **Name** and e-mail, **Role** (and, for client users, the client they belong to), **Price per hour**, **Status** and **Actions**.
 - **Pending invitations**: invitations not accepted yet, shown only when there are any.
 
 ## Inviting someone
@@ -41,7 +41,7 @@ The **Pending invitations** table shows each open invitation with its e-mail, ro
 
 ## Changing someone's role
 
-Pick a new role in the drop-down in the person's row. The change is saved straight away and applies the next time they open a page. The role decides what they can see and do (see [Roles](/help/roles)) and, for staff, the **Cost per hour** used for their time on jobs.
+Pick a new role in the drop-down in the person's row. The change is saved straight away and applies the next time they open a page. The role decides what they can see and do (see [Roles](/help/roles)) and, for staff, the **Price per hour** charged for their time on jobs.
 
 > Only people whose role can carry out work orders can be assigned work orders. If someone is missing from the assignee list, check their role.
 
@@ -76,7 +76,7 @@ Convide pessoas para a sua empresa, escolha a função de cada uma e desative-as
 A página tem três partes:
 
 - **Convidar utilizador**: o formulário para novos convites.
-- **A lista de pessoas**, com o **Nome** e e-mail, a **Função** (e, nos utilizadores de cliente, o cliente a que pertencem), o **Custo por hora**, o **Estado** e as **Ações**.
+- **A lista de pessoas**, com o **Nome** e e-mail, a **Função** (e, nos utilizadores de cliente, o cliente a que pertencem), o **Preço por hora**, o **Estado** e as **Ações**.
 - **Convites pendentes**: convites ainda não aceites, só aparece quando existem.
 
 ## Convidar uma pessoa
@@ -101,7 +101,7 @@ A tabela **Convites pendentes** mostra cada convite em aberto, com o e-mail, a f
 
 ## Mudar a função de uma pessoa
 
-Escolha a nova função na lista na linha da pessoa. A alteração fica guardada de imediato e aplica-se na próxima página que a pessoa abrir. A função decide o que a pessoa pode ver e fazer (veja [Funções](/help/roles)) e, para os colaboradores, o **Custo por hora** usado no tempo registado nos trabalhos.
+Escolha a nova função na lista na linha da pessoa. A alteração fica guardada de imediato e aplica-se na próxima página que a pessoa abrir. A função decide o que a pessoa pode ver e fazer (veja [Funções](/help/roles)) e, para os colaboradores, o **Preço por hora** cobrado pelo tempo registado nos trabalhos.
 
 > Só as pessoas cuja função pode executar ordens de trabalho podem ter ordens de trabalho atribuídas. Se alguém não aparece na lista de responsáveis, verifique a sua função.
 

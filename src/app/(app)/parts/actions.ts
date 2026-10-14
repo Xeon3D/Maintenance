@@ -42,7 +42,8 @@ const partSchema = z.object({
   manufacturer: optStr(100),
   model: optStr(100),
   unit: str(20),
-  unitCost: money(),
+  unitCost: money(), // sale price
+  purchaseCost: money(),
   minQuantity: qty(),
   vendorId: optId(),
 });

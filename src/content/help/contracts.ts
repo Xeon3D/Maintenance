@@ -16,7 +16,7 @@ A contract belongs to one client and covers either all of that client's villas o
 
 ## The contracts list
 
-**Service contracts** in the menu lists every contract with its client and villa, **Status**, **Period**, **Service levels** (for example "Respond 4 h · resolve 48 h") and, if you can see costs, the **Monthly fee**. Filter by status or client, or search by name and notes.
+**Service contracts** in the menu lists every contract with its client and villa, **Status**, **Period**, **Service levels** (for example "Respond 4 h · resolve 48 h") and, if you can see amounts, the **Monthly fee**. Filter by status or client, or search by name and notes.
 
 An **Active** contract whose end date has passed shows an extra **Past end date** badge: renew it, or set it to **Expired**.
 
@@ -69,7 +69,8 @@ Saving or deleting a contract re-checks all of the client's work orders, includi
 
 - Everyone in the company can see contracts and their compliance.
 - **Super Admin**, **Administrator** and **Manager** can create, edit and delete contracts (permission **Service contracts**).
-- The **Monthly fee** is only shown to roles with **See costs**. Someone without it can still edit the contract; the stored fee is kept.
+- The **Monthly fee** is only shown to roles with **See amounts**. Someone without it can still edit the contract; the stored fee is kept.
+- **Urgent fee** (also only with **See amounts**): what this contract's urgent work orders are charged on top, a fixed amount plus a percentage of labour. Leave both empty to use the company's ([Settings → Organization](/help/organization)); 0 means none, for example on a premium contract.
 `,
   pt: `# Contratos de manutenção
 
@@ -81,7 +82,7 @@ Um contrato pertence a um cliente e abrange todas as moradias desse cliente ou u
 
 ## A lista de contratos
 
-**Contratos de manutenção** no menu mostra todos os contratos com o cliente e a moradia, **Estado**, **Período**, **Níveis de serviço** (por exemplo "Resposta 4 h · resolução 48 h") e, se puder ver custos, a **Mensalidade**. Filtre por estado ou cliente, ou pesquise pelo nome e notas.
+**Contratos de manutenção** no menu mostra todos os contratos com o cliente e a moradia, **Estado**, **Período**, **Níveis de serviço** (por exemplo "Resposta 4 h · resolução 48 h") e, se puder ver valores, a **Mensalidade**. Filtre por estado ou cliente, ou pesquise pelo nome e notas.
 
 Um contrato **Ativo** cuja data de fim já passou mostra também o distintivo **Data de fim ultrapassada**: renove-o ou passe-o a **Expirado**.
 
@@ -134,7 +135,8 @@ Guardar ou eliminar um contrato volta a verificar todas as ordens de trabalho do
 
 - Todas as pessoas da empresa podem ver os contratos e o seu cumprimento.
 - **Super Admin**, **Administrador** e **Gestor** podem criar, editar e eliminar contratos (permissão **Contratos de serviço**).
-- A **Mensalidade** só é mostrada às funções com **Ver custos**. Quem não a tiver pode editar o contrato na mesma; a mensalidade guardada mantém-se.
+- A **Mensalidade** só é mostrada às funções com **Ver valores**. Quem não a tiver pode editar o contrato na mesma; a mensalidade guardada mantém-se.
+- **Taxa de urgência** (também só com **Ver valores**): o valor cobrado a mais nas ordens de trabalho urgentes deste contrato, um valor fixo mais uma percentagem da mão de obra. Deixe ambos vazios para usar a da empresa ([Definições → Empresa](/help/organization)); 0 significa nenhuma, por exemplo num contrato premium.
 `,
 };
 

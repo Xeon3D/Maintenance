@@ -128,9 +128,9 @@
     "REQUESTER": "Client (requester)",
     "VIEWER": "Viewer",
     "title": "Roles",
-    "description": "What each role can do, and what an hour of its time costs. Time logged on jobs is costed with the rate of the person's role at that moment.",
+    "description": "What each role can do, and the price of an hour of its time. Time logged on jobs is charged at the rate of the person's role at that moment.",
     "builtIn": "Built-in roles",
-    "builtInHint": "Leave a rate empty if you don't track costs for that role. Rate changes apply to time logged from now on.",
+    "builtInHint": "Leave a rate empty if that role's time isn't charged. Rate changes apply to time logged from now on.",
     "can": {
       "OWNER": "Everything, always. The only role that can change what the others may do.",
       "ADMIN": "By default: everything except billing — settings, users, approvals.",
@@ -138,17 +138,17 @@
       "TECHNICIAN": "By default: does the work — work orders, checklists, time, parts.",
       "VIEWER": "By default: observer — sees everything, changes nothing.",
       "REQUESTER": "Client portal: their villas and requests only.",
-      "ACCOUNTANT": "By default: reports, costs and billing; no field work."
+      "ACCOUNTANT": "By default: reports, amounts and billing; no field work."
     },
-    "notBillable": "No cost (doesn't log time)",
+    "notBillable": "Not charged (doesn't log time)",
     "custom": "Custom roles",
-    "customHint": "Roles of your own, such as Engineer or Electrician. Each one has its own cost per hour and the access of one of the built-in roles. Assign them in Users.",
+    "customHint": "Roles of your own, such as Engineer or Electrician. Each one has its own price per hour and the access of one of the built-in roles. Assign them in Users.",
     "new": "New role",
     "namePlaceholder": "e.g. Engineer",
     "members": "{count, plural, =0 {No one in this role} one {# person} other {# people}}",
     "access": "Access",
     "accessLike": "Same access as {role}",
-    "costPerHour": "Cost per hour",
+    "costPerHour": "Price per hour",
     "delete": "Delete",
     "deleteConfirm": "Delete the role \"{name}\"? {count, plural, =0 {} one {The # person in it keeps the same access under the built-in role.} other {The # people in it keep the same access under the built-in role.}}",
     "customGroup": "Custom roles",
@@ -537,16 +537,17 @@
     "billedFrom": "{billed} (logged {logged})"
   },
   "costs": {
-    "title": "Costs",
+    "title": "Amounts to bill",
     "labor": "Labour",
     "total": "Total",
-    "add": "Add cost",
+    "add": "Add charge",
     "descriptionPlaceholder": "e.g. Crane hire, parking",
     "parts": "Parts",
     "timeSpent": "Time spent",
     "hours": "{hours} h",
-    "other": "Other costs",
-    "timeBilled": "Time billed"
+    "other": "Other charges",
+    "timeBilled": "Time billed",
+    "urgent": "Urgent fee"
   },
   "files": {
     "title": "Photos & files",
@@ -582,7 +583,9 @@
   "report": {
     "title": "Service report",
     "photos": "Photos",
-    "seePhotos": "See photos"
+    "seePhotos": "See photos",
+    "service": "Service",
+    "urgentService": "Urgent"
   },
   "procedures": {
     "description": "Reusable checklists your team follows on site. Use them in work orders and preventive schedules.",
@@ -802,7 +805,7 @@
     "onHandLower": "on hand",
     "minQuantity": "Reorder point",
     "minQuantityHint": "Low-stock alert at or below this total. 0 = not tracked.",
-    "unitCost": "Unit cost",
+    "unitCost": "Sale price",
     "reorder": "Reorder low stock",
     "reorderConfirm": "Create draft purchase orders for {count, plural, one {# low-stock part} other {# low-stock parts}}, one per preferred vendor?",
     "reorderResult": "{created, plural, =0 {No purchase orders created.} one {# draft purchase order created.} other {# draft purchase orders created.}}",
@@ -816,14 +819,17 @@
     "vendor": "Preferred vendor",
     "openingQuantity": "Opening stock",
     "openingHint": "Optional: how many you have now.",
-    "stockValue": "Stock value",
+    "stockValue": "Stock value (at cost)",
     "photos": "Photos & datasheets",
     "onOrder": "On order",
     "compatibleAssets": "Fits these assets",
     "compatibleHint": "Link parts from an asset's page.",
     "compatibleParts": "Compatible spare parts",
     "noCompatible": "No spare parts linked to this asset yet.",
-    "pickPart": "Link a part…"
+    "pickPart": "Link a part…",
+    "unitCostHint": "What a unit is charged at on work orders.",
+    "purchaseCost": "Purchase cost",
+    "purchaseCostHint": "What a unit costs from the vendor: used on purchase orders and for the stock value. Receiving a purchase order updates it."
   },
   "stock": {
     "location": "Location",
@@ -908,7 +914,7 @@
     "freeTextOption": "Free text (not a stocked part)",
     "fromVendor": "From {vendor}",
     "otherParts": "Other parts",
-    "unitCostHint": "Blank = the part's current cost.",
+    "unitCostHint": "Blank = the part's current purchase cost.",
     "received": "Received",
     "lineTotal": "Total",
     "subtotal": "Subtotal",
@@ -917,7 +923,7 @@
     "addLowStock": "Add low-stock parts",
     "lowStockAdded": "{count, plural, one {# item added.} other {# items added.}}",
     "receive": "Receive items",
-    "receiveHint": "Enter what arrived. Stocked parts are added to the chosen location and their unit cost is updated to this price.",
+    "receiveHint": "Enter what arrived. Stocked parts are added to the chosen location and their purchase cost is updated to this price (the sale price doesn't change).",
     "receiveInto": "Receive into",
     "outstanding": "{qty} outstanding",
     "noStockUpdate": "no stock update",
@@ -937,7 +943,8 @@
       "order": "Mark as ordered",
       "cancel": "Cancel order",
       "reopen": "Reopen as draft"
-    }
+    },
+    "unitPrice": "Unit price"
   },
   "poStatus": {
     "DRAFT": "Draft",
@@ -1161,7 +1168,7 @@
     "clockPauses": "pauses on hold"
   },
   "reports": {
-    "description": "Performance, SLA, costs, technicians and equipment reliability.",
+    "description": "Performance, SLA, billing, technicians and equipment reliability.",
     "period": "Period",
     "from": "From",
     "to": "To",
@@ -1176,7 +1183,7 @@
       "overview": "Overview",
       "workOrders": "Work orders",
       "sla": "SLA",
-      "costs": "Costs",
+      "costs": "Billing",
       "technicians": "Technicians",
       "assets": "Assets"
     },
@@ -1197,8 +1204,8 @@
       "slaResponse": "Response SLA met",
       "slaResolution": "Resolution SLA met",
       "pm": "PM compliance",
-      "cost": "Total cost",
-      "costHint": "Labour, parts and other costs"
+      "cost": "Value of the work",
+      "costHint": "Labour, parts, other charges and urgent fees"
     },
     "pmSub": "{onTime} of {due} on time",
     "trendTitle": "Opened vs completed",
@@ -1240,16 +1247,16 @@
     "breachedJobs": "Breached work orders",
     "latest50": "Latest 50",
     "noBreaches": "No SLA breaches in this period.",
-    "otherCosts": "Other",
-    "costNote": "Costs of work orders opened {from} – {to}: labour at each technician's rate, parts at cost, and other costs.",
+    "otherCosts": "Other charges",
+    "costNote": "Amounts of work orders opened {from} – {to}: labour at each technician's price per hour (billed time), parts at their sale price, other charges and urgent fees.",
     "jobCount": "{count, plural, one {# work order} other {# work orders}}",
-    "costByVilla": "Cost by villa",
-    "costByClient": "Cost by client",
-    "costBySystem": "Cost by system",
-    "noCosts": "No costs recorded in this period.",
-    "feesNote": "Fees = service-contract fees for the period, pro rata. Margin = fees minus the cost of the work.",
+    "costByVilla": "Value by villa",
+    "costByClient": "Value by client",
+    "costBySystem": "Value by system",
+    "noCosts": "Nothing to bill in this period.",
+    "feesNote": "Fees = service-contract fees for the period, pro rata. Fees − work = fees minus the value of the work done.",
     "fees": "Contract fees",
-    "margin": "Margin",
+    "margin": "Fees − work",
     "techNote": "Time logged {from} – {to}. Utilisation compares logged hours with {hours} h available ({perDay} h per working day).",
     "hoursLogged": "Hours logged",
     "noTime": "No time logged in this period.",
@@ -1650,7 +1657,7 @@
     "users": {
       "manage": {
         "label": "Users and roles",
-        "hint": "Invite, deactivate and erase people; change their role; role costs."
+        "hint": "Invite, deactivate and erase people; change their role; role prices."
       }
     },
     "teams": {
@@ -1752,13 +1759,13 @@
     "reports": {
       "view": {
         "label": "Reports",
-        "hint": "Dashboards, SLA, costs and exports."
+        "hint": "Dashboards, SLA, billing and exports."
       }
     },
     "costs": {
       "view": {
-        "label": "See costs",
-        "hint": "Labour, parts and totals on work orders and requests, cost reports and contract fees."
+        "label": "See amounts",
+        "hint": "Labour, parts, urgent fees and totals on work orders and requests, the billing report, part prices and contract fees."
       }
     },
     "billing": {
@@ -1776,7 +1783,7 @@
   },
   "reportEmail": {
     "title": "E-mail the service report",
-    "hint": "Sends the PDF service report (no costs) to each address separately.",
+    "hint": "Sends the PDF service report (no amounts) to each address separately.",
     "noDefaults": "No default recipients: add the client's e-mail, report contacts or company copies, or type addresses below.",
     "extra": "Other addresses (one per line)",
     "send": "Send report",
@@ -2030,7 +2037,7 @@
       "organization": {
         "update": "Changed the company settings",
         "logo": "Changed the company logo",
-        "roleRates": "Changed the role costs",
+        "roleRates": "Changed the role prices",
         "permissions": "Changed role permissions"
       },
       "villa": {
@@ -2088,8 +2095,8 @@
       "items": "Checklist",
       "lines": "Lines",
       "permissions": "Permissions",
-      "hourlyRate": "Cost per hour",
-      "unitCost": "Unit cost",
+      "hourlyRate": "Price per hour",
+      "unitCost": "Sale price",
       "minQuantity": "Minimum quantity",
       "quantity": "Quantity",
       "sku": "SKU",
@@ -2115,7 +2122,7 @@
       "appName": "Software name",
       "backups": "Backup schedule",
       "autoUpdate": "Automatic updates",
-      "roleRates": "Role costs",
+      "roleRates": "Role prices",
       "retention": "Data retention",
       "businessHours": "Business hours",
       "reportRecipients": "Report recipients",
@@ -2128,7 +2135,10 @@
       "direction": "Direction",
       "parts": "Parts",
       "note": "Note",
-      "timeRounding": "Time billing blocks"
+      "timeRounding": "Time billing blocks",
+      "urgentFee": "Urgent fee (fixed)",
+      "urgentPercent": "Urgent fee (%)",
+      "purchaseCost": "Purchase cost"
     }
   },
   "van": {
@@ -2173,8 +2183,18 @@
   "timeBilling": {
     "title": "Time billing",
     "rounding": "Bill time in blocks of",
-    "hint": "Each technician's time on a work order is rounded up to whole blocks for labour cost and the service report (e.g. 34 minutes bill as 1 hour with 30-minute blocks). The time logged is kept as it is.",
+    "hint": "Each technician's time on a work order is rounded up to whole blocks when it is billed: labour and the service report (e.g. 34 minutes bill as 1 hour with 30-minute blocks). The time logged is kept as it is.",
     "none": "No rounding (minutes logged)",
     "block": "{minutes} minutes"
+  },
+  "urgent": {
+    "title": "Urgent work orders",
+    "hint": "Work orders with Urgent priority are charged an extra fee: a fixed amount plus a percentage of their labour (leave both at 0 for none). A service contract can set its own. The service report shows \"Service: Urgent\", without amounts.",
+    "fee": "Fixed amount ({currency})",
+    "percent": "Percentage of labour (%)",
+    "contractTitle": "Urgent fee",
+    "contractHint": "Extra fee charged on this contract's urgent work orders. Leave both empty to use the company's (Settings → Organization); 0 means no fee.",
+    "none": "None",
+    "fromCompany": "{value} (company's)"
   }
 }

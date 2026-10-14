@@ -35,7 +35,7 @@ The list shows each order's number (PO-1, PO-2…), vendor, status, expected dat
 4. Enter **Tax** and **Shipping** if you know them, and any **Notes**: they are printed on the PDF for the vendor.
 5. Tick **Add this vendor's low-stock parts** to fill the order with everything from this vendor that is low on stock.
 6. Click **Create**. The draft opens.
-7. Under **Add item**, pick a part (this vendor's parts are listed first) or **Free text (not a stocked part)** for anything else, such as a service or a one-off item. Enter the **Quantity** and **Unit cost**; leave the cost blank to use the part's current cost, and the item text blank to use the part's name.
+7. Under **Add item**, pick a part (this vendor's parts are listed first) or **Free text (not a stocked part)** for anything else, such as a service or a one-off item. Enter the **Quantity** and the vendor's unit price; leave the price blank to use the part's current purchase cost, and the item text blank to use the part's name.
 
 While the order is a draft you can edit a line with the pencil, remove it, change the header with **Edit**, or click **Add low-stock parts** to add this vendor's low-stock parts that aren't on the order yet.
 
@@ -57,7 +57,7 @@ When the goods arrive, open the order. The **Receive items** box lists every lin
 2. Choose where to **Receive into** (it starts at the order's delivery location).
 3. Click **Receive items**.
 
-Stocked parts are added to that location and their unit cost is updated to the price on the order. Lines marked **Not a stocked part** are recorded as received but don't change stock. You can't receive more than is outstanding on a line. The order becomes **Partly received** or **Received**, and each delivery is listed under **Receipts** with who received it and when.
+Stocked parts are added to that location and their purchase cost is updated to the price on the order (their sale price doesn't change). Lines marked **Not a stocked part** are recorded as received but don't change stock. You can't receive more than is outstanding on a line. The order becomes **Partly received** or **Received**, and each delivery is listed under **Receipts** with who received it and when.
 
 Keep quotes, invoices and delivery notes with the order under **Documents**.
 
@@ -105,7 +105,7 @@ A lista mostra o número de cada nota (PO-1, PO-2…), o fornecedor, o estado, a
 4. Indique o **IVA** e os **Portes** se os souber, e as **Notas**: aparecem no PDF para o fornecedor.
 5. Marque **Adicionar as peças deste fornecedor com stock baixo** para preencher a nota com tudo deste fornecedor que está com stock baixo.
 6. Clique em **Criar**. O rascunho abre.
-7. Em **Adicionar artigo**, escolha uma peça (as deste fornecedor aparecem primeiro) ou **Texto livre (não é uma peça em stock)** para outra coisa, como um serviço ou um artigo pontual. Indique a **Quantidade** e o **Custo unitário**; deixe o custo vazio para usar o custo atual da peça, e o artigo vazio para usar o nome da peça.
+7. Em **Adicionar artigo**, escolha uma peça (as deste fornecedor aparecem primeiro) ou **Texto livre (não é uma peça em stock)** para outra coisa, como um serviço ou um artigo pontual. Indique a **Quantidade** e o preço unitário do fornecedor; deixe o preço vazio para usar o custo de compra atual da peça, e o artigo vazio para usar o nome da peça.
 
 Enquanto a nota for um rascunho, pode alterar uma linha com o lápis, removê-la, mudar o cabeçalho com **Editar**, ou clicar em **Adicionar peças com stock baixo** para juntar as peças deste fornecedor com stock baixo que ainda não estão na nota.
 
@@ -127,7 +127,7 @@ Quando os artigos chegarem, abra a nota. A caixa **Receber artigos** lista todas
 2. Escolha onde **Receber em** (começa no local de entrega da nota).
 3. Clique em **Receber artigos**.
 
-As peças em stock entram nesse local e o custo unitário passa a ser o preço da nota. As linhas marcadas **Não é uma peça em stock** ficam registadas como recebidas, mas não alteram o stock. Não pode receber mais do que o que está em falta numa linha. A nota passa a **Parcialmente recebida** ou **Recebida**, e cada entrega fica listada em **Receções**, com quem a recebeu e quando.
+As peças em stock entram nesse local e o custo de compra passa a ser o preço da nota (o preço de venda não muda). As linhas marcadas **Não é uma peça em stock** ficam registadas como recebidas, mas não alteram o stock. Não pode receber mais do que o que está em falta numa linha. A nota passa a **Parcialmente recebida** ou **Recebida**, e cada entrega fica listada em **Receções**, com quem a recebeu e quando.
 
 Guarde orçamentos, faturas e guias de remessa junto da nota, em **Documentos**.
 

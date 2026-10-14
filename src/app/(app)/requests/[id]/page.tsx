@@ -11,6 +11,7 @@ import { getContext } from "@/lib/context";
 import { fileUrl } from "@/lib/storage";
 import { assignableUsers, workOrderCosts } from "@/lib/work-orders";
 import { timeRoundingOf } from "@/lib/billing-time";
+import { urgentRuleFor } from "@/lib/urgent-surcharge";
 import { approveRequestAction, declineRequestAction } from "../actions";
 import { ApproveFields } from "./approve-fields";
 
@@ -33,6 +34,8 @@ export default async function RequestPage({ params }: PageProps<"/requests/[id]"
           id: true,
           number: true,
           status: true,
+          priority: true,
+          contract: { select: { urgentFee: true, urgentPercent: true } },
           timeEntries: { select: { userId: true, minutes: true, hourlyRate: true } },
           otherCosts: { select: { amount: true } },
           parts: { select: { quantity: true, unitCost: true } },
@@ -93,7 +96,7 @@ export default async function RequestPage({ params }: PageProps<"/requests/[id]"
           )}
           {r.status === "APPROVED" && r.workOrder && ctx.can("costs.view") && (() => {
             // What this request has cost so far: time (at each person's role rate), parts and other costs.
-            const c = workOrderCosts(r.workOrder, timeRoundingOf(ctx.organization.timeRounding));
+            const c = workOrderCosts(r.workOrder, timeRoundingOf(ctx.organization.timeRounding), urgentRuleFor(ctx.organization, r.workOrder.contract));
             const money = (n: number) => format.number(n, { style: "currency", currency: ctx.organization.currency });
             return (
               <Card className="p-5 text-sm">
@@ -119,6 +122,12 @@ export default async function RequestPage({ params }: PageProps<"/requests/[id]"
                     <>
                       <dt className="text-muted">{t("costs.other")}</dt>
                       <dd className="text-right tabular-nums">{money(c.other)}</dd>
+                    </>
+                  )}
+                  {c.urgent > 0 && (
+                    <>
+                      <dt className="text-muted">{t("costs.urgent")}</dt>
+                      <dd className="text-right tabular-nums">{money(c.urgent)}</dd>
                     </>
                   )}
                   <dt className="border-t border-border pt-1.5 font-medium">{t("costs.total")}</dt>

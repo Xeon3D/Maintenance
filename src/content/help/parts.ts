@@ -13,13 +13,13 @@ The catalogue of spare parts and consumables you keep, how many there are in eac
 
 ## What this area is for
 
-**Parts & inventory** answers three questions: what do we keep, where is it, and when do we need to buy more. Every part has one record with its codes, cost and reorder point; the quantity is kept per stock location. Stock only changes through recorded movements (a count, a transfer, a part used on a job, a delivery from a purchase order), so the history of each part always adds up.
+**Parts & inventory** answers three questions: what do we keep, where is it, and when do we need to buy more. Every part has one record with its codes, prices and reorder point; the quantity is kept per stock location. Stock only changes through recorded movements (a count, a transfer, a part used on a job, a delivery from a purchase order), so the history of each part always adds up.
 
 ## The parts list
 
 ![The parts list, with the low-stock badge and the filters at the top](parts-list)
 
-Each row shows the part with its SKU, make and model and preferred vendor, its system, the quantity **On hand** (all locations together), the **Reorder point** and the **Unit cost**. A red **Low stock** badge marks parts that need reordering.
+Each row shows the part with its SKU, make and model and preferred vendor, its system, the quantity **On hand** (all locations together), the **Reorder point** and the **Sale price**. A red **Low stock** badge marks parts that need reordering.
 
 - Search by name, SKU, barcode, make or model.
 - **Low stock only** shows just the parts that need reordering; the number in brackets is how many there are.
@@ -34,7 +34,7 @@ Each row shows the part with its SKU, make and model and preferred vendor, its s
 1. Click **New part**.
 2. Enter the **Name** and, if you have them, the **SKU / part no.** and **Barcode**. Both can be scanned when logging parts on a job, so use the code printed on the box. The camera button in the **Barcode** field (**Read with the camera**) reads the barcode off the box and fills it in for you.
 3. Choose the **System**, and fill in **Manufacturer** and **Model**.
-4. Set the **Unit** (pcs, m, box…), the **Unit cost** and the **Reorder point**. A reorder point of 0 means the part's total isn't tracked for low stock.
+4. Set the **Unit** (pcs, m, box…), the **Sale price** (what a unit is charged at on work orders), the **Purchase cost** (what a unit costs from the vendor, used on purchase orders and for the stock value) and the **Reorder point**. A reorder point of 0 means the part's total isn't tracked for low stock.
 5. Pick the **Preferred vendor**: it is the vendor the automatic reorder sends this part to.
 6. Optionally enter the **Opening stock** and the **Location** where it is, so you don't have to do a separate count.
 7. Click **Create**.
@@ -45,7 +45,7 @@ On the part's page you can add **Photos & datasheets**, change the details with 
 
 ![A part's page: total on hand, stock by location, the stock forms and the movement history](parts-detail)
 
-At the top is the total on hand (in red when it is low), the details and the **Stock value** (quantity on hand × unit cost). Below it:
+At the top is the total on hand (in red when it is low), the details and the **Stock value (at cost)** (quantity on hand × purchase cost). Below it:
 
 - **Stock by location**: the quantity in every active location, with its **Location minimum** if one is set. Click a location to see everything kept there.
 - **Stock movements**: the last 25 movements, newest first, with who made them, the work order or purchase order they belong to, and the signed quantity (green in, red out).
@@ -100,7 +100,7 @@ Technicians record parts in the **Parts used** panel of a work order:
 2. Choose the part. Parts that fit the job's asset are listed first, under **Fits this asset**.
 3. Check the location (their van by default) and the quantity. The panel shows how many are available there.
 4. Optionally add the **Serial numbers** of the units fitted, typed or read with the camera (at most one per unit).
-5. Click **Add**. The stock goes down and the part is charged to the job at its current unit cost.
+5. Click **Add**. The stock goes down and the part is charged to the job at its current sale price.
 
 If a part wasn't used after all, **Return to stock** removes it from the work order and puts the quantity back into the location it came from; the movement history shows "Returned from work order". People who handle purchasing also see **Order parts**, which starts a purchase order linked to the job.
 
@@ -119,13 +119,13 @@ O catálogo de peças de substituição e consumíveis que mantém, quantas exis
 
 ## Para que serve esta área
 
-**Peças e stock** responde a três perguntas: o que temos, onde está e quando é preciso comprar mais. Cada peça tem um único registo com os seus códigos, custo e ponto de encomenda; a quantidade é guardada por local de stock. O stock só muda através de movimentos registados (uma contagem, uma transferência, uma peça usada num trabalho, uma receção de uma nota de encomenda), por isso o histórico de cada peça bate sempre certo.
+**Peças e stock** responde a três perguntas: o que temos, onde está e quando é preciso comprar mais. Cada peça tem um único registo com os seus códigos, preços e ponto de encomenda; a quantidade é guardada por local de stock. O stock só muda através de movimentos registados (uma contagem, uma transferência, uma peça usada num trabalho, uma receção de uma nota de encomenda), por isso o histórico de cada peça bate sempre certo.
 
 ## A lista de peças
 
 ![A lista de peças, com o indicador de stock baixo e os filtros no topo](parts-list)
 
-Cada linha mostra a peça com a referência, marca e modelo e o fornecedor preferencial, o sistema, a quantidade **Em stock** (todos os locais juntos), o **Ponto de encomenda** e o **Custo unitário**. Um indicador vermelho **Stock baixo** assinala as peças que é preciso repor.
+Cada linha mostra a peça com a referência, marca e modelo e o fornecedor preferencial, o sistema, a quantidade **Em stock** (todos os locais juntos), o **Ponto de encomenda** e o **Preço de venda**. Um indicador vermelho **Stock baixo** assinala as peças que é preciso repor.
 
 - Pesquise por nome, referência, código de barras, marca ou modelo.
 - **Só stock baixo** mostra apenas as peças a repor; o número entre parênteses diz quantas são.
@@ -140,7 +140,7 @@ Cada linha mostra a peça com a referência, marca e modelo e o fornecedor prefe
 1. Clique em **Nova peça**.
 2. Indique o **Nome** e, se os tiver, a **Referência** e o **Código de barras**. Ambos podem ser lidos com a câmara ao registar peças num trabalho, por isso use o código impresso na caixa. O botão da câmara no campo **Código de barras** (**Ler com a câmara**) lê o código de barras da caixa e preenche-o por si.
 3. Escolha o **Sistema** e preencha **Fabricante** e **Modelo**.
-4. Defina a **Unidade** (un, m, caixa…), o **Custo unitário** e o **Ponto de encomenda**. Um ponto de encomenda de 0 significa que o total da peça não é controlado para stock baixo.
+4. Defina a **Unidade** (un, m, caixa…), o **Preço de venda** (o valor cobrado por unidade nas ordens de trabalho), o **Custo de compra** (o que uma unidade custa ao fornecedor, usado nas notas de encomenda e no valor em stock) e o **Ponto de encomenda**. Um ponto de encomenda de 0 significa que o total da peça não é controlado para stock baixo.
 5. Escolha o **Fornecedor preferencial**: é o fornecedor a quem a reposição automática encomenda esta peça.
 6. Opcionalmente, indique o **Stock inicial** e o **Local** onde está, para não ter de fazer uma contagem à parte.
 7. Clique em **Criar**.
@@ -151,7 +151,7 @@ Na página da peça pode adicionar **Fotografias e fichas técnicas**, alterar o
 
 ![A página de uma peça: total em stock, stock por local, os formulários de stock e o histórico de movimentos](parts-detail)
 
-No topo está o total em stock (a vermelho quando está baixo), os dados e o **Valor em stock** (quantidade em stock × custo unitário). Por baixo:
+No topo está o total em stock (a vermelho quando está baixo), os dados e o **Valor em stock (ao custo)** (quantidade em stock × custo de compra). Por baixo:
 
 - **Stock por local**: a quantidade em cada local ativo, com o **Mínimo do local** se estiver definido. Clique num local para ver tudo o que lá está.
 - **Movimentos de stock**: os últimos 25 movimentos, do mais recente para o mais antigo, com quem os fez, a ordem de trabalho ou nota de encomenda a que pertencem e a quantidade com sinal (verde a entrar, vermelho a sair).
@@ -206,7 +206,7 @@ Os técnicos registam as peças no painel **Peças usadas** de uma ordem de trab
 2. Escolha a peça. As peças que servem no equipamento do trabalho aparecem primeiro, em **Compatíveis com este equipamento**.
 3. Confirme o local (por defeito a carrinha do técnico) e a quantidade. O painel mostra quantas há disponíveis nesse local.
 4. Opcionalmente, acrescente os **Números de série** das unidades instaladas, escritos ou lidos com a câmara (no máximo um por unidade).
-5. Clique em **Adicionar**. O stock desce e a peça é imputada ao trabalho ao custo unitário atual.
+5. Clique em **Adicionar**. O stock desce e a peça é cobrada no trabalho ao preço de venda atual.
 
 Se afinal uma peça não foi usada, **Devolver ao stock** retira-a da ordem de trabalho e repõe a quantidade no local de onde saiu; o histórico mostra "Devolvido da ordem de trabalho". Quem trata das compras vê também **Encomendar peças**, que inicia uma nota de encomenda ligada ao trabalho.
 
