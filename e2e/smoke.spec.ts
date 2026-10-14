@@ -69,3 +69,24 @@ test.describe("client portal", () => {
     await expect(page.getByRole("link", { name: "Privacy notice" })).toBeVisible();
   });
 });
+
+test.describe("session", () => {
+  // Regression: responses to link prefetches still in flight during sign-out used to re-issue the old
+  // session cookie, so the previous user stayed signed in (or came back after signing in as someone else).
+  test("signing out right after a page opens really signs out, and the next user stays signed in", async ({ page }) => {
+    await signIn(page, "tech.network@demo.test");
+    await page.goto("/work-orders");
+    await page.getByTitle("Sign out").first().click(); // while the sidebar links are still prefetching
+    await expect(page).toHaveURL(/\/login/);
+    await page.waitForTimeout(1500);
+    // Signed out: the proxy sends the API request to the sign-in page.
+    const after = await page.request.get("/api/account/export", { maxRedirects: 0 });
+    expect(after.status()).toBe(307);
+    expect(after.headers()["location"]).toContain("/login");
+
+    await signIn(page, "manager@demo.test");
+    for (const p of ["/work-orders", "/assets", "/dashboard"]) await page.goto(p);
+    await page.reload();
+    expect((await (await page.request.get("/api/account/export")).json()).user.email).toBe("manager@demo.test");
+  });
+});
