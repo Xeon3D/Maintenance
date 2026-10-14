@@ -15,6 +15,8 @@ import { SCHEDULED_KINDS } from "@/lib/backup-schedule";
 import { checkUpdatesAction, lockAction, saveGeneralAction, saveScheduleAction, unlockAction } from "./actions";
 import { BackupNowButton, BackupsTable, UpdateButton, UploadBackup } from "./panel";
 import { titled } from "@/lib/metadata";
+import { EmailForm } from "./email-form";
+import { deliveryStatus } from "@/lib/email";
 
 export const generateMetadata = titled("nav.server");
 
@@ -50,7 +52,7 @@ export default async function ServerSettingsPage() {
     );
   }
 
-  const [settings, update, backups] = await Promise.all([getServerSettings(), checkForUpdate(), listBackups()]);
+  const [settings, update, backups, mailStatus] = await Promise.all([getServerSettings(), checkForUpdate(), listBackups(), deliveryStatus()]);
   const s = settings.backups;
   const available = backupsAvailable();
   const busy = busyState();
@@ -82,6 +84,31 @@ export default async function ServerSettingsPage() {
               <FieldError name="appName" />
             </Field>
           </ActionForm>
+        </Card>
+
+        {/* ── E-mail */}
+        <Card className="p-6">
+          <h2 className="mb-1 font-medium">{t("server.email.title")}</h2>
+          <p className="mb-4 text-sm text-muted">
+            {t("server.email.hint")}{" "}
+            <span className="font-medium text-foreground">
+              {mailStatus.kind === "smtp"
+                ? t("server.email.statusSmtp", { host: mailStatus.host })
+                : mailStatus.kind === "resend"
+                  ? t(mailStatus.source === "env" ? "server.email.statusResendEnv" : "server.email.statusResend")
+                  : t("server.email.statusNone")}
+            </span>
+          </p>
+          <EmailForm
+            userEmail={ctx.user.email}
+            values={{
+              provider: settings.email.provider,
+              from: settings.email.from,
+              smtp: { host: settings.email.smtp.host, port: settings.email.smtp.port, security: settings.email.smtp.security, user: settings.email.smtp.user, hasPassword: !!settings.email.smtp.passwordEnc },
+              hasResendKey: !!settings.email.resend.apiKeyEnc,
+              envResend: !!process.env.RESEND_API_KEY && !!process.env.EMAIL_FROM,
+            }}
+          />
         </Card>
 
         {/* ── Updates */}

@@ -89,6 +89,8 @@ restart `next dev` after adding a file. `npx playwright install --with-deps chro
   - Optional `APP_URL`, used for QR label links and email/push links (else the request host).
   - `VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`, `VAPID_SUBJECT`: web push (generated 2026-09-28; rotating
     them invalidates every browser subscription). Without them push is simply off.
+  - E-mail delivery is chosen in **Settings → Server → E-mail** (`lib/email-settings.ts`, stored in server-settings.json,
+    secrets via `encryptField`): SMTP (nodemailer **8.x**: next-auth's peer range) or Resend; "env" falls back to:
   - `RESEND_API_KEY` + `EMAIL_FROM` (commented out): real email via Resend's HTTP API. Without them,
     dev writes each email to `.mail/*.html` (gitignored) and production logs a warning.
 - **Prisma:** `prisma@latest` resolves to an 8.0 RC. **Keep `prisma` and `@prisma/client` pinned to 7.x.**
@@ -402,7 +404,7 @@ markers), Message, VerificationToken (password reset).
    Serverless hosts don't persist files.
 2. **Scheduler on the host:** configure a 15-minute cron calling `/api/cron/pm`.
    `SCHEDULER_INTERVAL_MINUTES` is only for self-hosting.
-3. **Email provider not configured.** Set `RESEND_API_KEY` + `EMAIL_FROM` (a verified sending domain).
+3. **Email provider not configured.** Settings → Server → E-mail: SMTP or Resend (or `RESEND_API_KEY` + `EMAIL_FROM`).
    Until then nothing is emailed in production (invites still show a copyable link).
 4. **Web push needs HTTPS** in production (localhost is exempt) and `VAPID_SUBJECT` set to a real
    contact address.
