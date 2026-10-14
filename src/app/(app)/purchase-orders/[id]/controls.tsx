@@ -107,7 +107,7 @@ export function DraftLineRow({ poId, line, display, remove }: { poId: string; li
                 <FieldError name="quantity" />
               </div>
               <div className="w-32">
-                <Input name="unitCost" type="number" min="0" step="0.01" defaultValue={line.unitCost} required aria-label={t("parts.unitCost")} className="text-right" />
+                <Input name="unitCost" type="number" min="0" step="0.01" defaultValue={line.unitCost} required aria-label={t("po.unitPrice")} className="text-right" />
                 <FieldError name="unitCost" />
               </div>
               <Button size="sm" disabled={pending} className="h-9">

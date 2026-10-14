@@ -128,9 +128,9 @@
     "REQUESTER": "Cliente (requerente)",
     "VIEWER": "Observador",
     "title": "Funções",
-    "description": "O que cada função pode fazer e quanto custa uma hora do seu tempo. O tempo registado nos trabalhos é custeado com o valor da função da pessoa nesse momento.",
+    "description": "O que cada função pode fazer e o preço de uma hora do seu tempo. O tempo registado nos trabalhos é cobrado ao valor da função da pessoa nesse momento.",
     "builtIn": "Funções base",
-    "builtInHint": "Deixe o valor vazio se não controla custos dessa função. As alterações aplicam-se ao tempo registado a partir de agora.",
+    "builtInHint": "Deixe o valor vazio se o tempo dessa função não é cobrado. As alterações aplicam-se ao tempo registado a partir de agora.",
     "can": {
       "OWNER": "Tudo, sempre. A única função que pode alterar o que as outras podem fazer.",
       "ADMIN": "Por defeito: tudo exceto a faturação — definições, utilizadores, aprovações.",
@@ -138,17 +138,17 @@
       "TECHNICIAN": "Por defeito: executa o trabalho — ordens de trabalho, listas de verificação, tempo, peças.",
       "VIEWER": "Por defeito: observação — vê tudo, não altera nada.",
       "REQUESTER": "Portal do cliente: apenas as suas moradias e pedidos.",
-      "ACCOUNTANT": "Por defeito: relatórios, custos e faturação; sem trabalho de campo."
+      "ACCOUNTANT": "Por defeito: relatórios, valores e faturação; sem trabalho de campo."
     },
-    "notBillable": "Sem custo (não regista tempo)",
+    "notBillable": "Não cobrado (não regista tempo)",
     "custom": "Funções personalizadas",
-    "customHint": "Funções próprias, como Engenharia ou Eletricista. Cada uma tem o seu custo por hora e o acesso de uma das funções base. Atribua-as em Utilizadores.",
+    "customHint": "Funções próprias, como Engenharia ou Eletricista. Cada uma tem o seu preço por hora e o acesso de uma das funções base. Atribua-as em Utilizadores.",
     "new": "Nova função",
     "namePlaceholder": "ex.: Engenharia",
     "members": "{count, plural, =0 {Ninguém nesta função} one {# pessoa} other {# pessoas}}",
     "access": "Acesso",
     "accessLike": "Mesmo acesso que {role}",
-    "costPerHour": "Custo por hora",
+    "costPerHour": "Preço por hora",
     "delete": "Eliminar",
     "deleteConfirm": "Eliminar a função \"{name}\"? {count, plural, =0 {} one {A # pessoa nesta função mantém o mesmo acesso com a função base.} other {As # pessoas nesta função mantêm o mesmo acesso com a função base.}}",
     "customGroup": "Funções personalizadas",
@@ -537,17 +537,17 @@
     "billedFrom": "{billed} (registado {logged})"
   },
   "costs": {
-    "title": "Custos",
+    "title": "Valores a faturar",
     "labor": "Mão de obra",
     "total": "Total",
-    "add": "Adicionar custo",
+    "add": "Adicionar valor",
     "descriptionPlaceholder": "ex.: Aluguer de grua, estacionamento",
     "parts": "Peças",
     "timeSpent": "Tempo gasto",
     "hours": "{hours} h",
-    "other": "Outros custos",
+    "other": "Outros valores",
     "timeBilled": "Tempo faturado",
-    "urgent": "Custo extra de urgência"
+    "urgent": "Taxa de urgência"
   },
   "files": {
     "title": "Fotografias e ficheiros",
@@ -806,7 +806,7 @@
     "onHandLower": "em stock",
     "minQuantity": "Ponto de encomenda",
     "minQuantityHint": "Alerta de stock baixo quando o total for igual ou inferior. 0 = sem controlo.",
-    "unitCost": "Custo unitário",
+    "unitCost": "Preço de venda",
     "reorder": "Repor stock baixo",
     "reorderConfirm": "Criar notas de encomenda em rascunho para {count, plural, one {# peça com stock baixo} other {# peças com stock baixo}}, uma por fornecedor preferencial?",
     "reorderResult": "{created, plural, =0 {Não foi criada nenhuma nota de encomenda.} one {Foi criada # nota de encomenda em rascunho.} other {Foram criadas # notas de encomenda em rascunho.}}",
@@ -820,14 +820,17 @@
     "vendor": "Fornecedor preferencial",
     "openingQuantity": "Stock inicial",
     "openingHint": "Opcional: quantas tem neste momento.",
-    "stockValue": "Valor em stock",
+    "stockValue": "Valor em stock (ao custo)",
     "photos": "Fotografias e fichas técnicas",
     "onOrder": "Em encomenda",
     "compatibleAssets": "Serve nestes equipamentos",
     "compatibleHint": "Associe peças na página de cada equipamento.",
     "compatibleParts": "Peças de substituição compatíveis",
     "noCompatible": "Ainda não há peças associadas a este equipamento.",
-    "pickPart": "Associar uma peça…"
+    "pickPart": "Associar uma peça…",
+    "unitCostHint": "O valor cobrado por unidade nas ordens de trabalho.",
+    "purchaseCost": "Custo de compra",
+    "purchaseCostHint": "Quanto custa uma unidade ao fornecedor: usado nas encomendas e no valor do stock. É atualizado ao receber uma encomenda."
   },
   "stock": {
     "location": "Local",
@@ -912,7 +915,7 @@
     "freeTextOption": "Texto livre (não é uma peça em stock)",
     "fromVendor": "De {vendor}",
     "otherParts": "Outras peças",
-    "unitCostHint": "Vazio = custo atual da peça.",
+    "unitCostHint": "Vazio = custo de compra atual da peça.",
     "received": "Recebido",
     "lineTotal": "Total",
     "subtotal": "Subtotal",
@@ -921,7 +924,7 @@
     "addLowStock": "Adicionar peças com stock baixo",
     "lowStockAdded": "{count, plural, one {# artigo adicionado.} other {# artigos adicionados.}}",
     "receive": "Receber artigos",
-    "receiveHint": "Indique o que chegou. As peças em stock entram no local escolhido e o custo unitário passa a ser este preço.",
+    "receiveHint": "Indique o que chegou. As peças em stock entram no local escolhido e o custo de compra passa a ser este preço (o preço de venda não muda).",
     "receiveInto": "Receber em",
     "outstanding": "{qty} em falta",
     "noStockUpdate": "não atualiza stock",
@@ -941,7 +944,8 @@
       "order": "Marcar como encomendada",
       "cancel": "Cancelar encomenda",
       "reopen": "Reabrir como rascunho"
-    }
+    },
+    "unitPrice": "Preço unitário"
   },
   "poStatus": {
     "DRAFT": "Rascunho",
@@ -1165,7 +1169,7 @@
     "clockPauses": "pausa quando em espera"
   },
   "reports": {
-    "description": "Desempenho, SLA, custos, técnicos e fiabilidade dos equipamentos.",
+    "description": "Desempenho, SLA, faturação, técnicos e fiabilidade dos equipamentos.",
     "period": "Período",
     "from": "De",
     "to": "Até",
@@ -1180,7 +1184,7 @@
       "overview": "Resumo",
       "workOrders": "Ordens de trabalho",
       "sla": "SLA",
-      "costs": "Custos",
+      "costs": "Faturação",
       "technicians": "Técnicos",
       "assets": "Equipamentos"
     },
@@ -1201,8 +1205,8 @@
       "slaResponse": "SLA de resposta cumprido",
       "slaResolution": "SLA de resolução cumprido",
       "pm": "Cumprimento da manutenção preventiva",
-      "cost": "Custo total",
-      "costHint": "Mão de obra, peças e outros custos"
+      "cost": "Valor do trabalho",
+      "costHint": "Mão de obra, peças, outros valores e taxas de urgência"
     },
     "pmSub": "{onTime} de {due} a tempo",
     "trendTitle": "Abertas vs concluídas",
@@ -1244,16 +1248,16 @@
     "breachedJobs": "Ordens de trabalho com SLA falhado",
     "latest50": "Últimas 50",
     "noBreaches": "Nenhuma falha de SLA neste período.",
-    "otherCosts": "Outros",
-    "costNote": "Custos das ordens de trabalho abertas de {from} a {to}: mão de obra ao custo/hora de cada técnico, peças a preço de custo e outros custos.",
+    "otherCosts": "Outros valores",
+    "costNote": "Valores das ordens de trabalho abertas de {from} a {to}: mão de obra ao preço/hora de cada técnico (tempo faturado), peças ao preço de venda, outros valores e taxas de urgência.",
     "jobCount": "{count, plural, one {# ordem de trabalho} other {# ordens de trabalho}}",
-    "costByVilla": "Custo por moradia",
-    "costByClient": "Custo por cliente",
-    "costBySystem": "Custo por sistema",
-    "noCosts": "Nenhum custo registado neste período.",
-    "feesNote": "Mensalidades = valor dos contratos no período, proporcional aos dias. Margem = mensalidades menos o custo do trabalho.",
+    "costByVilla": "Valor por moradia",
+    "costByClient": "Valor por cliente",
+    "costBySystem": "Valor por sistema",
+    "noCosts": "Nada a faturar neste período.",
+    "feesNote": "Mensalidades = valor dos contratos no período, proporcional aos dias. Mensalidades − trabalho = mensalidades menos o valor do trabalho feito.",
     "fees": "Mensalidades",
-    "margin": "Margem",
+    "margin": "Mensalidades − trabalho",
     "techNote": "Tempo registado de {from} a {to}. A utilização compara as horas registadas com {hours} h disponíveis ({perDay} h por dia útil).",
     "hoursLogged": "Horas registadas",
     "noTime": "Nenhum tempo registado neste período.",
@@ -1654,7 +1658,7 @@
     "users": {
       "manage": {
         "label": "Utilizadores e funções",
-        "hint": "Convidar, desativar e apagar pessoas; mudar a função; custos das funções."
+        "hint": "Convidar, desativar e apagar pessoas; mudar a função; preços das funções."
       }
     },
     "teams": {
@@ -1756,13 +1760,13 @@
     "reports": {
       "view": {
         "label": "Relatórios",
-        "hint": "Painéis, SLA, custos e exportações."
+        "hint": "Painéis, SLA, faturação e exportações."
       }
     },
     "costs": {
       "view": {
-        "label": "Ver custos",
-        "hint": "Mão de obra, peças e totais nas ordens de trabalho e pedidos, relatórios de custos e mensalidades dos contratos."
+        "label": "Ver valores",
+        "hint": "Mão de obra, peças, taxas de urgência e totais nas ordens de trabalho e pedidos, relatório de faturação, preços das peças e mensalidades dos contratos."
       }
     },
     "billing": {
@@ -1780,7 +1784,7 @@
   },
   "reportEmail": {
     "title": "Enviar o relatório de serviço por e-mail",
-    "hint": "Envia o relatório de serviço em PDF (sem custos) a cada endereço em separado.",
+    "hint": "Envia o relatório de serviço em PDF (sem valores) a cada endereço em separado.",
     "noDefaults": "Sem destinatários por defeito: acrescente o e-mail do cliente, contactos que recebem relatórios ou cópias da empresa, ou escreva endereços abaixo.",
     "extra": "Outros endereços (um por linha)",
     "send": "Enviar relatório",
@@ -2034,7 +2038,7 @@
       "organization": {
         "update": "Alterou as definições da empresa",
         "logo": "Alterou o logótipo da empresa",
-        "roleRates": "Alterou os custos das funções",
+        "roleRates": "Alterou os preços das funções",
         "permissions": "Alterou as permissões das funções"
       },
       "villa": {
@@ -2092,8 +2096,8 @@
       "items": "Lista de verificação",
       "lines": "Linhas",
       "permissions": "Permissões",
-      "hourlyRate": "Custo por hora",
-      "unitCost": "Custo unitário",
+      "hourlyRate": "Preço por hora",
+      "unitCost": "Preço de venda",
       "minQuantity": "Quantidade mínima",
       "quantity": "Quantidade",
       "sku": "Referência",
@@ -2119,7 +2123,7 @@
       "appName": "Nome do software",
       "backups": "Agendamento dos backups",
       "autoUpdate": "Atualizações automáticas",
-      "roleRates": "Custos das funções",
+      "roleRates": "Preços das funções",
       "retention": "Conservação de dados",
       "businessHours": "Horário laboral",
       "reportRecipients": "Destinatários dos relatórios",
@@ -2133,8 +2137,9 @@
       "parts": "Peças",
       "note": "Nota",
       "timeRounding": "Blocos de faturação do tempo",
-      "urgentFee": "Custo extra de urgência (fixo)",
-      "urgentPercent": "Custo extra de urgência (%)"
+      "urgentFee": "Taxa de urgência (fixa)",
+      "urgentPercent": "Taxa de urgência (%)",
+      "purchaseCost": "Custo de compra"
     }
   },
   "van": {
@@ -2179,18 +2184,18 @@
   "timeBilling": {
     "title": "Faturação do tempo",
     "rounding": "Faturar o tempo em blocos de",
-    "hint": "O tempo de cada técnico numa ordem de trabalho é arredondado para cima a blocos inteiros no custo de mão de obra e no relatório de serviço (p. ex. 34 minutos são faturados como 1 hora com blocos de 30 minutos). O tempo registado mantém-se tal como foi registado.",
+    "hint": "O tempo de cada técnico numa ordem de trabalho é arredondado para cima a blocos inteiros quando é faturado: mão de obra e relatório de serviço (p. ex. 34 minutos são faturados como 1 hora com blocos de 30 minutos). O tempo registado mantém-se tal como foi registado.",
     "none": "Sem arredondamento (minutos registados)",
     "block": "{minutes} minutos"
   },
   "urgent": {
     "title": "Ordens de trabalho urgentes",
-    "hint": "As ordens de trabalho com prioridade Urgente têm um custo extra: um valor fixo mais uma percentagem da sua mão de obra (deixe ambos a 0 para não haver). Cada contrato de manutenção pode ter o seu. O relatório de serviço indica \"Serviço: Urgente\", sem valores.",
+    "hint": "As ordens de trabalho com prioridade Urgente têm uma taxa extra: um valor fixo mais uma percentagem da sua mão de obra (deixe ambos a 0 para não haver). Cada contrato de manutenção pode ter a sua. O relatório de serviço indica \"Serviço: Urgente\", sem valores.",
     "fee": "Valor fixo ({currency})",
     "percent": "Percentagem da mão de obra (%)",
-    "contractTitle": "Custo extra de urgência",
-    "contractHint": "Custo extra das ordens de trabalho urgentes deste contrato. Deixe ambos vazios para usar o da empresa (Definições → Empresa); 0 significa sem custo extra.",
-    "none": "Nenhum",
+    "contractTitle": "Taxa de urgência",
+    "contractHint": "Taxa extra cobrada nas ordens de trabalho urgentes deste contrato. Deixe ambos vazios para usar a da empresa (Definições → Empresa); 0 significa sem taxa.",
+    "none": "Nenhuma",
     "fromCompany": "{value} (da empresa)"
   }
 }

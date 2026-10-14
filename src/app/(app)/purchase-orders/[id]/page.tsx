@@ -55,7 +55,7 @@ export default async function PurchaseOrderPage({ params }: PageProps<"/purchase
     draft
       ? ctx.db.part.findMany({
           where: { archivedAt: null },
-          select: { id: true, name: true, sku: true, vendorId: true, unitCost: true },
+          select: { id: true, name: true, sku: true, vendorId: true, purchaseCost: true },
           orderBy: { name: "asc" },
           take: 1000,
         })
@@ -67,7 +67,7 @@ export default async function PurchaseOrderPage({ params }: PageProps<"/purchase
   const partOption = (p: (typeof parts)[number]) => (
     <option key={p.id} value={p.id}>
       {p.name}
-      {p.sku ? ` (${p.sku})` : ""} · {money(Number(p.unitCost))}
+      {p.sku ? ` (${p.sku})` : ""} · {money(Number(p.purchaseCost))}
     </option>
   );
   const openLines = po.lines.filter((l) => remainingQty(l) > 0);
@@ -133,7 +133,7 @@ export default async function PurchaseOrderPage({ params }: PageProps<"/purchase
                     <th>{t("po.item")}</th>
                     <th className="text-right">{t("stock.quantity")}</th>
                     {!draft && <th className="text-right">{t("po.received")}</th>}
-                    <th className="text-right">{t("parts.unitCost")}</th>
+                    <th className="text-right">{t("po.unitPrice")}</th>
                     <th className="text-right">{t("po.lineTotal")}</th>
                     {draft && <th />}
                   </tr>
@@ -227,7 +227,7 @@ export default async function PurchaseOrderPage({ params }: PageProps<"/purchase
                       <Input name="quantity" type="number" step="any" min={0} required defaultValue={1} />
                       <FieldError name="quantity" />
                     </Field>
-                    <Field label={t("parts.unitCost")} hint={t("po.unitCostHint")}>
+                    <Field label={t("po.unitPrice")} hint={t("po.unitCostHint")}>
                       <Input name="unitCost" type="number" step="0.01" min={0} />
                       <FieldError name="unitCost" />
                     </Field>

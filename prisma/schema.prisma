@@ -940,7 +940,8 @@ model Part {
   manufacturer   String?
   model          String?
   unit           String      @default("pcs")
-  unitCost       Decimal     @default(0) @db.Decimal(12, 2)
+  unitCost       Decimal     @default(0) @db.Decimal(12, 2) // sale price: what a unit is charged at on work orders
+  purchaseCost   Decimal     @default(0) @db.Decimal(12, 2) // what a unit costs from the vendor: purchase orders, stock value
   minQuantity    Decimal     @default(0) @db.Decimal(12, 3) // org-wide reorder point
   vendorId       String?
   imageUrl       String?

@@ -27,7 +27,7 @@ export default async function LocationsPage() {
     ctx.db.stockLocation.findMany({
       include: {
         user: { select: { name: true } },
-        stock: { where: { quantity: { gt: 0 }, part: { archivedAt: null } }, select: { quantity: true, part: { select: { unitCost: true } } } },
+        stock: { where: { quantity: { gt: 0 }, part: { archivedAt: null } }, select: { quantity: true, part: { select: { purchaseCost: true } } } },
       },
       orderBy: [{ archivedAt: { sort: "asc", nulls: "first" } }, { type: "asc" }, { name: "asc" }],
     }),
@@ -82,7 +82,7 @@ export default async function LocationsPage() {
           {locations.map((l) => {
             const Icon = ICON[l.type];
             const units = l.stock.reduce((s, r) => s + Number(r.quantity), 0);
-            const value = l.stock.reduce((s, r) => s + Number(r.quantity) * Number(r.part.unitCost), 0);
+            const value = l.stock.reduce((s, r) => s + Number(r.quantity) * Number(r.part.purchaseCost), 0); // at cost
             return (
               <li key={l.id}>
                 <Card className="p-4">

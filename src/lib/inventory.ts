@@ -277,7 +277,8 @@ export async function receivePurchaseOrder(ctx: WoCtx, poId: string, receipts: {
       line.receivedQuantity = line.receivedQuantity.add(q);
       if (line.partId && locationId) {
         await move(tx, ctx, { partId: line.partId, locationId, delta: q, type: "RECEIPT", unitCost: Number(line.unitCost), purchaseOrderId: po.id });
-        await tx.part.update({ where: { id: line.partId, organizationId: ctx.organization.id }, data: { unitCost: line.unitCost } });
+        // The vendor's price becomes the part's purchase cost; its sale price (what work orders charge) is left alone.
+        await tx.part.update({ where: { id: line.partId, organizationId: ctx.organization.id }, data: { purchaseCost: line.unitCost } });
       }
     }
     await tx.purchaseOrder.update({
@@ -306,6 +307,7 @@ export async function lowStockParts(db: TenantDb) {
       id: true,
       name: true,
       unitCost: true,
+      purchaseCost: true,
       minQuantity: true,
       vendorId: true,
       stock: { where: { location: { archivedAt: null } }, select: { quantity: true, minQuantity: true } },
@@ -350,7 +352,7 @@ export async function createLowStockPurchaseOrders(ctx: WoCtx) {
         shipToLocationId,
         createdById: ctx.user.id,
         lines: {
-          create: vLines.map((l) => ({ partId: l.part.id, description: l.part.name, quantity: l.quantity, unitCost: l.part.unitCost })),
+          create: vLines.map((l) => ({ partId: l.part.id, description: l.part.name, quantity: l.quantity, unitCost: l.part.purchaseCost })),
         },
       },
     });
@@ -368,7 +370,7 @@ export async function addLowStockLines(ctx: WoCtx, poId: string) {
   const lines = (await reorderLines(ctx.db, (p) => p.vendorId === po.vendorId)).filter((l) => !present.has(l.part.id));
   if (lines.length === 0) throw new InventoryError("noLines");
   await ctx.db.purchaseOrderLine.createMany({
-    data: lines.map((l) => ({ purchaseOrderId: po.id, partId: l.part.id, description: l.part.name, quantity: l.quantity, unitCost: l.part.unitCost })),
+    data: lines.map((l) => ({ purchaseOrderId: po.id, partId: l.part.id, description: l.part.name, quantity: l.quantity, unitCost: l.part.purchaseCost })),
   });
   return lines.length;
 }

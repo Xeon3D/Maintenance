@@ -52,14 +52,14 @@ The company has a public privacy notice, linked from request forms, the client p
 ## Regional settings
 
 - **Time zone**: all dates and times in the app, reports and schedules use it.
-- **Currency**: used for costs, rates, contract fees and purchase orders.
+- **Currency**: used for amounts to bill, prices, contract fees and purchase orders.
 - **Default language**: the company's language. Each person can still switch their own language at the bottom of the menu.
 
 ## Time billing
 
-**Bill time in blocks of** sets how work-order time is charged: each technician's time on a work order is rounded up to whole blocks of 15, 30 (the default) or 60 minutes, or not rounded. With 30-minute blocks, 34 minutes bill as 1 hour. It applies to labour cost, billed hours in the reports and the time on the service report. The time each person logged is kept as it is and still counts for utilisation.
+**Bill time in blocks of** sets how work-order time is charged: each technician's time on a work order is rounded up to whole blocks of 15, 30 (the default) or 60 minutes, or not rounded. With 30-minute blocks, 34 minutes bill as 1 hour. It applies to the labour amount, billed hours in the reports and the time on the service report. The time each person logged is kept as it is and still counts for utilisation.
 
-**Urgent work orders** sets the extra cost of work orders with Urgent priority: a **Fixed amount** plus a **Percentage of labour**. For example, 50 + 20% on a job with 80 of labour adds 66. Leave both at 0 for no surcharge. A [service contract](/help/contracts) can set its own. The surcharge shows in the work order's costs and the cost reports, and the client's service report says **Service: Urgent**, without amounts.
+**Urgent work orders** sets the urgent fee charged to the client on work orders with Urgent priority: a **Fixed amount** plus a **Percentage of labour**. For example, 50 + 20% on a job with 80 of labour adds 66. Leave both at 0 for no fee. A [service contract](/help/contracts) can set its own. The fee shows in the work order's amounts to bill and the billing report, and the client's service report says **Service: Urgent**, without amounts.
 
 ## Service report copies
 
@@ -134,14 +134,14 @@ A **Conservação de dados** define durante quanto tempo se guardam os registos 
 ## Definições regionais
 
 - **Fuso horário**: todas as datas e horas da aplicação, dos relatórios e dos agendamentos usam-no.
-- **Moeda**: usada nos custos, valores por hora, mensalidades dos contratos e notas de encomenda.
+- **Moeda**: usada nos valores a faturar, preços, mensalidades dos contratos e notas de encomenda.
 - **Idioma predefinido**: o idioma da empresa. Cada pessoa pode na mesma mudar o seu idioma no fundo do menu.
 
 ## Faturação do tempo
 
-**Faturar o tempo em blocos de** define como é cobrado o tempo das ordens de trabalho: o tempo de cada técnico numa ordem de trabalho é arredondado para cima a blocos inteiros de 15, 30 (por defeito) ou 60 minutos, ou não é arredondado. Com blocos de 30 minutos, 34 minutos são faturados como 1 hora. Aplica-se ao custo de mão de obra, às horas faturadas nos relatórios e ao tempo no relatório de serviço. O tempo que cada pessoa registou mantém-se e continua a contar para a utilização.
+**Faturar o tempo em blocos de** define como é cobrado o tempo das ordens de trabalho: o tempo de cada técnico numa ordem de trabalho é arredondado para cima a blocos inteiros de 15, 30 (por defeito) ou 60 minutos, ou não é arredondado. Com blocos de 30 minutos, 34 minutos são faturados como 1 hora. Aplica-se ao valor da mão de obra, às horas faturadas nos relatórios e ao tempo no relatório de serviço. O tempo que cada pessoa registou mantém-se e continua a contar para a utilização.
 
-**Ordens de trabalho urgentes** define o custo extra das ordens de trabalho com prioridade Urgente: um **Valor fixo** mais uma **Percentagem da mão de obra**. Por exemplo, 50 + 20% num trabalho com 80 de mão de obra acrescenta 66. Deixe ambos a 0 para não haver custo extra. Cada [contrato de manutenção](/help/contracts) pode ter o seu. O custo extra aparece nos custos da ordem de trabalho e nos relatórios de custos, e o relatório de serviço do cliente indica **Serviço: Urgente**, sem valores.
+**Ordens de trabalho urgentes** define a taxa de urgência cobrada ao cliente nas ordens de trabalho com prioridade Urgente: um **Valor fixo** mais uma **Percentagem da mão de obra**. Por exemplo, 50 + 20% num trabalho com 80 de mão de obra acrescenta 66. Deixe ambos a 0 para não haver taxa. Cada [contrato de manutenção](/help/contracts) pode ter a sua. A taxa aparece nos valores a faturar da ordem de trabalho e no relatório de faturação, e o relatório de serviço do cliente indica **Serviço: Urgente**, sem valores.
 
 ## Cópias dos relatórios de serviço
 

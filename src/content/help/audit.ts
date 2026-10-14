@@ -14,7 +14,7 @@ The **Audit log** (Settings → Audit log) answers questions such as "who change
 It records two kinds of events:
 
 - **Automatic changes**: every time someone creates, changes or deletes a client, villa, area, asset, contract, procedure, category, work order, request, preventive maintenance schedule, meter, part, stock location, vendor, purchase order, team, job role, membership or invitation. For photos and files, only deletions are recorded.
-- **Specific events**: sign-ins and sign-outs (including failed and blocked attempts), password changes and reset links, changes to the company settings and logo, role costs and role permissions, views and changes of villa access codes and device credentials, data erasures, stock moves and van restocks, service reports sent by e-mail, and the operations in Settings → Server (unlocking it, backups, restores, updates, e-mail settings, cloud folders and factory reset).
+- **Specific events**: sign-ins and sign-outs (including failed and blocked attempts), password changes and reset links, changes to the company settings and logo, role prices and role permissions, views and changes of villa access codes and device credentials, data erasures, stock moves and van restocks, service reports sent by e-mail, and the operations in Settings → Server (unlocking it, backups, restores, updates, e-mail settings, cloud folders and factory reset).
 
 Stock movements, time entries, comments and notifications are not repeated here: they already keep their own history.
 
@@ -76,7 +76,7 @@ O **Registo de auditoria** (Definições → Registo de auditoria) responde a pe
 Regista dois tipos de eventos:
 
 - **Alterações automáticas**: sempre que alguém cria, altera ou elimina um cliente, moradia, zona, equipamento, contrato, procedimento, categoria, ordem de trabalho, pedido, plano de manutenção preventiva, contador, peça, local de stock, fornecedor, encomenda, equipa, função, membro ou convite. Nas fotografias e ficheiros, só ficam registadas as eliminações.
-- **Eventos específicos**: inícios e fins de sessão (incluindo tentativas falhadas e bloqueadas), alterações de palavra-passe e links de reposição, alterações às definições e ao logótipo da empresa, aos custos e às permissões das funções, visualizações e alterações dos códigos de acesso das moradias e das credenciais dos equipamentos, apagamento de dados, movimentos de stock e reposições de carrinhas, relatórios de serviço enviados por email, e as operações em Definições → Servidor (desbloqueio, backups, restauros, atualizações, definições de email, pastas na cloud e reposição de fábrica).
+- **Eventos específicos**: inícios e fins de sessão (incluindo tentativas falhadas e bloqueadas), alterações de palavra-passe e links de reposição, alterações às definições e ao logótipo da empresa, aos preços e às permissões das funções, visualizações e alterações dos códigos de acesso das moradias e das credenciais dos equipamentos, apagamento de dados, movimentos de stock e reposições de carrinhas, relatórios de serviço enviados por email, e as operações em Definições → Servidor (desbloqueio, backups, restauros, atualizações, definições de email, pastas na cloud e reposição de fábrica).
 
 Os movimentos de stock, registos de tempo, comentários e notificações não se repetem aqui: já guardam o seu próprio histórico.
 

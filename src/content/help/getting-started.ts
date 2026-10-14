@@ -29,7 +29,7 @@ The app follows the way a villa is looked after:
 3. Work orders come from three places: created by hand, approved **requests** from clients, or generated automatically by **preventive maintenance** schedules and **meter** alerts.
 4. A **maintenance contract** sets the response and resolution times (SLA) and the visits a client pays for. Work orders at the client's villas are linked to it automatically.
 5. **Parts** used on a job come out of a stock location (the warehouse or a technician's van); **purchase orders** to **vendors** put them back.
-6. **Reports** add it all up: workload, SLA compliance, costs, technicians and assets.
+6. **Reports** add it all up: workload, SLA compliance, billing, technicians and assets.
 
 ## Roles: who can do what
 
@@ -39,7 +39,7 @@ Each person has a role in the company. The usual defaults are:
 - **Administrator**: everything except billing: settings, users and approvals.
 - **Manager**: plans and assigns work, manages clients, contracts, stock and purchasing.
 - **Technician**: carries out work orders, records time and parts, edits assets.
-- **Accountant**: reports and costs.
+- **Accountant**: reports and billing.
 - **Viewer**: can look at everything internal but not change it.
 - **Client (requester)**: only sees the client portal: their villas, their requests and the jobs shared with them.
 
@@ -84,7 +84,7 @@ A aplicação segue a forma como se cuida de uma moradia:
 3. As ordens de trabalho têm três origens: criadas à mão, **pedidos** de clientes aprovados, ou geradas automaticamente por planos de **manutenção preventiva** e alertas de **contadores**.
 4. Um **contrato de manutenção** define os tempos de resposta e de resolução (SLA) e as visitas que o cliente paga. As ordens de trabalho nas moradias do cliente ficam ligadas a ele automaticamente.
 5. As **peças** usadas num trabalho saem de um local de stock (o armazém ou a carrinha de um técnico); as **encomendas** a **fornecedores** repõem-nas.
-6. Os **relatórios** juntam tudo: volume de trabalho, cumprimento de SLA, custos, técnicos e equipamentos.
+6. Os **relatórios** juntam tudo: volume de trabalho, cumprimento de SLA, faturação, técnicos e equipamentos.
 
 ## Funções: quem pode fazer o quê
 
@@ -94,7 +94,7 @@ Cada pessoa tem uma função na empresa. Por defeito:
 - **Administrador**: tudo exceto a faturação: definições, utilizadores e aprovações.
 - **Gestor**: planeia e atribui trabalho, gere clientes, contratos, stock e compras.
 - **Técnico**: executa ordens de trabalho, regista tempo e peças, edita equipamentos.
-- **Contabilista**: relatórios e custos.
+- **Contabilista**: relatórios e faturação.
 - **Observador**: vê toda a informação interna, mas não a altera.
 - **Cliente (requerente)**: só vê o portal do cliente: as suas moradias, os seus pedidos e os trabalhos partilhados com ele.
 

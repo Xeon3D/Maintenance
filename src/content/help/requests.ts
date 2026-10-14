@@ -49,7 +49,7 @@ Click a request to open it. You see:
 
 The app creates the work order and opens it. It takes the villa, area and asset from the request; the description gets the requester's name and contact details at the end; and the client's photos are attached to the work order. The people assigned are notified, and so is the client: in the portal, or by e-mail for requests sent from a QR label.
 
-From then on the request shows **Approved as work order** with a link to the job and its current status, plus, for people who can see costs, what the job has cost so far.
+From then on the request shows **Approved as work order** with a link to the job and its current status, plus, for people who can see amounts, what the job has to bill so far.
 
 > When the work order is marked done, the client is told, as long as the work order is visible to the client.
 
@@ -115,7 +115,7 @@ Clique num pedido para o abrir. Vê:
 
 A aplicação cria a ordem de trabalho e abre-a. A moradia, a divisão e o equipamento vêm do pedido; a descrição recebe no fim o nome e os contactos de quem pediu; e as fotografias do cliente ficam anexadas à ordem de trabalho. As pessoas atribuídas são notificadas, e o cliente também: no portal, ou por e-mail nos pedidos enviados a partir de uma etiqueta QR.
 
-A partir daí o pedido mostra **Aprovado como ordem de trabalho**, com uma ligação ao trabalho e o seu estado atual e, para quem pode ver custos, quanto o trabalho custou até agora.
+A partir daí o pedido mostra **Aprovado como ordem de trabalho**, com uma ligação ao trabalho e o seu estado atual e, para quem pode ver valores, quanto há a faturar no trabalho até agora.
 
 > Quando a ordem de trabalho é concluída, o cliente é avisado, desde que a ordem de trabalho esteja visível para o cliente.
 
