@@ -11,6 +11,9 @@ import { changePasswordAction, updateProfileAction } from "./actions";
 import { NotificationPrefs, PushControl } from "./notification-settings";
 import { appOrigin } from "@/lib/qr";
 import { CalendarLink } from "./calendar-link";
+import { LocaleSwitcher } from "@/components/locale-switcher";
+import { ThemeToggle } from "@/components/theme-toggle";
+import { getTheme } from "@/lib/theme-server";
 
 /** Profile, password and notification settings; `portal` limits the notification list to what clients get. */
 export async function ProfileSettings({ portal = false, org }: { portal?: boolean; org: { slug: string } }) {
@@ -22,6 +25,20 @@ export async function ProfileSettings({ portal = false, org }: { portal?: boolea
   return (
     <div className="grid max-w-4xl gap-6 lg:grid-cols-2">
       <div className="space-y-6">
+        <Card className="p-5">
+          <h2 className="mb-4 font-medium">{t("profile.appearance")}</h2>
+          <div className="space-y-4">
+            <div>
+              <p className="mb-1.5 text-sm font-medium">{t("profile.language")}</p>
+              <LocaleSwitcher />
+            </div>
+            <div>
+              <p className="mb-1.5 text-sm font-medium">{t("theme.label")}</p>
+              <ThemeToggle initial={await getTheme()} labels />
+            </div>
+          </div>
+        </Card>
+
         <Card className="p-5">
           <h2 className="mb-4 font-medium">{t("profile.details")}</h2>
           <ActionForm action={updateProfileAction} successMessage={t("common.saved")}>

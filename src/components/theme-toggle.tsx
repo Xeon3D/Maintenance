@@ -10,7 +10,7 @@ import { cn } from "@/lib/utils";
 const ICONS = { light: Sun, system: Monitor, dark: Moon } as const;
 
 /** Light / system / dark. Applies at once, then saves (to the user when signed in, else a cookie). */
-export function ThemeToggle({ initial, className }: { initial: Theme; className?: string }) {
+export function ThemeToggle({ initial, className, labels = false }: { initial: Theme; className?: string; labels?: boolean }) {
   const t = useTranslations("theme");
   const [theme, setTheme] = useState<Theme>(initial);
   const [, start] = useTransition();
@@ -34,10 +34,10 @@ export function ThemeToggle({ initial, className }: { initial: Theme; className?
                 await setThemeAction(v).catch(() => undefined);
               });
             }}
-            className={cn("rounded p-1.5", theme === v ? "bg-brand text-brand-foreground" : "text-muted hover:text-foreground")}
+            className={cn("flex items-center gap-1.5 rounded p-1.5", labels && "px-2.5 text-sm", theme === v ? "bg-brand text-brand-foreground" : "text-muted hover:text-foreground")}
           >
             <Icon className="size-3.5" />
-            <span className="sr-only">{t(v)}</span>
+            <span className={labels ? undefined : "sr-only"}>{t(v)}</span>
           </button>
         );
       })}
