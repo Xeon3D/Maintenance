@@ -1359,7 +1359,12 @@
     "retake": "Retake",
     "savedOnDevice": "Saved on this device — uploads when online.",
     "signedBy": "Signed by {name}",
-    "waitingUpload": "will upload when online"
+    "waitingUpload": "will upload when online",
+    "section": {
+      "now": "To do",
+      "next30": "Next 30 days",
+      "later": "Later"
+    }
   },
   "company": {
     "details": "Company details",
@@ -2012,7 +2017,8 @@
         "passwordChanged": "Changed their password",
         "passwordChangeFailed": "Password change failed (wrong current password)",
         "passwordResetRequested": "Asked for a password reset link",
-        "passwordReset": "Reset their password with a link"
+        "passwordReset": "Reset their password with a link",
+        "calendarLink": "Created a new calendar link"
       },
       "server": {
         "unlock": "Unlocked Settings → Server",
@@ -2196,5 +2202,16 @@
     "contractHint": "Extra fee charged on this contract's urgent work orders. Leave both empty to use the company's (Settings → Organization); 0 means no fee.",
     "none": "None",
     "fromCompany": "{value} (company's)"
+  },
+  "calendarFeed": {
+    "title": "Calendar",
+    "hint": "See the work orders assigned to you in Google Calendar, Outlook or your phone's calendar. Subscribe to this private link (calendar apps refresh it every few hours). Anyone with the link sees your jobs, so don't share it.",
+    "create": "Create calendar link",
+    "link": "Calendar link",
+    "copy": "Copy",
+    "copied": "Copied",
+    "open": "Open in calendar app",
+    "reset": "New link",
+    "resetConfirm": "Create a new link? Calendars subscribed to the current one will stop updating."
   }
 }

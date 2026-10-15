@@ -1359,7 +1359,12 @@
     "retake": "Repetir",
     "savedOnDevice": "Guardada neste dispositivo — é enviada quando houver rede.",
     "signedBy": "Assinado por {name}",
-    "waitingUpload": "será enviado quando houver rede"
+    "waitingUpload": "será enviado quando houver rede",
+    "section": {
+      "now": "Para fazer",
+      "next30": "Próximos 30 dias",
+      "later": "Mais tarde"
+    }
   },
   "company": {
     "details": "Dados da empresa",
@@ -2012,7 +2017,8 @@
         "passwordChanged": "Alterou a palavra-passe",
         "passwordChangeFailed": "Alteração de palavra-passe falhada (palavra-passe atual errada)",
         "passwordResetRequested": "Pediu um link para repor a palavra-passe",
-        "passwordReset": "Repôs a palavra-passe com um link"
+        "passwordReset": "Repôs a palavra-passe com um link",
+        "calendarLink": "Criou um novo link de calendário"
       },
       "server": {
         "unlock": "Desbloqueou Definições → Servidor",
@@ -2196,5 +2202,16 @@
     "contractHint": "Taxa extra cobrada nas ordens de trabalho urgentes deste contrato. Deixe ambos vazios para usar a da empresa (Definições → Empresa); 0 significa sem taxa.",
     "none": "Nenhuma",
     "fromCompany": "{value} (da empresa)"
+  },
+  "calendarFeed": {
+    "title": "Calendário",
+    "hint": "Veja as ordens de trabalho atribuídas a si no Google Calendar, no Outlook ou no calendário do telemóvel. Subscreva este link privado (as aplicações de calendário atualizam-no de poucas em poucas horas). Quem tiver o link vê os seus trabalhos, por isso não o partilhe.",
+    "create": "Criar link do calendário",
+    "link": "Link do calendário",
+    "copy": "Copiar",
+    "copied": "Copiado",
+    "open": "Abrir na app de calendário",
+    "reset": "Novo link",
+    "resetConfirm": "Criar um link novo? Os calendários que subscreveram o atual deixam de ser atualizados."
   }
 }

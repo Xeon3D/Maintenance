@@ -44,6 +44,7 @@ export async function GET() {
       priority: w.priority,
       type: w.type,
       dueDate: w.dueDate?.toISOString() ?? null,
+      startDate: w.startDate?.toISOString() ?? null,
       villa: w.villa && { name: w.villa.name, address: w.villa.address, city: w.villa.city, accessNotes: w.villa.accessNotes },
       area: w.area?.name ?? null,
       asset: w.asset && {

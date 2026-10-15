@@ -186,6 +186,8 @@ model User {
   notificationPrefs Json?
   // Set when the account was erased (GDPR art. 17): name/e-mail replaced, sign-in impossible, history kept.
   erasedAt          DateTime?
+  // Secret in the personal calendar feed URL (/api/calendar/<token>.ics); a new one cuts off the old link.
+  calendarToken     String?  @unique
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
 

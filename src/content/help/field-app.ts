@@ -29,12 +29,12 @@ The app can only show what it has already downloaded:
 
 ![The field app: your open work orders, with the scan, sync and full-app buttons at the top](field-app-list)
 
-**My work** lists the work orders assigned to you that are **Open**, **In progress** or **On hold** (up to 50), the ones due soonest first. Each card shows:
+**My work** lists the work orders assigned to you that are **Open**, **In progress** or **On hold** (up to 50), in three sections: **To do** (overdue, today or without a date), **Next 30 days** and **Later**, by the job's start date (or its due date). Each card shows:
 
 - the work order number, its status and its priority;
 - a pulsing red dot if your timer is running on that job;
 - the title, and the villa, area and asset it's about;
-- the due date, in red when it has passed, and how many checklist steps are done (for example **3/8 steps**).
+- the start date and the due date (in red when it has passed), and how many checklist steps are done (for example **3/8 steps**).
 
 The buttons at the top right are: **Scan** (the camera, see below), **Sync now**, and **Open the full app**, which takes you to the normal app.
 
@@ -107,12 +107,12 @@ A aplicação só consegue mostrar o que já descarregou:
 
 ![A app de campo: as suas ordens de trabalho em aberto, com os botões de leitura, sincronização e aplicação completa no topo](field-app-list)
 
-**O meu trabalho** lista as ordens de trabalho atribuídas a si que estão **Aberta**, **Em curso** ou **Em espera** (até 50), primeiro as de prazo mais próximo. Cada cartão mostra:
+**O meu trabalho** lista as ordens de trabalho atribuídas a si que estão **Aberta**, **Em curso** ou **Em espera** (até 50), em três secções: **Para fazer** (em atraso, hoje ou sem data), **Próximos 30 dias** e **Mais tarde**, pela data de início do trabalho (ou pelo prazo). Cada cartão mostra:
 
 - o número da ordem de trabalho, o estado e a prioridade;
 - um ponto vermelho a piscar se o seu cronómetro estiver a contar nesse trabalho;
 - o título, e a moradia, divisão e equipamento a que diz respeito;
-- o prazo, a vermelho quando já passou, e quantos passos da checklist estão feitos (por exemplo **3/8 passos**).
+- a data de início e o prazo (a vermelho quando já passou), e quantos passos da checklist estão feitos (por exemplo **3/8 passos**).
 
 Os botões no canto superior direito são: **Ler código** (a câmara, ver abaixo), **Sincronizar agora** e **Abrir a aplicação completa**, que o leva à aplicação normal.
 
