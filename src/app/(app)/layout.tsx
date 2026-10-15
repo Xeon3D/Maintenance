@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 import { Sidebar } from "@/components/shell/sidebar";
+import { HelpButton } from "@/components/help-button";
 import { getAppName } from "@/lib/server-settings";
-import { getTheme } from "@/lib/theme-server";
 import { NAV } from "@/components/shell/nav";
 import { getContext } from "@/lib/context";
 import { unreadConversations } from "@/lib/conversations";
@@ -32,7 +32,6 @@ export default async function AppLayout({ children }: { children: React.ReactNod
     <div className="min-h-screen" style={brandStyle(ctx.organization)}>
       <Sidebar
         appName={await getAppName()}
-        theme={await getTheme()}
         groups={groups}
         user={{ name: ctx.user.name, email: ctx.user.email, role: ctx.membership.jobRole?.name ?? t(`roles.${ctx.role}`) }}
         org={{ id: ctx.organization.id, name: ctx.organization.name, logo: logoSrc(ctx.organization) }}
@@ -40,8 +39,9 @@ export default async function AppLayout({ children }: { children: React.ReactNod
         unreadNotifications={unreadNotifications}
       />
       <main className="lg:pl-64 print:pl-0">
-        <div className="mx-auto max-w-6xl px-4 py-6 sm:px-6 lg:py-8 print:max-w-none print:p-0">{children}</div>
+        <div className="mx-auto max-w-6xl px-4 py-6 pb-20 sm:px-6 lg:py-8 lg:pb-20 print:max-w-none print:p-0">{children}</div>
       </main>
+      <HelpButton />
     </div>
   );
 }

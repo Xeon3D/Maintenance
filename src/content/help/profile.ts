@@ -38,7 +38,7 @@ Your name is what colleagues see on work orders, comments, messages and time ent
 
 ## Language and theme
 
-Language and theme are not on this page: switch them at the bottom of the menu, where your name is. Choose English or Português, and a light, dark or automatic theme (**Same as device**). The choice is remembered for your account.
+The **Language and appearance** card at the top of this page switches between English and Português, and between a light, dark or automatic theme (**Same as device**). The change applies at once and is remembered for your account.
 
 ## Choosing your notifications
 
@@ -118,7 +118,7 @@ O seu nome é o que os colegas veem nas ordens de trabalho, comentários, mensag
 
 ## Idioma e tema
 
-O idioma e o tema não estão nesta página: mude-os no fundo do menu, junto ao seu nome. Escolha English ou Português, e um tema claro, escuro ou automático (**Igual ao dispositivo**). A escolha fica guardada na sua conta.
+O cartão **Idioma e aspeto**, no topo desta página, muda entre English e Português, e entre um tema claro, escuro ou automático (**Igual ao dispositivo**). A alteração aplica-se de imediato e fica guardada na sua conta.
 
 ## Escolher as notificações
 
