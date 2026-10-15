@@ -136,7 +136,9 @@ export function FieldApp({ user, org, logo, theme }: { user: { id: string; name:
     const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
     const now = new Date();
     const by = { now: [] as OfflineWorkOrder[], next30: [] as OfflineWorkOrder[], later: [] as OfflineWorkOrder[] };
-    for (const w of list) by[bucketOf({ startDate: w.startDate ?? null, dueDate: w.dueDate }, now, tz)].push(w);
+    for (const w of list) by[bucketOf({ startDate: w.startDate ?? null, dueDate: w.dueDate, status: w.status }, now, tz)].push(w);
+    // Jobs already in progress first.
+    by.now.sort((a, b) => Number(b.status === "IN_PROGRESS") - Number(a.status === "IN_PROGRESS"));
     const at = (w: OfflineWorkOrder) => scheduledAt({ startDate: w.startDate ?? null, dueDate: w.dueDate })?.getTime() ?? 0;
     by.next30.sort((a, b) => at(a) - at(b));
     by.later.sort((a, b) => at(a) - at(b));

@@ -29,7 +29,7 @@ The app can only show what it has already downloaded:
 
 ![The field app: your open work orders, with the scan, sync and full-app buttons at the top](field-app-list)
 
-**My work** lists the work orders assigned to you that are **Open**, **In progress** or **On hold** (up to 50), in three sections: **To do** (overdue, today or without a date), **Next 30 days** and **Later**, by the job's start date (or its due date). Each card shows:
+**My work** lists the work orders assigned to you that are **Open**, **In progress** or **On hold** (up to 50), in three sections: **To do** (in progress, overdue, today or without a date; jobs in progress first), **Next 30 days** and **Later**, by the job's start date (or its due date). Each card shows:
 
 - the work order number, its status and its priority;
 - a pulsing red dot if your timer is running on that job;
@@ -107,7 +107,7 @@ A aplicação só consegue mostrar o que já descarregou:
 
 ![A app de campo: as suas ordens de trabalho em aberto, com os botões de leitura, sincronização e aplicação completa no topo](field-app-list)
 
-**O meu trabalho** lista as ordens de trabalho atribuídas a si que estão **Aberta**, **Em curso** ou **Em espera** (até 50), em três secções: **Para fazer** (em atraso, hoje ou sem data), **Próximos 30 dias** e **Mais tarde**, pela data de início do trabalho (ou pelo prazo). Cada cartão mostra:
+**O meu trabalho** lista as ordens de trabalho atribuídas a si que estão **Aberta**, **Em curso** ou **Em espera** (até 50), em três secções: **Para fazer** (em curso, em atraso, hoje ou sem data; as em curso primeiro), **Próximos 30 dias** e **Mais tarde**, pela data de início do trabalho (ou pelo prazo). Cada cartão mostra:
 
 - o número da ordem de trabalho, o estado e a prioridade;
 - um ponto vermelho a piscar se o seu cronómetro estiver a contar nesse trabalho;

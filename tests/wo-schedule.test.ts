@@ -32,6 +32,7 @@ describe("work order schedule", () => {
     expect(bucketOf({ startDate: "2026-10-16T08:00:00Z", dueDate: null }, now, tz)).toBe("next30");
     expect(bucketOf({ startDate: null, dueDate: "2026-11-14T09:00:00Z" }, now, tz)).toBe("next30");
     expect(bucketOf({ startDate: null, dueDate: "2026-12-01T09:00:00Z" }, now, tz)).toBe("later");
+    expect(bucketOf({ startDate: "2026-11-01T09:00:00Z", dueDate: null, status: "IN_PROGRESS" }, now, tz)).toBe("now"); // started early
     expect(dayKey(now, tz)).toBe("2026-10-15");
   });
 });

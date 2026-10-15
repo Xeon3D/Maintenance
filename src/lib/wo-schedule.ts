@@ -37,9 +37,13 @@ export function scheduleDays(wo: Dated, timeZone: string): string[] {
   return days;
 }
 
-/** "Upcoming" buckets for a technician's list: due now (overdue / today / undated), the next 30 days, later. */
+/**
+ * "Upcoming" buckets for a technician's list: due now (overdue / today / undated), the next 30 days, later.
+ * A job already in progress is current work whatever its dates say.
+ */
 export type Bucket = "now" | "next30" | "later";
-export function bucketOf(wo: Dated, now: Date, timeZone: string): Bucket {
+export function bucketOf(wo: Dated & { status?: string }, now: Date, timeZone: string): Bucket {
+  if (wo.status === "IN_PROGRESS") return "now";
   const at = scheduledAt(wo);
   if (!at) return "now";
   const today = dayKey(now, timeZone);
