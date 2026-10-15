@@ -30,8 +30,11 @@ export default async function WorkOrdersPage({ searchParams }: PageProps<"/work-
   if (!ctx.can("internal.view")) notFound();
   const t = await getTranslations();
   const format = await getFormatter();
-  const params = await searchParams;
-  const view = sp(params, "view") ?? "list";
+  const raw = await searchParams;
+  const view = sp(raw, "view") ?? "list";
+  // The calendar opens on the technician's own jobs; managers see everyone's. "all" keeps an explicit "anyone".
+  const mineByDefault = view === "calendar" && !ctx.can("workOrders.manage");
+  const params = !sp(raw, "assignee") && mineByDefault ? { ...raw, assignee: "me" } : raw;
   const now = new Date();
 
   const [villas, members, categories] = await Promise.all([
@@ -41,7 +44,7 @@ export default async function WorkOrdersPage({ searchParams }: PageProps<"/work-
   ]);
 
   const viewHref = (v: string) => {
-    const q = new URLSearchParams(Object.entries(params).filter(([k, val]) => typeof val === "string" && k !== "view" && k !== "page") as [string, string][]);
+    const q = new URLSearchParams(Object.entries(raw).filter(([k, val]) => typeof val === "string" && k !== "view" && k !== "page") as [string, string][]);
     if (v !== "list") q.set("view", v);
     return `/work-orders${q.size ? `?${q}` : ""}`;
   };
@@ -186,8 +189,8 @@ export default async function WorkOrdersPage({ searchParams }: PageProps<"/work-
             <option value="all">{t("wo.statusAll")}</option>
           </Select>
         )}
-        <Select name="assignee" defaultValue={sp(params, "assignee") ?? ""}>
-          <option value="">{t("wo.anyone")}</option>
+        <Select name="assignee" defaultValue={sp(params, "assignee") ?? "all"}>
+          <option value="all">{t("wo.anyone")}</option>
           <option value="me">{t("wo.assignedToMe")}</option>
           <option value="unassigned">{t("wo.unassigned")}</option>
           {members

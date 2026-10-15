@@ -10,13 +10,12 @@ import { woFilter } from "./filter";
 import { recurrenceOf } from "@/lib/pm";
 import { occurrencesBetween } from "@/lib/pm-schedule";
 import { SystemType } from "@/generated/prisma/enums";
+import { dayKey, scheduleDays, scheduledAt } from "@/lib/wo-schedule";
 
-/** yyyy-mm-dd of `d` in the given time zone. */
-function dayKey(d: Date, timeZone: string) {
-  return new Intl.DateTimeFormat("en-CA", { timeZone, year: "numeric", month: "2-digit", day: "2-digit" }).format(d);
-}
-
-/** Month grid (Monday first) of work orders by due date, in the organization's time zone. */
+/**
+ * Month grid (Monday first) of work orders in the organization's time zone: each job on the days from its start
+ * to its due date (or just one of them), with the time on its first day.
+ */
 export async function CalendarView({ ctx, params }: { ctx: AppContext; params: Record<string, string | string[] | undefined> }) {
   const t = await getTranslations();
   const format = await getFormatter();
@@ -34,9 +33,22 @@ export async function CalendarView({ ctx, params }: { ctx: AppContext; params: R
   const rangeEnd = new Date(gridStart.getTime() + 43 * 86_400_000);
 
   const wos = await ctx.db.workOrder.findMany({
-    where: { ...woFilter(params, ctx.user.id, { ignoreStatus: true }), status: { not: "CANCELLED" }, dueDate: { gte: rangeStart, lt: rangeEnd } },
-    select: { id: true, number: true, title: true, status: true, dueDate: true },
-    orderBy: { dueDate: "asc" },
+    where: {
+      ...woFilter(params, ctx.user.id, { ignoreStatus: true }),
+      status: { not: "CANCELLED" },
+      // Overlaps the grid: starts or is due inside it, or spans across it.
+      AND: [
+        {
+          OR: [
+            { startDate: { gte: rangeStart, lt: rangeEnd } },
+            { dueDate: { gte: rangeStart, lt: rangeEnd } },
+            { startDate: { lt: rangeStart }, dueDate: { gte: rangeEnd } },
+          ],
+        },
+      ],
+    },
+    select: { id: true, number: true, title: true, status: true, startDate: true, dueDate: true },
+    orderBy: [{ startDate: { sort: "asc", nulls: "last" } }, { dueDate: "asc" }],
     take: 1000,
   });
   // Forecast: future occurrences of active time-based PM schedules (not yet generated).
@@ -62,11 +74,17 @@ export async function CalendarView({ ctx, params }: { ctx: AppContext; params: R
     }
   }
 
-  const byDay = new Map<string, typeof wos>();
+  type Entry = (typeof wos)[number] & { time: string | null; continued: boolean };
+  const byDay = new Map<string, Entry[]>();
   for (const w of wos) {
-    const k = dayKey(w.dueDate!, tz);
-    byDay.set(k, [...(byDay.get(k) ?? []), w]);
+    const at = scheduledAt(w)!;
+    scheduleDays(w, tz).forEach((k, i) => {
+      const entry = { ...w, time: i === 0 ? format.dateTime(at, { timeStyle: "short", timeZone: tz }) : null, continued: i > 0 };
+      byDay.set(k, [...(byDay.get(k) ?? []), entry]);
+    });
   }
+  // Within a day: timed starts in time order, then jobs carried over from earlier days.
+  for (const list of byDay.values()) list.sort((a, b) => Number(a.continued) - Number(b.continued) || (a.time ?? "").localeCompare(b.time ?? ""));
 
   const monthHref = (delta: number) => {
     const d = new Date(Date.UTC(y, m - 1 + delta, 1));
@@ -117,9 +135,15 @@ export async function CalendarView({ ctx, params }: { ctx: AppContext; params: R
                     key={w.id}
                     href={`/work-orders/${w.id}`}
                     title={w.title}
-                    className={cn("block truncate rounded px-1 py-0.5", WO_STATUS_TONE[w.status], w.status === "DONE" && "line-through opacity-70")}
+                    className={cn(
+                      "block truncate rounded px-1 py-0.5",
+                      WO_STATUS_TONE[w.status],
+                      w.status === "DONE" && "line-through opacity-70",
+                      w.continued && "opacity-60",
+                    )}
                   >
-                    #{w.number} {w.title}
+                    {w.time && <span className="mr-1 font-medium tabular-nums">{w.time}</span>}
+                    {w.continued && "↳ "}#{w.number} {w.title}
                   </Link>
                 ))}
                 {list.length > 4 && <div className="px-1 text-muted">+{list.length - 4}</div>}

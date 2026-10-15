@@ -9,6 +9,8 @@ import { privacyPath } from "@/lib/privacy";
 import { NOTIFICATION_TYPES, PORTAL_TYPES, prefsOf, type Channels } from "@/lib/notification-types";
 import { changePasswordAction, updateProfileAction } from "./actions";
 import { NotificationPrefs, PushControl } from "./notification-settings";
+import { appOrigin } from "@/lib/qr";
+import { CalendarLink } from "./calendar-link";
 import { LocaleSwitcher } from "@/components/locale-switcher";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { getTheme } from "@/lib/theme-server";
@@ -75,6 +77,13 @@ export async function ProfileSettings({ portal = false, org }: { portal?: boolea
       </div>
 
       <div className="space-y-6">
+        {!portal && (
+          <Card className="p-5">
+            <h2 className="mb-1 font-medium">{t("calendarFeed.title")}</h2>
+            <p className="mb-3 text-sm text-muted">{t("calendarFeed.hint")}</p>
+            <CalendarLink url={user.calendarToken ? `${await appOrigin()}/api/calendar/${user.calendarToken}.ics` : null} />
+          </Card>
+        )}
         <Card className="p-5">
           <h2 className="mb-1 font-medium">{t("profile.pushTitle")}</h2>
           <p className="mb-3 text-sm text-muted">{t("profile.pushHint")}</p>

@@ -55,7 +55,7 @@ The buttons above the filters switch between **List**, **Board** and **Calendar*
 ![The board: one column per status](work-orders-board)
 
 - **Board** shows a column per status: **Open**, **In progress**, **On hold** and **Done** (jobs finished in the last 14 days). Drag a card to another column to change its status. The same rules apply as on the work order page: a job can't be dropped in **Done** until its required checklist steps and the client sign-off are complete, and an error appears at the top if it can't move.
-- **Calendar** shows a month of work orders on their due date, coloured by status (cancelled jobs are left out). Preventive maintenance visits that are planned but not yet generated appear with a dashed outline and open the schedule. Use the arrows to move between months.
+- **Calendar** shows a month of work orders, coloured by status (cancelled jobs are left out). A job with a start date appears on every day from its start to its due date; otherwise on its due date. The first day shows its time. Technicians see their own jobs first (**Assigned to me**); choose **Anyone** to see everyone's. To have your jobs in Google Calendar, Outlook or your phone, subscribe to your calendar link in [Profile](/help/profile). Preventive maintenance visits that are planned but not yet generated appear with a dashed outline and open the schedule. Use the arrows to move between months.
 
 ## Creating a work order
 
@@ -261,7 +261,7 @@ Os botões acima dos filtros alternam entre **Lista**, **Quadro** e **Calendári
 ![O quadro: uma coluna por estado](work-orders-board)
 
 - O **Quadro** mostra uma coluna por estado: **Aberta**, **Em curso**, **Em espera** e **Concluída** (trabalhos terminados nos últimos 14 dias). Arraste um cartão para outra coluna para mudar o estado. Aplicam-se as mesmas regras da página da ordem de trabalho: um trabalho não pode ir para **Concluída** sem os passos obrigatórios da checklist e a aprovação do cliente, e aparece um erro no topo se não puder ser movido.
-- O **Calendário** mostra um mês de ordens de trabalho na data do prazo, com a cor do estado (as canceladas não aparecem). As visitas de manutenção preventiva planeadas mas ainda não geradas aparecem com contorno tracejado e abrem o plano. Use as setas para mudar de mês.
+- O **Calendário** mostra um mês de ordens de trabalho, com a cor do estado (as canceladas não aparecem). Um trabalho com data de início aparece em todos os dias, do início ao prazo; senão, no dia do prazo. O primeiro dia mostra a hora. Os técnicos veem primeiro os seus trabalhos (**Atribuídas a mim**); escolha **Qualquer pessoa** para ver os de todos. Para ter os seus trabalhos no Google Calendar, no Outlook ou no telemóvel, subscreva o seu link de calendário no [Perfil](/help/profile). As visitas de manutenção preventiva planeadas mas ainda não geradas aparecem com contorno tracejado e abrem o plano. Use as setas para mudar de mês.
 
 ## Criar uma ordem de trabalho
 

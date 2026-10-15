@@ -40,6 +40,15 @@ Your name is what colleagues see on work orders, comments, messages and time ent
 
 The **Language and appearance** card at the top of this page switches between English and Português, and between a light, dark or automatic theme (**Same as device**). The change applies at once and is remembered for your account.
 
+## Your calendar
+
+The **Calendar** card puts the work orders assigned to you into Google Calendar, Outlook or your phone's calendar:
+
+1. Click **Create calendar link**.
+2. Click **Open in calendar app** on the device whose calendar you use, or **Copy** the link and add it as a subscribed calendar ("From URL" in Google Calendar, "Subscribe to calendar" in Outlook).
+
+Each job appears from its start to its due time, with the villa as the location and a link back to the work order; finished jobs get a ✓. Calendar apps refresh subscriptions every few hours, so a change can take a while to show. Anyone with the link sees your jobs: if it leaked, click **New link** and the old one stops working.
+
 ## Choosing your notifications
 
 Everything that concerns you always appears under the bell in the app (see [Notifications](/help/notifications)). The **What to notify me about** card decides which of those events also reach you outside the app:
@@ -119,6 +128,15 @@ O seu nome é o que os colegas veem nas ordens de trabalho, comentários, mensag
 ## Idioma e tema
 
 O cartão **Idioma e aspeto**, no topo desta página, muda entre English e Português, e entre um tema claro, escuro ou automático (**Igual ao dispositivo**). A alteração aplica-se de imediato e fica guardada na sua conta.
+
+## O seu calendário
+
+O cartão **Calendário** põe as ordens de trabalho atribuídas a si no Google Calendar, no Outlook ou no calendário do telemóvel:
+
+1. Clique em **Criar link do calendário**.
+2. Clique em **Abrir na app de calendário** no dispositivo cujo calendário usa, ou **Copie** o link e acrescente-o como calendário subscrito ("A partir do URL" no Google Calendar, "Subscrever calendário" no Outlook).
+
+Cada trabalho aparece do início ao prazo, com a moradia como local e uma ligação para a ordem de trabalho; os concluídos têm um ✓. As aplicações de calendário atualizam as subscrições de poucas em poucas horas, por isso uma alteração pode demorar a aparecer. Quem tiver o link vê os seus trabalhos: se o divulgou sem querer, clique em **Novo link** e o antigo deixa de funcionar.
 
 ## Escolher as notificações
 

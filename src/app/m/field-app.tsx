@@ -10,6 +10,7 @@ import { applyOps } from "@/lib/offline/apply";
 import { blobs, kv, newId, queue } from "@/lib/offline/idb";
 import { clearIssues, loadIssues, loadSnapshot, syncNow, type SyncIssue, type SyncOutcome } from "@/lib/offline/sync";
 import { cn } from "@/lib/utils";
+import { bucketOf, scheduledAt } from "@/lib/wo-schedule";
 import { WorkOrderView } from "./work-order-view";
 import { ThemeToggle } from "@/components/theme-toggle";
 import type { Theme } from "@/lib/theme";
@@ -130,6 +131,19 @@ export function FieldApp({ user, org, logo, theme }: { user: { id: string; name:
   const workOrders = useMemo(() => (snapshot ? applyOps(snapshot, ops, user.name) : []), [snapshot, ops, user.name]);
   const current = workOrders.find((w) => w.id === openId) ?? null;
   const list = assetFilter ? workOrders.filter((w) => w.asset?.id === assetFilter.id) : workOrders;
+  // To do now (overdue, today or undated), the next 30 days, and later — in this device's time zone.
+  const sections = useMemo(() => {
+    const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    const now = new Date();
+    const by = { now: [] as OfflineWorkOrder[], next30: [] as OfflineWorkOrder[], later: [] as OfflineWorkOrder[] };
+    for (const w of list) by[bucketOf({ startDate: w.startDate ?? null, dueDate: w.dueDate, status: w.status }, now, tz)].push(w);
+    // Jobs already in progress first.
+    by.now.sort((a, b) => Number(b.status === "IN_PROGRESS") - Number(a.status === "IN_PROGRESS"));
+    const at = (w: OfflineWorkOrder) => scheduledAt({ startDate: w.startDate ?? null, dueDate: w.dueDate })?.getTime() ?? 0;
+    by.next30.sort((a, b) => at(a) - at(b));
+    by.later.sort((a, b) => at(a) - at(b));
+    return (["now", "next30", "later"] as const).map((key) => ({ key, items: by[key] })).filter((s) => s.items.length > 0);
+  }, [list]);
 
   const onScan = useCallback(
     (text: string) => {
@@ -264,13 +278,23 @@ export function FieldApp({ user, org, logo, theme }: { user: { id: string; name:
           ) : list.length === 0 ? (
             <p className="rounded-md border border-border bg-surface p-6 text-center text-sm text-muted">{assetFilter ? t("field.noneForAsset") : t("field.empty")}</p>
           ) : (
-            <ul className="space-y-2">
-              {list.map((w) => (
-                <li key={w.id}>
-                  <WorkOrderCard wo={w} running={timer?.woId === w.id} onOpen={() => open(w.id)} />
-                </li>
+            <div className="space-y-5">
+              {sections.map((s) => (
+                <section key={s.key}>
+                  <h2 className="mb-2 flex items-baseline justify-between text-xs font-semibold uppercase tracking-wide text-muted">
+                    {t(`field.section.${s.key}`)}
+                    <span className="font-normal normal-case">{s.items.length}</span>
+                  </h2>
+                  <ul className="space-y-2">
+                    {s.items.map((w) => (
+                      <li key={w.id}>
+                        <WorkOrderCard wo={w} running={timer?.woId === w.id} onOpen={() => open(w.id)} />
+                      </li>
+                    ))}
+                  </ul>
+                </section>
               ))}
-            </ul>
+            </div>
           )}
           <p className="mt-6 text-center text-xs text-muted">{t("field.offlineHint")}</p>
           <div className="mt-4 flex justify-center">
@@ -301,7 +325,12 @@ function WorkOrderCard({ wo, running, onOpen }: { wo: OfflineWorkOrder; running:
         </div>
         <div className="mt-1 font-medium">{wo.title}</div>
         <div className="mt-0.5 truncate text-xs text-muted">{[wo.villa?.name, wo.area, wo.asset?.name].filter(Boolean).join(" · ")}</div>
-        <div className="mt-1 flex gap-3 text-xs">
+        <div className="mt-1 flex flex-wrap gap-x-3 gap-y-0.5 text-xs">
+          {wo.startDate && (
+            <span className="text-muted">
+              {t("wo.startDate")}: {format.dateTime(new Date(wo.startDate), { dateStyle: "medium", timeStyle: "short" })}
+            </span>
+          )}
           {wo.dueDate && (
             <span className={overdue ? "font-medium text-danger" : "text-muted"}>
               {t("wo.dueDate")}: {format.dateTime(new Date(wo.dueDate), { dateStyle: "medium", timeStyle: "short" })}

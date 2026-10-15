@@ -24,6 +24,8 @@ export type OfflineWorkOrder = {
   priority: Priority;
   type: WorkOrderType;
   dueDate: string | null;
+  /** Optional: snapshots cached by older versions don't have it. */
+  startDate?: string | null;
   villa: { name: string; address: string | null; city: string | null; accessNotes: string | null } | null;
   area: string | null;
   asset: { id: string; name: string; details: string | null } | null;
