@@ -42,6 +42,8 @@ The buttons at the top right are: **Scan** (the camera, see below), **Sync now**
 
 Tap a card to open the work order. You'll see the villa address (tap it to open a map), the villa's **Access** notes, the asset and the description. Villa access codes are never stored on the phone; look them up in the full app if you need them.
 
+When the villa has a [knowledge base](/help/villas), tap **Knowledge base** under the job details to read its articles, even offline. Articles about the job's asset come first; with more than five, a search box appears. Attached files open in the full app and need a connection.
+
 1. Tap **Start work**. The job becomes **In progress**.
 2. Choose **On site** or **Remote**, then tap **Start timer** to time your work. The button turns into **Stop** with a running clock. Only one timer runs at a time: starting one on another job stops the first. Anything under a minute isn't recorded.
 3. Work through the **Checklist**: tick steps, choose pass/fail or an option, type text or numbers, take photos and collect signatures where a step asks for them.
@@ -123,6 +125,8 @@ Os botões no canto superior direito são: **Ler código** (a câmara, ver abaix
 ## Executar um trabalho
 
 Toque num cartão para abrir a ordem de trabalho. Vê a morada da moradia (toque nela para abrir um mapa), as notas de **Acesso** da moradia, o equipamento e a descrição. Os códigos de acesso das moradias nunca ficam guardados no telemóvel; consulte-os na aplicação completa se precisar.
+
+Quando a moradia tem [base de conhecimento](/help/villas), toque em **Base de conhecimento** por baixo dos dados do trabalho para ler os artigos, mesmo offline. Os artigos sobre o equipamento do trabalho aparecem primeiro; com mais de cinco, aparece uma caixa de pesquisa. Os ficheiros anexos abrem na aplicação completa e precisam de ligação.
 
 1. Toque em **Iniciar trabalho**. O trabalho passa a **Em curso**.
 2. Escolha **No local** ou **Remoto** e toque em **Iniciar cronómetro** para medir o seu tempo. O botão passa a **Parar**, com um relógio a contar. Só pode haver um cronómetro de cada vez: iniciar outro noutro trabalho para o primeiro. Menos de um minuto não é registado.

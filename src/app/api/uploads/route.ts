@@ -20,6 +20,7 @@ const targetSchema = z.union([
   z.object({ villaId: z.string() }),
   z.object({ partId: z.string() }),
   z.object({ purchaseOrderId: z.string() }),
+  z.object({ articleId: z.string() }),
 ]);
 
 export async function POST(req: Request) {
@@ -49,6 +50,9 @@ export async function POST(req: Request) {
   } else if ("purchaseOrderId" in t) {
     if (!ctx.can("purchasing.manage")) return NextResponse.json({ error: "forbidden" }, { status: 403 });
     if (!(await ctx.db.purchaseOrder.count({ where: { id: t.purchaseOrderId } }))) return NextResponse.json({ error: "notFound" }, { status: 404 });
+  } else if ("articleId" in t) {
+    if (!ctx.can("knowledge.manage")) return NextResponse.json({ error: "forbidden" }, { status: 403 });
+    if (!(await ctx.db.knowledgeArticle.count({ where: { id: t.articleId } }))) return NextResponse.json({ error: "notFound" }, { status: 404 });
   } else {
     if (!ctx.can("assets.manage")) return NextResponse.json({ error: "forbidden" }, { status: 403 });
     const ok =

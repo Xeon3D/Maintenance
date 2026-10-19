@@ -13,6 +13,7 @@ import { daysFromNow } from "@/lib/dates";
 import { setAssetArchivedAction } from "../actions";
 import { StatusControl } from "./status-control";
 import { RecentWorkOrders } from "@/components/recent-work-orders";
+import { KnowledgeCard } from "@/components/knowledge/knowledge-card";
 import { MetersPanel } from "../../meters/meters-panel";
 import { CompatibleParts } from "../../parts/compatible-parts";
 import { villaClient } from "@/lib/villa-client";
@@ -163,6 +164,8 @@ export default async function AssetPage({ params }: PageProps<"/assets/[id]">) {
           <CompatibleParts ctx={ctx} assetId={asset.id} />
 
           <RecentWorkOrders ctx={ctx} where={{ assetId: asset.id }} newHref={`/work-orders/new?assetId=${asset.id}`} viewAllHref={`/work-orders?assetId=${asset.id}&status=all`} />
+
+          <KnowledgeCard ctx={ctx} villaId={asset.villaId} assetId={asset.id} />
 
           <Card>
             <div className="flex items-center justify-between border-b border-border px-5 py-3">

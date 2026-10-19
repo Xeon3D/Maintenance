@@ -44,9 +44,27 @@ The **Owner** is the client the villa belongs to. The **Property manager / compa
 
 - **Needs attention**: shown only when an asset is **Down** or **Degraded**.
 - **Installed systems**: the villa's equipment grouped by system, with a link to each asset. **View all** opens the full asset list for the villa, and **Print QR labels** prints a label for every asset in it.
+- **Knowledge base**: the villa's pinned and latest articles (see below).
 - **Work orders**: the latest jobs at the villa, with a button to create a new one.
 - **Floors & rooms**: the villa's areas (see below).
 - On the right: the owner and manager, the address with **Open in Maps**, the client's main contacts, the **Access notes** and the **Access codes**.
+
+## Knowledge base
+
+The knowledge base keeps what the team has learned about a villa, so the next technician doesn't have to work it out again: how a system is set up, which VLAN is which, a fix that works, where the rack key is kept, what not to touch. Open it from the **Knowledge base** card on the villa page (**View all**).
+
+1. Click **New article**.
+2. Give it a **Title** and, if it is about one system, the **System** (leave **General** otherwise).
+3. Write the **Text**. Simple formatting works: headings, bold and italic, lists and numbered steps, notes, code blocks for configurations, and links; the line under the text box shows how to type each one. Click **Preview** to see how it will look.
+4. Tick the **Assets** it is about: the article then also shows on those assets' pages, and first in jobs on them.
+5. Tick **Pin to the top** for the articles everyone should read first.
+6. Click **Create**. On the article page you can then add photos and PDFs (schematics, manuals) under **Files**.
+
+Search the articles by any word of the title, the text or the linked assets; accents don't matter and small typos are forgiven. You can also filter by system or by asset. [Search](/help/search) in the menu finds articles of every villa too.
+
+In the [field app](/help/field-app), each job shows its villa's knowledge base, and the text can be read offline. Files need a connection.
+
+> The knowledge base is for the team only: clients never see it in the portal. Still, codes and passwords don't belong here; they go in the encrypted **Access codes**.
 
 ## Access codes
 
@@ -88,6 +106,7 @@ The form creates a request at that villa and asset for your team to review. To p
 - Everyone in the company can see villas, their areas and access notes.
 - **Super Admin**, **Administrator** and **Manager** can create, edit and archive villas and edit the access codes (permission **Clients and villas**).
 - **Technicians** can add, rename and delete floors and rooms (permission **Assets**).
+- Everyone in the company can read the knowledge base. Writing, editing and deleting articles needs **Knowledge base**: by default the Super Admin, Administrator, Manager and Technician.
 - Revealing access codes needs **See access codes**: by default the Super Admin, Administrator, Manager and Technician. The Viewer and Accountant see that codes exist, but not what they are.
 `,
   pt: `# Moradias
@@ -128,9 +147,27 @@ O **Proprietário** é o cliente a quem a moradia pertence. A **Gestão da propr
 
 - **Requer atenção**: só aparece quando um equipamento está **Avariado** ou **Degradado**.
 - **Sistemas instalados**: os equipamentos da moradia agrupados por sistema, com ligação a cada um. **Ver tudo** abre a lista completa de equipamentos da moradia e **Imprimir etiquetas QR** imprime uma etiqueta para cada equipamento.
+- **Base de conhecimento**: os artigos fixados e mais recentes da moradia (ver abaixo).
 - **Ordens de trabalho**: os últimos trabalhos na moradia, com um botão para criar um novo.
 - **Pisos e divisões**: as áreas da moradia (ver abaixo).
 - À direita: o proprietário e o gestor, a morada com **Abrir no Maps**, os contactos principais do cliente, as **Notas de acesso** e os **Códigos de acesso**.
+
+## Base de conhecimento
+
+A base de conhecimento guarda o que a equipa aprendeu sobre uma moradia, para que o próximo técnico não tenha de o descobrir outra vez: como está configurado um sistema, que VLAN é qual, uma solução que funciona, onde fica a chave do bastidor, o que não mexer. Abra-a a partir do cartão **Base de conhecimento** na página da moradia (**Ver todos**).
+
+1. Clique em **Novo artigo**.
+2. Dê-lhe um **Título** e, se for sobre um sistema, o **Sistema** (caso contrário deixe **Geral**).
+3. Escreva o **Texto**. Funciona uma formatação simples: títulos, negrito e itálico, listas e passos numerados, notas, blocos de código para configurações e ligações; a linha por baixo da caixa de texto mostra como escrever cada um. Clique em **Pré-visualizar** para ver o aspeto final.
+4. Marque os **Equipamentos** a que diz respeito: o artigo aparece também na página desses equipamentos e em primeiro lugar nos trabalhos sobre eles.
+5. Marque **Fixar no topo** nos artigos que todos devem ler primeiro.
+6. Clique em **Criar**. Na página do artigo pode depois juntar fotografias e PDFs (esquemas, manuais) em **Ficheiros**.
+
+Pesquise nos artigos por qualquer palavra do título, do texto ou dos equipamentos ligados; os acentos não contam e pequenos erros de escrita são tolerados. Também pode filtrar por sistema ou por equipamento. A [Pesquisa](/help/search) do menu também encontra artigos de todas as moradias.
+
+Na [app de campo](/help/field-app), cada trabalho mostra a base de conhecimento da sua moradia, e o texto pode ser lido offline. Os ficheiros precisam de ligação.
+
+> A base de conhecimento é só para a equipa: os clientes nunca a veem no portal. Mesmo assim, códigos e palavras-passe não pertencem aqui; vão para os **Códigos de acesso** encriptados.
 
 ## Códigos de acesso
 
@@ -172,6 +209,7 @@ O formulário cria um pedido nessa moradia e equipamento para a sua equipa anali
 - Todas as pessoas da empresa podem ver as moradias, as suas áreas e as notas de acesso.
 - **Super Admin**, **Administrador** e **Gestor** podem criar, editar e arquivar moradias e editar os códigos de acesso (permissão **Clientes e moradias**).
 - Os **Técnicos** podem acrescentar, mudar o nome e eliminar pisos e divisões (permissão **Ativos**).
+- Todas as pessoas da empresa podem ler a base de conhecimento. Escrever, editar e eliminar artigos exige **Base de conhecimento**: por defeito, o Super Admin, Administrador, Gestor e Técnico.
 - Mostrar os códigos de acesso exige **Ver códigos de acesso**: por defeito, o Super Admin, Administrador, Gestor e Técnico. O Observador e o Contabilista veem que existem códigos, mas não o seu conteúdo.
 `,
 };

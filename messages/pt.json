@@ -1808,6 +1808,12 @@
         "label": "Registo de auditoria",
         "hint": "Ver quem fez o quê e a partir de onde: inícios de sessão, alterações e eliminações, utilizadores e permissões, operações do servidor."
       }
+    },
+    "knowledge": {
+      "manage": {
+        "label": "Base de conhecimento",
+        "hint": "Escrever, editar e eliminar artigos da base de conhecimento das moradias. Toda a equipa os pode ler."
+      }
     }
   },
   "reportEmail": {
@@ -2030,7 +2036,8 @@
       "Attachment": "anexo",
       "Organization": "empresa",
       "User": "utilizador",
-      "Server": "servidor"
+      "Server": "servidor",
+      "KnowledgeArticle": "artigo da base de conhecimento"
     },
     "actions": {
       "auth": {
@@ -2168,7 +2175,11 @@
       "timeRounding": "Blocos de faturação do tempo",
       "urgentFee": "Taxa de urgência (fixa)",
       "urgentPercent": "Taxa de urgência (%)",
-      "purchaseCost": "Custo de compra"
+      "purchaseCost": "Custo de compra",
+      "body": "Texto",
+      "pinned": "Fixado",
+      "assets": "Equipamentos",
+      "updatedById": "Atualizado por"
     }
   },
   "van": {
@@ -2260,14 +2271,14 @@
   },
   "search": {
     "title": "Pesquisa",
-    "description": "Encontre trabalhos anteriores por qualquer palavra escrita neles: título, descrição, comentários, notas da lista de verificação e notas de tempo.",
+    "description": "Encontre trabalhos anteriores por qualquer palavra escrita neles (título, descrição, comentários, notas da lista de verificação e notas de tempo) e os artigos da base de conhecimento das moradias.",
     "placeholder": "ex.: processador, condensação, switch PoE…",
     "villa": "Moradia",
     "allVillas": "Todas as moradias",
     "system": "Sistema",
     "allSystems": "Todos os sistemas",
     "hint": "Escreva uma ou mais palavras. Maiúsculas, acentos e pequenos erros de escrita não importam.",
-    "none": "Nenhuma ordem de trabalho menciona estas palavras.",
+    "none": "Nenhuma ordem de trabalho nem artigo da base de conhecimento menciona estas palavras.",
     "count": "{count, plural, one {# ordem de trabalho} other {# ordens de trabalho}}",
     "countTop": "As {count} ordens de trabalho mais relevantes",
     "completedOn": "Concluída a {date}",
@@ -2284,6 +2295,46 @@
       "itemAnswer": "Resposta a \"{step}\"",
       "timeNote": "Nota de tempo",
       "statusNote": "Nota ao passar a {status}"
-    }
+    },
+    "articles": "{count, plural, one {# artigo da base de conhecimento} other {# artigos da base de conhecimento}}",
+    "articlesMore": "{count, plural, one {Mais # artigo} other {Mais # artigos}}: acrescente palavras para restringir a pesquisa."
+  },
+  "knowledge": {
+    "title": "Base de conhecimento",
+    "description": "Como estão configurados os sistemas desta moradia: configurações, soluções, onde fica cada coisa, cuidados a ter.",
+    "new": "Novo artigo",
+    "edit": "Editar artigo",
+    "delete": "Eliminar artigo",
+    "deleteConfirm": "Eliminar este artigo e os seus ficheiros? Não é possível anular.",
+    "empty": "Ainda não há artigos.",
+    "emptyHint": "Registe o que o próximo técnico precisa de saber sobre esta moradia: como está configurado um sistema, uma solução que funciona, onde está a chave do bastidor.",
+    "emptyAsset": "Ainda não há nada escrito sobre este equipamento.",
+    "viewAll": "Ver todos",
+    "searchPlaceholder": "Pesquisar nos artigos…",
+    "allSystems": "Todos os sistemas",
+    "allAssets": "Todos os equipamentos",
+    "noMatches": "Nenhum artigo corresponde.",
+    "found": "{count, plural, one {# artigo} other {# artigos}}",
+    "articleTitle": "Título",
+    "titlePlaceholder": "ex.: KNX: reiniciar o router IP",
+    "system": "Sistema",
+    "general": "Geral",
+    "body": "Texto",
+    "write": "Escrever",
+    "preview": "Pré-visualizar",
+    "nothingToPreview": "Ainda não há nada para pré-visualizar.",
+    "formatHint": "## título · **negrito** · *itálico* · `código` · - lista · 1. passos · > nota · ``` bloco de código ``` · [texto](https://…)",
+    "assets": "Equipamentos",
+    "assetsHint": "O artigo aparece também na página destes equipamentos e em primeiro lugar nos trabalhos sobre eles.",
+    "pin": "Fixar no topo",
+    "pinHint": "Os artigos fixados aparecem primeiro, aqui e na página da moradia.",
+    "pinned": "Fixado",
+    "files": "Ficheiros",
+    "noText": "Sem texto.",
+    "created": "Escrito a {when}",
+    "createdBy": "Escrito por {name}, {when}",
+    "updated": "Atualizado a {when}",
+    "updatedBy": "Atualizado por {name}, {when}",
+    "filesOnline": "{count, plural, one {# ficheiro} other {# ficheiros}} (requer ligação)"
   }
 }

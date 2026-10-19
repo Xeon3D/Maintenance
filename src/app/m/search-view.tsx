@@ -5,16 +5,20 @@ import { useTranslations } from "next-intl";
 import { ArrowLeft, CloudOff, Loader2, Search } from "lucide-react";
 import { SearchResults } from "@/components/search-results";
 import type { SearchResult } from "@/lib/search";
+import { ArticleResults } from "@/components/knowledge/article-results";
+import type { ArticleResult } from "@/lib/knowledge-search";
 
 type State =
   | { kind: "idle" }
   | { kind: "loading" }
   | { kind: "offline" }
   | { kind: "error" }
-  | { kind: "done"; results: SearchResult[]; truncated: boolean; empty: boolean };
+  | { kind: "done"; results: SearchResult[]; truncated: boolean; empty: boolean; articles: Articles };
+
+type Articles = { results: ArticleResult[]; total: number };
 
 /**
- * Search past work orders and technicians' notes (lib/search.ts through /api/search). It needs a connection:
+ * Search past work orders, technicians' notes and knowledge-base articles (lib/search.ts, lib/knowledge-search.ts through /api/search). It needs a connection:
  * the device only keeps the user's own open jobs. Results that are on the device open in the field app.
  */
 export function SearchView({ initial, onDevice, onBack }: { initial: string; onDevice: Set<string>; onBack: () => void }) {
@@ -37,8 +41,8 @@ export function SearchView({ initial, onDevice, onBack }: { initial: string; onD
       try {
         const res = await fetch(`/api/search?q=${encodeURIComponent(query)}`, { headers: { accept: "application/json" } });
         if (!res.ok || !res.headers.get("content-type")?.includes("json")) throw new Error(String(res.status));
-        const data = (await res.json()) as { terms: string[]; results: SearchResult[]; truncated: boolean };
-        if (id === request.current) setState({ kind: "done", results: data.results, truncated: data.truncated, empty: data.terms.length === 0 });
+        const data = (await res.json()) as { terms: string[]; results: SearchResult[]; truncated: boolean; articles?: Articles };
+        if (id === request.current) setState({ kind: "done", results: data.results, truncated: data.truncated, empty: data.terms.length === 0, articles: data.articles ?? { results: [], total: 0 } });
       } catch {
         if (id === request.current) setState({ kind: navigator.onLine ? "error" : "offline" });
       }
@@ -79,14 +83,19 @@ export function SearchView({ initial, onDevice, onBack }: { initial: string; onD
       ) : shown.kind === "error" ? (
         <p className="rounded-md bg-red-50 p-4 text-center text-sm text-red-800">{t("common.somethingWrong")}</p>
       ) : shown.kind === "done" ? (
-        shown.results.length === 0 ? (
+        shown.results.length === 0 && shown.articles.total === 0 ? (
           <p className="rounded-md border border-border bg-surface p-6 text-center text-sm text-muted">{shown.empty ? t("search.hint") : t("search.none")}</p>
         ) : (
           <>
-            <p className="mb-2 text-xs text-muted">
-              {shown.truncated ? t("search.countTop", { count: shown.results.length }) : t("search.count", { count: shown.results.length })}
-            </p>
-            <SearchResults compact results={shown.results} linkFor={(id) => (onDevice.has(id) ? `#wo=${id}` : `/work-orders/${id}`)} />
+            {shown.articles.total > 0 && <ArticleResults compact results={shown.articles.results} total={shown.articles.total} />}
+            {shown.results.length > 0 && (
+              <>
+                <p className="mb-2 text-xs text-muted">
+                  {shown.truncated ? t("search.countTop", { count: shown.results.length }) : t("search.count", { count: shown.results.length })}
+                </p>
+                <SearchResults compact results={shown.results} linkFor={(id) => (onDevice.has(id) ? `#wo=${id}` : `/work-orders/${id}`)} />
+              </>
+            )}
           </>
         )
       ) : null}

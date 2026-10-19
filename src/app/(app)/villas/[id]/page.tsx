@@ -12,6 +12,7 @@ import { flattenTree } from "@/lib/tree";
 import { setVillaArchivedAction } from "../actions";
 import { AreasManager } from "./areas";
 import { RecentWorkOrders } from "@/components/recent-work-orders";
+import { KnowledgeCard } from "@/components/knowledge/knowledge-card";
 import type { SystemType } from "@/generated/prisma/enums";
 import { villaClient } from "@/lib/villa-client";
 import { isFar, travelRuleFor } from "@/lib/travel-charge";
@@ -148,6 +149,8 @@ export default async function VillaPage({ params }: PageProps<"/villas/[id]">) {
               </div>
             )}
           </Card>
+
+          <KnowledgeCard ctx={ctx} villaId={villa.id} />
 
           <RecentWorkOrders ctx={ctx} where={{ villaId: villa.id }} newHref={`/work-orders/new?villaId=${villa.id}`} viewAllHref={`/work-orders?villaId=${villa.id}&status=all`} />
 

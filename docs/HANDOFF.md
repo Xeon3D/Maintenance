@@ -267,7 +267,7 @@ restart `next dev` after adding a file. `npx playwright install --with-deps chro
 - **Storage:** `src/lib/storage.ts` (`putObject/getObject/deleteObject`). Refs look like
   `local:<org>/<yyyy-mm>/<hex>.<ext>` and are served by `/api/files/[id]`: auth-checked, `ETag`,
   `Cache-Control: private, no-cache`.
-  - Upload endpoint `/api/uploads`: targets `workOrderId | workOrderItemId | assetId | villaId | partId | purchaseOrderId`.
+  - Upload endpoint `/api/uploads`: targets `workOrderId | workOrderItemId | assetId | villaId | partId | purchaseOrderId | articleId`.
     `<AttachmentsPanel target>` (`src/components/attachments-panel.tsx`) is the generic upload/thumbnail/delete UI.
   - The client downsizes photos first (`src/lib/upload-client.ts` → `shrinkImage`).
   - Portal and QR forms send photos inside the server-action FormData instead
@@ -646,6 +646,24 @@ markers), Message, VerificationToken (password reset).
   `ScanField` (asset serial / MAC, part barcode), `SerialList` (serial numbers of units used on a WO,
   `WorkOrderPart.serialNumbers`, shown in the service report). The scanner renders in a portal (it is opened
   inside forms). `/api/scan` also finds assets by MAC in any notation.
+
+### Villa knowledge base (added 2026-10-19)
+- `KnowledgeArticle` (tenant model, audited): per villa, title, Markdown `body`, optional `system`, `pinned`,
+  created/updated by, M2M `assets` (`_ArticleAssets`), files via `Attachment.articleId` (upload target `articleId`).
+  Staff only: never in the portal. Read = `internal.view`; write = new permission `knowledge.manage` (group "sites";
+  default owner/admin/manager/technician).
+- Pages: `/villas/[id]/knowledge` (list, URL filters `q`, `system`, `assetId`), `/new` (`?assetId=` prefills),
+  `/[articleId]` (rendered text, linked assets, files), `/[articleId]/edit` (+ delete, which removes the stored files).
+  `<KnowledgeCard>` shows pinned/latest articles on the villa page and on asset pages (linked ones).
+- `lib/markdown.ts` (pure, tested): a small Markdown subset parsed into blocks; `<Markdown>` renders React elements,
+  never HTML; links only http(s)/mailto/tel/in-app. No regex lookbehind (old iPhone Safari runs it in the field app).
+- `lib/knowledge.ts` (pure, tested): `filterArticles()` — same matching as the work-order search (`lib/search-text.ts`:
+  accents, partial words, typos, every word must appear) over title + text + linked asset names, in memory (a villa has
+  tens of articles). Shared by the web list and the field app.
+- Field app: the snapshot carries `knowledge` (text of the articles of the villas of the user's jobs, max 500) and
+  `villa.id`; both optional for older cached snapshots. `app/m/knowledge-view.tsx` shows them inside each job.
+- Global search: `lib/knowledge-search.ts` (`searchArticles`, max 3000 newest rows matched in memory) adds the top 5
+  articles above the work orders on `/search` (villa/system filters apply) and in `/api/search` (field app).
 
 ### Phase 10 — SaaS layer
 Stripe checkout and portal (`Subscription`), plan limits (seats, villas, storage), trial expiry

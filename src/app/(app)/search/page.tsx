@@ -8,6 +8,8 @@ import { SearchResults } from "@/components/search-results";
 import { getContext } from "@/lib/context";
 import { sp } from "@/lib/list";
 import { searchWorkOrders } from "@/lib/search";
+import { searchArticles } from "@/lib/knowledge-search";
+import { ArticleResults } from "@/components/knowledge/article-results";
 import { SystemType } from "@/generated/prisma/enums";
 import { titled } from "@/lib/metadata";
 
@@ -23,9 +25,10 @@ export default async function SearchPage({ searchParams }: PageProps<"/search">)
   const systemParam = sp(raw, "system");
   const system = Object.values(SystemType).find((s) => s === systemParam);
 
-  const [villas, found] = await Promise.all([
+  const [villas, found, articles] = await Promise.all([
     ctx.db.villa.findMany({ where: { archivedAt: null }, select: { id: true, name: true }, orderBy: { name: "asc" } }),
     searchWorkOrders(ctx.db, ctx.organization.id, q, { villaId, system }),
+    searchArticles(ctx.db, q, { villaId, system }, 5),
   ]);
 
   return (
@@ -55,14 +58,19 @@ export default async function SearchPage({ searchParams }: PageProps<"/search">)
           <Search className="mx-auto mb-2 size-6" aria-hidden />
           {t("search.hint")}
         </div>
-      ) : found.results.length === 0 ? (
+      ) : found.results.length === 0 && articles.total === 0 ? (
         <EmptyState title={t("search.none")} />
       ) : (
         <>
-          <p className="mb-3 text-sm text-muted">
-            {found.truncated ? t("search.countTop", { count: found.results.length }) : t("search.count", { count: found.results.length })}
-          </p>
-          <SearchResults results={found.results} linkFor={(id) => `/work-orders/${id}`} />
+          {articles.total > 0 && <ArticleResults results={articles.results} total={articles.total} />}
+          {found.results.length > 0 && (
+            <>
+              <p className="mb-3 text-sm text-muted">
+                {found.truncated ? t("search.countTop", { count: found.results.length }) : t("search.count", { count: found.results.length })}
+              </p>
+              <SearchResults results={found.results} linkFor={(id) => `/work-orders/${id}`} />
+            </>
+          )}
         </>
       )}
     </div>
