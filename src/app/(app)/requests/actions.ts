@@ -50,11 +50,11 @@ export async function declineRequestAction(id: string, _: FormResult, form: Form
   return { ok: true };
 }
 
-/** Approvers, and the member who was on call when the request arrived. */
+/** Approvers, and the members on call who got the request when it arrived. */
 async function handlerOf(id: string) {
   const ctx = await getContext();
   if (ctx.can("requests.approve")) return ctx;
-  const req = await ctx.db.request.findUnique({ where: { id }, select: { onCallUserId: true } });
-  if (ctx.can("internal.view") && req?.onCallUserId === ctx.user.id) return ctx;
+  const mine = await ctx.db.request.count({ where: { id, onCallUsers: { some: { id: ctx.user.id } } } });
+  if (ctx.can("internal.view") && mine === 1) return ctx;
   throw new Error("Forbidden");
 }

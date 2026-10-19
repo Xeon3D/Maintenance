@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { addDays, canBeOnCall, DEFAULT_ON_CALL_HOURS, isDay, isMonth, isoWeek, localDay, mondayOf, monthWeeks, onCallHoursFromForm, onCallShiftDay, parseOnCallHours, shiftMonth, weekDate, weekKey, weekOf } from "../src/lib/on-call";
+import { addDays, canBeOnCall, DEFAULT_ON_CALL_HOURS, isDay, isMonth, isoWeek, localDay, mondayOf, monthWeeks, onCallHoursFromForm, onCallShiftDay, parseOnCallHours, pickOnCall, shiftMonth, weekDate, weekKey, weekOf } from "../src/lib/on-call";
 
 describe("on-call weeks", () => {
   it("finds the Monday of any day", () => {
@@ -97,5 +97,19 @@ describe("on-call hours", () => {
     expect(onCallHoursFromForm(form({ onCallMode: "hours", onCallOn2: "on", onCallStart2: "25:00", onCallEnd2: "02:00" }))).toEqual({ errors: { onCallEnd2: "invalid_format" } });
     expect(parseOnCallHours(null)).toBeNull();
     expect(parseOnCallHours({ days: [1, 2] })).toBeNull();
+  });
+});
+
+describe("who of several on call gets a request", () => {
+  const onCall = ["rui", "daniel", "miguel"];
+  it("goes to those in a team for the request's system", () => {
+    expect(pickOnCall(onCall, ["rui", "ana"])).toEqual(["rui"]);
+    expect(pickOnCall(onCall, ["rui", "daniel"])).toEqual(["rui", "daniel"]);
+  });
+  it("goes to everyone on call when none is in such a team, or the request has no system", () => {
+    expect(pickOnCall(onCall, ["ana"])).toEqual(onCall);
+    expect(pickOnCall(onCall, [])).toEqual(onCall);
+    expect(pickOnCall(onCall, null)).toEqual(onCall);
+    expect(pickOnCall([], ["rui"])).toEqual([]);
   });
 });

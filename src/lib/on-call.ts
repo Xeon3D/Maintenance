@@ -140,3 +140,13 @@ export function onCallShiftDay(at: Date, timeZone: string, hours: OnCallHours | 
 
 /** "18:00–02:00" runs into the next day: the form says so. */
 export const endsNextDay = (d: { start: string; end: string }) => minutesOf(d.end) <= minutesOf(d.start);
+
+/**
+ * Who of the week's on-call people (`onCall`, user ids) gets a request: those in a team for the request's system
+ * (`teamMembers`: members of the teams whose specialty is that system; null when the request has no system),
+ * or everyone on call when none of them is in such a team.
+ */
+export function pickOnCall(onCall: string[], teamMembers: string[] | null): string[] {
+  const inTeam = teamMembers ? onCall.filter((id) => teamMembers.includes(id)) : [];
+  return inTeam.length ? inTeam : onCall;
+}

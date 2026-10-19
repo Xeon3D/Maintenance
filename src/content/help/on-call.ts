@@ -5,16 +5,17 @@ export const shots: HelpShot[] = [];
 const text: HelpText = {
   en: `# On call
 
-Take turns being on call, one person per week. Whoever is on call receives every new client request, so nothing waits for the office to open.
+Take turns being on call, one or more people per week. Whoever is on call receives every new client request, so nothing waits for the office to open.
 
 ## How it works
 
-Weeks run from Monday to Sunday, in the company's time zone. Each week can be given to one member of the **on-call team**.
+Weeks run from Monday to Sunday, in the company's time zone. Each week can be given to one or more members of the **on-call team**.
 
-When a client sends a request, from the client portal or by scanning a QR label, during the company's **on-call hours** (by default at any time; set in [Company](/help/organization)), the person on call:
+When a client sends a request, from the client portal or by scanning a QR label, during the company's **on-call hours** (by default at any time; set in [Company](/help/organization)), whoever is on call:
 
 - gets the **New request** notification, in the app, by e-mail and by push, as set in their profile;
 - can **approve or decline** that request, even if their role normally can't, and is pre-selected as the assignee when approving it;
+- when several people are on call that week, only those in a [team](/help/teams) whose specialty is the request's system get it; if none of them is in such a team, or the request has no system, they all get it;
 - is shown on the request as **On call when it arrived**, and next to it in the requests list.
 
 The people who approve requests keep receiving them as before. When nobody is on call, or outside the on-call hours, only they do. See [Requests](/help/requests).
@@ -33,7 +34,7 @@ Clients and viewers can't be in the team. Removing someone from the team frees t
 
 ## Giving out the weeks
 
-In the calendar of **Settings → Staff → On call**, choose a person in the **On call** column of each week. The change is saved at once. Choose **Nobody** to free a week.
+In the calendar of **Settings → Staff → On call**, use **+ Add** in the **On call** column of a week to put someone on call; add more people the same way. The cross next to a name takes them off that week. Changes are saved at once.
 
 > Plan a few months ahead: move to the next months with the arrow and fill in each week.
 
@@ -44,16 +45,17 @@ In the calendar of **Settings → Staff → On call**, choose a person in the **
 `,
   pt: `# Prevenção
 
-Façam turnos de prevenção, uma pessoa por semana. Quem está de prevenção recebe todos os novos pedidos dos clientes, para que nada fique à espera da abertura do escritório.
+Façam turnos de prevenção, uma ou mais pessoas por semana. Quem está de prevenção recebe todos os novos pedidos dos clientes, para que nada fique à espera da abertura do escritório.
 
 ## Como funciona
 
-As semanas vão de segunda a domingo, no fuso horário da empresa. Cada semana pode ser atribuída a um membro da **equipa de prevenção**.
+As semanas vão de segunda a domingo, no fuso horário da empresa. Cada semana pode ser atribuída a um ou mais membros da **equipa de prevenção**.
 
 Quando um cliente envia um pedido, a partir do portal do cliente ou ao digitalizar uma etiqueta QR, dentro do **horário de prevenção** da empresa (por defeito a qualquer hora; definido em [Empresa](/help/organization)), quem está de prevenção:
 
 - recebe a notificação **Novo pedido**, na aplicação, por e-mail e por push, conforme o seu perfil;
 - pode **aprovar ou recusar** esse pedido, mesmo que a sua função normalmente não o permita, e fica pré-selecionado como responsável ao aprová-lo;
+- quando há várias pessoas de prevenção nessa semana, só o recebem as que pertencem a uma [equipa](/help/teams) cuja especialidade é o sistema do pedido; se nenhuma pertencer, ou se o pedido não tiver sistema, recebem-no todas;
 - aparece no pedido como **De prevenção quando chegou**, e ao lado dele na lista de pedidos.
 
 Quem aprova pedidos continua a recebê-los como antes. Quando ninguém está de prevenção, ou fora do horário de prevenção, só essas pessoas os recebem. Veja [Pedidos](/help/requests).
@@ -72,7 +74,7 @@ Clientes e observadores não podem fazer parte da equipa. Retirar alguém da equ
 
 ## Atribuir as semanas
 
-No calendário de **Definições → Colaboradores → Prevenção**, escolha uma pessoa na coluna **De prevenção** de cada semana. A alteração fica guardada de imediato. Escolha **Ninguém** para libertar uma semana.
+No calendário de **Definições → Colaboradores → Prevenção**, use **+ Adicionar** na coluna **De prevenção** de uma semana para pôr alguém de prevenção; adicione mais pessoas da mesma forma. A cruz ao lado de um nome retira essa pessoa da semana. As alterações ficam guardadas de imediato.
 
 > Planeie alguns meses à frente: avance para os meses seguintes com a seta e preencha cada semana.
 

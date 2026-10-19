@@ -2360,7 +2360,7 @@
     "filesOnline": "{count, plural, one {# ficheiro} other {# ficheiros}} (requer ligação)"
   },
   "onCall": {
-    "description": "Escolha a equipa de prevenção e quem está de prevenção em cada semana. Quem está de prevenção recebe todos os novos pedidos dos clientes e pode aprová-los ou recusá-los.",
+    "description": "Escolha a equipa de prevenção e quem está de prevenção em cada semana. Quem está de prevenção recebe os novos pedidos dos clientes no horário de prevenção (Definições → Empresa); havendo várias pessoas, recebem-nos as da equipa do sistema do pedido, ou todas quando nenhuma é.",
     "thisWeek": "De prevenção esta semana ({from} – {to})",
     "you": "você",
     "nobodyNow": "Ninguém está de prevenção esta semana: os novos pedidos vão apenas para quem aprova pedidos.",
@@ -2368,16 +2368,19 @@
     "weekShort": "Sem.",
     "onCall": "De prevenção",
     "weekNumber": "Semana {n}",
-    "weekOf": "De prevenção de {range}",
     "leftTeam": "{name} (saiu da equipa)",
     "nobody": "Ninguém",
     "team": "Equipa de prevenção",
-    "teamHint": "Marque quem pode estar de prevenção. Só quem está na equipa pode receber uma semana. Clientes e observadores não podem participar.",
+    "teamHint": "Marque quem pode estar de prevenção. Cada semana pode ter uma ou mais destas pessoas. Clientes e observadores não podem participar.",
     "inTeam": "{name} faz parte da equipa de prevenção",
     "removeConfirm": "Retirar {name} da equipa de prevenção? As semanas atribuídas a partir desta ficam livres.",
     "requestOnCall": "De prevenção quando chegou",
-    "viewDescription": "Quem está de prevenção em cada semana. Quem está de prevenção recebe todos os novos pedidos dos clientes e pode aprová-los ou recusá-los.",
-    "seeCalendar": "Ver calendário completo"
+    "viewDescription": "Quem está de prevenção em cada semana. Quem está de prevenção recebe os novos pedidos dos clientes no horário de prevenção e pode aprová-los ou recusá-los.",
+    "seeCalendar": "Ver calendário completo",
+    "youToo": "incluindo você",
+    "removeFromWeek": "Retirar {name} desta semana",
+    "add": "Adicionar",
+    "addTo": "Adicionar alguém de prevenção de {range}"
   },
   "onCallHours": {
     "title": "Horário de prevenção",

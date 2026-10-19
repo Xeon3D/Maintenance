@@ -2,9 +2,9 @@ import Link from "next/link";
 import { getFormatter, getTranslations } from "next-intl/server";
 import { ChevronLeft, ChevronRight, PhoneCall } from "lucide-react";
 import { Card } from "@/components/ui";
-import { WeekSelect } from "@/app/(app)/settings/users/on-call/client";
+import { WeekPeople } from "@/app/(app)/settings/users/on-call/client";
 import type { AppContext } from "@/lib/context";
-import { onCallTeam, onCallUserAt } from "@/lib/on-call-db";
+import { onCallTeam, onCallUsersAt } from "@/lib/on-call-db";
 import { addDays, isMonth, isoWeek, localDay, monthWeeks, shiftMonth, weekDate, weekKey, weekOf } from "@/lib/on-call";
 import { cn } from "@/lib/utils";
 
@@ -31,8 +31,7 @@ export async function OnCallNow({ ctx, href }: { ctx: AppContext; href?: string 
   const day = await dayFormat();
   const now = new Date();
   const thisWeek = weekOf(now, ctx.organization.timezone);
-  const currentId = await onCallUserAt(ctx.db, ctx.organization.timezone, now);
-  const current = currentId ? await ctx.db.user.findUnique({ where: { id: currentId }, select: { id: true, name: true } }) : null;
+  const current = await onCallUsersAt(ctx.db, ctx.organization.timezone, now);
 
   const card = (
     <Card className={cn("mb-6 flex items-center gap-3 p-4", href && "transition hover:border-brand/40")}>
@@ -43,10 +42,10 @@ export async function OnCallNow({ ctx, href }: { ctx: AppContext; href?: string 
         <div className="text-xs text-muted">
           {t("onCall.thisWeek", { from: day(thisWeek, { day: "numeric", month: "short" }), to: day(addDays(thisWeek, 6), { day: "numeric", month: "short" }) })}
         </div>
-        {current ? (
+        {current.length > 0 ? (
           <div className="font-medium">
-            {current.name}
-            {current.id === ctx.user.id && <span className="ml-1.5 text-brand">({t("onCall.you")})</span>}
+            {current.map((u) => u.name).join(", ")}
+            {current.some((u) => u.id === ctx.user.id) && <span className="ml-1.5 text-brand">({t("onCall.youToo")})</span>}
           </div>
         ) : (
           <div className="text-muted">{t("onCall.nobodyNow")}</div>
@@ -69,7 +68,7 @@ export async function OnCallNow({ ctx, href }: { ctx: AppContext; href?: string 
   );
 }
 
-/** A month of weeks with who is on call in each: a picker per week when `editable`, else just the name. */
+/** A month of weeks with who is on call in each (one or more): add / remove per week when `editable`, else just the names. */
 export async function OnCallCalendar({ ctx, month: wanted, base, editable }: { ctx: AppContext; month?: string; base: string; editable: boolean }) {
   const t = await getTranslations();
   const day = await dayFormat();
@@ -87,7 +86,9 @@ export async function OnCallCalendar({ ctx, month: wanted, base, editable }: { c
       select: { weekStart: true, userId: true, user: { select: { name: true } } },
     }),
   ]);
-  const byWeek = new Map(rows.map((r) => [weekKey(r.weekStart), r]));
+  const byWeek = new Map<string, typeof rows>();
+  for (const r of rows) byWeek.set(weekKey(r.weekStart), [...(byWeek.get(weekKey(r.weekStart)) ?? []), r]);
+  const team = people.map((p) => ({ ...p, color: color.get(p.id) }));
   const weekdays = [0, 1, 2, 3, 4, 5, 6].map((i) => day(addDays(weeks[0], i), { weekday: "short" }));
   const monthHref = (m: string) => (m === today.slice(0, 7) ? base : `${base}?month=${m}`);
 
@@ -110,7 +111,7 @@ export async function OnCallCalendar({ ctx, month: wanted, base, editable }: { c
         </Link>
       </div>
 
-      <div className="hidden grid-cols-[3rem_repeat(7,minmax(2.25rem,1fr))_minmax(9rem,13rem)] border-b border-border text-center text-xs font-medium uppercase text-muted sm:grid">
+      <div className="hidden grid-cols-[3rem_repeat(7,minmax(2.25rem,1fr))_minmax(12rem,20rem)] border-b border-border text-center text-xs font-medium uppercase text-muted sm:grid">
         <div className="py-2">{t("onCall.weekShort")}</div>
         {weekdays.map((w) => (
           <div key={w} className="py-2">
@@ -122,20 +123,20 @@ export async function OnCallCalendar({ ctx, month: wanted, base, editable }: { c
 
       <ul>
         {weeks.map((w) => {
-          const row = byWeek.get(w);
-          const assigned = row?.userId ?? "";
           const range = `${day(w, { day: "numeric", month: "short" })} – ${day(addDays(w, 6), { day: "numeric", month: "short" })}`;
-          // Someone who left the team keeps showing on their past weeks.
-          const options = !assigned || color.has(assigned) ? people : [...people, { id: assigned, name: t("onCall.leftTeam", { name: row!.user.name }) }];
+          // By name; someone who left the team keeps showing on their past weeks.
+          const onWeek = (byWeek.get(w) ?? [])
+            .map((r) => ({ id: r.userId, name: color.has(r.userId) ? r.user.name : t("onCall.leftTeam", { name: r.user.name }), color: color.get(r.userId) }))
+            .sort((a, b) => a.name.localeCompare(b.name));
           return (
             <li
               key={w}
               className={cn(
-                "grid grid-cols-[1fr_minmax(9rem,13rem)] items-center gap-2 border-b border-l-4 border-border px-3 py-2 last:border-b-0 sm:grid-cols-[3rem_repeat(7,minmax(2.25rem,1fr))_minmax(9rem,13rem)] sm:gap-0 sm:px-0 sm:py-0",
+                "grid grid-cols-[1fr_minmax(12rem,20rem)] items-center gap-2 border-b border-l-4 border-border px-3 py-2 last:border-b-0 sm:grid-cols-[3rem_repeat(7,minmax(2.25rem,1fr))_minmax(12rem,20rem)] sm:gap-0 sm:px-0 sm:py-0",
                 w === thisWeek && "bg-brand/5",
                 w < thisWeek && "opacity-70",
               )}
-              style={{ borderLeftColor: assigned ? (color.get(assigned) ?? "var(--color-border)") : "transparent" }}
+              style={{ borderLeftColor: onWeek.length === 0 ? "transparent" : onWeek.length === 1 ? (onWeek[0].color ?? "var(--color-border)") : "var(--color-brand)" }}
             >
               <div className="text-sm sm:hidden">
                 <div className="font-medium">{range}</div>
@@ -157,17 +158,23 @@ export async function OnCallCalendar({ ctx, month: wanted, base, editable }: { c
                   </div>
                 );
               })}
-              <div className="min-w-0 sm:pr-3">
+              <div className="min-w-0 py-1 sm:pr-3">
                 {editable ? (
-                  <WeekSelect week={w} value={assigned} options={options} label={t("onCall.weekOf", { range })} />
+                  <WeekPeople week={w} people={onWeek} team={team} label={t("onCall.addTo", { range })} />
+                ) : onWeek.length === 0 ? (
+                  <span className="text-sm text-muted">{t("onCall.nobody")}</span>
                 ) : (
-                  <span className={cn("flex items-center gap-1.5 text-sm", !row && "text-muted")}>
-                    {row && <span className="size-2.5 shrink-0 rounded-full" style={{ backgroundColor: color.get(assigned) ?? "var(--color-muted)" }} />}
-                    <span className="truncate">
-                      {row?.user.name ?? t("onCall.nobody")}
-                      {row && assigned === ctx.user.id && <span className="ml-1 text-brand">({t("onCall.you")})</span>}
-                    </span>
-                  </span>
+                  <ul className="space-y-0.5 text-sm">
+                    {onWeek.map((p) => (
+                      <li key={p.id} className="flex items-center gap-1.5">
+                        <span className="size-2.5 shrink-0 rounded-full" style={{ backgroundColor: p.color ?? "var(--color-muted)" }} />
+                        <span className="truncate">
+                          {p.name}
+                          {p.id === ctx.user.id && <span className="ml-1 text-brand">({t("onCall.you")})</span>}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
                 )}
               </div>
             </li>

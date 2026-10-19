@@ -667,7 +667,7 @@ markers), Message, VerificationToken (password reset).
 
 ### On call (added 2026-10-19)
 - `Membership.onCall` = in the on-call team (staff only: `ON_CALL_ROLES` excludes REQUESTER and VIEWER). `OnCallWeek` (tenant
-  model, audited): one member per week, `weekStart` = the Monday as a DATE, unique per company. Weeks are Monday–Sunday in the
+  model, audited): one row per member per week (a week can have several), `weekStart` = the Monday as a DATE. Weeks are Monday–Sunday in the
   company time zone (`lib/on-call.ts`, pure, tested: `weekOf`, `monthWeeks`, `isoWeek`…).
 - Two pages share `components/on-call-calendar.tsx` (`OnCallNow`, `OnCallCalendar editable?`): `/on-call` (nav "On call",
   `internal.view`) is **read-only** for all staff, and `OnCallNow href="/on-call"` is the dashboard card; `/settings/users/on-call` (no nav item: reached only from the **On call** button
@@ -678,7 +678,7 @@ markers), Message, VerificationToken (password reset).
   property manager (villa counts), and invites them with a client (no role picker). `updateMemberAction` refuses role changes
   across the staff/client boundary; `revalidateUsers()` refreshes both pages. Note the sidebar now has two "Clients" entries
   (client companies under Sites, client users under Settings).
-- `createRequest` stamps `Request.onCallUserId` with `onCallUserAt()` (`lib/on-call-db.ts`: the week's member, if still active
+- `createRequest` links `Request.onCallUsers` (M2M `_RequestOnCall`; was `onCallUserId` until migration `on_call_several`) from `requestOnCallUsers()` (`lib/on-call-db.ts`: the week's member, if still active
   and in the team) and adds them to the REQUEST_NEW recipients (approvers still get it). That member may approve/decline that
   request whatever their role (`handlerOf` in `requests/actions.ts`), is pre-selected as assignee, and sees it in the Requests
   nav badge. Shown on the request page and list ("On call when it arrived").
@@ -687,7 +687,10 @@ markers), Message, VerificationToken (password reset).
   offered: weekdays 18:00–02:00, weekend 02:00–02:00. `onCallShiftDay()` (`lib/on-call.ts`, tested) returns the day the period
   holding a request started (yesterday first), and `requestOnCallUser()` gives the request to that day's week member, so Monday
   01:00 still goes to the previous week's person. Outside the hours only approvers are notified. The calendar and the dashboard
-  card (`onCallUserAt`) show the week's member regardless of the hours.
+  card (`onCallUsersAt`) show the week's members regardless of the hours.
+- **Several on call**: `pickOnCall()` (tested) gives a request to those of the week's members in a team whose specialty
+  (`Team.system`) is the request's system; to all of them when none is, or the request has no system. Requests have no team of
+  their own, so the system is the link. Management UI: chips per week with × and a "+ Add" picker (`WeekPeople`).
 
 ### Phase 10 — SaaS layer
 Stripe checkout and portal (`Subscription`), plan limits (seats, villas, storage), trial expiry
