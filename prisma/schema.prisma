@@ -741,7 +741,7 @@ model WorkOrderItem {
   options       String[]
   unit          String?
   meterId       String? // METER_READING items record their answer as a reading on this meter
-  // Answer: "true"/"false", "PASS"/"FAIL"/"FLAG", text, number, choice, or attachment id.
+  // Answer: "true"/"false", "PASS"/"FAIL"/"FLAG"/"NA", text, number, choice, or attachment id.
   value         String?
   note          String?
   completedById String?

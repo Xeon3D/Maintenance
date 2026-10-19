@@ -34,7 +34,7 @@ export async function answerItem(ctx: WoCtx, woId: string, itemId: string, value
   let v = value === null ? null : z.string().max(5000).parse(value).trim() || null;
   if (v !== null) {
     if (item.type === "NUMBER" || item.type === "METER_READING") v = String(z.coerce.number().finite().parse(v));
-    if (item.type === "PASS_FAIL") v = z.enum(["PASS", "FAIL", "FLAG"]).parse(v);
+    if (item.type === "PASS_FAIL") v = z.enum(["PASS", "FAIL", "FLAG", "NA"]).parse(v);
     if (item.type === "CHECKBOX") v = z.enum(["true", "false"]).parse(v);
     if (item.type === "MULTIPLE_CHOICE" && !item.options.includes(v)) throw new WorkOrderError("invalidRef");
     // Photo/signature answers point at an attachment on this work order.

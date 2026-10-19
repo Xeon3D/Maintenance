@@ -84,6 +84,7 @@ export function ChecklistItemInput({ item, woId, locked, enqueue }: { item: Offl
             {choice("PASS", t("checklist.pf.PASS"), "border-green-600 bg-green-600 text-white")}
             {choice("FLAG", t("checklist.pf.FLAG"), "border-amber-500 bg-amber-500 text-white")}
             {choice("FAIL", t("checklist.pf.FAIL"), "border-red-600 bg-red-600 text-white")}
+            {choice("NA", t("checklist.pf.NA"), "border-gray-500 bg-gray-500 text-white")}
           </div>
         )}
 

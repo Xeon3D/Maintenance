@@ -15,6 +15,7 @@ describe("isItemComplete", () => {
   it("requires a non-blank value for other types", () => {
     expect(isItemComplete({ type: "TEXT", value: "  " })).toBe(false);
     expect(isItemComplete({ type: "PASS_FAIL", value: "FAIL" })).toBe(true);
+    expect(isItemComplete({ type: "PASS_FAIL", value: "NA" })).toBe(true);
     expect(isItemComplete({ type: "NUMBER", value: "0" })).toBe(true);
   });
 });

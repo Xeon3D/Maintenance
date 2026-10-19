@@ -2,7 +2,7 @@
 
 import { useRef, useState, useTransition } from "react";
 import { useTranslations } from "next-intl";
-import { ArrowDown, ArrowUp, Camera, Check, Flag, ListChecks, PenLine, Plus, Trash2, X } from "lucide-react";
+import { ArrowDown, ArrowUp, Camera, Check, Flag, ListChecks, Minus, PenLine, Plus, Trash2, X } from "lucide-react";
 import { Button, Input, Select } from "@/components/ui";
 import { SignaturePad, type SignaturePadHandle } from "@/components/signature-pad";
 import { uploadFile } from "@/lib/upload-client";
@@ -143,6 +143,7 @@ function ItemRow({ woId, item, locked }: { woId: string; item: ChecklistItem; lo
               ["PASS", Check, "border-green-400 bg-green-50 text-green-800"],
               ["FLAG", Flag, "border-amber-400 bg-amber-50 text-amber-800"],
               ["FAIL", X, "border-red-400 bg-red-50 text-red-800"],
+              ["NA", Minus, "border-gray-400 bg-gray-100 text-gray-700"],
             ] as const
           ).map(([v, Icon, tone]) => (
             <button

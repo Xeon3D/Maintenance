@@ -518,12 +518,13 @@
     "pf": {
       "PASS": "OK",
       "FLAG": "Alerta",
-      "FAIL": "Falha"
+      "FAIL": "Falha",
+      "NA": "N/A"
     },
     "types": {
       "HEADING": "Título de secção",
       "CHECKBOX": "Caixa de verificação",
-      "PASS_FAIL": "OK / alerta / falha",
+      "PASS_FAIL": "OK / alerta / falha / N/A",
       "TEXT": "Texto",
       "NUMBER": "Número",
       "MULTIPLE_CHOICE": "Escolha múltipla",
