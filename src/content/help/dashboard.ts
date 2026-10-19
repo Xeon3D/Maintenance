@@ -19,6 +19,10 @@ The figures are always live: they are worked out when the page opens, so reload 
 
 The box at the top searches every work order and the notes technicians wrote on them. Type a word, press Enter, and the [Search](/help/search) page opens with the results.
 
+## On call this week
+
+Below the search, a card shows who is on call this week, the person who receives every new client request (or that nobody is). Click it to open the full rota. See [On call](/help/on-call).
+
 ## The counters
 
 The row of cards at the top counts things across the whole company, not only your own work. A number shown in red means something is wrong and needs action.
@@ -77,6 +81,10 @@ Os valores estão sempre atualizados: são calculados quando a página abre, por
 ## Pesquisar
 
 A caixa no topo pesquisa todas as ordens de trabalho e as notas que os técnicos escreveram nelas. Escreva uma palavra, carregue em Enter e abre a página de [Pesquisa](/help/search) com os resultados.
+
+## De prevenção esta semana
+
+Por baixo da pesquisa, um cartão mostra quem está de prevenção esta semana, a pessoa que recebe todos os novos pedidos dos clientes (ou que ninguém está). Clique nele para abrir a escala completa. Veja [Prevenção](/help/on-call).
 
 ## Os contadores
 

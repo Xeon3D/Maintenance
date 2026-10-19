@@ -2369,6 +2369,7 @@
     "inTeam": "{name} faz parte da equipa de prevenção",
     "removeConfirm": "Retirar {name} da equipa de prevenção? As semanas atribuídas a partir desta ficam livres.",
     "requestOnCall": "De prevenção quando chegou",
-    "viewDescription": "Quem está de prevenção em cada semana. Quem está de prevenção recebe todos os novos pedidos dos clientes e pode aprová-los ou recusá-los."
+    "viewDescription": "Quem está de prevenção em cada semana. Quem está de prevenção recebe todos os novos pedidos dos clientes e pode aprová-los ou recusá-los.",
+    "seeRota": "Ver a escala"
   }
 }

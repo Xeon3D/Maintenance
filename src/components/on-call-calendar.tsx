@@ -25,8 +25,8 @@ const dayFormat = async () => {
     format.dateTime(weekDate(d), { ...opts, timeZone: "UTC" });
 };
 
-/** Who is on call this week. */
-export async function OnCallNow({ ctx }: { ctx: AppContext }) {
+/** Who is on call this week; with `href`, the whole card links there (the dashboard links to the calendar). */
+export async function OnCallNow({ ctx, href }: { ctx: AppContext; href?: string }) {
   const t = await getTranslations();
   const day = await dayFormat();
   const now = new Date();
@@ -34,8 +34,8 @@ export async function OnCallNow({ ctx }: { ctx: AppContext }) {
   const currentId = await onCallUserAt(ctx.db, ctx.organization.timezone, now);
   const current = currentId ? await ctx.db.user.findUnique({ where: { id: currentId }, select: { id: true, name: true } }) : null;
 
-  return (
-    <Card className="mb-6 flex items-center gap-3 p-4">
+  const card = (
+    <Card className={cn("mb-6 flex items-center gap-3 p-4", href && "transition hover:border-brand/40")}>
       <span className="grid size-9 shrink-0 place-items-center rounded-full bg-brand/10 text-brand">
         <PhoneCall className="size-4" />
       </span>
@@ -52,7 +52,20 @@ export async function OnCallNow({ ctx }: { ctx: AppContext }) {
           <div className="text-muted">{t("onCall.nobodyNow")}</div>
         )}
       </div>
+      {href && (
+        <span className="ml-auto inline-flex shrink-0 items-center gap-1 text-xs text-brand">
+          {t("onCall.seeRota")}
+          <ChevronRight className="size-3.5" />
+        </span>
+      )}
     </Card>
+  );
+  return href ? (
+    <Link href={href} className="block">
+      {card}
+    </Link>
+  ) : (
+    card
   );
 }
 

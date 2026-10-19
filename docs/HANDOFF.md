@@ -670,7 +670,7 @@ markers), Message, VerificationToken (password reset).
   model, audited): one member per week, `weekStart` = the Monday as a DATE, unique per company. Weeks are Monday–Sunday in the
   company time zone (`lib/on-call.ts`, pure, tested: `weekOf`, `monthWeeks`, `isoWeek`…).
 - Two pages share `components/on-call-calendar.tsx` (`OnCallNow`, `OnCallCalendar editable?`): `/on-call` (nav "On call",
-  `internal.view`) is **read-only** for all staff; `/settings/users/on-call` (no nav item: reached only from the **On call** button
+  `internal.view`) is **read-only** for all staff, and `OnCallNow href="/on-call"` is the dashboard card; `/settings/users/on-call` (no nav item: reached only from the **On call** button
   on Settings → Staff; page and writes need the new permission `onCall.manage`, group "admin", default owner/admin) has a select
   per week and the team checkboxes. Removing someone from the team frees their weeks from the current one on; past weeks stay.
 - **Settings → Staff / Clients** (split 2026-10-19): `/settings/users` ("Staff" / "Colaboradores") lists non-REQUESTER members and
