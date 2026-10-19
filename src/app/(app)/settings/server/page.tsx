@@ -93,6 +93,13 @@ export default async function ServerSettingsPage({ searchParams }: PageProps<"/s
               <Input name="appName" defaultValue={settings.appName ?? ""} placeholder={process.env.APP_NAME || DEFAULT_APP_NAME} maxLength={40} className="max-w-sm" />
               <FieldError name="appName" />
             </Field>
+            <label className="flex items-start gap-2 text-sm">
+              <input type="checkbox" name="showVersion" defaultChecked={settings.showVersion} className="mt-0.5 size-4 accent-[var(--brand)]" />
+              <span>
+                <span className="font-medium">{t("server.showVersion")}</span>
+                <span className="block text-xs text-muted">{t("server.showVersionHint")}</span>
+              </span>
+            </label>
           </ActionForm>
         </Card>
 

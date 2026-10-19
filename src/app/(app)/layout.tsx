@@ -1,7 +1,8 @@
 import { redirect } from "next/navigation";
 import { Sidebar } from "@/components/shell/sidebar";
 import { HelpButton } from "@/components/help-button";
-import { getAppName } from "@/lib/server-settings";
+import { getAppName, getServerSettings } from "@/lib/server-settings";
+import { runningVersion } from "@/lib/running-version";
 import { NAV } from "@/components/shell/nav";
 import { getContext } from "@/lib/context";
 import { unreadConversations } from "@/lib/conversations";
@@ -28,11 +29,13 @@ export default async function AppLayout({ children }: { children: React.ReactNod
       .filter((i) => i.ready && (!i.permission || ctx.can(i.permission)))
       .map((i) => (badges[i.href] ? { ...i, badge: badges[i.href] } : i)),
   })).filter((g) => g.items.length > 0);
+  const version = (await getServerSettings()).showVersion ? await runningVersion() : null;
 
   return (
     <div className="min-h-screen" style={brandStyle(ctx.organization)}>
       <Sidebar
         appName={await getAppName()}
+        version={version}
         groups={groups}
         user={{ name: ctx.user.name, email: ctx.user.email, role: ctx.membership.jobRole?.name ?? t(`roles.${ctx.role}`) }}
         org={{ id: ctx.organization.id, name: ctx.organization.name, logo: logoSrc(ctx.organization) }}

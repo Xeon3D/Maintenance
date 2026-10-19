@@ -77,6 +77,7 @@ const ICONS: Record<string, LucideIcon> = {
 
 type Props = {
   appName: string;
+  version?: string | null; // release version or dev commit, when Settings → Server asks for it
   groups: NavGroup[]; // already filtered by permission/readiness on the server
   user: { name: string; email: string; role: string }; // role: display name (custom role or translated built-in)
   org: { id: string; name: string; logo: string | null };
@@ -84,7 +85,7 @@ type Props = {
   unreadNotifications: number;
 };
 
-export function Sidebar({ appName, groups, user, org, orgs, unreadNotifications }: Props) {
+export function Sidebar({ appName, version, groups, user, org, orgs, unreadNotifications }: Props) {
   const t = useTranslations();
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
@@ -105,7 +106,10 @@ export function Sidebar({ appName, groups, user, org, orgs, unreadNotifications 
               <img src={org.logo} alt="" className="size-9 shrink-0 rounded-md border border-border bg-white object-contain p-0.5" />
             )}
             <span className="min-w-0">
-              <span className="block text-xs font-semibold uppercase tracking-wide text-brand">{appName}</span>
+              <span className="block text-xs font-semibold uppercase tracking-wide text-brand">
+                {appName}
+                {version && <span className="ml-1.5 font-mono font-normal normal-case tracking-normal text-muted">{version}</span>}
+              </span>
               <span className="block truncate text-sm font-medium">{org.name}</span>
             </span>
           </span>
