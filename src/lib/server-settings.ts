@@ -5,20 +5,22 @@ import { DEFAULT_BACKUP_SCHEDULE, normalizeSchedule, type BackupSchedule } from 
 import { DEFAULT_EMAIL, normalizeEmailSettings, type EmailSettings } from "@/lib/email-settings";
 import { DEFAULT_BACKUP_COPIES, normalizeBackupCopies, type BackupCopies } from "@/lib/backup-copies-settings";
 
-// Server-wide settings (not per company): software name, backup schedule, automatic updates, e-mail delivery.
+// Server-wide settings (not per company): software name and version label, backup schedule, automatic updates, e-mail delivery.
 // Kept in a JSON file in DATA_DIR so they survive a factory reset and a database restore.
 
 export const DEFAULT_APP_NAME = "VillaOps";
 
 export type ServerSettings = {
   appName: string | null;
+  /** Show the version (on a dev server, the commit) after the software name in the sidebar. */
+  showVersion: boolean;
   backups: BackupSchedule;
   autoUpdate: boolean;
   email: EmailSettings;
   backupCopies: BackupCopies;
 };
 
-const DEFAULTS: ServerSettings = { appName: null, backups: DEFAULT_BACKUP_SCHEDULE, autoUpdate: false, email: DEFAULT_EMAIL, backupCopies: DEFAULT_BACKUP_COPIES };
+const DEFAULTS: ServerSettings = { appName: null, showVersion: false, backups: DEFAULT_BACKUP_SCHEDULE, autoUpdate: false, email: DEFAULT_EMAIL, backupCopies: DEFAULT_BACKUP_COPIES };
 
 export const dataDir = () => path.resolve(process.env.DATA_DIR ?? "./.data");
 const file = () => path.join(dataDir(), "server-settings.json");
@@ -32,6 +34,7 @@ export async function getServerSettings(): Promise<ServerSettings> {
     const raw = JSON.parse(await readFile(file(), "utf8")) as Partial<ServerSettings>;
     const value: ServerSettings = {
       appName: typeof raw.appName === "string" && raw.appName.trim() ? raw.appName.trim().slice(0, 40) : null,
+      showVersion: raw.showVersion === true,
       backups: normalizeSchedule(raw.backups),
       autoUpdate: raw.autoUpdate === true,
       email: normalizeEmailSettings(raw.email),

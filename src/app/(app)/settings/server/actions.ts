@@ -58,8 +58,9 @@ export async function saveGeneralAction(_: FormResult, form: FormData): Promise<
   const parsed = parseForm(z.object({ appName: optStr(40) }), form);
   if (parsed.error) return parsed.error;
   const before = await getServerSettings();
-  await updateServerSettings({ appName: parsed.data.appName });
-  const { changes } = changesOf({ appName: before.appName }, { appName: parsed.data.appName });
+  const next = { appName: parsed.data.appName, showVersion: form.get("showVersion") === "on" };
+  await updateServerSettings(next);
+  const { changes } = changesOf({ appName: before.appName, showVersion: before.showVersion }, next);
   if (Object.keys(changes).length) await serverAudit(ctx, "settings", { changes });
   revalidatePath("/", "layout");
   return { ok: true };
