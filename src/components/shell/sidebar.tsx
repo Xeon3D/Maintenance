@@ -25,6 +25,7 @@ import {
   Package,
   ScanLine,
   ScrollText,
+  Search,
   Server,
   ShoppingCart,
   Smartphone,
@@ -57,6 +58,7 @@ const ICONS: Record<string, LucideIcon> = {
   MessagesSquare,
   Package,
   ScanLine,
+  Search,
   ShoppingCart,
   Smartphone,
   Truck,
@@ -187,6 +189,9 @@ export function Sidebar({ appName, groups, user, org, orgs, unreadNotifications 
           <img src={org.logo} alt="" className="size-7 rounded bg-white object-contain" />
         )}
         <span className="flex-1 truncate font-medium">{org.name}</span>
+        <Link href="/search" aria-label={t("nav.search")} className="rounded-md p-2 text-muted hover:bg-gray-100">
+          <Search className="size-4" />
+        </Link>
         <Link href="/scan" aria-label={t("nav.scan")} className="rounded-md p-2 text-muted hover:bg-gray-100">
           <ScanLine className="size-4" />
         </Link>

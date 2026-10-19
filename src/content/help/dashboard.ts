@@ -15,6 +15,10 @@ The figures are always live: they are worked out when the page opens, so reload 
 
 ![The dashboard: counters at the top, your open work orders and the overdue ones below](dashboard-overview)
 
+## Searching
+
+The box at the top searches every work order and the notes technicians wrote on them. Type a word, press Enter, and the [Search](/help/search) page opens with the results.
+
 ## The counters
 
 The row of cards at the top counts things across the whole company, not only your own work. A number shown in red means something is wrong and needs action.
@@ -69,6 +73,10 @@ O **Painel** é a primeira página que vê depois de iniciar sessão. Não subst
 Os valores estão sempre atualizados: são calculados quando a página abre, por isso recarregue a página (ou volte a ela) para ver os números mais recentes.
 
 ![O painel: contadores no topo, as suas ordens de trabalho em aberto e as que estão em atraso por baixo](dashboard-overview)
+
+## Pesquisar
+
+A caixa no topo pesquisa todas as ordens de trabalho e as notas que os técnicos escreveram nelas. Escreva uma palavra, carregue em Enter e abre a página de [Pesquisa](/help/search) com os resultados.
 
 ## Os contadores
 

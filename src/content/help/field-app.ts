@@ -58,6 +58,10 @@ If you have to stop, tap **On hold**, type the reason (for example waiting for p
 
 Tap the scan button at the top and point the camera at the QR label on a piece of equipment. The list then shows only your jobs for that asset (**Showing** followed by the asset name). Tap the cross to **Show all** again, or **Open** to see the asset's page (that needs a connection). This works offline for assets at the villas of your assigned jobs. See [Scan](/help/scan).
 
+## Searching past jobs
+
+Tap the magnifying glass at the top to search every work order in the company, not just yours: type a word such as *processor* and you see the jobs where it was written, with the comment or note highlighted. Results that are in your list open in the field app; the others open the full work order page. Search needs a connection. See [Search](/help/search).
+
 ## Syncing and what the banners mean
 
 The app syncs on its own: when it opens, when the connection comes back, when you return to it, every minute while it's open, and a moment after each change. Changes are sent in the order you made them; photos and signatures are uploaded first. A coloured banner under the header tells you where things stand:
@@ -135,6 +139,10 @@ Se tiver de parar, toque em **Em espera**, escreva o motivo (por exemplo a aguar
 ## Ler a etiqueta de um equipamento
 
 Toque no botão de leitura no topo e aponte a câmara para a etiqueta QR de um equipamento. A lista passa a mostrar só os seus trabalhos desse equipamento (**A mostrar** seguido do nome do equipamento). Toque na cruz para **Mostrar tudo** de novo, ou em **Abrir** para ver a página do equipamento (isso precisa de ligação). Funciona sem rede para os equipamentos das moradias dos seus trabalhos atribuídos. Veja [Ler código](/help/scan).
+
+## Pesquisar trabalhos anteriores
+
+Toque na lupa no topo para pesquisar todas as ordens de trabalho da empresa, não só as suas: escreva uma palavra como *processador* e vê os trabalhos onde foi escrita, com o comentário ou a nota destacados. Os resultados que estão na sua lista abrem na app de campo; os outros abrem a página completa da ordem de trabalho. A pesquisa precisa de ligação. Veja [Pesquisa](/help/search).
 
 ## A sincronização e o que significam os avisos
 

@@ -118,7 +118,8 @@
     "server": "Servidor",
     "roles": "Funções",
     "categories": "Categorias",
-    "audit": "Registo de auditoria"
+    "audit": "Registo de auditoria",
+    "search": "Pesquisa"
   },
   "roles": {
     "OWNER": "Super Admin",
@@ -180,7 +181,8 @@
     "myWorkOrders": "As minhas ordens abertas",
     "overdueWorkOrders": "Em atraso",
     "lowStock": "Peças com stock baixo",
-    "poApprovals": "Encomendas por aprovar"
+    "poApprovals": "Encomendas por aprovar",
+    "searchPlaceholder": "Pesquisar ordens de trabalho anteriores e notas dos técnicos…"
   },
   "settings": {
     "orgTitle": "Organização",
@@ -2255,5 +2257,33 @@
     "includedInContract": "incluídas no contrato",
     "feeTerm": "{amount} por deslocação",
     "kmTerm": "{amount} por km"
+  },
+  "search": {
+    "title": "Pesquisa",
+    "description": "Encontre trabalhos anteriores por qualquer palavra escrita neles: título, descrição, comentários, notas da lista de verificação e notas de tempo.",
+    "placeholder": "ex.: processador, condensação, switch PoE…",
+    "villa": "Moradia",
+    "allVillas": "Todas as moradias",
+    "system": "Sistema",
+    "allSystems": "Todos os sistemas",
+    "hint": "Escreva uma ou mais palavras. Maiúsculas, acentos e pequenos erros de escrita não importam.",
+    "none": "Nenhuma ordem de trabalho menciona estas palavras.",
+    "count": "{count, plural, one {# ordem de trabalho} other {# ordens de trabalho}}",
+    "countTop": "As {count} ordens de trabalho mais relevantes",
+    "completedOn": "Concluída a {date}",
+    "openedOn": "Aberta a {date}",
+    "moreHits": "{count, plural, one {Mais # nota} other {Mais # notas}} com estas palavras",
+    "back": "Voltar",
+    "searching": "A pesquisar…",
+    "offline": "A pesquisa precisa de ligação. Os seus trabalhos continuam disponíveis sem rede.",
+    "kind": {
+      "description": "Descrição",
+      "request": "Pedido do cliente",
+      "comment": "Comentário",
+      "itemNote": "Nota em \"{step}\"",
+      "itemAnswer": "Resposta a \"{step}\"",
+      "timeNote": "Nota de tempo",
+      "statusNote": "Nota ao passar a {status}"
+    }
   }
 }

@@ -19,6 +19,7 @@ export const HELP_GROUPS: HelpGroup[] = ["start", "operations", "sites", "supply
 export const HELP_TOPICS: HelpTopic[] = [
   { slug: "getting-started", group: "start", icon: "Compass", paths: [] },
   { slug: "dashboard", group: "start", icon: "LayoutDashboard", href: "/dashboard", paths: ["/dashboard"] },
+  { slug: "search", group: "start", icon: "Search", href: "/search", permission: "internal.view", paths: ["/search"] },
   { slug: "field-app", group: "start", icon: "Smartphone", href: "/m", permission: "workOrders.execute", paths: ["/m"] },
   { slug: "scan", group: "start", icon: "ScanLine", href: "/scan", permission: "internal.view", paths: ["/scan"] },
   { slug: "notifications", group: "start", icon: "Bell", href: "/notifications", paths: ["/notifications"] },
