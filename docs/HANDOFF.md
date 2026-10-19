@@ -665,6 +665,24 @@ markers), Message, VerificationToken (password reset).
 - Global search: `lib/knowledge-search.ts` (`searchArticles`, max 3000 newest rows matched in memory) adds the top 5
   articles above the work orders on `/search` (villa/system filters apply) and in `/api/search` (field app).
 
+### On call (added 2026-10-19)
+- `Membership.onCall` = in the on-call team (staff only: `ON_CALL_ROLES` excludes REQUESTER and VIEWER). `OnCallWeek` (tenant
+  model, audited): one member per week, `weekStart` = the Monday as a DATE, unique per company. Weeks are Monday–Sunday in the
+  company time zone (`lib/on-call.ts`, pure, tested: `weekOf`, `monthWeeks`, `isoWeek`…).
+- Two pages share `components/on-call-calendar.tsx` (`OnCallNow`, `OnCallCalendar editable?`): `/on-call` (nav "On call",
+  `internal.view`) is **read-only** for all staff, and `OnCallNow href="/on-call"` is the dashboard card; `/settings/users/on-call` (no nav item: reached only from the **On call** button
+  on Settings → Staff; page and writes need the new permission `onCall.manage`, group "admin", default owner/admin) has a select
+  per week and the team checkboxes. Removing someone from the team frees their weeks from the current one on; past weeks stay.
+- **Settings → Staff / Clients** (split 2026-10-19): `/settings/users` ("Staff" / "Colaboradores") lists non-REQUESTER members and
+  invites; `/settings/client-users` ("Clients" / "Clientes") lists portal users (REQUESTER) with their client marked owner and/or
+  property manager (villa counts), and invites them with a client (no role picker). `updateMemberAction` refuses role changes
+  across the staff/client boundary; `revalidateUsers()` refreshes both pages. Note the sidebar now has two "Clients" entries
+  (client companies under Sites, client users under Settings).
+- `createRequest` stamps `Request.onCallUserId` with `onCallUserAt()` (`lib/on-call-db.ts`: the week's member, if still active
+  and in the team) and adds them to the REQUEST_NEW recipients (approvers still get it). That member may approve/decline that
+  request whatever their role (`handlerOf` in `requests/actions.ts`), is pre-selected as assignee, and sees it in the Requests
+  nav badge. Shown on the request page and list ("On call when it arrived").
+
 ### Phase 10 — SaaS layer
 Stripe checkout and portal (`Subscription`), plan limits (seats, villas, storage), trial expiry
 handling, a super-admin console (`User.isSuperAdmin`), org deletion/export.

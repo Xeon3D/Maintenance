@@ -3,6 +3,7 @@ import * as assets from "./assets";
 import * as audit from "./audit";
 import * as categories from "./categories";
 import * as clients from "./clients";
+import * as clientUsers from "./client-users";
 import * as contracts from "./contracts";
 import * as dashboard from "./dashboard";
 import * as fieldApp from "./field-app";
@@ -10,6 +11,7 @@ import * as gettingStarted from "./getting-started";
 import * as messages from "./messages";
 import * as meters from "./meters";
 import * as notifications from "./notifications";
+import * as onCall from "./on-call";
 import * as organization from "./organization";
 import * as parts from "./parts";
 import * as preventive from "./preventive";
@@ -40,6 +42,7 @@ export const HELP_CONTENT: Record<string, HelpModule> = {
   notifications,
   "work-orders": workOrders,
   requests,
+  "on-call": onCall,
   preventive,
   procedures,
   messages,
@@ -55,6 +58,7 @@ export const HELP_CONTENT: Record<string, HelpModule> = {
   profile,
   organization,
   users,
+  "client-users": clientUsers,
   roles,
   teams,
   categories,

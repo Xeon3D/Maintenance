@@ -1,44 +1,63 @@
+import Link from "next/link";
 import { notFound } from "next/navigation";
+import { PhoneCall } from "lucide-react";
 import { getFormatter, getTranslations } from "next-intl/server";
-import { Badge, Card, PageHeader, Table } from "@/components/ui";
+import { Badge, Button, Card, PageHeader, Table } from "@/components/ui";
 import { getContext } from "@/lib/context";
 import { ASSIGNABLE_ROLES } from "@/lib/rbac";
 import { hourlyRateFor, parseRoleRates } from "@/lib/roles";
+import { titled } from "@/lib/metadata";
 import { InviteForm, MemberControls, RevokeInviteButton, type RoleOptions } from "./client";
 
+export const generateMetadata = titled("nav.users");
+
+// Settings → Staff: the company's own people and viewers. Client (portal) users are in Settings → Clients.
 export default async function UsersPage() {
   const ctx = await getContext();
   if (!ctx.can("users.manage")) notFound();
   const t = await getTranslations();
   const format = await getFormatter();
 
-  const [members, invites, clients, jobRoles] = await Promise.all([
+  const [members, invites, jobRoles] = await Promise.all([
     ctx.db.membership.findMany({
+      where: { role: { not: "REQUESTER" } },
       include: { user: true, client: true, jobRole: true },
       orderBy: [{ active: "desc" }, { createdAt: "asc" }],
     }),
     ctx.db.invitation.findMany({
-      where: { acceptedAt: null, expiresAt: { gt: new Date() } },
+      where: { acceptedAt: null, expiresAt: { gt: new Date() }, role: { not: "REQUESTER" } },
       include: { jobRole: { select: { name: true } } },
       orderBy: { createdAt: "desc" },
     }),
-    ctx.db.client.findMany({ where: { archivedAt: null }, select: { id: true, name: true }, orderBy: { name: "asc" } }),
     ctx.db.jobRole.findMany({ select: { id: true, name: true }, orderBy: { name: "asc" } }),
   ]);
   const rates = parseRoleRates(ctx.organization.roleRates);
   const roleOptions: RoleOptions = {
-    builtIn: ASSIGNABLE_ROLES.map((r) => ({ value: r, label: t(`roles.${r}`) })),
+    builtIn: ASSIGNABLE_ROLES.filter((r) => r !== "REQUESTER").map((r) => ({ value: r, label: t(`roles.${r}`) })),
     custom: jobRoles.map((r) => ({ value: `job:${r.id}`, label: r.name })),
   };
   const money = (n: number) => format.number(n, { style: "currency", currency: ctx.organization.currency });
 
   return (
     <>
-      <PageHeader title={t("settings.usersTitle")} description={t("settings.usersDescription")} />
+      <PageHeader
+        title={t("settings.usersTitle")}
+        description={t("settings.usersDescription")}
+        actions={
+          ctx.can("onCall.manage") && (
+            <Link href="/settings/users/on-call">
+              <Button variant="secondary">
+                <PhoneCall className="size-4" />
+                {t("nav.onCall")}
+              </Button>
+            </Link>
+          )
+        }
+      />
 
       <Card className="mb-6 p-5">
         <h2 className="mb-4 font-medium">{t("settings.invite")}</h2>
-        <InviteForm clients={clients} roleOptions={roleOptions} />
+        <InviteForm roleOptions={roleOptions} />
       </Card>
 
       <Card>
@@ -65,7 +84,12 @@ export default async function UsersPage() {
                   </td>
                   <td>
                     {m.jobRole?.name ?? t(`roles.${m.role}`)}
-                    {m.client && <div className="text-xs text-muted">{m.client.name}</div>}
+                    {m.onCall && (
+                      <div className="flex items-center gap-1 text-xs text-muted">
+                        <PhoneCall className="size-3" />
+                        {t("onCall.team")}
+                      </div>
+                    )}
                   </td>
                   <td className="text-right tabular-nums">
                     {(() => {

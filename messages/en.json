@@ -105,7 +105,7 @@
     "reports": "Reports",
     "settings": "Settings",
     "organization": "Organization",
-    "users": "Users",
+    "users": "Staff",
     "teams": "Teams",
     "operations": "Operations",
     "sites": "Sites & equipment",
@@ -119,7 +119,9 @@
     "roles": "Roles",
     "categories": "Categories",
     "audit": "Audit log",
-    "search": "Search"
+    "search": "Search",
+    "onCall": "On call",
+    "clientUsers": "Clients"
   },
   "roles": {
     "OWNER": "Super Admin",
@@ -190,8 +192,8 @@
     "timezone": "Time zone",
     "currency": "Currency",
     "defaultLanguage": "Default language",
-    "usersTitle": "Users",
-    "usersDescription": "People who can sign in to this organization.",
+    "usersTitle": "Staff",
+    "usersDescription": "Your company's people, and viewers, who can sign in. Client users are under Settings → Clients.",
     "invite": "Invite user",
     "inviteSend": "Create invitation",
     "inviteLink": "We've emailed an invitation to {email}. You can also share this link directly; it expires in 7 days.",
@@ -209,7 +211,12 @@
     "addMember": "Add member",
     "specialty": "Specialty",
     "noTeams": "No teams yet.",
-    "cannotChangeOwner": "The Super Admin's role can't be changed."
+    "cannotChangeOwner": "The Super Admin's role can't be changed.",
+    "clientUsersTitle": "Clients",
+    "clientUsersDescription": "Villa owners and property managers who sign in to the client portal.",
+    "noClientUsers": "No client users yet",
+    "villaOwner": "Owner · {count, plural, one {# villa} other {# villas}}",
+    "propertyManager": "Property manager · {count, plural, one {# villa} other {# villas}}"
   },
   "validation": {
     "invalid": "Invalid value.",
@@ -1822,6 +1829,12 @@
         "label": "Knowledge base",
         "hint": "Write, edit and delete villa knowledge-base articles. Everyone on the team can read them."
       }
+    },
+    "onCall": {
+      "manage": {
+        "label": "Manage on call",
+        "hint": "Choose who is in the on-call team and give each week to someone."
+      }
     }
   },
   "reportEmail": {
@@ -2344,5 +2357,25 @@
     "updated": "Updated {when}",
     "updatedBy": "Updated by {name}, {when}",
     "filesOnline": "{count, plural, one {# file} other {# files}} (needs a connection)"
+  },
+  "onCall": {
+    "description": "Choose the on-call team and who is on call each week. Whoever is on call receives every new client request and can approve or decline it.",
+    "thisWeek": "On call this week ({from} – {to})",
+    "you": "you",
+    "nobodyNow": "Nobody is on call this week: new requests go only to those who approve requests.",
+    "today": "This month",
+    "weekShort": "Wk",
+    "onCall": "On call",
+    "weekNumber": "Week {n}",
+    "weekOf": "On call for {range}",
+    "leftTeam": "{name} (left the team)",
+    "nobody": "Nobody",
+    "team": "On-call team",
+    "teamHint": "Tick who can be on call. Only people in the team can be given a week. Clients and viewers can't take part.",
+    "inTeam": "{name} is in the on-call team",
+    "removeConfirm": "Remove {name} from the on-call team? Their weeks from this week on become free.",
+    "requestOnCall": "On call when it arrived",
+    "viewDescription": "Who is on call each week. Whoever is on call receives every new client request and can approve or decline it.",
+    "seeCalendar": "See full calendar"
   }
 }

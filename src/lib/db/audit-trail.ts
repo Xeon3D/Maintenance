@@ -30,6 +30,7 @@ export const AUDITED: Record<string, "all" | "delete"> = {
   Membership: "all",
   Invitation: "all",
   KnowledgeArticle: "all",
+  OnCallWeek: "all",
   Attachment: "delete",
 };
 
@@ -47,6 +48,10 @@ async function labelOf(model: string, row: Row | null | undefined): Promise<stri
   if (model === "Membership" && typeof row.userId === "string") {
     const u = await prisma.user.findUnique({ where: { id: row.userId }, select: { name: true, email: true } }).catch(() => null);
     return u ? `${u.name} <${u.email}>` : null;
+  }
+  if (model === "OnCallWeek" && row.weekStart instanceof Date && typeof row.userId === "string") {
+    const u = await prisma.user.findUnique({ where: { id: row.userId }, select: { name: true } }).catch(() => null);
+    return [row.weekStart.toISOString().slice(0, 10), u?.name].filter(Boolean).join(" · ");
   }
   const number = row.number != null ? `#${row.number}` : null;
   const name = (row.title ?? row.name ?? row.email ?? row.filename ?? null) as string | null;

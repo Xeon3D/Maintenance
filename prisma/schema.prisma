@@ -212,7 +212,9 @@ model User {
   timeEntries        TimeEntry[]
   statusLogs         WorkOrderStatusLog[]
   checklistAnswers   WorkOrderItem[]
-  requests           Request[]
+  requests           Request[]            @relation("RequestRequester")
+  onCallRequests     Request[]            @relation("RequestOnCall")
+  onCallWeeks        OnCallWeek[]
   pmAssignments      PMAssignee[]
   pmSchedulesCreated PMSchedule[]         @relation("PMCreatedBy")
   meterReadings      MeterReading[]
@@ -288,6 +290,7 @@ model Organization {
   categories     Category[]
   workOrders     WorkOrder[]
   requests       Request[]
+  onCallWeeks    OnCallWeek[]
   pmSchedules    PMSchedule[]
   meters         Meter[]
   parts          Part[]
@@ -315,6 +318,8 @@ model Membership {
   jobRoleId      String?
   // Legacy per-person rate, used only when neither the custom role nor the built-in role has one.
   hourlyRate     Decimal? @db.Decimal(10, 2)
+  // In the on-call team: can be given on-call weeks (OnCallWeek). Staff only (not clients or viewers).
+  onCall         Boolean  @default(false)
   active         Boolean  @default(true)
   createdAt      DateTime @default(now())
 
@@ -325,6 +330,21 @@ model Membership {
 
   @@unique([userId, organizationId])
   @@index([organizationId])
+}
+
+/// One on-call week (Monday to Sunday, company time zone): that member receives every new client request.
+model OnCallWeek {
+  id             String   @id @default(cuid())
+  organizationId String
+  weekStart      DateTime @db.Date // the Monday
+  userId         String
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([organizationId, weekStart])
 }
 
 model Invitation {
@@ -875,6 +895,7 @@ model Request {
   requesterPhone String?
   workOrderId    String?       @unique
   declineReason  String?
+  onCallUserId   String? // who was on call (OnCallWeek) when it arrived: notified, and may approve or decline it
   createdAt      DateTime      @default(now())
   updatedAt      DateTime      @updatedAt
 
@@ -882,7 +903,8 @@ model Request {
   villa        Villa?       @relation(fields: [villaId], references: [id], onDelete: SetNull)
   area         Area?        @relation(fields: [areaId], references: [id], onDelete: SetNull)
   asset        Asset?       @relation(fields: [assetId], references: [id], onDelete: SetNull)
-  requester    User?        @relation(fields: [requesterId], references: [id], onDelete: SetNull)
+  requester    User?        @relation("RequestRequester", fields: [requesterId], references: [id], onDelete: SetNull)
+  onCallUser   User?        @relation("RequestOnCall", fields: [onCallUserId], references: [id], onDelete: SetNull)
   workOrder    WorkOrder?   @relation(fields: [workOrderId], references: [id], onDelete: SetNull)
   attachments  Attachment[]
 

@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getFormatter, getTranslations } from "next-intl/server";
-import { Mail, Phone } from "lucide-react";
+import { Mail, Phone, PhoneCall } from "lucide-react";
 import { Card, PageHeader, Textarea } from "@/components/ui";
 import { BackLink } from "@/components/back-link";
 import { ActionForm } from "@/components/action-form";
@@ -31,6 +31,7 @@ export default async function RequestPage({ params }: PageProps<"/requests/[id]"
       area: { select: { name: true } },
       asset: { select: { id: true, name: true, status: true } },
       requester: { select: { name: true, email: true, phone: true } },
+      onCallUser: { select: { id: true, name: true } },
       workOrder: {
         select: {
           id: true,
@@ -48,7 +49,8 @@ export default async function RequestPage({ params }: PageProps<"/requests/[id]"
     },
   });
   if (!r) notFound();
-  const canApprove = ctx.can("requests.approve") && r.status === "PENDING";
+  // Approvers, and whoever was on call when it arrived.
+  const canApprove = (ctx.can("requests.approve") || r.onCallUserId === ctx.user.id) && r.status === "PENDING";
 
   const [teams, members] = canApprove
     ? await Promise.all([
@@ -162,6 +164,7 @@ export default async function RequestPage({ params }: PageProps<"/requests/[id]"
                   system={r.system}
                   teams={teams.map((x) => ({ id: x.id, name: x.name, memberIds: x.members.map((m) => m.userId) }))}
                   people={members}
+                  initialAssignees={r.onCallUserId && members.some((m) => m.id === r.onCallUserId) ? [r.onCallUserId] : []}
                 />
               </ActionForm>
             </Card>
@@ -187,6 +190,15 @@ export default async function RequestPage({ params }: PageProps<"/requests/[id]"
                 </a>
               )}
             </div>
+            {r.onCallUser && (
+              <div>
+                <div className="text-xs text-muted">{t("onCall.requestOnCall")}</div>
+                <div className="flex items-center gap-1.5">
+                  <PhoneCall className="size-3.5 text-muted" />
+                  {r.onCallUser.name}
+                </div>
+              </div>
+            )}
             {r.villa && (
               <div>
                 <div className="text-xs text-muted">{t("assets.villa")}</div>

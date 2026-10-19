@@ -4,6 +4,7 @@ import { CircleCheck, Circle, Search } from "lucide-react";
 import { Card, PageHeader } from "@/components/ui";
 import { getContext } from "@/lib/context";
 import { RecentWorkOrders } from "@/components/recent-work-orders";
+import { OnCallNow } from "@/components/on-call-calendar";
 import { ACTIVE_STATUSES } from "@/lib/work-orders";
 import { lowStockParts } from "@/lib/inventory";
 import { titled } from "@/lib/metadata";
@@ -66,6 +67,8 @@ export default async function DashboardPage() {
           className="h-11 w-full rounded-lg border border-border bg-surface pl-9 pr-3 text-sm outline-none focus:border-brand focus:ring-2 focus:ring-brand/20"
         />
       </form>
+
+      <OnCallNow ctx={ctx} href="/on-call" />
 
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
         {stats.map((s) => (
