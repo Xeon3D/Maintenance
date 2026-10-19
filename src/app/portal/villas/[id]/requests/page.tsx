@@ -116,9 +116,8 @@ export default async function PortalVillaRequestsPage({ params }: PageProps<"/po
                   <span className="flex shrink-0 items-center gap-3">
                     {done && (
                       <Link
-                        href={`/work-orders/${r.workOrder!.id}/report`}
+                        href={`/report/${r.workOrder!.id}`}
                         prefetch={false}
-                        target="_blank"
                         className="inline-flex items-center gap-1 rounded-md border border-border px-2.5 py-1 text-xs font-medium text-brand hover:border-brand"
                       >
                         <FileDown className="size-3.5" />
