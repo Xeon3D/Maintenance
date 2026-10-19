@@ -104,9 +104,8 @@ export default async function PortalRequestPage({ params }: PageProps<"/portal/r
           )}
           {wo?.status === "DONE" && (
             <Link
-              href={`/work-orders/${wo.id}/report`}
+              href={`/report/${wo.id}`}
               prefetch={false}
-              target="_blank"
               className="mt-3 inline-flex items-center gap-1 text-sm font-medium text-brand"
             >
               <FileDown className="size-4" />

@@ -603,6 +603,7 @@
   },
   "report": {
     "title": "Relatório de serviço",
+    "back": "Voltar",
     "photos": "Fotografias",
     "seePhotos": "Ver fotografias",
     "service": "Serviço",

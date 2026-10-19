@@ -603,6 +603,7 @@
   },
   "report": {
     "title": "Service report",
+    "back": "Back",
     "photos": "Photos",
     "seePhotos": "See photos",
     "service": "Service",

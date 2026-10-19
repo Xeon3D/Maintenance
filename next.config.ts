@@ -47,6 +47,15 @@ const nextConfig: NextConfig = {
   async headers() {
     return [
       { source: "/:path*", headers: securityHeaders },
+      // The service-report PDF is shown framed in /report/[id] (which adds a back button), so this origin may frame
+      // it. Later rules win for the same header key.
+      {
+        source: "/work-orders/:id/report",
+        headers: [
+          { key: "Content-Security-Policy", value: csp.replace("frame-ancestors 'none'", "frame-ancestors 'self'") },
+          { key: "X-Frame-Options", value: "SAMEORIGIN" },
+        ],
+      },
       // The service worker must always be revalidated so fixes reach devices promptly.
       {
         source: "/sw.js",

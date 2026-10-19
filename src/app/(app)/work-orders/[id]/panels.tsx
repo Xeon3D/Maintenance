@@ -548,7 +548,7 @@ export function WorkOrderActions({ woId, canEdit, canDelete }: { woId: string; c
   const [pending, start] = useTransition();
   return (
     <>
-      <Link href={`/work-orders/${woId}/report`} prefetch={false} target="_blank">
+      <Link href={`/report/${woId}`} prefetch={false}>
         <Button variant="secondary">
           <FileDown className="size-4" />
           {t("wo.report")}
