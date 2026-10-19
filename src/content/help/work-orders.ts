@@ -130,10 +130,11 @@ Type **@** followed by a name to mention a colleague: they get a notification. T
 
 The **Time** panel records who worked on the job and for how long:
 
-1. Click **Start timer** when you start. The button turns into **Stop** with a running clock.
-2. Click **Stop** when you finish. The time is rounded to the minute.
+1. Choose **On site** or **Remote**: where you are working. It starts on wherever your last entry on this job was.
+2. Click **Start timer** when you start. The button turns into **Stop** with a running clock.
+3. Click **Stop** when you finish. The time is rounded to the minute.
 
-Forgot to start the timer? Click **Log time** and enter the **Date**, the **Minutes** and an optional note. The list shows each entry and the **Total**. You can delete your own entries; managers can delete anyone's.
+Forgot to start the timer? Click **Log time** and enter the **Date**, the **Minutes** and an optional note; it is saved as **On site** or **Remote**, as chosen above. The list shows each entry and the **Total**. Each entry shows **On site** or **Remote**; click it to switch. You can change and delete your own entries; managers can change and delete anyone's. Two technicians on the same job can each log their own way, for example one on site and one remotely.
 
 Below the total, **Billed** shows the time that is charged: each technician's time on the job rounded up to whole blocks (30 minutes unless your company chose otherwise in [Settings → Organization](/help/organization)). For example, 34 minutes logged by one technician bill as 1 hour. The minutes logged stay as they are.
 
@@ -160,6 +161,7 @@ The **Amounts to bill** panel adds up what the job is charged to the client:
 
 - **Labour**: the billed time (each technician's time rounded up to the company's blocks), at the price per hour of each person's role.
 - **Parts**: the parts used, at their sale price.
+- **Trips**, for time logged on site: one trip per day on the job, per technician or for the whole job as your company chose, at the fixed fee, or the rate per km × the villa's distance when it is farther than the radius set in [Settings → Organization](/help/organization). Remote time charges no trip. When the job's contract includes trips they show as included, at no charge.
 - **Urgent fee**, on work orders with Urgent priority: the fixed amount plus the percentage of labour set in [Settings → Organization](/help/organization) or in the work order's contract.
 - **Other charges** added with **Add charge** (a description and an amount, for example crane hire or parking).
 - **Total**.
@@ -336,10 +338,11 @@ Escreva **@** seguido de um nome para mencionar um colega: ele recebe uma notifi
 
 O painel **Tempo** regista quem trabalhou no trabalho e durante quanto tempo:
 
-1. Clique em **Iniciar cronómetro** quando começar. O botão passa a **Parar**, com um relógio a contar.
-2. Clique em **Parar** quando terminar. O tempo é arredondado ao minuto.
+1. Escolha **No local** ou **Remoto**: onde está a trabalhar. Começa como no seu último registo neste trabalho.
+2. Clique em **Iniciar cronómetro** quando começar. O botão passa a **Parar**, com um relógio a contar.
+3. Clique em **Parar** quando terminar. O tempo é arredondado ao minuto.
 
-Esqueceu-se de iniciar o cronómetro? Clique em **Registar tempo** e indique a **Data**, os **Minutos** e uma nota opcional. A lista mostra cada registo e o **Total**. Pode eliminar os seus próprios registos; os gestores podem eliminar os de qualquer pessoa.
+Esqueceu-se de iniciar o cronómetro? Clique em **Registar tempo** e indique a **Data**, os **Minutos** e uma nota opcional; fica registado como **No local** ou **Remoto**, conforme escolhido acima. A lista mostra cada registo e o **Total**. Cada registo mostra **No local** ou **Remoto**; clique para mudar. Pode alterar e eliminar os seus próprios registos; os gestores podem alterar e eliminar os de qualquer pessoa. Dois técnicos no mesmo trabalho registam cada um à sua maneira, por exemplo um no local e outro remotamente.
 
 Por baixo do total, **Faturado** mostra o tempo que é cobrado: o tempo de cada técnico no trabalho arredondado para cima a blocos inteiros (30 minutos, a não ser que a empresa tenha escolhido outro valor em [Definições → Empresa](/help/organization)). Por exemplo, 34 minutos registados por um técnico são faturados como 1 hora. Os minutos registados mantêm-se.
 
@@ -366,6 +369,7 @@ O painel **Valores a faturar** soma o que é cobrado ao cliente pelo trabalho:
 
 - **Mão de obra**: o tempo faturado (o tempo de cada técnico arredondado aos blocos da empresa), ao preço por hora da função de cada pessoa.
 - **Peças**: as peças usadas, ao preço de venda.
+- **Deslocações**, pelo tempo registado no local: uma deslocação por dia no trabalho, por técnico ou para o trabalho todo conforme a empresa escolheu, ao valor fixo, ou o valor por km × a distância da moradia quando fica para lá do raio definido em [Definições → Empresa](/help/organization). O tempo remoto não cobra deslocação. Quando o contrato do trabalho inclui as deslocações, aparecem como incluídas, sem custo.
 - **Taxa de urgência**, nas ordens de trabalho com prioridade Urgente: o valor fixo mais a percentagem da mão de obra definidos em [Definições → Empresa](/help/organization) ou no contrato da ordem de trabalho.
 - **Outros valores** acrescentados com **Adicionar valor** (uma descrição e um valor, por exemplo aluguer de grua ou estacionamento).
 - **Total**.

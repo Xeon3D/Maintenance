@@ -74,6 +74,10 @@ export async function VillaForm({
           <FieldError name="longitude" />
         </Field>
       </div>
+      <Field label={t("villas.distanceKm")} hint={t("villas.distanceHint")}>
+        <Input name="distanceKm" type="number" min={0} step="0.1" defaultValue={villa?.distanceKm ?? ""} className="sm:max-w-40" />
+        <FieldError name="distanceKm" />
+      </Field>
       <Field label={t("villas.accessNotes")} hint={t("villas.accessNotesHint")}>
         <Textarea name="accessNotes" defaultValue={villa?.accessNotes ?? ""} />
       </Field>

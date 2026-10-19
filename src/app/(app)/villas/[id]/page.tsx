@@ -14,6 +14,7 @@ import { AreasManager } from "./areas";
 import { RecentWorkOrders } from "@/components/recent-work-orders";
 import type { SystemType } from "@/generated/prisma/enums";
 import { villaClient } from "@/lib/villa-client";
+import { isFar, travelRuleFor } from "@/lib/travel-charge";
 
 export default async function VillaPage({ params }: PageProps<"/villas/[id]">) {
   const { id } = await params;
@@ -197,6 +198,13 @@ export default async function VillaPage({ params }: PageProps<"/villas/[id]">) {
                 </a>
               </div>
             )}
+            <div>
+              <div className="text-xs text-muted">{t("villas.distanceKm")}</div>
+              <div>
+                {villa.distanceKm != null ? t("villas.distanceValue", { km: villa.distanceKm }) : <span className="text-muted">{t("villas.distanceUnset")}</span>}
+                {isFar(villa.distanceKm, travelRuleFor(ctx.organization)) && <span className="text-muted"> · {t("travel.chargedPerKm")}</span>}
+              </div>
+            </div>
             {contacts.length > 0 && (
               <div>
                 <div className="text-xs text-muted">{t("clients.contacts")}</div>

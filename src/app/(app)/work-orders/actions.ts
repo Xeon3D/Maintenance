@@ -19,7 +19,7 @@ import {
   validateCategories,
   WorkOrderError,
 } from "@/lib/work-orders";
-import { ChecklistItemType, Priority, SystemType, WorkOrderStatus, WorkOrderType } from "@/generated/prisma/enums";
+import { ChecklistItemType, Priority, SystemType, WorkMode, WorkOrderStatus, WorkOrderType } from "@/generated/prisma/enums";
 import { emailConfigured } from "@/lib/email";
 import { reportRecipients, sendServiceReport } from "@/lib/report-email";
 import { MAX_EXTRA, parseEmailList } from "@/lib/report-recipients";
@@ -208,12 +208,15 @@ export async function answerItemAction(woId: string, itemId: string, value: stri
 
 // ── Time tracking
 
-export async function startTimerAction(woId: string) {
+/** On site unless the value says remote (a stale client or a bad value never makes work remote by accident). */
+const workMode = (v: unknown): WorkMode => (v === WorkMode.REMOTE ? WorkMode.REMOTE : WorkMode.ONSITE);
+
+export async function startTimerAction(woId: string, mode: WorkMode = WorkMode.ONSITE) {
   const { ctx, wo } = await executableWorkOrder(woId);
   const running = await ctx.db.timeEntry.findFirst({ where: { workOrderId: woId, userId: ctx.user.id, endedAt: null } });
   if (!running) {
     await ctx.db.timeEntry.create({
-      data: { workOrderId: woId, userId: ctx.user.id, startedAt: new Date(), hourlyRate: ctx.hourlyRate },
+      data: { workOrderId: woId, userId: ctx.user.id, startedAt: new Date(), hourlyRate: ctx.hourlyRate, mode: workMode(mode) },
     });
   }
   if (wo.status === "OPEN" || wo.status === "ON_HOLD") await changeStatus(ctx, woId, "IN_PROGRESS");
@@ -246,10 +249,19 @@ export async function addTimeAction(woId: string, _: FormResult, form: FormData)
       minutes,
       note,
       hourlyRate: ctx.hourlyRate,
+      mode: workMode(form.get("mode")),
     },
   });
   revalidatePath(path(woId));
   return { ok: true };
+}
+
+/** Corrects where a time entry was worked (on site / remote): my own entries, or anyone's with workOrders.manage. */
+export async function setTimeModeAction(woId: string, entryId: string, mode: WorkMode) {
+  const { ctx } = await executableWorkOrder(woId);
+  const own = ctx.can("workOrders.manage") ? {} : { userId: ctx.user.id };
+  await ctx.db.timeEntry.updateMany({ where: { id: entryId, workOrderId: woId, ...own }, data: { mode: workMode(mode) } });
+  revalidatePath(path(woId));
 }
 
 export async function deleteTimeAction(woId: string, entryId: string) {

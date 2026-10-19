@@ -12,7 +12,7 @@ export default async function CostReportPage({ searchParams }: PageProps<"/repor
   const { ctx, f, t, money, day } = await loadReport(searchParams);
   if (!ctx.can("costs.view")) notFound();
   const c = await costReport(ctx, f);
-  const kinds = [t("costs.labor"), t("costs.parts"), t("reports.otherCosts"), t("costs.urgent")];
+  const kinds = [t("costs.labor"), t("costs.parts"), t("reports.otherCosts"), t("costs.urgent"), t("costs.travel")];
   const showFees = !f.system; // fees aren't per system
   const systemName = (s: string) => (s === "NONE" ? t("reports.noSystem") : t(`systems.${s}`));
 
@@ -22,12 +22,13 @@ export default async function CostReportPage({ searchParams }: PageProps<"/repor
         <p className="text-sm text-muted">{t("reports.costNote", { from: day(f.from), to: day(f.to) })}</p>
         <ExportLink kind="costs" f={f} label={t("reports.exportCsv")} />
       </div>
-      <div className="grid grid-cols-2 gap-3 md:grid-cols-5">
+      <div className="grid grid-cols-2 gap-3 md:grid-cols-6">
         <StatTile label={t("reports.kpi.cost")} value={money(c.totals.total)} sub={t("reports.jobCount", { count: c.rows.length })} />
         <StatTile label={t("costs.labor")} value={money(c.totals.labor)} />
         <StatTile label={t("costs.parts")} value={money(c.totals.parts)} />
         <StatTile label={t("reports.otherCosts")} value={money(c.totals.other)} />
         <StatTile label={t("costs.urgent")} value={money(c.totals.urgent)} />
+        <StatTile label={t("costs.travel")} value={money(c.totals.travel)} />
       </div>
 
       <Section title={t("reports.costByVilla")} note={c.byVilla.length > TOP ? t("reports.topN", { n: TOP }) : undefined}>
@@ -38,8 +39,8 @@ export default async function CostReportPage({ searchParams }: PageProps<"/repor
             key: v.id,
             label: v.name,
             href: `/villas/${v.id}`,
-            values: [v.labor, v.parts, v.other, v.urgent],
-            displays: [money(v.labor), money(v.parts), money(v.other), money(v.urgent)],
+            values: [v.labor, v.parts, v.other, v.urgent, v.travel],
+            displays: [money(v.labor), money(v.parts), money(v.other), money(v.urgent), money(v.travel)],
             total: money(v.total),
             totalValue: v.total,
           }))}
@@ -59,6 +60,7 @@ export default async function CostReportPage({ searchParams }: PageProps<"/repor
                 <th className="text-right">{t("costs.parts")}</th>
                 <th className="text-right">{t("reports.otherCosts")}</th>
                 <th className="text-right">{t("costs.urgent")}</th>
+                <th className="text-right">{t("costs.travel")}</th>
                 <th className="text-right">{t("costs.total")}</th>
                 {showFees && <th className="text-right">{t("reports.fees")}</th>}
                 {showFees && <th className="text-right">{t("reports.margin")}</th>}
@@ -73,6 +75,7 @@ export default async function CostReportPage({ searchParams }: PageProps<"/repor
                   <td className="text-right tabular-nums">{money(r.parts)}</td>
                   <td className="text-right tabular-nums">{money(r.other)}</td>
                   <td className="text-right tabular-nums">{money(r.urgent)}</td>
+                  <td className="text-right tabular-nums">{money(r.travel)}</td>
                   <td className="text-right font-medium tabular-nums">{money(r.total)}</td>
                   {showFees && <td className="text-right tabular-nums">{r.fees ? money(r.fees) : "—"}</td>}
                   {showFees && (

@@ -4,13 +4,15 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState, useTransition } from "react";
 import { useTranslations } from "next-intl";
-import { FileDown, ImagePlus, Paperclip, Pencil, Play, Send, Square, Trash2, X } from "lucide-react";
+import { FileDown, ImagePlus, MapPin, Monitor, Paperclip, Pencil, Play, Send, Square, Trash2, X } from "lucide-react";
 import { ActionForm, FieldError } from "@/components/action-form";
 import { Button, Field, Input } from "@/components/ui";
 import { MentionTextarea, type MentionMember } from "@/components/mention-textarea";
 import { SignaturePad, type SignaturePadHandle } from "@/components/signature-pad";
 import { uploadFile, type Uploaded } from "@/lib/upload-client";
 import { DateInput } from "@/components/date-input";
+import { cn } from "@/lib/utils";
+import type { WorkMode } from "@/generated/prisma/enums";
 import {
   addCommentAction,
   addCostAction,
@@ -21,6 +23,7 @@ import {
   deleteTimeAction,
   deleteWorkOrderAction,
   setClientAbsentAction,
+  setTimeModeAction,
   signOffAction,
   startTimerAction,
   stopTimerAction,
@@ -34,12 +37,41 @@ function formatDuration(totalMinutes: number) {
 
 // ── Time
 
-export type TimeRow = { id: string; user: string; mine: boolean; minutes: number | null; startedAt: string; label: string; note: string | null };
+export type TimeRow = { id: string; user: string; mine: boolean; minutes: number | null; startedAt: string; label: string; note: string | null; mode: WorkMode };
+
+const MODE_ICON = { ONSITE: MapPin, REMOTE: Monitor } as const;
+
+/** On site / remote, as a two-button switch. */
+function ModeSwitch({ value, onChange }: { value: WorkMode; onChange: (m: WorkMode) => void }) {
+  const t = useTranslations();
+  return (
+    <div role="radiogroup" aria-label={t("time.mode")} className="inline-flex rounded-md border border-border p-0.5 text-sm">
+      {(["ONSITE", "REMOTE"] as const).map((m) => {
+        const Icon = MODE_ICON[m];
+        return (
+          <button
+            key={m}
+            type="button"
+            role="radio"
+            aria-checked={value === m}
+            onClick={() => onChange(m)}
+            className={cn("inline-flex items-center gap-1.5 rounded px-2.5 py-1", value === m ? "bg-brand text-white" : "text-muted hover:text-foreground")}
+          >
+            <Icon className="size-3.5" />
+            {t(`time.modes.${m}`)}
+          </button>
+        );
+      })}
+    </div>
+  );
+}
 
 export function TimeTracker({
   woId,
   entries,
   runningSince,
+  runningMode,
+  defaultMode,
   canExecute,
   canDeleteAny,
   billed,
@@ -47,6 +79,9 @@ export function TimeTracker({
   woId: string;
   entries: TimeRow[];
   runningSince: string | null; // my running timer
+  runningMode: WorkMode | null;
+  /** Where a new entry is worked unless changed: my last entry's mode on this work order. */
+  defaultMode: WorkMode;
   canExecute: boolean;
   canDeleteAny: boolean;
   /** Time billed per technician (rounded up to the billing period); null when the company doesn't round. */
@@ -56,6 +91,8 @@ export function TimeTracker({
   const [pending, start] = useTransition();
   const [now, setNow] = useState(() => Date.now());
   const [manual, setManual] = useState(false);
+  const [mode, setMode] = useState<WorkMode>(defaultMode);
+  const other = (m: WorkMode): WorkMode => (m === "ONSITE" ? "REMOTE" : "ONSITE");
 
   useEffect(() => {
     if (!runningSince) return;
@@ -69,15 +106,17 @@ export function TimeTracker({
 
   return (
     <div className="space-y-3">
+      {canExecute && !runningSince && <ModeSwitch value={mode} onChange={setMode} />}
       {canExecute && (
         <div className="flex items-center gap-2">
           {runningSince ? (
             <Button variant="danger" disabled={pending} onClick={() => start(() => stopTimerAction(woId))} className="flex-1">
               <Square className="size-4" />
               {t("time.stop")} <span className="font-mono tabular-nums">{clock}</span>
+              {runningMode && <span className="text-xs font-normal opacity-90">· {t(`time.modes.${runningMode}`)}</span>}
             </Button>
           ) : (
-            <Button disabled={pending} onClick={() => start(() => startTimerAction(woId))} className="flex-1">
+            <Button disabled={pending} onClick={() => start(() => startTimerAction(woId, mode))} className="flex-1">
               <Play className="size-4" />
               {t("time.start")}
             </Button>
@@ -99,15 +138,39 @@ export function TimeTracker({
             </Field>
           </div>
           <Input name="note" placeholder={t("time.notePlaceholder")} />
+          <input type="hidden" name="mode" value={mode} />
+          {runningSince && <ModeSwitch value={mode} onChange={setMode} />}
         </ActionForm>
       )}
       {entries.length > 0 && (
         <ul className="divide-y divide-border text-sm">
-          {entries.map((e) => (
+          {entries.map((e) => {
+            const Icon = MODE_ICON[e.mode];
+            const canChange = canExecute && (e.mine || canDeleteAny);
+            const badge = (
+              <>
+                <Icon className="size-3" />
+                {t(`time.modes.${e.mode}`)}
+              </>
+            );
+            return (
             <li key={e.id} className="flex items-center justify-between gap-2 py-1.5">
               <span className="min-w-0">
                 <span className="font-medium">{e.user}</span>
                 <span className="ml-1.5 text-xs text-muted">{e.label}</span>
+                {canChange ? (
+                  <button
+                    type="button"
+                    disabled={pending}
+                    title={t("time.switchTo", { mode: t(`time.modes.${other(e.mode)}`) })}
+                    onClick={() => start(() => setTimeModeAction(woId, e.id, other(e.mode)))}
+                    className="ml-1.5 inline-flex items-center gap-1 rounded border border-border px-1.5 text-xs text-muted hover:border-brand hover:text-brand"
+                  >
+                    {badge}
+                  </button>
+                ) : (
+                  <span className="ml-1.5 inline-flex items-center gap-1 text-xs text-muted">{badge}</span>
+                )}
                 {e.note && <span className="block truncate text-xs text-muted">{e.note}</span>}
               </span>
               <span className="flex items-center gap-1">
@@ -123,7 +186,8 @@ export function TimeTracker({
                 )}
               </span>
             </li>
-          ))}
+            );
+          })}
           <li className="flex justify-between py-1.5 font-medium">
             <span>{t("time.total")}</span>
             <span className="tabular-nums">{formatDuration(total)}</span>
@@ -162,7 +226,7 @@ export function CostsPanel({
 }: {
   woId: string;
   costs: { id: string; description: string; amount: string }[];
-  summary: { labor: string; parts: string | null; other: string; total: string; urgent: { amount: string; rule: string } | null };
+  summary: { labor: string; parts: string | null; other: string; total: string; urgent: { amount: string; rule: string } | null; travel: { amount: string; trips: number; rule: string } | null };
   canExecute: boolean;
 }) {
   const t = useTranslations();
@@ -186,6 +250,14 @@ export function CostsPanel({
             {t("costs.urgent")} <span className="text-xs">({summary.urgent.rule})</span>
           </span>
           <span className="tabular-nums">{summary.urgent.amount}</span>
+        </div>
+      )}
+      {summary.travel && (
+        <div className="flex justify-between gap-2">
+          <span className="text-muted">
+            {t("costs.trips", { count: summary.travel.trips })} <span className="text-xs">({summary.travel.rule})</span>
+          </span>
+          <span className="tabular-nums">{summary.travel.amount}</span>
         </div>
       )}
       {costs.map((c) => (

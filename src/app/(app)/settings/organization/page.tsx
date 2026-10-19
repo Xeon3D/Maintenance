@@ -165,6 +165,30 @@ export default async function OrgSettingsPage() {
                 </Field>
               </div>
             </div>
+            <div>
+              <p className="mb-2 text-sm font-medium">{t("travel.title")}</p>
+              <p className="mb-3 text-xs text-muted">{t("travel.hint")}</p>
+              <div className="grid gap-4 sm:grid-cols-2">
+                <Field label={t("travel.fee", { currency: o.currency })}>
+                  <Input name="travelFee" type="number" min={0} step="0.01" defaultValue={Number(o.travelFee)} />
+                  <FieldError name="travelFee" />
+                </Field>
+                <Field label={t("travel.radius")}>
+                  <Input name="travelRadiusKm" type="number" min={0} max={1000} step={1} defaultValue={o.travelRadiusKm} />
+                  <FieldError name="travelRadiusKm" />
+                </Field>
+                <Field label={t("travel.kmRate", { currency: o.currency })} hint={t("travel.kmRateHint")}>
+                  <Input name="travelKmRate" type="number" min={0} step="0.01" defaultValue={Number(o.travelKmRate)} />
+                  <FieldError name="travelKmRate" />
+                </Field>
+                <Field label={t("travel.countBy")}>
+                  <Select name="travelPerTechnician" defaultValue={o.travelPerTechnician ? "technician" : "workOrder"}>
+                    <option value="technician">{t("travel.perTechnician")}</option>
+                    <option value="workOrder">{t("travel.perWorkOrder")}</option>
+                  </Select>
+                </Field>
+              </div>
+            </div>
 
             <h2 className="border-t border-border pt-5 font-medium">{t("reportEmail.companyTitle")}</h2>
             <p className="-mt-2 text-xs text-muted">{t("reportEmail.companyHint")}</p>

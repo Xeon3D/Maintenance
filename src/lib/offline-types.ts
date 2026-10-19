@@ -51,7 +51,7 @@ type Base = { id: string; woId: string; at: string };
 export type SyncOp =
   | (Base & { kind: "answer"; itemId: string; value: string | null; note?: string | null })
   | (Base & { kind: "comment"; body: string })
-  | (Base & { kind: "time"; startedAt: string; endedAt: string; note?: string | null })
+  | (Base & { kind: "time"; startedAt: string; endedAt: string; note?: string | null; mode?: "ONSITE" | "REMOTE" })
   | (Base & { kind: "status"; status: WorkOrderStatus; note?: string | null })
   | (Base & { kind: "signoff"; name: string; attachmentId: string })
   | (Base & { kind: "clientAbsent"; absent: boolean });
