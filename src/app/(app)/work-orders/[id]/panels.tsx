@@ -4,12 +4,14 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState, useTransition } from "react";
 import { useTranslations } from "next-intl";
-import { FileDown, ImagePlus, MapPin, Monitor, Paperclip, Pencil, Play, Send, Square, Trash2, X } from "lucide-react";
+import { FileDown, ImagePlus, MapPin, Monitor, Pencil, Play, Send, Square, Trash2, X } from "lucide-react";
 import { ActionForm, FieldError } from "@/components/action-form";
 import { Button, Field, Input } from "@/components/ui";
 import { MentionTextarea, type MentionMember } from "@/components/mention-textarea";
 import { SignaturePad, type SignaturePadHandle } from "@/components/signature-pad";
 import { uploadFile, type Uploaded } from "@/lib/upload-client";
+import { useUploader } from "@/lib/use-uploader";
+import { AttachmentThumb } from "@/components/attachment-thumb";
 import { DateInput } from "@/components/date-input";
 import { cn } from "@/lib/utils";
 import type { WorkMode } from "@/generated/prisma/enums";
@@ -300,8 +302,7 @@ export type Photo = { id: string; url: string; filename: string; mimeType: strin
 export function Gallery({ woId, files, canExecute, canDeleteAny }: { woId: string; files: Photo[]; canExecute: boolean; canDeleteAny: boolean }) {
   const t = useTranslations();
   const input = useRef<HTMLInputElement>(null);
-  const [busy, setBusy] = useState(false);
-  const [error, setError] = useState(false);
+  const uploader = useUploader();
   const [pending, start] = useTransition();
   const router = useRouter();
 
@@ -312,15 +313,7 @@ export function Gallery({ woId, files, canExecute, canDeleteAny }: { woId: strin
           {files.map((f) => (
             <div key={f.id} className="group relative">
               <a href={f.url} target="_blank" rel="noreferrer" title={f.filename}>
-                {f.mimeType.startsWith("image/") ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img src={f.url} alt={f.filename} className="aspect-square w-full rounded-md border border-border object-cover" />
-                ) : (
-                  <div className="flex aspect-square flex-col items-center justify-center gap-1 rounded-md border border-border bg-gray-50 p-1 text-center text-[10px] text-muted">
-                    <Paperclip className="size-4" />
-                    <span className="line-clamp-2 break-all">{f.filename}</span>
-                  </div>
-                )}
+                <AttachmentThumb url={f.url} filename={f.filename} mimeType={f.mimeType} />
               </a>
               {canExecute && (f.mine || canDeleteAny) && (
                 <button
@@ -342,28 +335,20 @@ export function Gallery({ woId, files, canExecute, canDeleteAny }: { woId: strin
             ref={input}
             type="file"
             multiple
-            accept="image/*,application/pdf"
+            accept="image/*,video/*,application/pdf"
             className="sr-only"
             onChange={async (e) => {
               const list = [...(e.target.files ?? [])];
               e.target.value = "";
-              setBusy(true);
-              setError(false);
-              try {
-                for (const f of list) await uploadFile(f, { workOrderId: woId });
-              } catch {
-                setError(true);
-              } finally {
-                setBusy(false);
-                router.refresh();
-              }
+              await uploader.upload(list, { workOrderId: woId });
+              router.refresh();
             }}
           />
-          <Button size="sm" variant="secondary" disabled={busy} onClick={() => input.current?.click()}>
+          <Button size="sm" variant="secondary" disabled={uploader.busy} onClick={() => input.current?.click()}>
             <ImagePlus className="size-4" />
-            {busy ? t("checklist.uploading") : t("files.add")}
+            {uploader.busy ? uploader.label : t("files.addMedia")}
           </Button>
-          {error && <p className="mt-2 text-xs text-danger">{t("files.failed")}</p>}
+          {uploader.error && <p className="mt-2 text-xs text-danger">{uploader.error}</p>}
         </>
       )}
     </div>
@@ -376,7 +361,7 @@ export function CommentBox({ woId, members }: { woId: string; members: MentionMe
   const t = useTranslations();
   const [body, setBody] = useState("");
   const [files, setFiles] = useState<Uploaded[]>([]);
-  const [busy, setBusy] = useState(false);
+  const uploader = useUploader();
   const [pending, start] = useTransition();
   const input = useRef<HTMLInputElement>(null);
 
@@ -396,36 +381,30 @@ export function CommentBox({ woId, members }: { woId: string; members: MentionMe
       {files.length > 0 && (
         <div className="flex flex-wrap gap-2">
           {files.map((f) => (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img key={f.id} src={f.url} alt="" className="size-14 rounded border border-border object-cover" />
+            <AttachmentThumb key={f.id} url={f.url} filename={f.filename} mimeType={f.mimeType} className="size-14" />
           ))}
         </div>
       )}
+      {uploader.error && <p className="text-xs text-danger">{uploader.error}</p>}
       <div className="flex justify-between">
         <input
           ref={input}
           type="file"
-          accept="image/*"
+          accept="image/*,video/*"
           multiple
           className="sr-only"
           onChange={async (e) => {
             const list = [...(e.target.files ?? [])];
             e.target.value = "";
-            setBusy(true);
-            try {
-              const ups: Uploaded[] = [];
-              for (const f of list) ups.push(await uploadFile(f, { workOrderId: woId }));
-              setFiles((prev) => [...prev, ...ups]);
-            } finally {
-              setBusy(false);
-            }
+            const ups = await uploader.upload(list, { workOrderId: woId });
+            setFiles((prev) => [...prev, ...ups]);
           }}
         />
-        <Button type="button" size="sm" variant="ghost" disabled={busy} onClick={() => input.current?.click()}>
+        <Button type="button" size="sm" variant="ghost" disabled={uploader.busy} onClick={() => input.current?.click()}>
           <ImagePlus className="size-4" />
-          {busy ? t("checklist.uploading") : t("activity.attach")}
+          {uploader.busy ? uploader.label : t("activity.attach")}
         </Button>
-        <Button size="sm" disabled={pending || busy || (!body.trim() && files.length === 0)}>
+        <Button size="sm" disabled={pending || uploader.busy || (!body.trim() && files.length === 0)}>
           <Send className="size-4" />
           {t("activity.send")}
         </Button>

@@ -573,17 +573,22 @@
   "files": {
     "title": "Fotografias e ficheiros",
     "add": "Adicionar fotografias ou ficheiros",
-    "failed": "Alguns ficheiros não foram carregados (JPEG, PNG, WebP ou PDF até 15 MB).",
+    "failed": "Não foi possível carregar (fotografias e PDF até 15 MB, vídeos até 1 minuto).",
     "notFound": "A ordem de trabalho ou o passo já não existe.",
     "forbidden": "Não tem permissão para adicionar ficheiros aqui.",
     "badTarget": "A ordem de trabalho ou o passo já não existe.",
     "badType": "Tipo de ficheiro não suportado.",
-    "tooLarge": "Ficheiro demasiado grande."
+    "tooLarge": "Ficheiro demasiado grande.",
+    "addMedia": "Adicionar fotografias, vídeos ou ficheiros",
+    "converting": "A preparar o vídeo {progress}%",
+    "videoTooLong": "Os vídeos podem ter no máximo 1 minuto.",
+    "badVideo": "Não foi possível ler este vídeo.",
+    "videoUnavailable": "De momento, o servidor não consegue processar vídeos."
   },
   "activity": {
     "title": "Atividade",
     "placeholder": "Adicione uma atualização ou nota…",
-    "attach": "Fotografia",
+    "attach": "Fotografia ou vídeo",
     "send": "Publicar",
     "changedStatus": "alterou o estado para",
     "created": "criou esta ordem de trabalho"
@@ -1379,8 +1384,8 @@
     "hold": "Em espera",
     "done": "Marcar como concluída",
     "logged": "{minutes, plural, =0 {Sem tempo registado} other {# min registados}}",
-    "photos": "Fotografias",
-    "photosHint": "As fotografias ficam guardadas neste dispositivo e são enviadas quando houver rede.",
+    "photos": "Fotografias e vídeos",
+    "photosHint": "As fotografias e os vídeos (até 1 minuto) ficam guardados neste dispositivo e são enviados quando houver rede.",
     "takePhoto": "Tirar fotografia",
     "retake": "Repetir",
     "savedOnDevice": "Guardada neste dispositivo — é enviada quando houver rede.",
@@ -1390,7 +1395,8 @@
       "now": "Para fazer",
       "next30": "Próximos 30 dias",
       "later": "Mais tarde"
-    }
+    },
+    "takeVideo": "Gravar vídeo"
   },
   "company": {
     "details": "Dados da empresa",

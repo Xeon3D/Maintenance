@@ -31,7 +31,9 @@ export async function shrinkImage(file: File): Promise<File> {
   }
 }
 
+/** Uploads a photo, PDF or video. Videos should go through `prepareVideo()` (lib/video-client.ts) first. */
 export async function uploadFile(file: File | Blob, target: UploadTarget, filename = "file"): Promise<Uploaded> {
+  if (file.type.startsWith("video/")) return uploadVideo(file, target, file instanceof File ? file.name : filename);
   const f = file instanceof File ? await shrinkImage(file) : new File([file], filename, { type: file.type });
   const body = new FormData();
   body.set("file", f);
@@ -40,3 +42,21 @@ export async function uploadFile(file: File | Blob, target: UploadTarget, filena
   if (!res.ok) throw new Error((await res.json().catch(() => ({})))?.error ?? "uploadFailed");
   return res.json();
 }
+
+/** Videos are sent as the raw request body (streamed to disk on the server); target and name go in headers. */
+async function uploadVideo(file: Blob, target: UploadTarget, filename: string): Promise<Uploaded> {
+  const res = await fetch("/api/uploads/video", {
+    method: "POST",
+    body: file,
+    headers: {
+      "content-type": file.type,
+      "x-upload-target": encodeURIComponent(JSON.stringify(target)),
+      "x-upload-filename": encodeURIComponent(filename),
+    },
+  });
+  if (!res.ok) throw new Error((await res.json().catch(() => ({})))?.error ?? "uploadFailed");
+  return res.json();
+}
+
+/** Error codes from uploads that have their own message under `files.`; anything else is `files.failed`. */
+export const UPLOAD_ERRORS = ["notFound", "forbidden", "badTarget", "badType", "tooLarge", "videoTooLong", "badVideo", "videoUnavailable"];

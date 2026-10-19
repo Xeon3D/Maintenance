@@ -17,6 +17,7 @@ import { StatusBar } from "./status-bar";
 import { Checklist } from "./checklist";
 import { CommentBox, CostsPanel, Gallery, SignOff, TimeTracker, WorkOrderActions } from "./panels";
 import { PartsPanel } from "./parts-panel";
+import { AttachmentThumb } from "@/components/attachment-thumb";
 import { SendReportPanel } from "./send-report";
 import { reportRecipients } from "@/lib/report-email";
 import { villaClient } from "@/lib/villa-client";
@@ -213,8 +214,7 @@ export default async function WorkOrderPage({ params }: PageProps<"/work-orders/
                       <div className="mt-2 flex flex-wrap gap-2">
                         {a.c.attachments.map((f) => (
                           <a key={f.id} href={fileUrl(f.id)} target="_blank" rel="noreferrer">
-                            {/* eslint-disable-next-line @next/next/no-img-element */}
-                            <img src={fileUrl(f.id)} alt={f.filename} className="size-20 rounded-md border border-border object-cover" />
+                            <AttachmentThumb url={fileUrl(f.id)} filename={f.filename} mimeType={f.mimeType} className="size-20" />
                           </a>
                         ))}
                       </div>
