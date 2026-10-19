@@ -253,6 +253,9 @@ model Organization {
   retention     Json?
   // Opening hours per weekday and holidays for SLA timers, e.g. {"days": [null, {"start": "09:00", "end": "18:00"}, …], "holidays": ["2026-12-25"]}.
   businessHours Json?
+  // When whoever is on call receives new client requests: {"days": [{"start": "18:00", "end": "02:00"} | null, …] (0 = Sunday;
+  // an end at or before the start runs into the next day), "holidays": true}. Null = at any time (lib/on-call.ts).
+  onCallHours   Json?
   // Permissions of the built-in staff roles, e.g. {"MANAGER": ["workOrders.manage", …]}; a missing role uses the defaults in lib/rbac.
   rolePermissions Json?
   timeRounding   Int      @default(30) // billing period in minutes: each technician's time on a work order is rounded up to it (0 = none)

@@ -60,3 +60,83 @@ export function isoWeek(week: string): number {
   const jan1 = Date.UTC(new Date(thursday).getUTCFullYear(), 0, 1);
   return Math.floor((thursday - jan1) / DAY / 7) + 1;
 }
+
+// ── On-call hours: when whoever is on call receives new client requests (Settings → Organization).
+
+/** One period a day: from `start` to `end` ("HH:MM"); an end at or before the start runs into the next day (equal = 24 h). */
+export type OnCallDay = { start: string; end: string } | null;
+/** days[0] = Sunday. `holidays`: the company's holidays (business hours) are on call all day. */
+export type OnCallHours = { days: OnCallDay[]; holidays: boolean };
+
+/** Shown when the company first restricts the hours: weekday evenings until 02:00, and the whole weekend. */
+export const DEFAULT_ON_CALL_HOURS: OnCallHours = {
+  days: [
+    { start: "02:00", end: "02:00" }, // Sunday 02:00 → Monday 02:00
+    ...Array.from({ length: 5 }, () => ({ start: "18:00", end: "02:00" })),
+    { start: "02:00", end: "02:00" }, // Saturday 02:00 → Sunday 02:00 (Friday's period covers until 02:00)
+  ],
+  holidays: true,
+};
+
+const TIME = /^([01]\d|2[0-3]):[0-5]\d$/;
+const minutesOf = (hhmm: string) => Number(hhmm.slice(0, 2)) * 60 + Number(hhmm.slice(3, 5));
+/** Length of a day's period in minutes (an end at or before the start is the next day's). */
+const lengthOf = (d: { start: string; end: string }) => {
+  const len = minutesOf(d.end) - minutesOf(d.start);
+  return len > 0 ? len : len + 1440;
+};
+
+/** Stored JSON → on-call hours, or null (= at any time) when absent or malformed. */
+export function parseOnCallHours(raw: unknown): OnCallHours | null {
+  const o = raw && typeof raw === "object" ? (raw as { days?: unknown; holidays?: unknown }) : null;
+  if (!o || !Array.isArray(o.days) || o.days.length !== 7) return null;
+  const days = o.days.map((d): OnCallDay => {
+    const { start, end } = (d && typeof d === "object" ? d : {}) as { start?: unknown; end?: unknown };
+    return typeof start === "string" && typeof end === "string" && TIME.test(start) && TIME.test(end) ? { start, end } : null;
+  });
+  return { days, holidays: o.holidays === true };
+}
+
+/**
+ * Reads the Settings → Organization fields: onCallMode ("always" | "hours"), onCallOn<d>, onCallStart<d>, onCallEnd<d>
+ * (d = 0–6, Sunday first) and onCallHolidays. Null = at any time.
+ */
+export function onCallHoursFromForm(get: (name: string) => string | null): { hours: OnCallHours | null } | { errors: Record<string, string> } {
+  if (get("onCallMode") !== "hours") return { hours: null };
+  const errors: Record<string, string> = {};
+  const days = Array.from({ length: 7 }, (_, d): OnCallDay => {
+    if (get(`onCallOn${d}`) !== "on") return null;
+    const start = get(`onCallStart${d}`) ?? "";
+    const end = get(`onCallEnd${d}`) ?? "";
+    if (!TIME.test(start) || !TIME.test(end)) {
+      errors[`onCallEnd${d}`] = "invalid_format";
+      return null;
+    }
+    return { start, end };
+  });
+  return Object.keys(errors).length ? { errors } : { hours: { days, holidays: get("onCallHolidays") === "on" } };
+}
+
+/**
+ * The day (company time zone) whose on-call period holds instant `at`, or null when `at` is outside the on-call hours.
+ * A period that runs past midnight belongs to the day it started on, so Monday 01:00 is still Sunday's (and the week
+ * before's on-call person). `hours` null = at any time. `holidayDates` are the company's holidays ("yyyy-mm-dd").
+ */
+export function onCallShiftDay(at: Date, timeZone: string, hours: OnCallHours | null, holidayDates: string[] = []): string | null {
+  const today = localDay(at, timeZone);
+  if (!hours) return today;
+  const parts = new Intl.DateTimeFormat("en-GB", { timeZone, hourCycle: "h23", hour: "2-digit", minute: "2-digit" }).formatToParts(at);
+  const now = Number(parts.find((p) => p.type === "hour")!.value) * 60 + Number(parts.find((p) => p.type === "minute")!.value);
+  // Yesterday's period first: someone already on duty since last night keeps the request.
+  for (const [day, minute] of [[addDays(today, -1), now + 1440], [today, now]] as const) {
+    const periods: { from: number; to: number }[] = [];
+    const d = hours.days[new Date(msOf(day)).getUTCDay()];
+    if (d) periods.push({ from: minutesOf(d.start), to: minutesOf(d.start) + lengthOf(d) });
+    if (hours.holidays && holidayDates.includes(day)) periods.push({ from: 0, to: 1440 });
+    if (periods.some((p) => minute >= p.from && minute < p.to)) return day;
+  }
+  return null;
+}
+
+/** "18:00–02:00" runs into the next day: the form says so. */
+export const endsNextDay = (d: { start: string; end: string }) => minutesOf(d.end) <= minutesOf(d.start);

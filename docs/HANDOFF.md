@@ -682,6 +682,12 @@ markers), Message, VerificationToken (password reset).
   and in the team) and adds them to the REQUEST_NEW recipients (approvers still get it). That member may approve/decline that
   request whatever their role (`handlerOf` in `requests/actions.ts`), is pre-selected as assignee, and sees it in the Requests
   nav badge. Shown on the request page and list ("On call when it arrived").
+- **On-call hours** (Settings → Organization, `Organization.onCallHours`, null = at any time): per weekday one period, an end at or
+  before the start runs into the next day (equal = 24 h), plus "company holidays all day" (holidays from business hours). Defaults
+  offered: weekdays 18:00–02:00, weekend 02:00–02:00. `onCallShiftDay()` (`lib/on-call.ts`, tested) returns the day the period
+  holding a request started (yesterday first), and `requestOnCallUser()` gives the request to that day's week member, so Monday
+  01:00 still goes to the previous week's person. Outside the hours only approvers are notified. The calendar and the dashboard
+  card (`onCallUserAt`) show the week's member regardless of the hours.
 
 ### Phase 10 — SaaS layer
 Stripe checkout and portal (`Subscription`), plan limits (seats, villas, storage), trial expiry

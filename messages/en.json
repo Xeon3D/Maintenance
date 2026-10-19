@@ -2200,7 +2200,8 @@
       "body": "Text",
       "pinned": "Pinned",
       "assets": "Assets",
-      "updatedById": "Updated by"
+      "updatedById": "Updated by",
+      "onCallHours": "On-call hours"
     }
   },
   "van": {
@@ -2377,5 +2378,17 @@
     "requestOnCall": "On call when it arrived",
     "viewDescription": "Who is on call each week. Whoever is on call receives every new client request and can approve or decline it.",
     "seeCalendar": "See full calendar"
+  },
+  "onCallHours": {
+    "title": "On-call hours",
+    "hint": "When whoever is on call receives new client requests (Settings → Staff → On call). Outside these hours, requests go only to those who approve requests, as usual.",
+    "always": "At any time",
+    "hours": "Only in these hours",
+    "nextDayHint": "An end at or before the start runs into the next day: 18:00–02:00 ends at 2 a.m. the next day, 02:00–02:00 lasts 24 hours.",
+    "from": "from",
+    "to": "to",
+    "nextDay": "until the next day",
+    "allDay": "24 hours",
+    "holidays": "Company holidays (from business hours): all day"
   }
 }

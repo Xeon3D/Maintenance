@@ -2200,7 +2200,8 @@
       "body": "Texto",
       "pinned": "Fixado",
       "assets": "Equipamentos",
-      "updatedById": "Atualizado por"
+      "updatedById": "Atualizado por",
+      "onCallHours": "Horário de prevenção"
     }
   },
   "van": {
@@ -2377,5 +2378,17 @@
     "requestOnCall": "De prevenção quando chegou",
     "viewDescription": "Quem está de prevenção em cada semana. Quem está de prevenção recebe todos os novos pedidos dos clientes e pode aprová-los ou recusá-los.",
     "seeCalendar": "Ver calendário completo"
+  },
+  "onCallHours": {
+    "title": "Horário de prevenção",
+    "hint": "Quando quem está de prevenção recebe os novos pedidos dos clientes (Definições → Colaboradores → Prevenção). Fora deste horário, os pedidos vão apenas para quem aprova pedidos, como habitualmente.",
+    "always": "A qualquer hora",
+    "hours": "Só neste horário",
+    "nextDayHint": "Uma hora de fim igual ou anterior à de início termina no dia seguinte: 18:00–02:00 acaba às 2h do dia seguinte, 02:00–02:00 dura 24 horas.",
+    "from": "das",
+    "to": "às",
+    "nextDay": "até ao dia seguinte",
+    "allDay": "24 horas",
+    "holidays": "Feriados da empresa (do horário de funcionamento): todo o dia"
   }
 }

@@ -11,13 +11,13 @@ Take turns being on call, one person per week. Whoever is on call receives every
 
 Weeks run from Monday to Sunday, in the company's time zone. Each week can be given to one member of the **on-call team**.
 
-When a client sends a request, from the client portal or by scanning a QR label, the person on call at that moment:
+When a client sends a request, from the client portal or by scanning a QR label, during the company's **on-call hours** (by default at any time; set in [Company](/help/organization)), the person on call:
 
 - gets the **New request** notification, in the app, by e-mail and by push, as set in their profile;
 - can **approve or decline** that request, even if their role normally can't, and is pre-selected as the assignee when approving it;
 - is shown on the request as **On call when it arrived**, and next to it in the requests list.
 
-The people who approve requests keep receiving them as before. When nobody is on call, only they do. See [Requests](/help/requests).
+The people who approve requests keep receiving them as before. When nobody is on call, or outside the on-call hours, only they do. See [Requests](/help/requests).
 
 ## The on-call screen
 
@@ -50,13 +50,13 @@ Façam turnos de prevenção, uma pessoa por semana. Quem está de prevenção r
 
 As semanas vão de segunda a domingo, no fuso horário da empresa. Cada semana pode ser atribuída a um membro da **equipa de prevenção**.
 
-Quando um cliente envia um pedido, a partir do portal do cliente ou ao digitalizar uma etiqueta QR, quem está de prevenção nesse momento:
+Quando um cliente envia um pedido, a partir do portal do cliente ou ao digitalizar uma etiqueta QR, dentro do **horário de prevenção** da empresa (por defeito a qualquer hora; definido em [Empresa](/help/organization)), quem está de prevenção:
 
 - recebe a notificação **Novo pedido**, na aplicação, por e-mail e por push, conforme o seu perfil;
 - pode **aprovar ou recusar** esse pedido, mesmo que a sua função normalmente não o permita, e fica pré-selecionado como responsável ao aprová-lo;
 - aparece no pedido como **De prevenção quando chegou**, e ao lado dele na lista de pedidos.
 
-Quem aprova pedidos continua a recebê-los como antes. Quando ninguém está de prevenção, só essas pessoas os recebem. Veja [Pedidos](/help/requests).
+Quem aprova pedidos continua a recebê-los como antes. Quando ninguém está de prevenção, ou fora do horário de prevenção, só essas pessoas os recebem. Veja [Pedidos](/help/requests).
 
 ## O ecrã Prevenção
 

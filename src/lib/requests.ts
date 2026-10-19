@@ -3,7 +3,7 @@ import { randomBytes } from "node:crypto";
 import { nextNumber, type TenantDb } from "@/lib/db/tenant";
 import { prisma } from "@/lib/db/client";
 import { membersWith, notify, notifyExternal, type NotifyActor } from "@/lib/notify";
-import { onCallUserAt } from "@/lib/on-call-db";
+import { requestOnCallUser } from "@/lib/on-call-db";
 import { putObject } from "@/lib/storage";
 import { createWorkOrder, type WoCtx, type WorkOrderInput } from "@/lib/work-orders";
 import type { Priority, SystemType } from "@/generated/prisma/enums";
@@ -31,8 +31,8 @@ export type RequestInput = {
  * Callers are responsible for having validated villa/asset scope for the submitter.
  */
 export async function createRequest(db: TenantDb, organizationId: string, input: RequestInput, photos: File[] = []) {
-  const org = await prisma.organization.findUniqueOrThrow({ where: { id: organizationId }, select: { id: true, name: true, timezone: true } });
-  const onCallUserId = await onCallUserAt(db, org.timezone);
+  const org = await prisma.organization.findUniqueOrThrow({ where: { id: organizationId }, select: { id: true, name: true, timezone: true, onCallHours: true, businessHours: true } });
+  const onCallUserId = await requestOnCallUser(db, org);
   const number = await nextNumber(organizationId, "request");
   const req = await db.request.create({
     data: {

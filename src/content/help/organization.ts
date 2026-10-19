@@ -83,6 +83,16 @@ Service contracts can count response and resolution times in business hours only
 
 > Times are in the company's time zone. Contracts that don't use **Count business hours only** count around the clock and ignore this section.
 
+## On-call hours
+
+Choose when whoever is on call receives new client requests (see [On call](/help/on-call)):
+
+- **At any time**: every request goes to them, day and night.
+- **Only in these hours**: tick the days and set a start and an end for each. An end at or before the start runs into the next day: **18:00–02:00** ends at 2 a.m. the next day, and **02:00–02:00** lasts 24 hours. When you first choose it, the hours are set to weekday evenings 18:00–02:00 and the whole weekend.
+- **Company holidays: all day** also covers the holidays listed under business hours.
+
+A request made at night after midnight belongs to the evening it started from, so on Monday at 1 a.m. it still goes to the person on call the week before. Outside these hours, requests only go to those who approve requests, as usual.
+
 ## Who can access it
 
 Only roles with the **Company settings** permission, by default the Super Admin and Administrators. Changes are recorded in the security log. Server-wide settings, such as backups and e-mail delivery, are in [Server](/help/server), not here.
@@ -166,6 +176,16 @@ Os contratos de serviço podem contar os tempos de resposta e de resolução ape
 3. Clique em **Guardar**.
 
 > As horas estão no fuso horário da empresa. Os contratos que não usam **Contar apenas horário laboral** contam a toda a hora e ignoram esta secção.
+
+## Horário de prevenção
+
+Escolha quando quem está de prevenção recebe os novos pedidos dos clientes (veja [Prevenção](/help/on-call)):
+
+- **A qualquer hora**: todos os pedidos vão para essa pessoa, de dia e de noite.
+- **Só neste horário**: marque os dias e defina, para cada um, uma hora de início e de fim. Uma hora de fim igual ou anterior à de início termina no dia seguinte: **18:00–02:00** acaba às 2h do dia seguinte e **02:00–02:00** dura 24 horas. Quando o escolhe pela primeira vez, o horário fica com as noites dos dias úteis das 18:00 às 02:00 e o fim de semana completo.
+- **Feriados da empresa: todo o dia** cobre também os feriados indicados no horário de funcionamento.
+
+Um pedido feito depois da meia-noite pertence à noite em que o período começou: na segunda-feira à 1h ainda vai para quem estava de prevenção na semana anterior. Fora deste horário, os pedidos vão apenas para quem aprova pedidos, como habitualmente.
 
 ## Quem pode aceder
 
