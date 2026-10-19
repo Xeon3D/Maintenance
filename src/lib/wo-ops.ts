@@ -4,6 +4,7 @@ import { changeStatus, WorkOrderError, type WoCtx } from "@/lib/work-orders";
 import { recordReading } from "@/lib/meters";
 import { notify } from "@/lib/notify";
 import { excerpt, findMentions } from "@/lib/mentions";
+import type { WorkMode } from "@/generated/prisma/enums";
 
 // Technician actions on a work order, shared by the web app's server actions and the offline
 // field app's sync endpoint so both behave identically. `at` is when it happened on the device
@@ -84,13 +85,13 @@ export async function addComment(ctx: WoCtx, woId: string, body: string, attachm
 }
 
 /** A finished time interval (manual entry, or a timer run on the device while offline). */
-export async function addTimeEntry(ctx: WoCtx, woId: string, rate: unknown, startedAt: Date, endedAt: Date, note: string | null) {
+export async function addTimeEntry(ctx: WoCtx, woId: string, rate: unknown, startedAt: Date, endedAt: Date, note: string | null, mode: WorkMode = "ONSITE") {
   const minutes = Math.round((endedAt.getTime() - startedAt.getTime()) / 60_000);
   if (minutes < 1 || minutes > 24 * 60) throw new WorkOrderError("invalidRef");
   const wo = await ctx.db.workOrder.findUnique({ where: { id: woId }, select: { status: true } });
   if (!wo) throw new WorkOrderError("invalidRef");
   const entry = await ctx.db.timeEntry.create({
-    data: { workOrderId: woId, userId: ctx.user.id, startedAt, endedAt, minutes, note: note?.slice(0, 500) || null, hourlyRate: rate as number | null },
+    data: { workOrderId: woId, userId: ctx.user.id, startedAt, endedAt, minutes, note: note?.slice(0, 500) || null, hourlyRate: rate as number | null, mode },
   });
   if (wo.status === "OPEN" || wo.status === "ON_HOLD") await changeStatus(ctx, woId, "IN_PROGRESS");
   return entry;

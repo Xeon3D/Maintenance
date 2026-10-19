@@ -58,6 +58,10 @@ const orgSchema = z.object({
   timeRounding: z.coerce.number().int().refine((v) => (TIME_ROUNDING_OPTIONS as readonly number[]).includes(v), "invalid"),
   urgentFee: z.coerce.number().finite().min(0).max(1_000_000),
   urgentPercent: z.coerce.number().int().min(0).max(500),
+  travelFee: z.coerce.number().finite().min(0).max(1_000_000),
+  travelRadiusKm: z.coerce.number().int().min(0).max(1000),
+  travelKmRate: z.coerce.number().finite().min(0).max(1000),
+  travelPerTechnician: z.enum(["technician", "workOrder"]).transform((v) => v === "technician"),
 });
 
 export async function updateOrgAction(_: FormResult, form: FormData): Promise<FormResult> {

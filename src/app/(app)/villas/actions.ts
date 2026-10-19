@@ -22,6 +22,7 @@ const villaSchema = z
     country: optStr(100),
     latitude: optNumber().refine((v) => v === null || Math.abs(v) <= 90),
     longitude: optNumber().refine((v) => v === null || Math.abs(v) <= 180),
+    distanceKm: optNumber().refine((v) => v === null || (v >= 0 && v <= 10_000)),
     accessNotes: optStr(5000),
   })
   .refine((v) => v.clientId || v.managerId, { path: ["clientId"], message: "ownerOrManager" })

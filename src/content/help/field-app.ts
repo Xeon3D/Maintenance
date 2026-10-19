@@ -43,7 +43,7 @@ The buttons at the top right are: **Scan** (the camera, see below), **Sync now**
 Tap a card to open the work order. You'll see the villa address (tap it to open a map), the villa's **Access** notes, the asset and the description. Villa access codes are never stored on the phone; look them up in the full app if you need them.
 
 1. Tap **Start work**. The job becomes **In progress**.
-2. Tap **Start timer** to time your work. The button turns into **Stop** with a running clock. Only one timer runs at a time: starting one on another job stops the first. Anything under a minute isn't recorded.
+2. Choose **On site** or **Remote**, then tap **Start timer** to time your work. The button turns into **Stop** with a running clock. Only one timer runs at a time: starting one on another job stops the first. Anything under a minute isn't recorded.
 3. Work through the **Checklist**: tick steps, choose pass/fail or an option, type text or numbers, take photos and collect signatures where a step asks for them.
 4. Under **Photos**, tap **Take photo** to add pictures of the job.
 5. Under **Activity**, write a note and tap the send button. Type @ to mention a colleague; they'll be notified once the comment syncs.
@@ -121,7 +121,7 @@ Os botões no canto superior direito são: **Ler código** (a câmara, ver abaix
 Toque num cartão para abrir a ordem de trabalho. Vê a morada da moradia (toque nela para abrir um mapa), as notas de **Acesso** da moradia, o equipamento e a descrição. Os códigos de acesso das moradias nunca ficam guardados no telemóvel; consulte-os na aplicação completa se precisar.
 
 1. Toque em **Iniciar trabalho**. O trabalho passa a **Em curso**.
-2. Toque em **Iniciar cronómetro** para medir o seu tempo. O botão passa a **Parar**, com um relógio a contar. Só pode haver um cronómetro de cada vez: iniciar outro noutro trabalho para o primeiro. Menos de um minuto não é registado.
+2. Escolha **No local** ou **Remoto** e toque em **Iniciar cronómetro** para medir o seu tempo. O botão passa a **Parar**, com um relógio a contar. Só pode haver um cronómetro de cada vez: iniciar outro noutro trabalho para o primeiro. Menos de um minuto não é registado.
 3. Percorra a **Checklist**: marque passos, escolha passa/falha ou uma opção, escreva texto ou números, tire fotografias e recolha assinaturas quando um passo o pedir.
 4. Em **Fotografias**, toque em **Tirar fotografia** para juntar imagens do trabalho.
 5. Em **Atividade**, escreva uma nota e toque no botão de enviar. Escreva @ para mencionar um colega; essa pessoa é notificada quando o comentário for sincronizado.

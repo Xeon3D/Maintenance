@@ -15,7 +15,8 @@ import { WorkOrderView } from "./work-order-view";
 import { ThemeToggle } from "@/components/theme-toggle";
 import type { Theme } from "@/lib/theme";
 
-export type Timer = { woId: string; startedAt: string } | null;
+/** The device timer; `mode` is missing on timers saved before on-site / remote existed (= on site). */
+export type Timer = { woId: string; startedAt: string; mode?: "ONSITE" | "REMOTE" } | null;
 type Status = "idle" | "syncing" | SyncOutcome["state"];
 
 const SYNC_EVERY_MS = 60_000;

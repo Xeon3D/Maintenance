@@ -291,7 +291,11 @@
     "noOwner": "None",
     "billTo": "Bill to",
     "billToHint": "Who the work is billed and the service reports sent to, when the villa has both an owner and a property manager.",
-    "billed": "billed"
+    "billed": "billed",
+    "distanceKm": "Distance from the company",
+    "distanceHint": "Road distance in km, one way. Decides the trip charge for on-site work (Settings → Organization).",
+    "distanceValue": "{km, number} km",
+    "distanceUnset": "Not set (fixed trip fee)"
   },
   "areas": {
     "title": "Floors & rooms",
@@ -540,7 +544,13 @@
     "total": "Total",
     "billed": "Billed",
     "billedHint": "Each technician's time rounded up to blocks of {block} minutes (Settings → Organization).",
-    "billedFrom": "{billed} (logged {logged})"
+    "billedFrom": "{billed} (logged {logged})",
+    "mode": "Where",
+    "modes": {
+      "ONSITE": "On site",
+      "REMOTE": "Remote"
+    },
+    "switchTo": "Change to {mode}"
   },
   "costs": {
     "title": "Amounts to bill",
@@ -553,7 +563,9 @@
     "hours": "{hours} h",
     "other": "Other charges",
     "timeBilled": "Time billed",
-    "urgent": "Urgent fee"
+    "urgent": "Urgent fee",
+    "travel": "Trips",
+    "trips": "{count, plural, one {# trip} other {# trips}}"
   },
   "files": {
     "title": "Photos & files",
@@ -591,7 +603,8 @@
     "photos": "Photos",
     "seePhotos": "See photos",
     "service": "Service",
-    "urgentService": "Urgent"
+    "urgentService": "Urgent",
+    "trips": "Trips"
   },
   "procedures": {
     "description": "Reusable checklists your team follows on site. Use them in work orders and preventive schedules.",
@@ -1294,7 +1307,8 @@
       "minutes": "Minutes logged",
       "downHours": "Hours down",
       "degradedHours": "Hours degraded",
-      "billedMinutes": "Minutes billed"
+      "billedMinutes": "Minutes billed",
+      "trips": "Trips"
     },
     "billedHoursCol": "Hours billed",
     "billedHoursHint": "Hours charged: each technician's time per work order rounded up to the billing period. Utilisation uses the hours logged."
@@ -2221,5 +2235,25 @@
     "open": "Open in calendar app",
     "reset": "New link",
     "resetConfirm": "Create a new link? Calendars subscribed to the current one will stop updating."
+  },
+  "travel": {
+    "title": "Trips for on-site work",
+    "hint": "Time logged on site charges trips; remote time charges none. Villas up to the radius from the company (or without a distance) pay the fixed fee; farther ones pay the rate per km × the villa's whole distance (one way). Leave the fee and the rate at 0 to charge no trips. A service contract can include trips or set its own amounts.",
+    "fee": "Fixed fee per trip ({currency})",
+    "radius": "Radius for the fixed fee (km)",
+    "kmRate": "Beyond the radius, per km ({currency})",
+    "kmRateHint": "Charged on the villa's whole distance (one way), not just the km beyond the radius.",
+    "perTripRule": "{amount} each",
+    "perKmRule": "{km} km × {rate} each",
+    "chargedPerKm": "trips charged per km",
+    "countBy": "Charge trips",
+    "perTechnician": "One per technician per day",
+    "perWorkOrder": "One per work order per day",
+    "contractTitle": "Trips",
+    "contractHint": "Trips charged for on-site work on this contract's work orders. Leave a field empty to use the company's amount (Settings → Organization); 0 means none.",
+    "included": "Trips included in the contract (none charged)",
+    "includedInContract": "included in the contract",
+    "feeTerm": "{amount} per trip",
+    "kmTerm": "{amount} per km"
   }
 }

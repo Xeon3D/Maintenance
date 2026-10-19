@@ -6,6 +6,7 @@ import { countByBucket, hoursBetween, mean, median, pmCompliance, sumBy, timeInS
 import { ACTIVE_STATUSES, workOrderCosts } from "@/lib/work-orders";
 import { billedTime, timeRoundingOf } from "@/lib/billing-time";
 import { urgentRuleFor } from "@/lib/urgent-surcharge";
+import { travelOf } from "@/lib/travel-charge";
 import { villaAccess } from "@/lib/portal-scope";
 import type { Prisma } from "@/generated/prisma/client";
 import type { Priority, SystemType, WorkOrderType } from "@/generated/prisma/enums";
@@ -31,11 +32,13 @@ export function woScope(f: ReportFilters): Prisma.WorkOrderWhereInput {
 
 const inRange = (f: ReportFilters) => ({ gte: f.from, lte: f.to });
 
-const URGENT_FIELDS = { urgentFee: true, urgentPercent: true } as const;
+// Contract fields that change what a work order costs: its urgent surcharge and trips.
+const CONTRACT_COST_FIELDS = { urgentFee: true, urgentPercent: true, travelIncluded: true, travelFee: true, travelKmRate: true } as const;
 const costSelect = {
   priority: true,
-  contract: { select: URGENT_FIELDS },
-  timeEntries: { select: { userId: true, minutes: true, hourlyRate: true } },
+  contract: { select: CONTRACT_COST_FIELDS },
+  timeEntries: { select: { userId: true, minutes: true, hourlyRate: true, startedAt: true, mode: true } },
+  villa: { select: { distanceKm: true } },
   parts: { select: { quantity: true, unitCost: true } },
   otherCosts: { select: { amount: true } },
 } as const;
@@ -55,7 +58,7 @@ export async function overview(ctx: Ctx, f: ReportFilters, now = new Date()) {
         completedAt: true,
         statusLogs: SLA_STATUS_LOGS,
         ...costSelect,
-        contract: { select: { responseTimeHours: true, resolutionTimeHours: true, businessHoursOnly: true, pauseOnHold: true, ...URGENT_FIELDS } },
+        contract: { select: { responseTimeHours: true, resolutionTimeHours: true, businessHoursOnly: true, pauseOnHold: true, ...CONTRACT_COST_FIELDS } },
       },
     }),
     ctx.db.workOrder.findMany({ where: { ...scope, status: "DONE", completedAt: inRange(f) }, select: { type: true, createdAt: true, completedAt: true } }),
@@ -71,7 +74,7 @@ export async function overview(ctx: Ctx, f: ReportFilters, now = new Date()) {
   const calendar = slaCalendar(ctx.organization);
   const sla = opened.filter((w) => w.contract).map((w) => slaStates(w, w.contract, now, calendar));
   const block = timeRoundingOf(ctx.organization.timeRounding);
-  const cost = opened.reduce((s, w) => s + workOrderCosts(w, block, urgentRuleFor(ctx.organization, w.contract)).total, 0);
+  const cost = opened.reduce((s, w) => s + workOrderCosts(w, block, urgentRuleFor(ctx.organization, w.contract), travelOf(ctx.organization, w.contract)).total, 0);
   const trend = countByBucket({ opened: opened.map((w) => w.createdAt), completed: completed.map((w) => w.completedAt) }, f.from, f.to);
 
   return {
@@ -184,8 +187,8 @@ export async function costReport(ctx: Ctx, f: ReportFilters) {
         number: true,
         title: true,
         system: true,
-        villa: { select: { id: true, name: true, client: { select: { id: true, name: true } }, manager: { select: { id: true, name: true } }, billTo: true } },
         ...costSelect,
+        villa: { select: { id: true, name: true, distanceKm: true, client: { select: { id: true, name: true } }, manager: { select: { id: true, name: true } }, billTo: true } },
       },
     }),
     ctx.db.serviceContract.findMany({
@@ -204,18 +207,19 @@ export async function costReport(ctx: Ctx, f: ReportFilters) {
     }),
   ]);
   const block = timeRoundingOf(ctx.organization.timeRounding);
-  const rows = wos.map((w) => ({ ...w, cost: workOrderCosts(w, block, urgentRuleFor(ctx.organization, w.contract)) }));
+  const rows = wos.map((w) => ({ ...w, cost: workOrderCosts(w, block, urgentRuleFor(ctx.organization, w.contract), travelOf(ctx.organization, w.contract)) }));
   type Row = (typeof rows)[number];
   const group = (key: (r: Row) => { id: string; name: string } | null) => {
-    const m = new Map<string, { id: string; name: string; labor: number; parts: number; other: number; urgent: number; total: number; count: number }>();
+    const m = new Map<string, { id: string; name: string; labor: number; parts: number; other: number; urgent: number; travel: number; total: number; count: number }>();
     for (const r of rows) {
       const k = key(r);
       if (!k) continue;
-      const g = m.get(k.id) ?? { ...k, labor: 0, parts: 0, other: 0, urgent: 0, total: 0, count: 0 };
+      const g = m.get(k.id) ?? { ...k, labor: 0, parts: 0, other: 0, urgent: 0, travel: 0, total: 0, count: 0 };
       g.labor += r.cost.labor;
       g.parts += r.cost.parts;
       g.other += r.cost.other;
       g.urgent += r.cost.urgent;
+      g.travel += r.cost.travel;
       g.total += r.cost.total;
       g.count += 1;
       m.set(k.id, g);
@@ -233,8 +237,8 @@ export async function costReport(ctx: Ctx, f: ReportFilters) {
   }
 
   const totals = rows.reduce(
-    (s, r) => ({ labor: s.labor + r.cost.labor, parts: s.parts + r.cost.parts, other: s.other + r.cost.other, urgent: s.urgent + r.cost.urgent, total: s.total + r.cost.total }),
-    { labor: 0, parts: 0, other: 0, urgent: 0, total: 0 },
+    (s, r) => ({ labor: s.labor + r.cost.labor, parts: s.parts + r.cost.parts, other: s.other + r.cost.other, urgent: s.urgent + r.cost.urgent, travel: s.travel + r.cost.travel, total: s.total + r.cost.total }),
+    { labor: 0, parts: 0, other: 0, urgent: 0, travel: 0, total: 0 },
   );
   return {
     totals,

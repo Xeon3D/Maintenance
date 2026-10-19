@@ -114,6 +114,27 @@ export async function ContractForm({ ctx, contract, defaults }: { ctx: AppContex
         </fieldset>
       )}
 
+      {ctx.can("costs.view") && (
+        <fieldset>
+          <legend className="mb-1 text-sm font-medium">{t("travel.contractTitle")}</legend>
+          <p className="mb-2 text-xs text-muted">{t("travel.contractHint")}</p>
+          <label className="mb-3 flex items-center gap-2 text-sm">
+            <input type="checkbox" name="travelIncluded" defaultChecked={contract?.travelIncluded ?? false} className="size-4 accent-brand" />
+            {t("travel.included")}
+          </label>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <Field label={t("travel.fee", { currency: ctx.organization.currency })}>
+              <Input name="travelFee" type="number" min={0} step="0.01" defaultValue={contract?.travelFee != null ? Number(contract.travelFee) : ""} placeholder={String(Number(ctx.organization.travelFee))} />
+              <FieldError name="travelFee" />
+            </Field>
+            <Field label={t("travel.kmRate", { currency: ctx.organization.currency })}>
+              <Input name="travelKmRate" type="number" min={0} step="0.01" defaultValue={contract?.travelKmRate != null ? Number(contract.travelKmRate) : ""} placeholder={String(Number(ctx.organization.travelKmRate))} />
+              <FieldError name="travelKmRate" />
+            </Field>
+          </div>
+        </fieldset>
+      )}
+
       <fieldset>
         <legend className="mb-1 text-sm font-medium">{t("contracts.systems")}</legend>
         <p className="mb-2 text-xs text-muted">{t("contracts.systemsHint")}</p>

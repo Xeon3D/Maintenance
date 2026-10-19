@@ -291,7 +291,11 @@
     "noOwner": "Nenhum",
     "billTo": "Faturar a",
     "billToHint": "A quem se fatura o trabalho e se enviam os relatórios de serviço, quando a moradia tem proprietário e gestão.",
-    "billed": "faturada"
+    "billed": "faturada",
+    "distanceKm": "Distância à empresa",
+    "distanceHint": "Distância por estrada em km, só ida. Define o valor da deslocação no trabalho no local (Definições → Empresa).",
+    "distanceValue": "{km, number} km",
+    "distanceUnset": "Não definida (valor fixo de deslocação)"
   },
   "areas": {
     "title": "Pisos e divisões",
@@ -540,7 +544,13 @@
     "total": "Total",
     "billed": "Faturado",
     "billedHint": "O tempo de cada técnico arredondado para cima a blocos de {block} minutos (Definições → Empresa).",
-    "billedFrom": "{billed} (registado {logged})"
+    "billedFrom": "{billed} (registado {logged})",
+    "mode": "Local",
+    "modes": {
+      "ONSITE": "No local",
+      "REMOTE": "Remoto"
+    },
+    "switchTo": "Mudar para {mode}"
   },
   "costs": {
     "title": "Valores a faturar",
@@ -553,7 +563,9 @@
     "hours": "{hours} h",
     "other": "Outros valores",
     "timeBilled": "Tempo faturado",
-    "urgent": "Taxa de urgência"
+    "urgent": "Taxa de urgência",
+    "travel": "Deslocações",
+    "trips": "{count, plural, one {# deslocação} other {# deslocações}}"
   },
   "files": {
     "title": "Fotografias e ficheiros",
@@ -591,7 +603,8 @@
     "photos": "Fotografias",
     "seePhotos": "Ver fotografias",
     "service": "Serviço",
-    "urgentService": "Urgente"
+    "urgentService": "Urgente",
+    "trips": "Deslocações"
   },
   "procedures": {
     "description": "Checklists reutilizáveis que a equipa segue em obra. Use-as em ordens de trabalho e planos preventivos.",
@@ -1294,7 +1307,8 @@
       "minutes": "Minutos registados",
       "downHours": "Horas avariado",
       "degradedHours": "Horas degradado",
-      "billedMinutes": "Minutos faturados"
+      "billedMinutes": "Minutos faturados",
+      "trips": "Deslocações"
     },
     "billedHoursCol": "Horas faturadas",
     "billedHoursHint": "Horas cobradas: o tempo de cada técnico por ordem de trabalho arredondado ao período de faturação. A utilização usa as horas registadas."
@@ -2221,5 +2235,25 @@
     "open": "Abrir na app de calendário",
     "reset": "Novo link",
     "resetConfirm": "Criar um link novo? Os calendários que subscreveram o atual deixam de ser atualizados."
+  },
+  "travel": {
+    "title": "Deslocações (trabalho no local)",
+    "hint": "O tempo registado no local cobra deslocações; o tempo remoto não cobra nenhuma. As moradias até ao raio a partir da empresa (ou sem distância) pagam o valor fixo; as mais distantes pagam o valor por km × toda a distância da moradia (só ida). Deixe o valor fixo e o valor por km a 0 para não cobrar deslocações. Cada contrato de manutenção pode incluir as deslocações ou ter os seus próprios valores.",
+    "fee": "Valor fixo por deslocação ({currency})",
+    "radius": "Raio do valor fixo (km)",
+    "kmRate": "Acima do raio, por km ({currency})",
+    "kmRateHint": "Cobrado sobre toda a distância da moradia (só ida), não só os km acima do raio.",
+    "perTripRule": "{amount} cada",
+    "perKmRule": "{km} km × {rate} cada",
+    "chargedPerKm": "deslocações cobradas ao km",
+    "countBy": "Cobrar deslocações",
+    "perTechnician": "Uma por técnico e por dia",
+    "perWorkOrder": "Uma por ordem de trabalho e por dia",
+    "contractTitle": "Deslocações",
+    "contractHint": "Deslocações cobradas pelo trabalho no local nas ordens de trabalho deste contrato. Deixe um campo vazio para usar o valor da empresa (Definições → Empresa); 0 significa nenhum.",
+    "included": "Deslocações incluídas no contrato (não são cobradas)",
+    "includedInContract": "incluídas no contrato",
+    "feeTerm": "{amount} por deslocação",
+    "kmTerm": "{amount} por km"
   }
 }

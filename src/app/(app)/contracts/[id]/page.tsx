@@ -56,6 +56,14 @@ export default async function ContractPage({ params }: PageProps<"/contracts/[id
       t("urgent.none");
     return own ? value : t("urgent.fromCompany", { value });
   };
+  /** "Included", or "30 € per trip · 0.40 € per km", each marked as the company's when the contract doesn't set it. */
+  const travelText = () => {
+    if (contract.travelIncluded) return t("travel.included");
+    const cur = (n: unknown) => format.number(Number(n), { style: "currency", currency: ctx.organization.currency });
+    const fee = t("travel.feeTerm", { amount: cur(contract.travelFee ?? ctx.organization.travelFee) });
+    const km = t("travel.kmTerm", { amount: cur(contract.travelKmRate ?? ctx.organization.travelKmRate) });
+    return [contract.travelFee != null ? fee : t("urgent.fromCompany", { value: fee }), contract.travelKmRate != null ? km : t("urgent.fromCompany", { value: km })].join(" · ");
+  };
   const dt = (d: Date) => format.dateTime(d, { dateStyle: "short", timeStyle: "short" });
   const canManage = ctx.can("contracts.manage");
 
@@ -71,6 +79,7 @@ export default async function ContractPage({ params }: PageProps<"/contracts/[id
       ? ([
           [t("contracts.monthlyFee"), contract.monthlyFee != null ? format.number(Number(contract.monthlyFee), { style: "currency", currency: ctx.organization.currency }) : "—"],
           [t("urgent.contractTitle"), urgentText(urgentRuleFor(ctx.organization, contract), contract.urgentFee != null || contract.urgentPercent != null)],
+          [t("travel.contractTitle"), travelText()],
         ] as [string, React.ReactNode][])
       : []),
     [

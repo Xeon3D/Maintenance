@@ -70,6 +70,7 @@ Saving or deleting a contract re-checks all of the client's work orders, includi
 - Everyone in the company can see contracts and their compliance.
 - **Super Admin**, **Administrator** and **Manager** can create, edit and delete contracts (permission **Service contracts**).
 - The **Monthly fee** is only shown to roles with **See amounts**. Someone without it can still edit the contract; the stored fee is kept.
+- **Trips** (also only with **See amounts**): tick **Trips included in the contract** to charge no trips on its work orders, or set its own **Fixed fee per trip** and rate **per km**. Leave a field empty to use the company's ([Settings → Organization](/help/organization)).
 - **Urgent fee** (also only with **See amounts**): what this contract's urgent work orders are charged on top, a fixed amount plus a percentage of labour. Leave both empty to use the company's ([Settings → Organization](/help/organization)); 0 means none, for example on a premium contract.
 `,
   pt: `# Contratos de manutenção
@@ -136,6 +137,7 @@ Guardar ou eliminar um contrato volta a verificar todas as ordens de trabalho do
 - Todas as pessoas da empresa podem ver os contratos e o seu cumprimento.
 - **Super Admin**, **Administrador** e **Gestor** podem criar, editar e eliminar contratos (permissão **Contratos de serviço**).
 - A **Mensalidade** só é mostrada às funções com **Ver valores**. Quem não a tiver pode editar o contrato na mesma; a mensalidade guardada mantém-se.
+- **Deslocações** (também só com **Ver valores**): marque **Deslocações incluídas no contrato** para não cobrar deslocações nas suas ordens de trabalho, ou defina o seu **Valor fixo por deslocação** e o valor **por km**. Deixe um campo vazio para usar o da empresa ([Definições → Empresa](/help/organization)).
 - **Taxa de urgência** (também só com **Ver valores**): o valor cobrado a mais nas ordens de trabalho urgentes deste contrato, um valor fixo mais uma percentagem da mão de obra. Deixe ambos vazios para usar a da empresa ([Definições → Empresa](/help/organization)); 0 significa nenhuma, por exemplo num contrato premium.
 `,
 };

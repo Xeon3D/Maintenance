@@ -305,6 +305,13 @@ restart `next dev` after adding a file. `npx playwright install --with-deps chro
   - PO workflow is `poActions(status, {canApprove, hasReceipts})`: approvers approve straight from DRAFT;
     others submit → PENDING_APPROVAL. Only drafts are editable; cancel is blocked once anything is received.
   - Domain errors surface as `stock.<code>` message keys.
+- **On site / remote time and trips** (`src/lib/travel-charge.ts`, pure, tested): `TimeEntry.mode` (ONSITE default,
+  REMOTE); chosen before the timer / manual entry (web and field app, `time` op `mode`), switchable per entry
+  (`setTimeModeAction`). One trip per day (org time zone) with finished on-site time, per technician or per work order
+  (`Organization.travelPerTechnician`); cost = `travelFee` within `travelRadiusKm` of the company (or when
+  `Villa.distanceKm` is unset), else `travelKmRate` × the whole one-way distance. A contract can include trips
+  (`travelIncluded`) or set its own `travelFee` / `travelKmRate` (null = company). Pass `travelOf(org, contract)` to `workOrderCosts` (select `villa.distanceKm` and the
+  entries' `startedAt`/`mode`). The service report shows the count and each person's mode, no amounts.
 - **Per-org counters** via `nextNumber(orgId, key)`. Keys in use: `workOrder`, `request`, `purchaseOrder`.
 
 ### UI kit

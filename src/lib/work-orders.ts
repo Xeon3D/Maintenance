@@ -9,6 +9,7 @@ import { contractFor } from "@/lib/contracts";
 import { effectivePermissions } from "@/lib/rbac";
 import { billedTime, type TimeEntryLike } from "@/lib/billing-time";
 import { NO_SURCHARGE, urgentSurcharge, type UrgentRule } from "@/lib/urgent-surcharge";
+import { travelCharge, type TravelContext, type TripEntry } from "@/lib/travel-charge";
 import type { ChecklistItemType, Priority, SystemType, WorkOrderStatus, WorkOrderType } from "@/generated/prisma/enums";
 
 export const ACTIVE_STATUSES: WorkOrderStatus[] = ["OPEN", "IN_PROGRESS", "ON_HOLD"];
@@ -251,23 +252,40 @@ export async function stopRunningTimers(ctx: WoCtx, workOrderId: string, at = ne
 }
 
 /**
- * Labour + parts + other costs for a work order. Labour uses billed time: each technician's minutes rounded up
+ * Labour + parts + other costs (+ urgent surcharge and trips) for a work order. Labour uses billed time: each technician's minutes rounded up
  * to `block` (the company's billing period, see lib/billing-time.ts); `minutes` is the time actually logged.
  */
 export function workOrderCosts(
   wo: {
     priority?: string | null;
-    timeEntries: TimeEntryLike[];
+    timeEntries: (TimeEntryLike & Partial<TripEntry>)[];
     otherCosts: { amount: unknown }[];
     parts?: { quantity: unknown; unitCost: unknown }[];
+    /** Select the villa's distanceKm and the entries' startedAt + mode whenever `travel` is passed. */
+    villa?: { distanceKm: number | null } | null;
   },
   block: number,
   /** The urgent surcharge that applies to this work order (see lib/urgent-surcharge.ts); none when omitted. */
   urgentRule: UrgentRule = NO_SURCHARGE,
+  /** The company's trip charges (see lib/travel-charge.ts); none when omitted. */
+  travel: TravelContext | null = null,
 ) {
   const time = billedTime(wo.timeEntries, block);
   const other = wo.otherCosts.reduce((s, c) => s + Number(c.amount), 0);
   const parts = (wo.parts ?? []).reduce((s, p) => s + Number(p.quantity) * Number(p.unitCost), 0);
   const urgent = urgentSurcharge(wo.priority, time.labor, urgentRule);
-  return { minutes: time.minutes, billedMinutes: time.billed, labor: time.labor, parts, other, urgent, total: time.labor + parts + other + urgent };
+  const trips = travel ? travelCharge(wo.timeEntries, wo.villa?.distanceKm, travel) : null;
+  const travelCost = trips?.amount ?? 0;
+  return {
+    minutes: time.minutes,
+    billedMinutes: time.billed,
+    labor: time.labor,
+    parts,
+    other,
+    urgent,
+    travel: travelCost,
+    trips: trips?.trips ?? 0,
+    perTrip: trips?.perTrip ?? 0,
+    total: time.labor + parts + other + urgent + travelCost,
+  };
 }
