@@ -260,6 +260,7 @@ export function FieldApp({ user, org, logo, theme }: { user: { id: string; name:
       {current ? (
         <WorkOrderView
           wo={current}
+          articles={current.villa?.id ? (snapshot?.knowledge ?? []).filter((a) => a.villaId === current.villa?.id) : []}
           members={snapshot?.members.filter((m) => m.id !== user.id) ?? []}
           timer={timer}
           setTimer={setTimer}

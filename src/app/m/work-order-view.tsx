@@ -9,10 +9,11 @@ import { MentionTextarea, type MentionMember } from "@/components/mention-textar
 import { shrinkImage } from "@/lib/upload-client";
 import { missingRequired } from "@/lib/offline/apply";
 import { newId } from "@/lib/offline/idb";
-import type { NewOp, OfflineWorkOrder } from "@/lib/offline-types";
+import type { NewOp, OfflineArticle, OfflineWorkOrder } from "@/lib/offline-types";
 import type { WorkOrderStatus } from "@/generated/prisma/enums";
 import { SignaturePad, type SignaturePadHandle } from "@/components/signature-pad";
 import { ChecklistItemInput } from "./checklist-item";
+import { KnowledgeSection } from "./knowledge-view";
 import type { Timer } from "./field-app";
 
 type Enqueue = (op: NewOp, blob?: Blob) => Promise<void>;
@@ -23,6 +24,7 @@ function clock(sec: number) {
 
 export function WorkOrderView({
   wo,
+  articles,
   members,
   timer,
   setTimer,
@@ -30,6 +32,8 @@ export function WorkOrderView({
   onBack,
 }: {
   wo: OfflineWorkOrder;
+  /** The villa's knowledge-base articles. */
+  articles: OfflineArticle[];
   members: MentionMember[];
   timer: Timer;
   setTimer: (t: Timer) => Promise<void>;
@@ -138,6 +142,8 @@ export function WorkOrderView({
         )}
         {wo.description && <p className="whitespace-pre-wrap pt-1">{wo.description}</p>}
       </section>
+
+      {articles.length > 0 && <KnowledgeSection articles={articles} assetId={wo.asset?.id ?? null} />}
 
       {!closed && (
         <section className="space-y-3 border-b border-border bg-surface px-4 py-3">

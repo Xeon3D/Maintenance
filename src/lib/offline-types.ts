@@ -1,6 +1,6 @@
 // Shapes exchanged between the offline field app (/m) and /api/offline/*. No server imports.
 
-import type { ChecklistItemType, Priority, WorkOrderStatus, WorkOrderType } from "@/generated/prisma/enums";
+import type { ChecklistItemType, Priority, SystemType, WorkOrderStatus, WorkOrderType } from "@/generated/prisma/enums";
 
 export type OfflineItem = {
   id: string;
@@ -26,7 +26,8 @@ export type OfflineWorkOrder = {
   dueDate: string | null;
   /** Optional: snapshots cached by older versions don't have it. */
   startDate?: string | null;
-  villa: { name: string; address: string | null; city: string | null; accessNotes: string | null } | null;
+  /** `id` is optional: snapshots cached by older versions don't have it. */
+  villa: { id?: string; name: string; address: string | null; city: string | null; accessNotes: string | null } | null;
   area: string | null;
   asset: { id: string; name: string; details: string | null } | null;
   items: OfflineItem[];
@@ -44,6 +45,21 @@ export type Snapshot = {
   /** Assets at the villas in the snapshot, so a scanned QR label resolves offline. */
   assets: { id: string; name: string; qrToken: string; villa: string }[];
   members: { id: string; name: string }[];
+  /** Knowledge-base articles of the villas in the snapshot (text only). Optional: older snapshots lack it. */
+  knowledge?: OfflineArticle[];
+};
+
+export type OfflineArticle = {
+  id: string;
+  villaId: string;
+  title: string;
+  body: string;
+  system: SystemType | null;
+  pinned: boolean;
+  updatedAt: string;
+  updatedBy: string | null;
+  assets: { id: string; name: string }[];
+  files: number;
 };
 
 type Base = { id: string; woId: string; at: string };

@@ -29,6 +29,7 @@ export const AUDITED: Record<string, "all" | "delete"> = {
   JobRole: "all",
   Membership: "all",
   Invitation: "all",
+  KnowledgeArticle: "all",
   Attachment: "delete",
 };
 
@@ -78,7 +79,7 @@ function replacedIds(op: unknown): { key: string; ids: string[] } | null {
   return null;
 }
 
-/** Names for related ids (people and categories), else the ids themselves. */
+/** Names for related ids (people, categories, assets), else the ids themselves. */
 async function namesOf(relation: string, key: string, ids: string[]) {
   if (!ids.length) return [];
   const rows: { id: string; name: string }[] =
@@ -86,7 +87,9 @@ async function namesOf(relation: string, key: string, ids: string[]) {
       ? await prisma.user.findMany({ where: { id: { in: ids } }, select: { id: true, name: true } }).catch(() => [])
       : relation === "categories"
         ? await prisma.category.findMany({ where: { id: { in: ids } }, select: { id: true, name: true } }).catch(() => [])
-        : [];
+        : relation === "assets"
+          ? await prisma.asset.findMany({ where: { id: { in: ids } }, select: { id: true, name: true } }).catch(() => [])
+          : [];
   const byId = new Map(rows.map((r) => [r.id, r.name]));
   return ids.map((id) => byId.get(id) ?? id).sort((a, b) => a.localeCompare(b));
 }

@@ -14,6 +14,7 @@ export const PERMISSIONS = {
   "contracts.manage": ["OWNER", "ADMIN", "MANAGER"],
   "assets.manage": ["OWNER", "ADMIN", "MANAGER", "TECHNICIAN"],
   "secrets.view": ["OWNER", "ADMIN", "MANAGER", "TECHNICIAN"],
+  "knowledge.manage": ["OWNER", "ADMIN", "MANAGER", "TECHNICIAN"], // write villa knowledge-base articles (reading = internal.view)
   "workOrders.create": ["OWNER", "ADMIN", "MANAGER", "TECHNICIAN"],
   "workOrders.manage": ["OWNER", "ADMIN", "MANAGER"], // assign, delete, edit anyone's
   "workOrders.execute": ["OWNER", "ADMIN", "MANAGER", "TECHNICIAN"],
@@ -46,7 +47,7 @@ export const STAFF_BASE: Permission[] = ["internal.view"];
 export const PERMISSION_GROUPS: { key: string; permissions: Permission[] }[] = [
   { key: "admin", permissions: ["org.manage", "users.manage", "teams.manage", "audit.view"] },
   { key: "work", permissions: ["workOrders.create", "workOrders.execute", "workOrders.manage", "workOrders.sendReport", "requests.create", "requests.approve", "pm.manage", "procedures.manage"] },
-  { key: "sites", permissions: ["clients.manage", "contracts.manage", "assets.manage", "secrets.view"] },
+  { key: "sites", permissions: ["clients.manage", "contracts.manage", "assets.manage", "secrets.view", "knowledge.manage"] },
   { key: "supply", permissions: ["inventory.use", "inventory.manage", "vendors.manage", "purchasing.manage", "purchasing.approve"] },
   { key: "insights", permissions: ["reports.view"] },
   { key: "finance", permissions: ["costs.view", "billing.manage"] },

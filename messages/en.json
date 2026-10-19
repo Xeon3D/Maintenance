@@ -1809,6 +1809,12 @@
         "label": "Audit log",
         "hint": "See who did what and from where: sign-ins, changes and deletions, users and permissions, server operations."
       }
+    },
+    "knowledge": {
+      "manage": {
+        "label": "Knowledge base",
+        "hint": "Write, edit and delete villa knowledge-base articles. Everyone on the team can read them."
+      }
     }
   },
   "reportEmail": {
@@ -2031,7 +2037,8 @@
       "Attachment": "attachment",
       "Organization": "company",
       "User": "user",
-      "Server": "server"
+      "Server": "server",
+      "KnowledgeArticle": "knowledge-base article"
     },
     "actions": {
       "auth": {
@@ -2169,7 +2176,11 @@
       "timeRounding": "Time billing blocks",
       "urgentFee": "Urgent fee (fixed)",
       "urgentPercent": "Urgent fee (%)",
-      "purchaseCost": "Purchase cost"
+      "purchaseCost": "Purchase cost",
+      "body": "Text",
+      "pinned": "Pinned",
+      "assets": "Assets",
+      "updatedById": "Updated by"
     }
   },
   "van": {
@@ -2261,14 +2272,14 @@
   },
   "search": {
     "title": "Search",
-    "description": "Find earlier jobs by any word written on them: title, description, comments, checklist notes and time notes.",
+    "description": "Find earlier jobs by any word written on them (title, description, comments, checklist notes and time notes) and the villas' knowledge-base articles.",
     "placeholder": "e.g. processor, condensation, PoE switch…",
     "villa": "Villa",
     "allVillas": "All villas",
     "system": "System",
     "allSystems": "All systems",
     "hint": "Type one or more words. Upper case, accents and small typos don't matter.",
-    "none": "No work order mentions these words.",
+    "none": "No work order or knowledge-base article mentions these words.",
     "count": "{count, plural, one {# work order} other {# work orders}}",
     "countTop": "The {count} most relevant work orders",
     "completedOn": "Completed {date}",
@@ -2285,6 +2296,46 @@
       "itemAnswer": "Answer to \"{step}\"",
       "timeNote": "Time note",
       "statusNote": "Note when moved to {status}"
-    }
+    },
+    "articles": "{count, plural, one {# knowledge-base article} other {# knowledge-base articles}}",
+    "articlesMore": "{count, plural, one {# more article} other {# more articles}}: add more words to narrow the search."
+  },
+  "knowledge": {
+    "title": "Knowledge base",
+    "description": "How this villa's systems are set up: configurations, workarounds, where things are, what to watch out for.",
+    "new": "New article",
+    "edit": "Edit article",
+    "delete": "Delete article",
+    "deleteConfirm": "Delete this article and its files? This can't be undone.",
+    "empty": "No articles yet.",
+    "emptyHint": "Write down what the next technician needs to know about this villa: how a system is set up, a fix that works, where the rack key is.",
+    "emptyAsset": "Nothing written about this asset yet.",
+    "viewAll": "View all",
+    "searchPlaceholder": "Search the articles…",
+    "allSystems": "All systems",
+    "allAssets": "All assets",
+    "noMatches": "No articles match.",
+    "found": "{count, plural, one {# article} other {# articles}}",
+    "articleTitle": "Title",
+    "titlePlaceholder": "e.g. KNX: resetting the IP router",
+    "system": "System",
+    "general": "General",
+    "body": "Text",
+    "write": "Write",
+    "preview": "Preview",
+    "nothingToPreview": "Nothing to preview yet.",
+    "formatHint": "## heading · **bold** · *italic* · `code` · - list · 1. steps · > note · ``` code block ``` · [text](https://…)",
+    "assets": "Assets",
+    "assetsHint": "The article also shows on these assets' pages, and first in jobs on them.",
+    "pin": "Pin to the top",
+    "pinHint": "Pinned articles are listed first, here and on the villa page.",
+    "pinned": "Pinned",
+    "files": "Files",
+    "noText": "No text.",
+    "created": "Written {when}",
+    "createdBy": "Written by {name}, {when}",
+    "updated": "Updated {when}",
+    "updatedBy": "Updated by {name}, {when}",
+    "filesOnline": "{count, plural, one {# file} other {# files}} (needs a connection)"
   }
 }

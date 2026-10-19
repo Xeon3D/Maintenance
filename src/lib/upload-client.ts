@@ -6,7 +6,8 @@ export type UploadTarget =
   | { assetId: string }
   | { villaId: string }
   | { partId: string }
-  | { purchaseOrderId: string };
+  | { purchaseOrderId: string }
+  | { articleId: string };
 export type Uploaded = { id: string; url: string; filename: string; mimeType: string };
 
 const MAX_EDGE = 2000;
