@@ -31,7 +31,7 @@ export default async function RequestPage({ params }: PageProps<"/requests/[id]"
       area: { select: { name: true } },
       asset: { select: { id: true, name: true, status: true } },
       requester: { select: { name: true, email: true, phone: true } },
-      onCallUser: { select: { id: true, name: true } },
+      onCallUsers: { select: { id: true, name: true }, orderBy: { name: "asc" } },
       workOrder: {
         select: {
           id: true,
@@ -50,7 +50,7 @@ export default async function RequestPage({ params }: PageProps<"/requests/[id]"
   });
   if (!r) notFound();
   // Approvers, and whoever was on call when it arrived.
-  const canApprove = (ctx.can("requests.approve") || r.onCallUserId === ctx.user.id) && r.status === "PENDING";
+  const canApprove = (ctx.can("requests.approve") || r.onCallUsers.some((u) => u.id === ctx.user.id)) && r.status === "PENDING";
 
   const [teams, members] = canApprove
     ? await Promise.all([
@@ -164,7 +164,7 @@ export default async function RequestPage({ params }: PageProps<"/requests/[id]"
                   system={r.system}
                   teams={teams.map((x) => ({ id: x.id, name: x.name, memberIds: x.members.map((m) => m.userId) }))}
                   people={members}
-                  initialAssignees={r.onCallUserId && members.some((m) => m.id === r.onCallUserId) ? [r.onCallUserId] : []}
+                  initialAssignees={r.onCallUsers.map((u) => u.id).filter((id) => members.some((m) => m.id === id))}
                 />
               </ActionForm>
             </Card>
@@ -190,13 +190,15 @@ export default async function RequestPage({ params }: PageProps<"/requests/[id]"
                 </a>
               )}
             </div>
-            {r.onCallUser && (
+            {r.onCallUsers.length > 0 && (
               <div>
                 <div className="text-xs text-muted">{t("onCall.requestOnCall")}</div>
-                <div className="flex items-center gap-1.5">
-                  <PhoneCall className="size-3.5 text-muted" />
-                  {r.onCallUser.name}
-                </div>
+                {r.onCallUsers.map((u) => (
+                  <div key={u.id} className="flex items-center gap-1.5">
+                    <PhoneCall className="size-3.5 text-muted" />
+                    {u.name}
+                  </div>
+                ))}
               </div>
             )}
             {r.villa && (

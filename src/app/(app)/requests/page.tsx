@@ -47,7 +47,7 @@ export default async function RequestsPage({ searchParams }: PageProps<"/request
         villa: { select: { name: true } },
         asset: { select: { name: true } },
         requester: { select: { name: true } },
-        onCallUser: { select: { name: true } },
+        onCallUsers: { select: { name: true }, orderBy: { name: "asc" } },
         _count: { select: { attachments: true } },
       },
       orderBy: [{ createdAt: "desc" }],
@@ -126,10 +126,10 @@ export default async function RequestsPage({ searchParams }: PageProps<"/request
                           {r._count.attachments}
                         </span>
                       )}
-                      {r.onCallUser && (
+                      {r.onCallUsers.length > 0 && (
                         <span className="inline-flex items-center gap-0.5 text-xs text-muted" title={t("onCall.requestOnCall")}>
                           <PhoneCall className="size-3.5" />
-                          {r.onCallUser.name}
+                          {r.onCallUsers.map((u) => u.name).join(", ")}
                         </span>
                       )}
                     </div>

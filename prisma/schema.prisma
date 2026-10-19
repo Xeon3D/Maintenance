@@ -253,6 +253,9 @@ model Organization {
   retention     Json?
   // Opening hours per weekday and holidays for SLA timers, e.g. {"days": [null, {"start": "09:00", "end": "18:00"}, …], "holidays": ["2026-12-25"]}.
   businessHours Json?
+  // When whoever is on call receives new client requests: {"days": [{"start": "18:00", "end": "02:00"} | null, …] (0 = Sunday;
+  // an end at or before the start runs into the next day), "holidays": true}. Null = at any time (lib/on-call.ts).
+  onCallHours   Json?
   // Permissions of the built-in staff roles, e.g. {"MANAGER": ["workOrders.manage", …]}; a missing role uses the defaults in lib/rbac.
   rolePermissions Json?
   timeRounding   Int      @default(30) // billing period in minutes: each technician's time on a work order is rounded up to it (0 = none)
@@ -332,7 +335,7 @@ model Membership {
   @@index([organizationId])
 }
 
-/// One on-call week (Monday to Sunday, company time zone): that member receives every new client request.
+/// A member on call for one week (Monday to Sunday, company time zone). A week can have several; see lib/on-call.ts for who gets a request.
 model OnCallWeek {
   id             String   @id @default(cuid())
   organizationId String
@@ -344,7 +347,8 @@ model OnCallWeek {
   organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
   user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  @@unique([organizationId, weekStart])
+  @@unique([organizationId, weekStart, userId])
+  @@index([organizationId, weekStart])
 }
 
 model Invitation {
@@ -895,7 +899,6 @@ model Request {
   requesterPhone String?
   workOrderId    String?       @unique
   declineReason  String?
-  onCallUserId   String? // who was on call (OnCallWeek) when it arrived: notified, and may approve or decline it
   createdAt      DateTime      @default(now())
   updatedAt      DateTime      @updatedAt
 
@@ -904,7 +907,8 @@ model Request {
   area         Area?        @relation(fields: [areaId], references: [id], onDelete: SetNull)
   asset        Asset?       @relation(fields: [assetId], references: [id], onDelete: SetNull)
   requester    User?        @relation("RequestRequester", fields: [requesterId], references: [id], onDelete: SetNull)
-  onCallUser   User?        @relation("RequestOnCall", fields: [onCallUserId], references: [id], onDelete: SetNull)
+  // Who was on call when it arrived (lib/on-call.ts): notified, and may approve or decline it.
+  onCallUsers  User[]       @relation("RequestOnCall")
   workOrder    WorkOrder?   @relation(fields: [workOrderId], references: [id], onDelete: SetNull)
   attachments  Attachment[]
 

@@ -2200,7 +2200,8 @@
       "body": "Text",
       "pinned": "Pinned",
       "assets": "Assets",
-      "updatedById": "Updated by"
+      "updatedById": "Updated by",
+      "onCallHours": "On-call hours"
     }
   },
   "van": {
@@ -2359,7 +2360,7 @@
     "filesOnline": "{count, plural, one {# file} other {# files}} (needs a connection)"
   },
   "onCall": {
-    "description": "Choose the on-call team and who is on call each week. Whoever is on call receives every new client request and can approve or decline it.",
+    "description": "Choose the on-call team and who is on call each week. Whoever is on call receives new client requests in the on-call hours (Settings → Company); with several people, those in the team for the request's system, or all of them when none is.",
     "thisWeek": "On call this week ({from} – {to})",
     "you": "you",
     "nobodyNow": "Nobody is on call this week: new requests go only to those who approve requests.",
@@ -2367,15 +2368,30 @@
     "weekShort": "Wk",
     "onCall": "On call",
     "weekNumber": "Week {n}",
-    "weekOf": "On call for {range}",
     "leftTeam": "{name} (left the team)",
     "nobody": "Nobody",
     "team": "On-call team",
-    "teamHint": "Tick who can be on call. Only people in the team can be given a week. Clients and viewers can't take part.",
+    "teamHint": "Tick who can be on call. Each week can have one or more of them. Clients and viewers can't take part.",
     "inTeam": "{name} is in the on-call team",
     "removeConfirm": "Remove {name} from the on-call team? Their weeks from this week on become free.",
     "requestOnCall": "On call when it arrived",
-    "viewDescription": "Who is on call each week. Whoever is on call receives every new client request and can approve or decline it.",
-    "seeCalendar": "See full calendar"
+    "viewDescription": "Who is on call each week. Whoever is on call receives new client requests in the on-call hours and can approve or decline them.",
+    "seeCalendar": "See full calendar",
+    "youToo": "including you",
+    "removeFromWeek": "Take {name} off this week",
+    "add": "Add",
+    "addTo": "Add someone on call for {range}"
+  },
+  "onCallHours": {
+    "title": "On-call hours",
+    "hint": "When whoever is on call receives new client requests (Settings → Staff → On call). Outside these hours, requests go only to those who approve requests, as usual.",
+    "always": "At any time",
+    "hours": "Only in these hours",
+    "nextDayHint": "An end at or before the start runs into the next day: 18:00–02:00 ends at 2 a.m. the next day, 02:00–02:00 lasts 24 hours.",
+    "from": "from",
+    "to": "to",
+    "nextDay": "until the next day",
+    "allDay": "24 hours",
+    "holidays": "Company holidays (from business hours): all day"
   }
 }

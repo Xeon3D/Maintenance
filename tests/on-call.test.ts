@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { addDays, canBeOnCall, isDay, isMonth, isoWeek, localDay, mondayOf, monthWeeks, shiftMonth, weekDate, weekKey, weekOf } from "../src/lib/on-call";
+import { addDays, canBeOnCall, DEFAULT_ON_CALL_HOURS, isDay, isMonth, isoWeek, localDay, mondayOf, monthWeeks, onCallHoursFromForm, onCallShiftDay, parseOnCallHours, pickOnCall, shiftMonth, weekDate, weekKey, weekOf } from "../src/lib/on-call";
 
 describe("on-call weeks", () => {
   it("finds the Monday of any day", () => {
@@ -52,5 +52,64 @@ describe("on-call weeks", () => {
     expect(canBeOnCall("OWNER")).toBe(true);
     expect(canBeOnCall("REQUESTER")).toBe(false);
     expect(canBeOnCall("VIEWER")).toBe(false);
+  });
+});
+
+describe("on-call hours", () => {
+  const tz = "Europe/Lisbon"; // UTC+1 until 25 Oct 2026, then UTC+0
+  const at = (iso: string) => new Date(iso);
+  const h = DEFAULT_ON_CALL_HOURS; // Mon–Fri 18:00–02:00, weekend 02:00–02:00
+
+  it("is always on without hours", () => {
+    expect(onCallShiftDay(at("2026-10-19T09:00:00Z"), tz, null)).toBe("2026-10-19");
+  });
+
+  it("is off during the working day", () => {
+    expect(onCallShiftDay(at("2026-10-19T09:00:00Z"), tz, h)).toBeNull(); // Mon 10:00
+    expect(onCallShiftDay(at("2026-10-20T01:30:00Z"), tz, h)).toBeNull(); // Tue 02:30
+  });
+
+  it("covers weekday evenings until 02:00, as the evening's shift", () => {
+    expect(onCallShiftDay(at("2026-10-19T18:00:00Z"), tz, h)).toBe("2026-10-19"); // Mon 19:00
+    expect(onCallShiftDay(at("2026-10-20T00:30:00Z"), tz, h)).toBe("2026-10-19"); // Tue 01:30 → Monday's
+  });
+
+  it("covers the whole weekend, and Sunday night belongs to the week before", () => {
+    expect(onCallShiftDay(at("2026-10-24T00:00:00Z"), tz, h)).toBe("2026-10-23"); // Sat 01:00 → Friday's
+    expect(onCallShiftDay(at("2026-10-24T13:00:00Z"), tz, h)).toBe("2026-10-24"); // Sat 14:00
+    const mondayNight = onCallShiftDay(at("2026-10-26T01:00:00Z"), tz, h); // Mon 01:00 (after the clocks went back)
+    expect(mondayNight).toBe("2026-10-25");
+    expect(mondayOf(mondayNight!)).toBe("2026-10-19");
+    expect(onCallShiftDay(at("2026-10-26T03:00:00Z"), tz, h)).toBeNull(); // Mon 03:00
+  });
+
+  it("can cover the company's holidays all day", () => {
+    const wed = at("2026-10-21T09:00:00Z"); // Wed 10:00
+    expect(onCallShiftDay(wed, tz, h, ["2026-10-21"])).toBe("2026-10-21");
+    expect(onCallShiftDay(wed, tz, { ...h, holidays: false }, ["2026-10-21"])).toBeNull();
+  });
+
+  it("reads and validates the form", () => {
+    const form = (v: Record<string, string>) => (k: string) => v[k] ?? null;
+    expect(onCallHoursFromForm(form({ onCallMode: "always", onCallOn1: "on" }))).toEqual({ hours: null });
+    const ok = onCallHoursFromForm(form({ onCallMode: "hours", onCallOn1: "on", onCallStart1: "18:00", onCallEnd1: "02:00", onCallHolidays: "on" }));
+    expect(ok).toEqual({ hours: { days: [null, { start: "18:00", end: "02:00" }, null, null, null, null, null], holidays: true } });
+    expect(onCallHoursFromForm(form({ onCallMode: "hours", onCallOn2: "on", onCallStart2: "25:00", onCallEnd2: "02:00" }))).toEqual({ errors: { onCallEnd2: "invalid_format" } });
+    expect(parseOnCallHours(null)).toBeNull();
+    expect(parseOnCallHours({ days: [1, 2] })).toBeNull();
+  });
+});
+
+describe("who of several on call gets a request", () => {
+  const onCall = ["rui", "daniel", "miguel"];
+  it("goes to those in a team for the request's system", () => {
+    expect(pickOnCall(onCall, ["rui", "ana"])).toEqual(["rui"]);
+    expect(pickOnCall(onCall, ["rui", "daniel"])).toEqual(["rui", "daniel"]);
+  });
+  it("goes to everyone on call when none is in such a team, or the request has no system", () => {
+    expect(pickOnCall(onCall, ["ana"])).toEqual(onCall);
+    expect(pickOnCall(onCall, [])).toEqual(onCall);
+    expect(pickOnCall(onCall, null)).toEqual(onCall);
+    expect(pickOnCall([], ["rui"])).toEqual([]);
   });
 });

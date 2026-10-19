@@ -16,7 +16,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
 
   const [pendingRequests, posToApprove, unreadMessages, unreadNotifications] = await Promise.all([
     // Approvers see every pending request; anyone else, those that arrived while they were on call.
-    ctx.db.request.count({ where: { status: "PENDING", ...(ctx.can("requests.approve") ? {} : { onCallUserId: ctx.user.id }) } }),
+    ctx.db.request.count({ where: { status: "PENDING", ...(ctx.can("requests.approve") ? {} : { onCallUsers: { some: { id: ctx.user.id } } }) } }),
     ctx.can("purchasing.approve") ? ctx.db.purchaseOrder.count({ where: { status: "PENDING_APPROVAL" } }) : 0,
     ctx.can("internal.view") ? unreadConversations(ctx) : 0,
     ctx.db.notification.count({ where: { userId: ctx.user.id, readAt: null } }),

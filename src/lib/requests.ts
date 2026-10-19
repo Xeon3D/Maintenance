@@ -3,7 +3,7 @@ import { randomBytes } from "node:crypto";
 import { nextNumber, type TenantDb } from "@/lib/db/tenant";
 import { prisma } from "@/lib/db/client";
 import { membersWith, notify, notifyExternal, type NotifyActor } from "@/lib/notify";
-import { onCallUserAt } from "@/lib/on-call-db";
+import { requestOnCallUsers } from "@/lib/on-call-db";
 import { putObject } from "@/lib/storage";
 import { createWorkOrder, type WoCtx, type WorkOrderInput } from "@/lib/work-orders";
 import type { Priority, SystemType } from "@/generated/prisma/enums";
@@ -31,8 +31,8 @@ export type RequestInput = {
  * Callers are responsible for having validated villa/asset scope for the submitter.
  */
 export async function createRequest(db: TenantDb, organizationId: string, input: RequestInput, photos: File[] = []) {
-  const org = await prisma.organization.findUniqueOrThrow({ where: { id: organizationId }, select: { id: true, name: true, timezone: true } });
-  const onCallUserId = await onCallUserAt(db, org.timezone);
+  const org = await prisma.organization.findUniqueOrThrow({ where: { id: organizationId }, select: { id: true, name: true, timezone: true, onCallHours: true, businessHours: true } });
+  const onCallIds = await requestOnCallUsers(db, org, input.system ?? null);
   const number = await nextNumber(organizationId, "request");
   const req = await db.request.create({
     data: {
@@ -49,8 +49,10 @@ export async function createRequest(db: TenantDb, organizationId: string, input:
       requesterName: input.requesterName ?? null,
       requesterEmail: input.requesterEmail ?? null,
       requesterPhone: input.requesterPhone ?? null,
-      onCallUserId,
+      // Server-side lookup, not user input; User isn't a tenant model.
+      onCallUsers: { connect: onCallIds.map((id) => ({ id })) },
     },
+    include: { onCallUsers: { select: { id: true } } },
   });
 
   const month = new Date().toISOString().slice(0, 7);
@@ -72,9 +74,8 @@ export async function createRequest(db: TenantDb, organizationId: string, input:
   }
 
   const villa = req.villaId ? await db.villa.findUnique({ where: { id: req.villaId }, select: { name: true } }) : null;
-  // Approvers, plus whoever is on call this week (who may not be an approver).
-  const recipients = new Set(await membersWith(db, "requests.approve"));
-  if (onCallUserId) recipients.add(onCallUserId);
+  // Approvers, plus whoever on call gets it (who may not be an approver).
+  const recipients = new Set([...(await membersWith(db, "requests.approve")), ...onCallIds]);
   await notify({ organization: org, user: input.requesterId ? { id: input.requesterId } : null }, [...recipients], {
     type: "REQUEST_NEW",
     data: { number: req.number, title: req.title, place: [villa?.name, input.requesterName].filter(Boolean).join(" · ") },

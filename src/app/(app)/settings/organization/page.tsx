@@ -10,6 +10,7 @@ import { TIME_ROUNDING_OPTIONS, timeRoundingOf } from "@/lib/billing-time";
 import { privacyPath } from "@/lib/privacy";
 import { parseRetention, RETENTION_KEYS, RETENTION_MAX } from "@/lib/retention-rules";
 import { parseBusinessHours } from "@/lib/sla-clock";
+import { parseOnCallHours } from "@/lib/on-call";
 import { parseCompanyRecipients } from "@/lib/report-recipients";
 
 // Roles that can be sent copies of service reports (custom roles are added from the company's list).
@@ -20,6 +21,7 @@ const NL = "\n";
 const WEEK = [1, 2, 3, 4, 5, 6, 0];
 import { updateOrgAction } from "../actions";
 import { BrandColorField, LogoUploader } from "./form";
+import { OnCallHoursFields } from "./on-call-hours";
 import { titled } from "@/lib/metadata";
 import { TimeInput } from "@/components/date-input";
 
@@ -244,6 +246,10 @@ export default async function OrgSettingsPage() {
               <Textarea name="holidays" defaultValue={hours.holidays.join("\n")} className="min-h-24 font-mono" placeholder="2026-12-25" />
               <FieldError name="holidays" />
             </Field>
+
+            <h2 className="border-t border-border pt-5 font-medium">{t("onCallHours.title")}</h2>
+            <p className="-mt-2 text-xs text-muted">{t("onCallHours.hint")}</p>
+            <OnCallHoursFields hours={parseOnCallHours(o.onCallHours)} weekdays={[0, 1, 2, 3, 4, 5, 6].map(weekday)} />
           </ActionForm>
         </Card>
 

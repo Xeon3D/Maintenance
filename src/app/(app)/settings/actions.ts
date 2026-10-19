@@ -20,6 +20,8 @@ import { appOrigin } from "@/lib/qr";
 import { privacyPath } from "@/lib/privacy";
 import { RETENTION_MAX } from "@/lib/retention-rules";
 import { businessHoursFromForm } from "@/lib/sla-clock";
+import { onCallHoursFromForm } from "@/lib/on-call";
+import { Prisma } from "@/generated/prisma/client";
 import { MAX_EXTRA, parseEmailList } from "@/lib/report-recipients";
 
 const STAFF_REPORT_ROLES: string[] = ["ADMIN", "MANAGER", "TECHNICIAN", "ACCOUNTANT", "VIEWER"];
@@ -79,6 +81,11 @@ export async function updateOrgAction(_: FormResult, form: FormData): Promise<Fo
     return typeof v === "string" ? v : null;
   });
   if ("errors" in bh) return { error: "validation", fieldErrors: bh.errors };
+  const onCall = onCallHoursFromForm((k) => {
+    const v = form.get(k);
+    return typeof v === "string" ? v : null;
+  });
+  if ("errors" in onCall) return { error: "validation", fieldErrors: onCall.errors };
   // Company copies of e-mailed service reports: only this company's staff, known roles and valid addresses.
   const reportEmails = parseEmailList(String(form.get("reportCompanyEmails") ?? ""));
   if (reportEmails.invalid.length) return { error: "validation", fieldErrors: { reportCompanyEmails: "badEmails" } };
@@ -91,9 +98,9 @@ export async function updateOrgAction(_: FormResult, form: FormData): Promise<Fo
     emails: reportEmails.emails.slice(0, MAX_EXTRA),
   };
   const { notificationsDays, auditMonths, requestersMonths, chatMonths, ...rest } = parsed.data;
-  const data = { ...rest, brandColor: normalizeHex(rest.brandColor), retention: { notificationsDays, auditMonths, requestersMonths, chatMonths }, businessHours: bh.hours, reportRecipients };
-  // Organization isn't a tenant-scoped model; scope by id explicitly.
-  await prisma.organization.update({ where: { id: ctx.organization.id }, data });
+  const data = { ...rest, brandColor: normalizeHex(rest.brandColor), retention: { notificationsDays, auditMonths, requestersMonths, chatMonths }, businessHours: bh.hours, onCallHours: onCall.hours, reportRecipients };
+  // Organization isn't a tenant-scoped model; scope by id explicitly. No on-call hours = a JSON null column (at any time).
+  await prisma.organization.update({ where: { id: ctx.organization.id }, data: { ...data, onCallHours: data.onCallHours ?? Prisma.DbNull } });
   const { changes } = changesOf(ctx.organization as unknown as Record<string, unknown>, data);
   if (Object.keys(changes).length) await audit(ctx, "organization.update", "Organization", ctx.organization.id, { changes });
   revalidatePath("/", "layout");
