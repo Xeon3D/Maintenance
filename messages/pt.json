@@ -105,7 +105,7 @@
     "reports": "Relatórios",
     "settings": "Definições",
     "organization": "Organização",
-    "users": "Utilizadores",
+    "users": "Colaboradores",
     "teams": "Equipas",
     "operations": "Operações",
     "sites": "Locais e equipamentos",
@@ -120,7 +120,8 @@
     "categories": "Categorias",
     "audit": "Registo de auditoria",
     "search": "Pesquisa",
-    "onCall": "Prevenção"
+    "onCall": "Prevenção",
+    "clientUsers": "Clientes"
   },
   "roles": {
     "OWNER": "Super Admin",
@@ -191,8 +192,8 @@
     "timezone": "Fuso horário",
     "currency": "Moeda",
     "defaultLanguage": "Idioma predefinido",
-    "usersTitle": "Utilizadores",
-    "usersDescription": "Pessoas que podem entrar nesta organização.",
+    "usersTitle": "Colaboradores",
+    "usersDescription": "As pessoas da empresa, e observadores, que podem entrar. Os utilizadores clientes estão em Definições → Clientes.",
     "invite": "Convidar utilizador",
     "inviteSend": "Criar convite",
     "inviteLink": "Enviámos um convite por email para {email}. Também pode partilhar este link diretamente; expira dentro de 7 dias.",
@@ -210,7 +211,12 @@
     "addMember": "Adicionar membro",
     "specialty": "Especialidade",
     "noTeams": "Ainda não há equipas.",
-    "cannotChangeOwner": "A função do Super Admin não pode ser alterada."
+    "cannotChangeOwner": "A função do Super Admin não pode ser alterada.",
+    "clientUsersTitle": "Clientes",
+    "clientUsersDescription": "Proprietários de vilas e property managers que entram no portal do cliente.",
+    "noClientUsers": "Ainda não há utilizadores clientes",
+    "villaOwner": "Proprietário · {count, plural, one {# vila} other {# vilas}}",
+    "propertyManager": "Property manager · {count, plural, one {# vila} other {# vilas}}"
   },
   "validation": {
     "invalid": "Valor inválido.",
@@ -2347,7 +2353,7 @@
     "filesOnline": "{count, plural, one {# ficheiro} other {# ficheiros}} (requer ligação)"
   },
   "onCall": {
-    "description": "Quem está de prevenção em cada semana. Quem está de prevenção recebe todos os novos pedidos dos clientes e pode aprová-los ou recusá-los.",
+    "description": "Escolha a equipa de prevenção e quem está de prevenção em cada semana. Quem está de prevenção recebe todos os novos pedidos dos clientes e pode aprová-los ou recusá-los.",
     "thisWeek": "De prevenção esta semana ({from} – {to})",
     "you": "você",
     "nobodyNow": "Ninguém está de prevenção esta semana: os novos pedidos vão apenas para quem aprova pedidos.",
@@ -2360,8 +2366,6 @@
     "nobody": "Ninguém",
     "team": "Equipa de prevenção",
     "teamHint": "Marque quem pode estar de prevenção. Só quem está na equipa pode receber uma semana. Clientes e observadores não podem participar.",
-    "teamHintView": "Pessoas que fazem turnos de prevenção.",
-    "noTeam": "Ainda ninguém faz parte da equipa de prevenção.",
     "inTeam": "{name} faz parte da equipa de prevenção",
     "removeConfirm": "Retirar {name} da equipa de prevenção? As semanas atribuídas a partir desta ficam livres.",
     "requestOnCall": "De prevenção quando chegou"

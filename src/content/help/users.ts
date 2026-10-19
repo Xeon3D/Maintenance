@@ -3,20 +3,20 @@ import type { HelpShot, HelpText } from "@/lib/help";
 export const shots: HelpShot[] = [{ name: "users-page", path: "/settings/users", maxHeight: 720 }];
 
 const text: HelpText = {
-  en: `# Users
+  en: `# Staff
 
-Invite people to your company, choose their role, and deactivate or erase them when they leave. Client portal users are invited here too.
+Invite the people of your company, and viewers, choose their role, and deactivate or erase them when they leave. The on-call team is managed from here too.
 
 ## What this page is for
 
-**Users** (under **Settings** in the menu) lists everyone who can sign in to this company: your staff and your clients' portal users. From here you invite new people, decide what each one can do by giving them a role, and remove access when someone leaves.
+**Staff** (under **Settings** in the menu) lists your company's people and viewers who can sign in. Client portal users (villa owners and property managers) have their own page, [Clients](/help/client-users). From here you invite new people, decide what each one can do by giving them a role, and remove access when someone leaves.
 
-![The Users page: the invitation form at the top and the list of people below](users-page)
+![The Staff page: the invitation form at the top and the list of people below](users-page)
 
 The page has three parts:
 
 - **Invite user**: the form for new invitations.
-- **The list of people**, with their **Name** and e-mail, **Role** (and, for client users, the client they belong to), **Price per hour**, **Status** and **Actions**.
+- **The list of people**, with their **Name** and e-mail, **Role** (and **On-call team** when they are in it), **Price per hour**, **Status** and **Actions**.
 - **Pending invitations**: invitations not accepted yet, shown only when there are any.
 
 ## Inviting someone
@@ -31,9 +31,9 @@ When they open the link, they either sign in, if they already have an account wi
 
 > The invitation only works for the e-mail address it was sent to. If the person is signed in with a different account, they are asked to sign out and sign in with the right one. An invitation can also be accepted by someone who already works for another company on this server: they then switch between companies from the top of the menu.
 
-## Client portal users
+## On call
 
-To give a client access to the client portal, invite them with the **Client (requester)** role. A **Client** field then appears: choose which client they belong to. Client users only see requests and work orders for that client's villas, and never the staff app. See [Requests](/help/requests) for what they can do there.
+The **On call** button at the top of the page opens the on-call rota: who is in the on-call team and who is on call each week. See [On call](/help/on-call). It is shown to roles with the **Manage on call** permission.
 
 ## Pending invitations
 
@@ -41,7 +41,7 @@ The **Pending invitations** table shows each open invitation with its e-mail, ro
 
 ## Changing someone's role
 
-Pick a new role in the drop-down in the person's row. The change is saved straight away and applies the next time they open a page. The role decides what they can see and do (see [Roles](/help/roles)) and, for staff, the **Price per hour** charged for their time on jobs.
+Pick a new role in the drop-down in the person's row. Staff can't be turned into client users, or the other way round: invite them on the right page instead. The change is saved straight away and applies the next time they open a page. The role decides what they can see and do (see [Roles](/help/roles)) and, for staff, the **Price per hour** charged for their time on jobs.
 
 > Only people whose role can carry out work orders can be assigned work orders. If someone is missing from the assignee list, check their role.
 
@@ -63,20 +63,20 @@ Once a person is deactivated, an **Erase data** button appears. It removes their
 
 Roles with the **Users and roles** permission, by default the Super Admin and Administrators. To group technicians by specialty, use [Teams](/help/teams).
 `,
-  pt: `# Utilizadores
+  pt: `# Colaboradores
 
-Convide pessoas para a sua empresa, escolha a função de cada uma e desative-as ou apague os seus dados quando saírem. Os utilizadores do portal do cliente também são convidados aqui.
+Convide as pessoas da sua empresa, e observadores, escolha a função de cada uma e desative-as ou apague os seus dados quando saírem. A equipa de prevenção também se gere a partir daqui.
 
 ## Para que serve esta página
 
-**Utilizadores** (em **Definições** no menu) mostra todas as pessoas que podem entrar nesta empresa: os seus colaboradores e os utilizadores do portal dos seus clientes. Aqui convida novas pessoas, decide o que cada uma pode fazer atribuindo-lhe uma função e retira o acesso quando alguém sai.
+**Colaboradores** (em **Definições** no menu) mostra as pessoas da sua empresa e os observadores que podem entrar. Os utilizadores do portal do cliente (proprietários de vilas e property managers) têm a sua própria página, [Clientes](/help/client-users). Aqui convida novas pessoas, decide o que cada uma pode fazer atribuindo-lhe uma função e retira o acesso quando alguém sai.
 
-![A página Utilizadores: o formulário de convite no topo e a lista de pessoas por baixo](users-page)
+![A página Colaboradores: o formulário de convite no topo e a lista de pessoas por baixo](users-page)
 
 A página tem três partes:
 
 - **Convidar utilizador**: o formulário para novos convites.
-- **A lista de pessoas**, com o **Nome** e e-mail, a **Função** (e, nos utilizadores de cliente, o cliente a que pertencem), o **Preço por hora**, o **Estado** e as **Ações**.
+- **A lista de pessoas**, com o **Nome** e e-mail, a **Função** (e **Equipa de prevenção** quando fazem parte dela), o **Preço por hora**, o **Estado** e as **Ações**.
 - **Convites pendentes**: convites ainda não aceites, só aparece quando existem.
 
 ## Convidar uma pessoa
@@ -91,9 +91,9 @@ Ao abrir a ligação, a pessoa inicia sessão, se já tiver uma conta com esse e
 
 > O convite só funciona para o endereço de e-mail para onde foi enviado. Se a pessoa tiver sessão iniciada com outra conta, é-lhe pedido que termine a sessão e entre com a conta certa. Um convite também pode ser aceite por alguém que já trabalha para outra empresa neste servidor: passa a mudar de empresa no topo do menu.
 
-## Utilizadores do portal do cliente
+## Prevenção
 
-Para dar a um cliente acesso ao portal do cliente, convide-o com a função **Cliente (requerente)**. Aparece então o campo **Cliente**: escolha a que cliente pertence. Os utilizadores de cliente só veem pedidos e ordens de trabalho das moradias desse cliente, e nunca a aplicação da equipa. Veja em [Pedidos](/help/requests) o que podem fazer.
+O botão **Prevenção** no topo da página abre a escala de prevenção: quem faz parte da equipa de prevenção e quem está de prevenção em cada semana. Veja [Prevenção](/help/on-call). Aparece às funções com a permissão **Gerir prevenção**.
 
 ## Convites pendentes
 
@@ -101,7 +101,7 @@ A tabela **Convites pendentes** mostra cada convite em aberto, com o e-mail, a f
 
 ## Mudar a função de uma pessoa
 
-Escolha a nova função na lista na linha da pessoa. A alteração fica guardada de imediato e aplica-se na próxima página que a pessoa abrir. A função decide o que a pessoa pode ver e fazer (veja [Funções](/help/roles)) e, para os colaboradores, o **Preço por hora** cobrado pelo tempo registado nos trabalhos.
+Escolha a nova função na lista na linha da pessoa. Um colaborador não pode passar a utilizador cliente, nem o contrário: convide-o na página certa. A alteração fica guardada de imediato e aplica-se na próxima página que a pessoa abrir. A função decide o que a pessoa pode ver e fazer (veja [Funções](/help/roles)) e, para os colaboradores, o **Preço por hora** cobrado pelo tempo registado nos trabalhos.
 
 > Só as pessoas cuja função pode executar ordens de trabalho podem ter ordens de trabalho atribuídas. Se alguém não aparece na lista de responsáveis, verifique a sua função.
 

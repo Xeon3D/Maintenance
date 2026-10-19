@@ -669,9 +669,14 @@ markers), Message, VerificationToken (password reset).
 - `Membership.onCall` = in the on-call team (staff only: `ON_CALL_ROLES` excludes REQUESTER and VIEWER). `OnCallWeek` (tenant
   model, audited): one member per week, `weekStart` = the Monday as a DATE, unique per company. Weeks are Monday–Sunday in the
   company time zone (`lib/on-call.ts`, pure, tested: `weekOf`, `monthWeeks`, `isoWeek`…).
-- `/on-call` (nav "On call", `internal.view`): this week's person, a month calendar (one row per week, a select per week) and the
-  team checkboxes. Writes need the new permission `onCall.manage` (default owner/admin/manager). Removing someone from the team
-  frees their weeks from the current one on; past weeks stay.
+- `/settings/users/on-call` (no nav item: reached only from the **On call** button on Settings → Staff; page and writes need the
+  new permission `onCall.manage`, group "admin", default owner/admin): this week's person, a month calendar (one row per week, a
+  select per week) and the team checkboxes. Removing someone from the team frees their weeks from the current one on; past weeks stay.
+- **Settings → Staff / Clients** (split 2026-10-19): `/settings/users` ("Staff" / "Colaboradores") lists non-REQUESTER members and
+  invites; `/settings/client-users` ("Clients" / "Clientes") lists portal users (REQUESTER) with their client marked owner and/or
+  property manager (villa counts), and invites them with a client (no role picker). `updateMemberAction` refuses role changes
+  across the staff/client boundary; `revalidateUsers()` refreshes both pages. Note the sidebar now has two "Clients" entries
+  (client companies under Sites, client users under Settings).
 - `createRequest` stamps `Request.onCallUserId` with `onCallUserAt()` (`lib/on-call-db.ts`: the week's member, if still active
   and in the team) and adds them to the REQUEST_NEW recipients (approvers still get it). That member may approve/decline that
   request whatever their role (`handlerOf` in `requests/actions.ts`), is pre-selected as assignee, and sees it in the Requests

@@ -3,6 +3,7 @@ import * as assets from "./assets";
 import * as audit from "./audit";
 import * as categories from "./categories";
 import * as clients from "./clients";
+import * as clientUsers from "./client-users";
 import * as contracts from "./contracts";
 import * as dashboard from "./dashboard";
 import * as fieldApp from "./field-app";
@@ -57,6 +58,7 @@ export const HELP_CONTENT: Record<string, HelpModule> = {
   profile,
   organization,
   users,
+  "client-users": clientUsers,
   roles,
   teams,
   categories,

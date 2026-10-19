@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { getFormatter, getTranslations } from "next-intl/server";
 import { ChevronLeft, ChevronRight, PhoneCall } from "lucide-react";
 import { Card, PageHeader } from "@/components/ui";
+import { BackLink } from "@/components/back-link";
 import { getContext } from "@/lib/context";
 import { onCallTeam, onCallUserAt } from "@/lib/on-call-db";
 import { addDays, isMonth, isoWeek, localDay, monthWeeks, ON_CALL_ROLES, shiftMonth, weekDate, weekKey, weekOf } from "@/lib/on-call";
@@ -14,14 +15,16 @@ import { MemberToggle, WeekSelect } from "./client";
 export const generateMetadata = titled("nav.onCall");
 
 // One colour per team member (by name order), so the rota reads at a glance. Used as dots and stripes only.
+const BASE = "/settings/users/on-call";
+
 const COLORS = ["#2563eb", "#db2777", "#059669", "#d97706", "#7c3aed", "#0891b2", "#dc2626", "#65a30d"];
 
-export default async function OnCallPage({ searchParams }: PageProps<"/on-call">) {
+export default async function OnCallPage({ searchParams }: PageProps<"/settings/users/on-call">) {
   const ctx = await getContext();
-  if (!ctx.can("internal.view")) notFound();
+  // Managed from Settings → Staff (its "On call" button).
+  if (!ctx.can("onCall.manage")) notFound();
   const t = await getTranslations();
   const format = await getFormatter();
-  const canManage = ctx.can("onCall.manage");
   const tz = ctx.organization.timezone;
 
   const now = new Date();
@@ -38,13 +41,11 @@ export default async function OnCallPage({ searchParams }: PageProps<"/on-call">
       select: { weekStart: true, userId: true, user: { select: { name: true } } },
     }),
     onCallUserAt(ctx.db, tz, now),
-    canManage
-      ? ctx.db.membership.findMany({
-          where: { active: true, role: { in: ON_CALL_ROLES } },
-          select: { userId: true, onCall: true, role: true, user: { select: { name: true } }, jobRole: { select: { name: true } } },
-          orderBy: { user: { name: "asc" } },
-        })
-      : [],
+    ctx.db.membership.findMany({
+      where: { active: true, role: { in: ON_CALL_ROLES } },
+      select: { userId: true, onCall: true, role: true, user: { select: { name: true } }, jobRole: { select: { name: true } } },
+      orderBy: { user: { name: "asc" } },
+    }),
   ]);
   const people = team.map((m) => m.user);
   const color = new Map(people.map((p, i) => [p.id, COLORS[i % COLORS.length]]));
@@ -53,10 +54,11 @@ export default async function OnCallPage({ searchParams }: PageProps<"/on-call">
 
   const day = (d: string, opts: { weekday?: "short"; day?: "numeric"; month?: "short" | "long"; year?: "numeric" }) => format.dateTime(weekDate(d), { ...opts, timeZone: "UTC" });
   const weekdays = [0, 1, 2, 3, 4, 5, 6].map((i) => day(addDays(weeks[0], i), { weekday: "short" }));
-  const monthHref = (m: string) => (m === today.slice(0, 7) ? "/on-call" : `/on-call?month=${m}`);
+  const monthHref = (m: string) => (m === today.slice(0, 7) ? BASE : `${BASE}?month=${m}`);
 
   return (
     <>
+      <BackLink href="/settings/users" label={t("nav.users")} />
       <PageHeader title={t("nav.onCall")} description={t("onCall.description")} />
 
       <Card className="mb-6 flex items-center gap-3 p-4">
@@ -85,7 +87,7 @@ export default async function OnCallPage({ searchParams }: PageProps<"/on-call">
             <div className="flex items-center gap-3">
               <h2 className="font-medium capitalize">{day(`${month}-01`, { month: "long", year: "numeric" })}</h2>
               {month !== today.slice(0, 7) && (
-                <Link href="/on-call" className="text-xs text-brand hover:underline">
+                <Link href={BASE} className="text-xs text-brand hover:underline">
                   {t("onCall.today")}
                 </Link>
               )}
@@ -144,14 +146,7 @@ export default async function OnCallPage({ searchParams }: PageProps<"/on-call">
                     );
                   })}
                   <div className="min-w-0 sm:pr-3">
-                    {canManage ? (
-                      <WeekSelect week={w} value={assigned} options={options} label={t("onCall.weekOf", { range })} />
-                    ) : (
-                      <span className={cn("flex items-center gap-1.5 truncate text-sm", !row && "text-muted")}>
-                        {row && <span className="size-2.5 shrink-0 rounded-full" style={{ backgroundColor: color.get(assigned) ?? "var(--color-muted)" }} />}
-                        {row?.user.name ?? t("onCall.nobody")}
-                      </span>
-                    )}
+                    <WeekSelect week={w} value={assigned} options={options} label={t("onCall.weekOf", { range })} />
                   </div>
                 </li>
               );
@@ -161,32 +156,19 @@ export default async function OnCallPage({ searchParams }: PageProps<"/on-call">
 
         <Card className="p-5">
           <h2 className="font-medium">{t("onCall.team")}</h2>
-          <p className="mb-4 mt-1 text-xs text-muted">{t(canManage ? "onCall.teamHint" : "onCall.teamHintView")}</p>
-          {canManage ? (
-            <ul className="space-y-2">
-              {staff.map((m) => (
-                <li key={m.userId}>
-                  <label className="flex cursor-pointer items-center gap-2.5 text-sm">
-                    <MemberToggle userId={m.userId} checked={m.onCall} name={m.user.name} />
-                    <span className="size-2.5 shrink-0 rounded-full" style={{ backgroundColor: color.get(m.userId) ?? "transparent" }} />
-                    <span className="min-w-0 flex-1 truncate">{m.user.name}</span>
-                    <span className="text-xs text-muted">{m.jobRole?.name ?? t(`roles.${m.role}`)}</span>
-                  </label>
-                </li>
-              ))}
-            </ul>
-          ) : people.length === 0 ? (
-            <p className="text-sm text-muted">{t("onCall.noTeam")}</p>
-          ) : (
-            <ul className="space-y-2">
-              {people.map((p) => (
-                <li key={p.id} className="flex items-center gap-2.5 text-sm">
-                  <span className="size-2.5 shrink-0 rounded-full" style={{ backgroundColor: color.get(p.id) }} />
-                  {p.name}
-                </li>
-              ))}
-            </ul>
-          )}
+          <p className="mb-4 mt-1 text-xs text-muted">{t("onCall.teamHint")}</p>
+          <ul className="space-y-2">
+            {staff.map((m) => (
+              <li key={m.userId}>
+                <label className="flex cursor-pointer items-center gap-2.5 text-sm">
+                  <MemberToggle userId={m.userId} checked={m.onCall} name={m.user.name} />
+                  <span className="size-2.5 shrink-0 rounded-full" style={{ backgroundColor: color.get(m.userId) ?? "transparent" }} />
+                  <span className="min-w-0 flex-1 truncate">{m.user.name}</span>
+                  <span className="text-xs text-muted">{m.jobRole?.name ?? t(`roles.${m.role}`)}</span>
+                </label>
+              </li>
+            ))}
+          </ul>
         </Card>
       </div>
     </>

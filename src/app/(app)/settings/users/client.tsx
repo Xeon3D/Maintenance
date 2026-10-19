@@ -31,10 +31,11 @@ function RoleSelectOptions({ options }: { options: RoleOptions }) {
   );
 }
 
-export function InviteForm({ clients, roleOptions }: { clients: { id: string; name: string }[]; roleOptions: RoleOptions }) {
+/** Staff invites pick a role; without `roleOptions` it invites a client (portal) user of one of `clients`. */
+export function InviteForm({ clients = [], roleOptions }: { clients?: { id: string; name: string }[]; roleOptions?: RoleOptions }) {
   const t = useTranslations();
   const [state, action, pending] = useActionForm(inviteUserAction);
-  const [role, setRole] = useState("TECHNICIAN");
+  const [role, setRole] = useState(roleOptions ? "TECHNICIAN" : "REQUESTER");
   const [copied, setCopied] = useState(false);
   const fullUrl = state?.inviteUrl && typeof window !== "undefined" ? window.location.origin + state.inviteUrl : null;
 
@@ -44,13 +45,29 @@ export function InviteForm({ clients, roleOptions }: { clients: { id: string; na
         <Field label={t("common.email")}>
           <Input name="email" type="email" required />
         </Field>
-        <Field label={t("common.role")}>
-          <Select name="role" value={role} onChange={(e) => setRole(e.target.value)}>
-            <RoleSelectOptions options={roleOptions} />
-          </Select>
-        </Field>
+        {roleOptions ? (
+          <Field label={t("common.role")}>
+            <Select name="role" value={role} onChange={(e) => setRole(e.target.value)}>
+              <RoleSelectOptions options={roleOptions} />
+            </Select>
+          </Field>
+        ) : (
+          <>
+            <input type="hidden" name="role" value="REQUESTER" />
+            <Field label={t("settings.client")}>
+              <Select name="clientId" required>
+                <option value="">—</option>
+                {clients.map((c) => (
+                  <option key={c.id} value={c.id}>
+                    {c.name}
+                  </option>
+                ))}
+              </Select>
+            </Field>
+          </>
+        )}
         <Button disabled={pending}>{t("settings.inviteSend")}</Button>
-        {role === "REQUESTER" && (
+        {roleOptions && role === "REQUESTER" && (
           <div className="sm:col-span-3">
             <Field label={t("settings.client")} hint={t("settings.clientHint")}>
               <Select name="clientId" required>
@@ -88,19 +105,22 @@ export function InviteForm({ clients, roleOptions }: { clients: { id: string; na
   );
 }
 
-export function MemberControls({ id, role, active, roleOptions }: { id: string; role: string; active: boolean; roleOptions: RoleOptions }) {
+/** Role (staff only: without `roleOptions` there is no role picker), deactivate / reactivate and erase. */
+export function MemberControls({ id, role, active, roleOptions }: { id: string; role?: string; active: boolean; roleOptions?: RoleOptions }) {
   const t = useTranslations();
   const [pending, start] = useTransition();
   return (
     <div className="inline-flex items-center gap-2">
-      <Select
-        className="h-8 w-44"
-        defaultValue={role}
-        disabled={pending}
-        onChange={(e) => start(() => updateMemberAction(id, { role: e.target.value }))}
-      >
-        <RoleSelectOptions options={roleOptions} />
-      </Select>
+      {roleOptions && (
+        <Select
+          className="h-8 w-44"
+          defaultValue={role}
+          disabled={pending}
+          onChange={(e) => start(() => updateMemberAction(id, { role: e.target.value }))}
+        >
+          <RoleSelectOptions options={roleOptions} />
+        </Select>
+      )}
       <Button
         size="sm"
         variant={active ? "danger" : "secondary"}

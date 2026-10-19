@@ -29,6 +29,12 @@ import { background } from "@/lib/notify";
 import { audit, changesOf } from "@/lib/audit";
 import { TIME_ROUNDING_OPTIONS } from "@/lib/billing-time";
 
+/** Settings → Staff and Settings → Clients list the same memberships and invitations. */
+function revalidateUsers() {
+  revalidatePath("/settings/users");
+  revalidatePath("/settings/client-users");
+}
+
 export type ActionState = { ok?: boolean; error?: string; inviteUrl?: string; inviteEmail?: string } | undefined;
 
 // ── Organization
@@ -175,7 +181,7 @@ export async function inviteUserAction(_: ActionState, form: FormData): Promise<
       expiresAt: new Date(Date.now() + 7 * 86_400_000),
     },
   });
-  revalidatePath("/settings/users");
+  revalidateUsers();
 
   // Emailed in the inviter's current language; the link is also shown so it can be shared directly.
   const locale = appLocale(await getLocale());
@@ -199,7 +205,7 @@ export async function inviteUserAction(_: ActionState, form: FormData): Promise<
 export async function revokeInviteAction(id: string) {
   const ctx = await requirePermission("users.manage");
   await ctx.db.invitation.deleteMany({ where: { id, acceptedAt: null } });
-  revalidatePath("/settings/users");
+  revalidateUsers();
 }
 
 export async function updateMemberAction(membershipId: string, data: { role?: string; active?: boolean }) {
@@ -207,6 +213,8 @@ export async function updateMemberAction(membershipId: string, data: { role?: st
   const m = await ctx.db.membership.findUnique({ where: { id: membershipId } });
   if (!m || m.role === "OWNER" || m.userId === ctx.user.id) throw new Error("Forbidden");
   const choice = data.role ? await resolveRoleChoice(ctx, data.role) : null;
+  // Staff and client (portal) users are managed on separate pages; a role change never moves someone across.
+  if (choice && (choice.role === "REQUESTER") !== (m.role === "REQUESTER")) throw new Error("Forbidden");
   await ctx.db.membership.update({
     where: { id: membershipId },
     data: {
@@ -214,7 +222,7 @@ export async function updateMemberAction(membershipId: string, data: { role?: st
       active: typeof data.active === "boolean" ? data.active : undefined,
     },
   });
-  revalidatePath("/settings/users");
+  revalidateUsers();
 }
 
 // ── Teams
@@ -281,6 +289,6 @@ export async function eraseMemberAction(membershipId: string): Promise<{ error?:
     if (e instanceof ErasureError) return { error: e.message };
     throw e;
   }
-  revalidatePath("/settings/users");
+  revalidateUsers();
   return {};
 }

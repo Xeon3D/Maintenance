@@ -21,7 +21,7 @@ The people who approve requests keep receiving them as before. When nobody is on
 
 ## The on-call screen
 
-Open **On call** in the sidebar. At the top is who is on call this week. Below it, the month's calendar has one row per week, with the week number, its days and the person on call; the current week is highlighted and today is circled. The arrows move between months, and **This month** comes back.
+Open **Settings → Staff** and click the **On call** button at the top. At the top of the page is who is on call this week. Below it, the month's calendar has one row per week, with the week number, its days and the person on call; the current week is highlighted and today is circled. The arrows move between months, and **This month** comes back.
 
 ## Choosing the on-call team
 
@@ -37,8 +37,8 @@ In the calendar, choose a person in the **On call** column of each week. The cha
 
 ## Who can do what
 
-- **Super Admin**, **Administrator** and **Manager** choose the team and give out the weeks (the **Manage on call** permission in [Roles](/help/roles)).
-- Everyone else on the staff sees the calendar and the team.
+- **Super Admin** and **Administrator** choose the team and give out the weeks (the **Manage on call** permission in [Roles](/help/roles), which can be given to other roles).
+- Whoever is on call sees it on each request that arrived during their week.
 `,
   pt: `# Prevenção
 
@@ -58,7 +58,7 @@ Quem aprova pedidos continua a recebê-los como antes. Quando ninguém está de 
 
 ## O ecrã Prevenção
 
-Abra **Prevenção** na barra lateral. No topo está quem está de prevenção esta semana. Por baixo, o calendário do mês tem uma linha por semana, com o número da semana, os seus dias e quem está de prevenção; a semana atual está destacada e o dia de hoje assinalado. As setas mudam de mês e **Este mês** volta ao atual.
+Abra **Definições → Colaboradores** e clique no botão **Prevenção** no topo. No topo da página está quem está de prevenção esta semana. Por baixo, o calendário do mês tem uma linha por semana, com o número da semana, os seus dias e quem está de prevenção; a semana atual está destacada e o dia de hoje assinalado. As setas mudam de mês e **Este mês** volta ao atual.
 
 ## Escolher a equipa de prevenção
 
@@ -74,8 +74,8 @@ No calendário, escolha uma pessoa na coluna **De prevenção** de cada semana. 
 
 ## Quem pode fazer o quê
 
-- **Super Admin**, **Administrador** e **Gestor** escolhem a equipa e atribuem as semanas (a permissão **Gerir prevenção** em [Funções](/help/roles)).
-- Os restantes membros da empresa veem o calendário e a equipa.
+- **Super Admin** e **Administrador** escolhem a equipa e atribuem as semanas (a permissão **Gerir prevenção** em [Funções](/help/roles), que pode ser dada a outras funções).
+- Quem está de prevenção vê-o em cada pedido que chegou durante a sua semana.
 `,
 };
 

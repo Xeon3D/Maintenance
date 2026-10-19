@@ -19,7 +19,7 @@ export async function setOnCallWeekAction(week: string, userId: string) {
     if (existing) await ctx.db.onCallWeek.update({ where: { id: existing.id }, data: { userId } });
     else await ctx.db.onCallWeek.create({ data: { organizationId: ctx.organization.id, weekStart, userId } });
   }
-  revalidatePath("/on-call");
+  revalidatePath("/settings/users/on-call");
 }
 
 /** Adds a staff member to the on-call team, or removes them (and frees their weeks from this one on). */
@@ -32,5 +32,5 @@ export async function setOnCallMemberAction(userId: string, onCall: boolean) {
     // Past weeks stay as a record of who was on call; current and future ones need someone else.
     await ctx.db.onCallWeek.deleteMany({ where: { userId, weekStart: { gte: weekDate(weekOf(new Date(), ctx.organization.timezone)) } } });
   }
-  revalidatePath("/on-call");
+  revalidatePath("/settings/users/on-call");
 }
