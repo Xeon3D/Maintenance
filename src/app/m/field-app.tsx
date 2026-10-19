@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useFormatter, useTranslations } from "next-intl";
-import { AlertTriangle, ChevronRight, CloudOff, LayoutDashboard, RefreshCw, ScanLine, X } from "lucide-react";
+import { AlertTriangle, ChevronRight, CloudOff, LayoutDashboard, RefreshCw, ScanLine, Search, X } from "lucide-react";
 import { WorkOrderStatusBadge, PriorityText } from "@/components/badges";
 import { qrTokenOf, Scanner } from "@/components/scanner";
 import type { NewOp, OfflineWorkOrder, QueuedOp, Snapshot } from "@/lib/offline-types";
@@ -12,6 +12,7 @@ import { clearIssues, loadIssues, loadSnapshot, syncNow, type SyncIssue, type Sy
 import { cn } from "@/lib/utils";
 import { bucketOf, scheduledAt } from "@/lib/wo-schedule";
 import { WorkOrderView } from "./work-order-view";
+import { SearchView } from "./search-view";
 import { ThemeToggle } from "@/components/theme-toggle";
 import type { Theme } from "@/lib/theme";
 
@@ -34,6 +35,9 @@ export function FieldApp({ user, org, logo, theme }: { user: { id: string; name:
   const t = useTranslations();
   const format = useFormatter();
   const [snapshot, setSnapshot] = useState<Snapshot | null>(null);
+  // The search words while the search screen is open (#search=<words>), else null.
+  const [searchQ, setSearchQ] = useState<string | null>(null);
+  const fromSearch = useRef(false);
   const [ops, setOps] = useState<QueuedOp[]>([]);
   const [issues, setIssues] = useState<SyncIssue[]>([]);
   const [timer, setTimerState] = useState<Timer>(null);
@@ -95,9 +99,17 @@ export function FieldApp({ user, org, logo, theme }: { user: { id: string; name:
     };
   }, [reload, sync, user.id]);
 
-  // #wo=<id> keeps the open work order in the URL, so the back button works.
+  // #wo=<id> keeps the open work order in the URL, so the back button works; #search=<words> the search.
   useEffect(() => {
-    const read = () => setOpenId(new URLSearchParams(location.hash.slice(1)).get("wo"));
+    let wasSearch = false;
+    const read = () => {
+      const h = new URLSearchParams(location.hash.slice(1));
+      setOpenId(h.get("wo"));
+      setSearchQ(h.get("search"));
+      // A job opened from the search goes back to the search.
+      fromSearch.current = h.has("wo") && wasSearch;
+      wasSearch = h.has("search");
+    };
     read();
     window.addEventListener("hashchange", read);
     return () => window.removeEventListener("hashchange", read);
@@ -183,6 +195,9 @@ export function FieldApp({ user, org, logo, theme }: { user: { id: string; name:
               {snapshot ? t("field.lastSync", { when: format.relativeTime(new Date(snapshot.at), new Date()) }) : t("field.title")}
             </div>
           </div>
+          <button onClick={() => (location.hash = "search=")} className="rounded-md p-2.5 hover:bg-gray-100" aria-label={t("search.title")} title={t("search.title")}>
+            <Search className="size-5" />
+          </button>
           <button onClick={() => setScanning(true)} className="rounded-md p-2.5 hover:bg-gray-100" aria-label={t("scan.title")} title={t("scan.title")}>
             <ScanLine className="size-5" />
           </button>
@@ -248,8 +263,10 @@ export function FieldApp({ user, org, logo, theme }: { user: { id: string; name:
           timer={timer}
           setTimer={setTimer}
           enqueue={enqueue}
-          onBack={() => open(null)}
+          onBack={() => (fromSearch.current ? history.back() : open(null))}
         />
+      ) : searchQ !== null ? (
+        <SearchView initial={searchQ} onDevice={new Set(workOrders.map((w) => w.id))} onBack={() => open(null)} />
       ) : (
         <main className="px-4 py-4">
           <div className="mb-3 flex items-baseline justify-between">

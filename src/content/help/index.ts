@@ -20,6 +20,7 @@ import * as reports from "./reports";
 import * as requests from "./requests";
 import * as roles from "./roles";
 import * as scan from "./scan";
+import * as search from "./search";
 import * as server from "./server";
 import * as teams from "./teams";
 import * as users from "./users";
@@ -33,6 +34,7 @@ export type HelpModule = { default: HelpText; shots: HelpShot[] };
 export const HELP_CONTENT: Record<string, HelpModule> = {
   "getting-started": gettingStarted,
   dashboard,
+  search,
   "field-app": fieldApp,
   scan,
   notifications,

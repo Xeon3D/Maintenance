@@ -118,7 +118,8 @@
     "server": "Server",
     "roles": "Roles",
     "categories": "Categories",
-    "audit": "Audit log"
+    "audit": "Audit log",
+    "search": "Search"
   },
   "roles": {
     "OWNER": "Super Admin",
@@ -180,7 +181,8 @@
     "myWorkOrders": "My open work orders",
     "overdueWorkOrders": "Overdue",
     "lowStock": "Low-stock parts",
-    "poApprovals": "POs to approve"
+    "poApprovals": "POs to approve",
+    "searchPlaceholder": "Search past work orders and technicians' notes…"
   },
   "settings": {
     "orgTitle": "Organization",
@@ -2215,5 +2217,33 @@
     "open": "Open in calendar app",
     "reset": "New link",
     "resetConfirm": "Create a new link? Calendars subscribed to the current one will stop updating."
+  },
+  "search": {
+    "title": "Search",
+    "description": "Find earlier jobs by any word written on them: title, description, comments, checklist notes and time notes.",
+    "placeholder": "e.g. processor, condensation, PoE switch…",
+    "villa": "Villa",
+    "allVillas": "All villas",
+    "system": "System",
+    "allSystems": "All systems",
+    "hint": "Type one or more words. Upper case, accents and small typos don't matter.",
+    "none": "No work order mentions these words.",
+    "count": "{count, plural, one {# work order} other {# work orders}}",
+    "countTop": "The {count} most relevant work orders",
+    "completedOn": "Completed {date}",
+    "openedOn": "Opened {date}",
+    "moreHits": "{count, plural, one {# more note} other {# more notes}} with these words",
+    "back": "Back",
+    "searching": "Searching…",
+    "offline": "Search needs a connection. Your own jobs are still available offline.",
+    "kind": {
+      "description": "Description",
+      "request": "Client's request",
+      "comment": "Comment",
+      "itemNote": "Note on \"{step}\"",
+      "itemAnswer": "Answer to \"{step}\"",
+      "timeNote": "Time note",
+      "statusNote": "Note when moved to {status}"
+    }
   }
 }
