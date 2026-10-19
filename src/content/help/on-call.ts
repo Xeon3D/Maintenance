@@ -21,24 +21,26 @@ The people who approve requests keep receiving them as before. When nobody is on
 
 ## The on-call screen
 
-Open **Settings → Staff** and click the **On call** button at the top. At the top of the page is who is on call this week. Below it, the month's calendar has one row per week, with the week number, its days and the person on call; the current week is highlighted and today is circled. The arrows move between months, and **This month** comes back.
+Open **On call** in the sidebar. At the top is who is on call this week. Below it, the month's calendar has one row per week, with the week number, its days and the person on call; the current week is highlighted and today is circled. The arrows move between months, and **This month** comes back. This screen is for viewing only: everyone on the staff sees it, and nothing can be changed there.
+
+The team and the weeks are changed on a copy of the same screen, opened with the **On call** button at the top of **Settings → Staff** (see [Staff](/help/users)), for those allowed to manage it.
 
 ## Choosing the on-call team
 
-On the right, **On-call team** lists the active staff. Tick the people who can be on call; each gets a colour, used on their weeks in the calendar.
+In **Settings → Staff → On call**, **On-call team** lists the active staff. Tick the people who can be on call; each gets a colour, used on their weeks in the calendar.
 
 Clients and viewers can't be in the team. Removing someone from the team frees their weeks from the current one on; past weeks stay as a record.
 
 ## Giving out the weeks
 
-In the calendar, choose a person in the **On call** column of each week. The change is saved at once. Choose **Nobody** to free a week.
+In the calendar of **Settings → Staff → On call**, choose a person in the **On call** column of each week. The change is saved at once. Choose **Nobody** to free a week.
 
 > Plan a few months ahead: move to the next months with the arrow and fill in each week.
 
 ## Who can do what
 
 - **Super Admin** and **Administrator** choose the team and give out the weeks (the **Manage on call** permission in [Roles](/help/roles), which can be given to other roles).
-- Whoever is on call sees it on each request that arrived during their week.
+- Everyone on the staff sees the calendar in **On call** on the sidebar.
 `,
   pt: `# Prevenção
 
@@ -58,24 +60,26 @@ Quem aprova pedidos continua a recebê-los como antes. Quando ninguém está de 
 
 ## O ecrã Prevenção
 
-Abra **Definições → Colaboradores** e clique no botão **Prevenção** no topo. No topo da página está quem está de prevenção esta semana. Por baixo, o calendário do mês tem uma linha por semana, com o número da semana, os seus dias e quem está de prevenção; a semana atual está destacada e o dia de hoje assinalado. As setas mudam de mês e **Este mês** volta ao atual.
+Abra **Prevenção** na barra lateral. No topo está quem está de prevenção esta semana. Por baixo, o calendário do mês tem uma linha por semana, com o número da semana, os seus dias e quem está de prevenção; a semana atual está destacada e o dia de hoje assinalado. As setas mudam de mês e **Este mês** volta ao atual. Este ecrã é só de consulta: todos os colaboradores o veem e nada pode ser alterado aí.
+
+A equipa e as semanas alteram-se numa cópia do mesmo ecrã, aberta com o botão **Prevenção** no topo de **Definições → Colaboradores** (veja [Colaboradores](/help/users)), por quem tem permissão para a gerir.
 
 ## Escolher a equipa de prevenção
 
-À direita, **Equipa de prevenção** lista os membros ativos da empresa. Marque quem pode estar de prevenção; cada pessoa recebe uma cor, usada nas suas semanas no calendário.
+Em **Definições → Colaboradores → Prevenção**, **Equipa de prevenção** lista os membros ativos da empresa. Marque quem pode estar de prevenção; cada pessoa recebe uma cor, usada nas suas semanas no calendário.
 
 Clientes e observadores não podem fazer parte da equipa. Retirar alguém da equipa liberta as suas semanas a partir da atual; as semanas passadas ficam como registo.
 
 ## Atribuir as semanas
 
-No calendário, escolha uma pessoa na coluna **De prevenção** de cada semana. A alteração fica guardada de imediato. Escolha **Ninguém** para libertar uma semana.
+No calendário de **Definições → Colaboradores → Prevenção**, escolha uma pessoa na coluna **De prevenção** de cada semana. A alteração fica guardada de imediato. Escolha **Ninguém** para libertar uma semana.
 
 > Planeie alguns meses à frente: avance para os meses seguintes com a seta e preencha cada semana.
 
 ## Quem pode fazer o quê
 
 - **Super Admin** e **Administrador** escolhem a equipa e atribuem as semanas (a permissão **Gerir prevenção** em [Funções](/help/roles), que pode ser dada a outras funções).
-- Quem está de prevenção vê-o em cada pedido que chegou durante a sua semana.
+- Todos os colaboradores veem o calendário em **Prevenção** na barra lateral.
 `,
 };
 

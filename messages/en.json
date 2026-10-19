@@ -2368,6 +2368,7 @@
     "teamHint": "Tick who can be on call. Only people in the team can be given a week. Clients and viewers can't take part.",
     "inTeam": "{name} is in the on-call team",
     "removeConfirm": "Remove {name} from the on-call team? Their weeks from this week on become free.",
-    "requestOnCall": "On call when it arrived"
+    "requestOnCall": "On call when it arrived",
+    "viewDescription": "Who is on call each week. Whoever is on call receives every new client request and can approve or decline it."
   }
 }

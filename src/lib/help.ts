@@ -26,6 +26,7 @@ export const HELP_TOPICS: HelpTopic[] = [
 
   { slug: "work-orders", group: "operations", icon: "ClipboardList", href: "/work-orders", permission: "internal.view", paths: ["/work-orders"] },
   { slug: "requests", group: "operations", icon: "Inbox", href: "/requests", permission: "internal.view", paths: ["/requests"] },
+  { slug: "on-call", group: "operations", icon: "PhoneCall", href: "/on-call", permission: "internal.view", paths: ["/on-call", "/settings/users/on-call"] },
   { slug: "preventive", group: "operations", icon: "CalendarClock", href: "/preventive", permission: "internal.view", paths: ["/preventive"] },
   { slug: "procedures", group: "operations", icon: "ListChecks", href: "/procedures", permission: "internal.view", paths: ["/procedures"] },
   { slug: "messages", group: "operations", icon: "MessagesSquare", href: "/messages", permission: "internal.view", paths: ["/messages"] },
@@ -46,7 +47,6 @@ export const HELP_TOPICS: HelpTopic[] = [
   { slug: "organization", group: "settings", icon: "Building2", href: "/settings/organization", permission: "org.manage", paths: ["/settings/organization"] },
   { slug: "users", group: "settings", icon: "UserCog", href: "/settings/users", permission: "users.manage", paths: ["/settings/users"] },
   { slug: "client-users", group: "settings", icon: "Contact", href: "/settings/client-users", permission: "users.manage", paths: ["/settings/client-users"] },
-  { slug: "on-call", group: "settings", icon: "PhoneCall", href: "/settings/users/on-call", permission: "onCall.manage", paths: ["/settings/users/on-call"] },
   { slug: "roles", group: "settings", icon: "BadgeCheck", href: "/settings/roles", permission: "users.manage", paths: ["/settings/roles"] },
   { slug: "teams", group: "settings", icon: "UsersRound", href: "/settings/teams", permission: "teams.manage", paths: ["/settings/teams"] },
   { slug: "categories", group: "settings", icon: "Tags", href: "/settings/categories", permission: "workOrders.manage", paths: ["/settings/categories"] },
