@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useFormatter, useTranslations } from "next-intl";
-import { Camera, ChevronLeft, CirclePause, CirclePlay, MapPin, Send, Square } from "lucide-react";
+import { Camera, ChevronLeft, CirclePause, CirclePlay, MapPin, Monitor, Send, Square } from "lucide-react";
 import { Button } from "@/components/ui";
 import { PriorityText, WorkOrderStatusBadge } from "@/components/badges";
 import { MentionTextarea, type MentionMember } from "@/components/mention-textarea";
@@ -42,6 +42,7 @@ export function WorkOrderView({
   const [comment, setComment] = useState("");
   const [blocked, setBlocked] = useState<{ items: string[]; signOff: boolean } | null>(null);
   const [holdNote, setHoldNote] = useState<string | null>(null);
+  const [mode, setMode] = useState<"ONSITE" | "REMOTE">("ONSITE");
   const photoInput = useRef<HTMLInputElement>(null);
   const runningHere = timer?.woId === wo.id;
   const closed = wo.status === "DONE" || wo.status === "CANCELLED";
@@ -57,7 +58,7 @@ export function WorkOrderView({
     if (!timer) return;
     const end = new Date();
     if (end.getTime() - new Date(timer.startedAt).getTime() >= 60_000) {
-      await enqueue({ kind: "time", woId: timer.woId, startedAt: timer.startedAt, endedAt: end.toISOString(), at: end.toISOString() });
+      await enqueue({ kind: "time", woId: timer.woId, startedAt: timer.startedAt, endedAt: end.toISOString(), at: end.toISOString(), mode: timer.mode ?? "ONSITE" });
     }
     await setTimer(null);
   };
@@ -203,11 +204,32 @@ export function WorkOrderView({
             </div>
           )}
 
+          {!runningHere && (
+            <div role="radiogroup" aria-label={t("time.mode")} className="grid grid-cols-2 rounded-md border border-border p-0.5 text-sm">
+              {(["ONSITE", "REMOTE"] as const).map((m) => {
+                const Icon = m === "ONSITE" ? MapPin : Monitor;
+                return (
+                  <button
+                    key={m}
+                    type="button"
+                    role="radio"
+                    aria-checked={mode === m}
+                    onClick={() => setMode(m)}
+                    className={`inline-flex h-9 items-center justify-center gap-1.5 rounded ${mode === m ? "bg-brand text-white" : "text-muted"}`}
+                  >
+                    <Icon className="size-4" />
+                    {t(`time.modes.${m}`)}
+                  </button>
+                );
+              })}
+            </div>
+          )}
           <div className="flex items-center gap-3">
             {runningHere ? (
               <Button variant="danger" onClick={stopTimer} className="h-11 flex-1">
                 <Square className="size-4" />
                 {t("time.stop")} <span className="font-mono tabular-nums">{clock(elapsed)}</span>
+                <span className="text-xs font-normal opacity-90">· {t(`time.modes.${timer!.mode ?? "ONSITE"}`)}</span>
               </Button>
             ) : (
               <Button
@@ -215,7 +237,7 @@ export function WorkOrderView({
                 className="h-11 flex-1"
                 onClick={async () => {
                   if (timer) await stopTimer(); // one timer at a time
-                  await setTimer({ woId: wo.id, startedAt: new Date().toISOString() });
+                  await setTimer({ woId: wo.id, startedAt: new Date().toISOString(), mode });
                   if (wo.status === "OPEN" || wo.status === "ON_HOLD") await enqueue({ kind: "status", woId: wo.id, status: "IN_PROGRESS" });
                 }}
               >

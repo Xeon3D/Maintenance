@@ -6,7 +6,9 @@ import { SLA_STATUS_LOGS, slaCalendar, slaStates } from "@/lib/sla";
 import { workOrderCosts } from "@/lib/work-orders";
 import { timeRoundingOf } from "@/lib/billing-time";
 import { urgentRuleFor } from "@/lib/urgent-surcharge";
+import { travelOf } from "@/lib/travel-charge";
 import { csvResponse, money, moneyColumns, toCsv, type Cell, type Column } from "@/lib/csv";
+import { villaClient } from "@/lib/villa-client";
 
 const r2 = (n: number | null) => (n === null ? null : Math.round(n * 100) / 100);
 
@@ -33,11 +35,11 @@ export async function GET(req: Request, { params }: RouteContext<"/reports/expor
       const wos = await ctx.db.workOrder.findMany({
         where: { ...woScope(f), createdAt: { gte: f.from, lte: f.to } },
         include: {
-          villa: { select: { name: true, client: { select: { name: true } } } },
+          villa: { select: { name: true, distanceKm: true, client: { select: { name: true } }, manager: { select: { name: true } }, billTo: true } },
           asset: { select: { name: true } },
-          contract: { select: { name: true, responseTimeHours: true, resolutionTimeHours: true, businessHoursOnly: true, pauseOnHold: true, urgentFee: true, urgentPercent: true } },
+          contract: { select: { name: true, responseTimeHours: true, resolutionTimeHours: true, businessHoursOnly: true, pauseOnHold: true, urgentFee: true, urgentPercent: true, travelIncluded: true, travelFee: true, travelKmRate: true } },
           statusLogs: SLA_STATUS_LOGS,
-          timeEntries: { select: { userId: true, minutes: true, hourlyRate: true } },
+          timeEntries: { select: { userId: true, minutes: true, hourlyRate: true, startedAt: true, mode: true } },
           parts: { select: { quantity: true, unitCost: true } },
           otherCosts: { select: { amount: true } },
         },
@@ -47,16 +49,16 @@ export async function GET(req: Request, { params }: RouteContext<"/reports/expor
         t("reports.csv.number"), t("wo.title"), t("wo.type"), t("common.status"), t("wo.priority"), t("assets.system"),
         t("villas.client"), t("assets.villa"), t("wo.asset"), t("wo.createdAt"), t("reports.csv.firstResponse"), t("wo.completedAt"),
         t("contracts.contract"), t("contracts.responseShort"), t("contracts.resolutionShort"), t("reports.csv.minutes"), t("reports.csv.billedMinutes"),
-        money(t("costs.labor")), money(t("costs.parts")), money(t("reports.otherCosts")), money(t("costs.urgent")), money(t("costs.total")),
+        money(t("costs.labor")), money(t("costs.parts")), money(t("reports.otherCosts")), money(t("costs.urgent")), t("reports.csv.trips"), money(t("costs.travel")), money(t("costs.total")),
       ];
       rows = wos.map((w) => {
-        const c = workOrderCosts(w, timeRoundingOf(ctx.organization.timeRounding), urgentRuleFor(ctx.organization, w.contract));
+        const c = workOrderCosts(w, timeRoundingOf(ctx.organization.timeRounding), urgentRuleFor(ctx.organization, w.contract), travelOf(ctx.organization, w.contract));
         const s = w.contract ? slaStates(w, w.contract, now, slaCalendar(ctx.organization)) : null;
         return [
           w.number, w.title, t(`woType.${w.type}`), t(`woStatus.${w.status}`), t(`priority.${w.priority}`), sys(w.system),
-          w.villa?.client.name, w.villa?.name, w.asset?.name, when(w.createdAt), when(w.firstResponseAt), when(w.completedAt),
+          w.villa && villaClient(w.villa)?.name, w.villa?.name, w.asset?.name, when(w.createdAt), when(w.firstResponseAt), when(w.completedAt),
           w.contract?.name, s && s.response !== "na" ? t(`sla.${s.response}`) : null, s && s.resolution !== "na" ? t(`sla.${s.resolution}`) : null,
-          c.minutes, c.billedMinutes, r2(c.labor), r2(c.parts), r2(c.other), r2(c.urgent), r2(c.total),
+          c.minutes, c.billedMinutes, r2(c.labor), r2(c.parts), r2(c.other), r2(c.urgent), c.trips, r2(c.travel), r2(c.total),
         ];
       });
       break;
@@ -73,8 +75,8 @@ export async function GET(req: Request, { params }: RouteContext<"/reports/expor
     }
     case "costs": {
       const c = await costReport(ctx, f);
-      header = [t("assets.villa"), t("reports.jobs"), money(t("costs.labor")), money(t("costs.parts")), money(t("reports.otherCosts")), money(t("costs.urgent")), money(t("costs.total"))];
-      rows = c.byVilla.map((v) => [v.name, v.count, r2(v.labor), r2(v.parts), r2(v.other), r2(v.urgent), r2(v.total)]);
+      header = [t("assets.villa"), t("reports.jobs"), money(t("costs.labor")), money(t("costs.parts")), money(t("reports.otherCosts")), money(t("costs.urgent")), money(t("costs.travel")), money(t("costs.total"))];
+      rows = c.byVilla.map((v) => [v.name, v.count, r2(v.labor), r2(v.parts), r2(v.other), r2(v.urgent), r2(v.travel), r2(v.total)]);
       break;
     }
     case "technicians": {

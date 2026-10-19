@@ -12,8 +12,10 @@ import { fileUrl } from "@/lib/storage";
 import { assignableUsers, workOrderCosts } from "@/lib/work-orders";
 import { timeRoundingOf } from "@/lib/billing-time";
 import { urgentRuleFor } from "@/lib/urgent-surcharge";
+import { travelOf } from "@/lib/travel-charge";
 import { approveRequestAction, declineRequestAction } from "../actions";
 import { ApproveFields } from "./approve-fields";
+import { villaClient } from "@/lib/villa-client";
 
 export default async function RequestPage({ params }: PageProps<"/requests/[id]">) {
   const { id } = await params;
@@ -25,7 +27,7 @@ export default async function RequestPage({ params }: PageProps<"/requests/[id]"
   const r = await ctx.db.request.findUnique({
     where: { id },
     include: {
-      villa: { select: { id: true, name: true, client: { select: { id: true, name: true } } } },
+      villa: { select: { id: true, name: true, client: { select: { id: true, name: true } }, manager: { select: { id: true, name: true } }, billTo: true } },
       area: { select: { name: true } },
       asset: { select: { id: true, name: true, status: true } },
       requester: { select: { name: true, email: true, phone: true } },
@@ -35,8 +37,9 @@ export default async function RequestPage({ params }: PageProps<"/requests/[id]"
           number: true,
           status: true,
           priority: true,
-          contract: { select: { urgentFee: true, urgentPercent: true } },
-          timeEntries: { select: { userId: true, minutes: true, hourlyRate: true } },
+          contract: { select: { urgentFee: true, urgentPercent: true, travelIncluded: true, travelFee: true, travelKmRate: true } },
+          villa: { select: { distanceKm: true } },
+          timeEntries: { select: { userId: true, minutes: true, hourlyRate: true, startedAt: true, mode: true } },
           otherCosts: { select: { amount: true } },
           parts: { select: { quantity: true, unitCost: true } },
         },
@@ -96,7 +99,7 @@ export default async function RequestPage({ params }: PageProps<"/requests/[id]"
           )}
           {r.status === "APPROVED" && r.workOrder && ctx.can("costs.view") && (() => {
             // What this request has cost so far: time (at each person's role rate), parts and other costs.
-            const c = workOrderCosts(r.workOrder, timeRoundingOf(ctx.organization.timeRounding), urgentRuleFor(ctx.organization, r.workOrder.contract));
+            const c = workOrderCosts(r.workOrder, timeRoundingOf(ctx.organization.timeRounding), urgentRuleFor(ctx.organization, r.workOrder.contract), travelOf(ctx.organization, r.workOrder.contract));
             const money = (n: number) => format.number(n, { style: "currency", currency: ctx.organization.currency });
             return (
               <Card className="p-5 text-sm">
@@ -128,6 +131,12 @@ export default async function RequestPage({ params }: PageProps<"/requests/[id]"
                     <>
                       <dt className="text-muted">{t("costs.urgent")}</dt>
                       <dd className="text-right tabular-nums">{money(c.urgent)}</dd>
+                    </>
+                  )}
+                  {c.travel > 0 && (
+                    <>
+                      <dt className="text-muted">{t("costs.trips", { count: c.trips })}</dt>
+                      <dd className="text-right tabular-nums">{money(c.travel)}</dd>
                     </>
                   )}
                   <dt className="border-t border-border pt-1.5 font-medium">{t("costs.total")}</dt>
@@ -184,7 +193,7 @@ export default async function RequestPage({ params }: PageProps<"/requests/[id]"
                 <Link href={`/villas/${r.villa.id}`} className="hover:text-brand">
                   {r.villa.name}
                 </Link>
-                <div className="text-xs text-muted">{r.villa.client.name}</div>
+                <div className="text-xs text-muted">{villaClient(r.villa)?.name}</div>
               </div>
             )}
             {r.area && (

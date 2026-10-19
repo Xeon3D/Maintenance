@@ -11,6 +11,7 @@ import { fileUrl } from "@/lib/storage";
 import { ACTIVE_STATUSES, workOrderCosts } from "@/lib/work-orders";
 import { billedTime, timeRoundingOf } from "@/lib/billing-time";
 import { urgentApplies, urgentRuleFor } from "@/lib/urgent-surcharge";
+import { countTrips, isFar, travelOf } from "@/lib/travel-charge";
 import { cn } from "@/lib/utils";
 import { StatusBar } from "./status-bar";
 import { Checklist } from "./checklist";
@@ -18,6 +19,7 @@ import { CommentBox, CostsPanel, Gallery, SignOff, TimeTracker, WorkOrderActions
 import { PartsPanel } from "./parts-panel";
 import { SendReportPanel } from "./send-report";
 import { reportRecipients } from "@/lib/report-email";
+import { villaClient } from "@/lib/villa-client";
 
 export default async function WorkOrderPage({ params }: PageProps<"/work-orders/[id]">) {
   const { id } = await params;
@@ -29,7 +31,7 @@ export default async function WorkOrderPage({ params }: PageProps<"/work-orders/
   const wo = await ctx.db.workOrder.findUnique({
     where: { id },
     include: {
-      villa: { select: { id: true, name: true, client: { select: { id: true, name: true } } } },
+      villa: { select: { id: true, name: true, distanceKm: true, client: { select: { id: true, name: true } }, manager: { select: { id: true, name: true } }, billTo: true } },
       area: { select: { name: true } },
       asset: { select: { id: true, name: true, status: true } },
       team: { select: { name: true, color: true } },
@@ -44,7 +46,7 @@ export default async function WorkOrderPage({ params }: PageProps<"/work-orders/
       parts: { include: { part: { select: { name: true, unit: true } }, stockLocation: { select: { name: true } } }, orderBy: { id: "asc" } },
       attachments: { where: { commentId: null, workOrderItemId: null }, orderBy: { createdAt: "asc" } },
       request: { select: { id: true, number: true } },
-      contract: { select: { id: true, name: true, responseTimeHours: true, resolutionTimeHours: true, businessHoursOnly: true, pauseOnHold: true, urgentFee: true, urgentPercent: true } },
+      contract: { select: { id: true, name: true, responseTimeHours: true, resolutionTimeHours: true, businessHoursOnly: true, pauseOnHold: true, urgentFee: true, urgentPercent: true, travelIncluded: true, travelFee: true, travelKmRate: true } },
       categories: { select: { id: true, name: true, color: true }, orderBy: { name: "asc" } },
     },
   });
@@ -90,11 +92,16 @@ export default async function WorkOrderPage({ params }: PageProps<"/work-orders/
   const money = (n: number) => format.number(n, { style: "currency", currency: ctx.organization.currency });
   const block = timeRoundingOf(ctx.organization.timeRounding);
   const urgentRule = urgentRuleFor(ctx.organization, wo.contract);
-  const costs = workOrderCosts(wo, block, urgentRule);
+  const travel = travelOf(ctx.organization, wo.contract);
+  const costs = workOrderCosts(wo, block, urgentRule, travel);
+  // Trips the contract includes: shown on the job at no charge.
+  const includedTrips = travel.rule.included ? countTrips(wo.timeEntries, travel.timeZone, travel.rule.perTechnician) : 0;
   const dt = (d: Date) => format.dateTime(d, { dateStyle: "medium", timeStyle: "short" });
   const reportEmail = ctx.can("workOrders.sendReport") ? await reportRecipients(ctx, wo.id) : null;
   const sla = wo.contract ? slaStates(wo, wo.contract, now, slaCalendar(ctx.organization)) : null;
   const myRunning = wo.timeEntries.find((e) => e.userId === ctx.user.id && !e.endedAt);
+  // A new entry starts where my last one was (on site / remote); entries are newest first.
+  const myLastMode = wo.timeEntries.find((e) => e.userId === ctx.user.id)?.mode ?? "ONSITE";
 
   // Activity: comments and status changes, oldest first.
   const activity = [
@@ -104,7 +111,7 @@ export default async function WorkOrderPage({ params }: PageProps<"/work-orders/
 
   const details: [string, React.ReactNode][] = [
     [t("assets.villa"), wo.villa && <Link href={`/villas/${wo.villa.id}`} className="hover:text-brand">{wo.villa.name}</Link>],
-    [t("villas.client"), wo.villa && <Link href={`/clients/${wo.villa.client.id}`} className="hover:text-brand">{wo.villa.client.name}</Link>],
+    [t("villas.client"), wo.villa && villaClient(wo.villa) && <Link href={`/clients/${villaClient(wo.villa)!.id}`} className="hover:text-brand">{villaClient(wo.villa)!.name}</Link>],
     [t("assets.area"), wo.area?.name],
     [t("wo.asset"), wo.asset && <Link href={`/assets/${wo.asset.id}`} className="hover:text-brand">{wo.asset.name}</Link>],
     [t("wo.type"), t(`woType.${wo.type}`)],
@@ -241,12 +248,15 @@ export default async function WorkOrderPage({ params }: PageProps<"/work-orders/
               canExecute={canExecute && !closed}
               canDeleteAny={ctx.can("workOrders.manage")}
               runningSince={myRunning?.startedAt.toISOString() ?? null}
+              runningMode={myRunning?.mode ?? null}
+              defaultMode={myLastMode}
               entries={wo.timeEntries.map((e) => ({
                 id: e.id,
                 user: e.user.name,
                 mine: e.userId === ctx.user.id,
                 minutes: e.minutes,
                 startedAt: e.startedAt.toISOString(),
+                mode: e.mode,
                 label: format.dateTime(e.startedAt, { dateStyle: "short" }),
                 note: e.note,
               }))}
@@ -322,6 +332,18 @@ export default async function WorkOrderPage({ params }: PageProps<"/work-orders/
                 urgent: urgentApplies(wo.priority, urgentRule)
                   ? { amount: money(costs.urgent), rule: [urgentRule.fee ? money(urgentRule.fee) : null, urgentRule.percent ? `${urgentRule.percent}%` : null].filter(Boolean).join(" + ") }
                   : null,
+                travel:
+                  costs.trips > 0
+                    ? {
+                        amount: money(costs.travel),
+                        trips: costs.trips,
+                        rule: isFar(wo.villa?.distanceKm, travel.rule)
+                          ? t("travel.perKmRule", { km: format.number(wo.villa!.distanceKm!, { maximumFractionDigits: 1 }), rate: money(travel.rule.kmRate) })
+                          : t("travel.perTripRule", { amount: money(costs.perTrip) }),
+                      }
+                    : includedTrips > 0
+                      ? { amount: money(0), trips: includedTrips, rule: t("travel.includedInContract") }
+                      : null,
               }}
             />
           </Card>

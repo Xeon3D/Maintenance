@@ -10,6 +10,8 @@ import { INTL_LOCALE, type Locale } from "@/i18n/config";
 import { ServiceReport, type ReportData } from "@/app/(app)/work-orders/[id]/report/report-pdf";
 import { billedTime, timeRoundingOf } from "@/lib/billing-time";
 import { urgentApplies, urgentRuleFor } from "@/lib/urgent-surcharge";
+import { villaClient } from "@/lib/villa-client";
+import { chargesTravel, countTrips, travelRuleFor } from "@/lib/travel-charge";
 
 // The client-facing PDF service report of a work order (no costs). Used by the download route and by
 // e-mailing (lib/report-email.ts). `where` scopes the work order (tenant + portal rules are the caller's);
@@ -30,7 +32,7 @@ export async function renderServiceReport(ctx: Pick<AppContext, "db" | "organiza
   const wo = await ctx.db.workOrder.findFirst({
     where,
     include: {
-      villa: { select: { name: true, address: true, city: true, client: { select: { name: true } } } },
+      villa: { select: { name: true, address: true, city: true, client: { select: { name: true } }, manager: { select: { name: true } }, billTo: true } },
       area: { select: { name: true } },
       asset: { select: { name: true, manufacturer: true, model: true, serialNumber: true } },
       assignees: { select: { user: { select: { name: true } } } },
@@ -39,7 +41,7 @@ export async function renderServiceReport(ctx: Pick<AppContext, "db" | "organiza
       timeEntries: { where: { minutes: { not: null } }, include: { user: { select: { name: true } } }, orderBy: { startedAt: "asc" } },
       attachments: { where: { mimeType: { in: [...PDF_IMAGE_TYPES] } }, orderBy: { createdAt: "asc" } },
       parts: { include: { part: { select: { name: true, sku: true, unit: true } } }, orderBy: { id: "asc" } },
-      contract: { select: { urgentFee: true, urgentPercent: true } },
+      contract: { select: { urgentFee: true, urgentPercent: true, travelIncluded: true, travelFee: true, travelKmRate: true } },
     },
   });
   if (!wo) return null;
@@ -63,12 +65,16 @@ export async function renderServiceReport(ctx: Pick<AppContext, "db" | "organiza
   // Client-facing time is the billed time: one line per technician, their time on this work order rounded up to
   // the company's billing period (lib/billing-time.ts), with the dates and notes of their entries.
   const billed = billedTime(wo.timeEntries, timeRoundingOf(ctx.organization.timeRounding));
+  const rule = travelRuleFor(ctx.organization, wo.contract);
+  const trips = chargesTravel(rule) ? countTrips(wo.timeEntries, ctx.organization.timezone, rule.perTechnician) : 0;
   const day = (d: Date) => format.dateTime(d, { dateStyle: "short" });
   const timeRows = billed.people.map((p) => {
     const mine = wo.timeEntries.filter((e) => (e.userId ?? "-") === p.userId);
     const first = day(mine[0].startedAt);
     const last = day(mine[mine.length - 1].startedAt);
-    return { who: mine[0].user.name, when: first === last ? first : `${first} – ${last}`, duration: duration(p.billed), note: mine.map((e) => e.note).filter(Boolean).join("; ") || null };
+    // Where they worked: on site, remotely, or both.
+    const modes = [...new Set(mine.map((e) => e.mode))].sort().map((m) => t(`time.modes.${m}`)).join(" + ");
+    return { who: `${mine[0].user.name} (${modes})`, when: first === last ? first : `${first} – ${last}`, duration: duration(p.billed), note: mine.map((e) => e.note).filter(Boolean).join("; ") || null };
   });
 
   const signatureIds = new Set([wo.signatureUrl, ...wo.items.filter((i) => i.type === "SIGNATURE").map((i) => i.value)]);
@@ -81,7 +87,7 @@ export async function renderServiceReport(ctx: Pick<AppContext, "db" | "organiza
     : null;
 
   const info: [string, string | null | undefined][] = [
-    [t("villas.client"), wo.villa?.client.name],
+    [t("villas.client"), wo.villa && villaClient(wo.villa)?.name],
     [t("assets.villa"), wo.villa && [wo.villa.name, wo.villa.city].filter(Boolean).join(", ")],
     [t("assets.area"), wo.area?.name],
     [t("wo.asset"), asset],
@@ -89,6 +95,8 @@ export async function renderServiceReport(ctx: Pick<AppContext, "db" | "organiza
     [t("wo.type"), t(`woType.${wo.type}`)],
     // Billed as urgent (the surcharge applies): the client sees it, without amounts.
     [t("report.service"), urgentApplies(wo.priority, urgentRuleFor(ctx.organization, wo.contract)) ? t("report.urgentService") : null],
+    // Trips charged for on-site work: the client sees how many, without amounts.
+    [t("report.trips"), trips > 0 ? String(trips) : null],
     [t("common.status"), t(`woStatus.${wo.status}`)],
     [t("wo.technicians"), wo.assignees.map((a) => a.user.name).join(", ")],
     [t("wo.createdAt"), dt(wo.createdAt)],

@@ -57,6 +57,18 @@ enum AreaKind {
   TECH_ROOM
 }
 
+/// Who a villa's work is billed and reported to, when it has both an owner and a manager.
+enum BillTo {
+  OWNER
+  MANAGER
+}
+
+// Where a technician worked during a time entry: on site (charged a trip, see lib/travel-charge.ts) or remotely.
+enum WorkMode {
+  ONSITE
+  REMOTE
+}
+
 enum ClientType {
   PRIVATE_OWNER
   COMPANY
@@ -242,6 +254,13 @@ model Organization {
   timeRounding   Int      @default(30) // billing period in minutes: each technician's time on a work order is rounded up to it (0 = none)
   urgentFee      Decimal  @default(0) @db.Decimal(12, 2) // extra cost of an urgent work order: fixed amount…
   urgentPercent  Int      @default(0) // …plus this % of its labour (both 0 = no surcharge); a contract can override
+  // Trips charged for on-site work (lib/travel-charge.ts): a fixed fee up to travelRadiusKm from the company,
+  // beyond it travelKmRate per km of the one-way distance (Villa.distanceKm). Both 0 = no trips charged.
+  // A trip is per technician per day (travelPerTechnician) or per work order per day. A contract can override.
+  travelFee      Decimal  @default(0) @db.Decimal(12, 2)
+  travelRadiusKm Int      @default(25)
+  travelKmRate   Decimal  @default(0) @db.Decimal(12, 2)
+  travelPerTechnician Boolean @default(true)
   // Who also gets e-mailed service reports: {"userIds": […], "roles": ["ACCOUNTANT", "job:<id>"], "emails": […]}.
   reportRecipients Json?
   privacyNotice String? // custom privacy notice (plain text) shown at /privacy/<slug>; null = built-in template
@@ -426,10 +445,12 @@ model ClientContact {
 model Villa {
   id             String    @id @default(cuid())
   organizationId String
-  // The owner (billing client). A property manager / managing company can be added as manager:
-  // portal users of either client can see the villa and request work on it.
-  clientId       String
+  // The owner and/or the property manager / managing company: at least one is set (a check constraint
+  // enforces it). Portal users of either client can see the villa and request work on it;
+  // work is billed and reported to the one billTo names (see villaClient()).
+  clientId       String?
   managerId      String?
+  billTo         BillTo    @default(OWNER)
   name           String
   code           String? // short internal ref, e.g. "VQL-07"
   address        String?
@@ -437,6 +458,7 @@ model Villa {
   country        String?
   latitude       Float?
   longitude      Float?
+  distanceKm     Float? // road distance from the company's address, one way; decides the trip charge (null = within the radius)
   accessNotes    String? // parking, working hours, dogs… (non-secret)
   // AES-GCM encrypted blob: gate/alarm codes, Wi-Fi admin, etc. Every decrypt is audit-logged.
   secretsEnc     String?
@@ -446,7 +468,7 @@ model Villa {
   updatedAt      DateTime  @updatedAt
 
   organization Organization      @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-  client       Client            @relation("VillaOwner", fields: [clientId], references: [id])
+  client       Client?           @relation("VillaOwner", fields: [clientId], references: [id], onDelete: Restrict)
   manager      Client?           @relation("VillaManager", fields: [managerId], references: [id], onDelete: SetNull)
   areas        Area[]
   assets       Asset[]
@@ -560,6 +582,10 @@ model ServiceContract {
   monthlyFee          Decimal?       @db.Decimal(12, 2)
   urgentFee           Decimal?       @db.Decimal(12, 2) // urgent surcharge for this contract's work orders; both null = the company's
   urgentPercent       Int?
+  // Trips for on-site work: included (none charged), or this contract's own fee / rate per km (null = the company's).
+  travelIncluded      Boolean        @default(false)
+  travelFee           Decimal?       @db.Decimal(12, 2)
+  travelKmRate        Decimal?       @db.Decimal(12, 2)
   systems             SystemType[]
   notes               String?
   createdAt           DateTime       @default(now())
@@ -751,6 +777,7 @@ model TimeEntry {
   endedAt     DateTime? // null = timer running
   minutes     Int?
   hourlyRate  Decimal?  @db.Decimal(10, 2)
+  mode        WorkMode  @default(ONSITE)
   note        String?
 
   workOrder WorkOrder @relation(fields: [workOrderId], references: [id], onDelete: Cascade)
