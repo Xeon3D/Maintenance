@@ -67,6 +67,7 @@ The client is notified the same way as for an approval. A declined request can't
 
 - **Super Admin**, **Administrator** and **Manager**: see, approve and decline requests, and get notified of new ones.
 - **Technician**, **Accountant** and **Viewer**: can see requests but not approve or decline them.
+- **Whoever is on call** that week is also notified of every new request and can approve or decline the ones that arrived during their week, whatever their role. The request shows who was on call. See [On call](/help/on-call).
 - **Clients** send requests and follow them in the client portal.
 `,
   pt: `# Pedidos
@@ -133,6 +134,7 @@ O cliente é notificado da mesma forma que numa aprovação. Um pedido recusado 
 
 - **Super Admin**, **Administrador** e **Gestor**: veem, aprovam e recusam pedidos, e são notificados dos novos.
 - **Técnico**, **Contabilista** e **Observador**: veem os pedidos, mas não os aprovam nem recusam.
+- **Quem está de prevenção** nessa semana também é notificado de todos os novos pedidos e pode aprovar ou recusar os que chegaram durante a sua semana, seja qual for a sua função. O pedido mostra quem estava de prevenção. Veja [Prevenção](/help/on-call).
 - Os **clientes** enviam pedidos e acompanham-nos no portal do cliente.
 `,
 };

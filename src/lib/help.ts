@@ -26,6 +26,7 @@ export const HELP_TOPICS: HelpTopic[] = [
 
   { slug: "work-orders", group: "operations", icon: "ClipboardList", href: "/work-orders", permission: "internal.view", paths: ["/work-orders"] },
   { slug: "requests", group: "operations", icon: "Inbox", href: "/requests", permission: "internal.view", paths: ["/requests"] },
+  { slug: "on-call", group: "operations", icon: "PhoneCall", href: "/on-call", permission: "internal.view", paths: ["/on-call"] },
   { slug: "preventive", group: "operations", icon: "CalendarClock", href: "/preventive", permission: "internal.view", paths: ["/preventive"] },
   { slug: "procedures", group: "operations", icon: "ListChecks", href: "/procedures", permission: "internal.view", paths: ["/procedures"] },
   { slug: "messages", group: "operations", icon: "MessagesSquare", href: "/messages", permission: "internal.view", paths: ["/messages"] },

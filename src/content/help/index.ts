@@ -10,6 +10,7 @@ import * as gettingStarted from "./getting-started";
 import * as messages from "./messages";
 import * as meters from "./meters";
 import * as notifications from "./notifications";
+import * as onCall from "./on-call";
 import * as organization from "./organization";
 import * as parts from "./parts";
 import * as preventive from "./preventive";
@@ -40,6 +41,7 @@ export const HELP_CONTENT: Record<string, HelpModule> = {
   notifications,
   "work-orders": workOrders,
   requests,
+  "on-call": onCall,
   preventive,
   procedures,
   messages,

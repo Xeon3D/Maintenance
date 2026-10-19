@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getFormatter, getTranslations } from "next-intl/server";
-import { Camera } from "lucide-react";
+import { Camera, PhoneCall } from "lucide-react";
 import { Card, PageHeader, Select, Table } from "@/components/ui";
 import { FilterBar, Pagination } from "@/components/list-controls";
 import { EmptyState } from "@/components/empty-state";
@@ -47,6 +47,7 @@ export default async function RequestsPage({ searchParams }: PageProps<"/request
         villa: { select: { name: true } },
         asset: { select: { name: true } },
         requester: { select: { name: true } },
+        onCallUser: { select: { name: true } },
         _count: { select: { attachments: true } },
       },
       orderBy: [{ createdAt: "desc" }],
@@ -123,6 +124,12 @@ export default async function RequestsPage({ searchParams }: PageProps<"/request
                         <span className="inline-flex items-center gap-0.5 text-xs text-muted">
                           <Camera className="size-3.5" />
                           {r._count.attachments}
+                        </span>
+                      )}
+                      {r.onCallUser && (
+                        <span className="inline-flex items-center gap-0.5 text-xs text-muted" title={t("onCall.requestOnCall")}>
+                          <PhoneCall className="size-3.5" />
+                          {r.onCallUser.name}
                         </span>
                       )}
                     </div>

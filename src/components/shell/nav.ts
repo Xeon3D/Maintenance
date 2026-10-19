@@ -25,6 +25,7 @@ export const NAV: NavGroup[] = [
     items: [
       { href: "/work-orders", labelKey: "workOrders", icon: "ClipboardList", permission: "internal.view", ready: true },
       { href: "/requests", labelKey: "requests", icon: "Inbox", permission: "internal.view", ready: true },
+      { href: "/on-call", labelKey: "onCall", icon: "PhoneCall", permission: "internal.view", ready: true },
       { href: "/preventive", labelKey: "preventive", icon: "CalendarClock", permission: "internal.view", ready: true },
       { href: "/procedures", labelKey: "procedures", icon: "ListChecks", permission: "internal.view", ready: true },
       { href: "/messages", labelKey: "messages", icon: "MessagesSquare", permission: "internal.view", ready: true },

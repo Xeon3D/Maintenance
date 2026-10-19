@@ -14,15 +14,17 @@ export function ApproveFields({
   system,
   teams,
   people,
+  initialAssignees = [],
 }: {
   title: string;
   priority: Priority;
   system: SystemType | null;
   teams: { id: string; name: string; memberIds: string[] }[];
   people: { id: string; name: string }[];
+  initialAssignees?: string[];
 }) {
   const t = useTranslations();
-  const [assignees, setAssignees] = useState<Set<string>>(new Set());
+  const [assignees, setAssignees] = useState<Set<string>>(() => new Set(initialAssignees));
   const toggle = (id: string) =>
     setAssignees((s) => {
       const n = new Set(s);

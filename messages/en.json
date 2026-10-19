@@ -119,7 +119,8 @@
     "roles": "Roles",
     "categories": "Categories",
     "audit": "Audit log",
-    "search": "Search"
+    "search": "Search",
+    "onCall": "On call"
   },
   "roles": {
     "OWNER": "Super Admin",
@@ -1816,6 +1817,12 @@
         "label": "Knowledge base",
         "hint": "Write, edit and delete villa knowledge-base articles. Everyone on the team can read them."
       }
+    },
+    "onCall": {
+      "manage": {
+        "label": "Manage on call",
+        "hint": "Choose who is in the on-call team and give each week to someone."
+      }
     }
   },
   "reportEmail": {
@@ -2338,5 +2345,25 @@
     "updated": "Updated {when}",
     "updatedBy": "Updated by {name}, {when}",
     "filesOnline": "{count, plural, one {# file} other {# files}} (needs a connection)"
+  },
+  "onCall": {
+    "description": "Who is on call each week. Whoever is on call receives every new client request and can approve or decline it.",
+    "thisWeek": "On call this week ({from} – {to})",
+    "you": "you",
+    "nobodyNow": "Nobody is on call this week: new requests go only to those who approve requests.",
+    "today": "This month",
+    "weekShort": "Wk",
+    "onCall": "On call",
+    "weekNumber": "Week {n}",
+    "weekOf": "On call for {range}",
+    "leftTeam": "{name} (left the team)",
+    "nobody": "Nobody",
+    "team": "On-call team",
+    "teamHint": "Tick who can be on call. Only people in the team can be given a week. Clients and viewers can't take part.",
+    "teamHintView": "People who take turns being on call.",
+    "noTeam": "Nobody is in the on-call team yet.",
+    "inTeam": "{name} is in the on-call team",
+    "removeConfirm": "Remove {name} from the on-call team? Their weeks from this week on become free.",
+    "requestOnCall": "On call when it arrived"
   }
 }
