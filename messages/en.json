@@ -2370,6 +2370,6 @@
     "removeConfirm": "Remove {name} from the on-call team? Their weeks from this week on become free.",
     "requestOnCall": "On call when it arrived",
     "viewDescription": "Who is on call each week. Whoever is on call receives every new client request and can approve or decline it.",
-    "seeRota": "See the rota"
+    "seeCalendar": "See full calendar"
   }
 }

@@ -21,7 +21,7 @@ The box at the top searches every work order and the notes technicians wrote on 
 
 ## On call this week
 
-Below the search, a card shows who is on call this week, the person who receives every new client request (or that nobody is). Click it to open the full rota. See [On call](/help/on-call).
+Below the search, a card shows who is on call this week, the person who receives every new client request (or that nobody is). Click it to open the full calendar. See [On call](/help/on-call).
 
 ## The counters
 
@@ -84,7 +84,7 @@ A caixa no topo pesquisa todas as ordens de trabalho e as notas que os técnicos
 
 ## De prevenção esta semana
 
-Por baixo da pesquisa, um cartão mostra quem está de prevenção esta semana, a pessoa que recebe todos os novos pedidos dos clientes (ou que ninguém está). Clique nele para abrir a escala completa. Veja [Prevenção](/help/on-call).
+Por baixo da pesquisa, um cartão mostra quem está de prevenção esta semana, a pessoa que recebe todos os novos pedidos dos clientes (ou que ninguém está). Clique nele para abrir o calendário completo. Veja [Prevenção](/help/on-call).
 
 ## Os contadores
 

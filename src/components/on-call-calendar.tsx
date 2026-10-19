@@ -54,7 +54,7 @@ export async function OnCallNow({ ctx, href }: { ctx: AppContext; href?: string 
       </div>
       {href && (
         <span className="ml-auto inline-flex shrink-0 items-center gap-1 text-xs text-brand">
-          {t("onCall.seeRota")}
+          {t("onCall.seeCalendar")}
           <ChevronRight className="size-3.5" />
         </span>
       )}

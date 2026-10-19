@@ -33,7 +33,7 @@ When they open the link, they either sign in, if they already have an account wi
 
 ## On call
 
-The **On call** button at the top of the page opens the on-call rota: who is in the on-call team and who is on call each week. See [On call](/help/on-call). It is shown to roles with the **Manage on call** permission.
+The **On call** button at the top of the page opens the on-call settings: who is in the on-call team and who is on call each week. See [On call](/help/on-call). It is shown to roles with the **Manage on call** permission.
 
 ## Pending invitations
 
