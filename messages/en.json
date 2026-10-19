@@ -518,12 +518,13 @@
     "pf": {
       "PASS": "Pass",
       "FLAG": "Flag",
-      "FAIL": "Fail"
+      "FAIL": "Fail",
+      "NA": "N/A"
     },
     "types": {
       "HEADING": "Section heading",
       "CHECKBOX": "Checkbox",
-      "PASS_FAIL": "Pass / flag / fail",
+      "PASS_FAIL": "Pass / flag / fail / N/A",
       "TEXT": "Text",
       "NUMBER": "Number",
       "MULTIPLE_CHOICE": "Multiple choice",
