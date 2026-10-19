@@ -1,7 +1,7 @@
 "use client";
 
 import type { QueuedOp, Snapshot, SyncOp, SyncResult } from "@/lib/offline-types";
-import { uploadFile } from "@/lib/upload-client";
+import { UPLOAD_ERRORS, uploadFile } from "@/lib/upload-client";
 import { blobs, kv, queue, type QueueRow } from "./idb";
 
 export type SyncIssue = { id: string; woId: string; kind: string; error: string; at: string };
@@ -81,7 +81,7 @@ export async function syncNow(userId: string): Promise<SyncOutcome> {
     } catch (e) {
       const code = e instanceof Error ? e.message : "";
       // The record is gone or not ours: drop it. Anything else (network) is retried later.
-      if (["notFound", "forbidden", "badTarget", "badType", "tooLarge"].includes(code)) {
+      if (UPLOAD_ERRORS.includes(code)) {
         await addIssue(userId, op, `files.${code}`);
         await queue.del(row.id);
         await blobs.del(op.blobKey);

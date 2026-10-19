@@ -15,6 +15,7 @@ import { WorkOrderView } from "./work-order-view";
 import { SearchView } from "./search-view";
 import { ThemeToggle } from "@/components/theme-toggle";
 import type { Theme } from "@/lib/theme";
+import { preloadVideoConverter } from "@/lib/video-client";
 
 /** The device timer; `mode` is missing on timers saved before on-site / remote existed (= on site). */
 export type Timer = { woId: string; startedAt: string; mode?: "ONSITE" | "REMOTE" } | null;
@@ -71,6 +72,9 @@ export function FieldApp({ user, org, logo, theme }: { user: { id: string; name:
       await reload();
     }
   }, [user.id, reload]);
+
+  // Load the video converter now, so the service worker has it cached when there is no signal.
+  useEffect(() => void preloadVideoConverter(), []);
 
   // Open from the device first, then refresh from the server.
   useEffect(() => {

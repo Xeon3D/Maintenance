@@ -47,7 +47,7 @@ When the villa has a [knowledge base](/help/villas), tap **Knowledge base** unde
 1. Tap **Start work**. The job becomes **In progress**.
 2. Choose **On site** or **Remote**, then tap **Start timer** to time your work. The button turns into **Stop** with a running clock. Only one timer runs at a time: starting one on another job stops the first. Anything under a minute isn't recorded.
 3. Work through the **Checklist**: tick steps, choose pass/fail or an option, type text or numbers, take photos and collect signatures where a step asks for them.
-4. Under **Photos**, tap **Take photo** to add pictures of the job.
+4. Under **Photos & videos**, tap **Take photo** to add pictures of the job, or **Record video** for a clip of up to 1 minute. The video is reduced to 720p on the phone (this takes a moment; the button shows the progress) and kept there until it is uploaded.
 5. Under **Activity**, write a note and tap the send button. Type @ to mention a colleague; they'll be notified once the comment syncs.
 6. Under **Client sign-off**, ask the client or house manager to sign, type their name and tap **Confirm sign-off**. If nobody is there, tick **Client absent** instead.
 7. Tap **Mark done**.
@@ -66,7 +66,7 @@ Tap the magnifying glass at the top to search every work order in the company, n
 
 ## Syncing and what the banners mean
 
-The app syncs on its own: when it opens, when the connection comes back, when you return to it, every minute while it's open, and a moment after each change. Changes are sent in the order you made them; photos and signatures are uploaded first. A coloured banner under the header tells you where things stand:
+The app syncs on its own: when it opens, when the connection comes back, when you return to it, every minute while it's open, and a moment after each change. Changes are sent in the order you made them; photos, videos and signatures are uploaded first. A coloured banner under the header tells you where things stand:
 
 - **Offline.** You have no connection. Keep working: everything is saved on the device and the banner tells you how many changes are waiting.
 - **changes waiting to sync…**: you're online and the app is sending your changes.
@@ -131,7 +131,7 @@ Quando a moradia tem [base de conhecimento](/help/villas), toque em **Base de co
 1. Toque em **Iniciar trabalho**. O trabalho passa a **Em curso**.
 2. Escolha **No local** ou **Remoto** e toque em **Iniciar cronómetro** para medir o seu tempo. O botão passa a **Parar**, com um relógio a contar. Só pode haver um cronómetro de cada vez: iniciar outro noutro trabalho para o primeiro. Menos de um minuto não é registado.
 3. Percorra a **Checklist**: marque passos, escolha passa/falha ou uma opção, escreva texto ou números, tire fotografias e recolha assinaturas quando um passo o pedir.
-4. Em **Fotografias**, toque em **Tirar fotografia** para juntar imagens do trabalho.
+4. Em **Fotografias e vídeos**, toque em **Tirar fotografia** para juntar imagens do trabalho, ou em **Gravar vídeo** para um vídeo até 1 minuto. O vídeo é reduzido para 720p no telemóvel (demora um pouco; o botão mostra o progresso) e fica lá guardado até ser enviado.
 5. Em **Atividade**, escreva uma nota e toque no botão de enviar. Escreva @ para mencionar um colega; essa pessoa é notificada quando o comentário for sincronizado.
 6. Em **Aprovação do cliente**, peça ao cliente ou ao governante para assinar, escreva o nome dele e toque em **Confirmar aprovação**. Se não estiver ninguém, marque **Cliente ausente**.
 7. Toque em **Marcar como concluída**.
@@ -150,7 +150,7 @@ Toque na lupa no topo para pesquisar todas as ordens de trabalho da empresa, nã
 
 ## A sincronização e o que significam os avisos
 
-A aplicação sincroniza sozinha: quando abre, quando a ligação volta, quando regressa a ela, a cada minuto enquanto está aberta e pouco depois de cada alteração. As alterações são enviadas pela ordem em que as fez; as fotografias e assinaturas são enviadas primeiro. Uma faixa colorida por baixo do cabeçalho mostra o ponto da situação:
+A aplicação sincroniza sozinha: quando abre, quando a ligação volta, quando regressa a ela, a cada minuto enquanto está aberta e pouco depois de cada alteração. As alterações são enviadas pela ordem em que as fez; as fotografias, os vídeos e as assinaturas são enviados primeiro. Uma faixa colorida por baixo do cabeçalho mostra o ponto da situação:
 
 - **Sem ligação.** Não tem rede. Continue a trabalhar: está tudo guardado no dispositivo e a faixa diz quantas alterações estão à espera.
 - **alterações a aguardar sincronização…**: tem rede e a aplicação está a enviar as suas alterações.

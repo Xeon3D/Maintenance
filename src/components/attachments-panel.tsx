@@ -3,7 +3,8 @@
 import { useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { ImagePlus, Paperclip, Trash2 } from "lucide-react";
+import { ImagePlus, Trash2 } from "lucide-react";
+import { AttachmentThumb } from "@/components/attachment-thumb";
 import { Button } from "@/components/ui";
 import { uploadFile, type UploadTarget } from "@/lib/upload-client";
 
@@ -37,15 +38,7 @@ export function AttachmentsPanel({
           {files.map((f) => (
             <div key={f.id} className="group relative">
               <a href={f.url} target="_blank" rel="noreferrer" title={f.filename}>
-                {f.mimeType.startsWith("image/") ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img src={f.url} alt={f.filename} className="aspect-square w-full rounded-md border border-border object-cover" />
-                ) : (
-                  <div className="flex aspect-square flex-col items-center justify-center gap-1 rounded-md border border-border bg-gray-50 p-1 text-center text-[10px] text-muted">
-                    <Paperclip className="size-4" />
-                    <span className="line-clamp-2 break-all">{f.filename}</span>
-                  </div>
-                )}
+                <AttachmentThumb url={f.url} filename={f.filename} mimeType={f.mimeType} />
               </a>
               {canEdit && (
                 <button

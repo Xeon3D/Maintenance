@@ -1,6 +1,8 @@
 import "server-only";
-import { mkdir, readdir, readFile, rm, writeFile } from "node:fs/promises";
+import { createReadStream } from "node:fs";
+import { copyFile, mkdir, readdir, readFile, rm, stat, writeFile } from "node:fs/promises";
 import path from "node:path";
+import { Readable } from "node:stream";
 
 // Object storage. Local disk for now (UPLOAD_DIR); swap these three functions for S3/R2 in production.
 // Keys look like "<orgId>/<yyyy-mm>/<random>.<ext>" and are stored in Attachment.url as "local:<key>".
@@ -26,9 +28,37 @@ export async function getObject(ref: string): Promise<Buffer> {
   return readFile(resolveKey(ref.slice("local:".length)));
 }
 
+/** Stores a file that is already on disk (large uploads are streamed to a temp file first). */
+export async function putObjectFile(key: string, source: string): Promise<string> {
+  const full = resolveKey(key);
+  await mkdir(path.dirname(full), { recursive: true });
+  await copyFile(source, full);
+  return `local:${key}`;
+}
+
+function localPath(ref: string) {
+  if (!ref.startsWith("local:")) throw new Error("Unsupported storage ref");
+  return resolveKey(ref.slice("local:".length));
+}
+
+export async function objectSize(ref: string): Promise<number> {
+  return (await stat(localPath(ref))).size;
+}
+
+/** Streams an object, or the inclusive byte range [start, end] of it (video players ask for ranges). */
+export function objectStream(ref: string, range?: { start: number; end: number }): ReadableStream<Uint8Array> {
+  return Readable.toWeb(createReadStream(localPath(ref), range)) as ReadableStream<Uint8Array>;
+}
+
+/** A video's thumbnail is stored next to it: "<key>.mp4" → "<key>.poster.jpg". */
+export function posterRef(ref: string) {
+  return ref.replace(/\.mp4$/, ".poster.jpg");
+}
+
 export async function deleteObject(ref: string) {
   if (!ref.startsWith("local:")) return;
   await rm(resolveKey(ref.slice("local:".length)), { force: true });
+  if (ref.endsWith(".mp4")) await rm(resolveKey(posterRef(ref).slice("local:".length)), { force: true });
 }
 
 /** Public-facing URL (auth-checked route) for an attachment. */

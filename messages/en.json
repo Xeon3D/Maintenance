@@ -573,17 +573,22 @@
   "files": {
     "title": "Photos & files",
     "add": "Add photos or files",
-    "failed": "Some files couldn't be uploaded (JPEG, PNG, WebP or PDF up to 15 MB).",
+    "failed": "Couldn't upload (photos and PDFs up to 15 MB, videos up to 1 minute).",
     "notFound": "The work order or step no longer exists.",
     "forbidden": "You're not allowed to add files here.",
     "badTarget": "The work order or step no longer exists.",
     "badType": "Unsupported file type.",
-    "tooLarge": "File too large."
+    "tooLarge": "File too large.",
+    "addMedia": "Add photos, videos or files",
+    "converting": "Preparing video {progress}%",
+    "videoTooLong": "Videos can be up to 1 minute long.",
+    "badVideo": "This video couldn't be read.",
+    "videoUnavailable": "The server can't process videos right now."
   },
   "activity": {
     "title": "Activity",
     "placeholder": "Add an update or note…",
-    "attach": "Photo",
+    "attach": "Photo or video",
     "send": "Post",
     "changedStatus": "changed status to",
     "created": "created this work order"
@@ -1379,8 +1384,8 @@
     "hold": "On hold",
     "done": "Mark done",
     "logged": "{minutes, plural, =0 {No time logged} other {# min logged}}",
-    "photos": "Photos",
-    "photosHint": "Photos are kept on this device and uploaded when there's a connection.",
+    "photos": "Photos & videos",
+    "photosHint": "Photos and videos (up to 1 minute) are kept on this device and uploaded when there's a connection.",
     "takePhoto": "Take photo",
     "retake": "Retake",
     "savedOnDevice": "Saved on this device — uploads when online.",
@@ -1390,7 +1395,8 @@
       "now": "To do",
       "next30": "Next 30 days",
       "later": "Later"
-    }
+    },
+    "takeVideo": "Record video"
   },
   "company": {
     "details": "Company details",

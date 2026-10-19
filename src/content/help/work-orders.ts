@@ -122,7 +122,7 @@ Click **Edit** in the checklist header to add, move (arrows) or delete steps. At
 
 ## Activity and comments
 
-The **Activity** card lists comments and status changes, oldest first. To add an update, type in the box and click **Post**; **Photo** attaches pictures to the comment.
+The **Activity** card lists comments and status changes, oldest first. To add an update, type in the box and click **Post**; **Photo or video** attaches pictures or short videos to the comment.
 
 Type **@** followed by a name to mention a colleague: they get a notification. The creator and the people assigned are notified of every comment. See [Notifications](/help/notifications).
 
@@ -140,7 +140,7 @@ Below the total, **Billed** shows the time that is charged: each technician's ti
 
 ## Photos and files
 
-**Add photos or files** uploads pictures (JPEG, PNG, WebP) or PDFs of up to 15 MB, for example before-and-after photos or a commissioning sheet. Click a thumbnail to open it. You can delete your own files; managers can delete any.
+**Add photos, videos or files** uploads pictures (JPEG, PNG, WebP) or PDFs of up to 15 MB, for example before-and-after photos or a commissioning sheet, and videos of up to 1 minute, for example a fault that only shows when something moves or makes a noise. Videos are reduced to 720p on your device before they are sent, so a minute takes about 15 MB; on older browsers the original is sent and the server reduces it. Location data is removed. Click a thumbnail to open it; videos show a play mark. The service report only includes photos. You can delete your own files; managers can delete any.
 
 ## Parts used
 
@@ -330,7 +330,7 @@ Clique em **Editar** no cabeçalho da checklist para acrescentar, mover (setas) 
 
 ## Atividade e comentários
 
-O cartão **Atividade** lista os comentários e as mudanças de estado, do mais antigo para o mais recente. Para acrescentar uma atualização, escreva na caixa e clique em **Publicar**; **Fotografia** junta imagens ao comentário.
+O cartão **Atividade** lista os comentários e as mudanças de estado, do mais antigo para o mais recente. Para acrescentar uma atualização, escreva na caixa e clique em **Publicar**; **Fotografia ou vídeo** junta imagens ou vídeos curtos ao comentário.
 
 Escreva **@** seguido de um nome para mencionar um colega: ele recebe uma notificação. Quem criou a ordem e as pessoas atribuídas são notificados de cada comentário. Veja [Notificações](/help/notifications).
 
@@ -348,7 +348,7 @@ Por baixo do total, **Faturado** mostra o tempo que é cobrado: o tempo de cada 
 
 ## Fotografias e ficheiros
 
-**Adicionar fotografias ou ficheiros** carrega imagens (JPEG, PNG, WebP) ou PDF até 15 MB, por exemplo fotografias do antes e depois ou uma folha de comissionamento. Clique numa miniatura para a abrir. Pode eliminar os seus próprios ficheiros; os gestores podem eliminar qualquer um.
+**Adicionar fotografias, vídeos ou ficheiros** carrega imagens (JPEG, PNG, WebP) ou PDF até 15 MB, por exemplo fotografias do antes e depois ou uma folha de comissionamento, e vídeos até 1 minuto, por exemplo uma avaria que só se nota quando algo se mexe ou faz ruído. Os vídeos são reduzidos para 720p no seu dispositivo antes de serem enviados, por isso um minuto ocupa cerca de 15 MB; em browsers mais antigos é enviado o original e o servidor reduz o vídeo. Os dados de localização são removidos. Clique numa miniatura para a abrir; os vídeos têm um símbolo de reprodução. O relatório de serviço só inclui fotografias. Pode eliminar os seus próprios ficheiros; os gestores podem eliminar qualquer um.
 
 ## Peças usadas
 

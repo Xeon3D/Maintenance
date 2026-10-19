@@ -2,11 +2,12 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useFormatter, useTranslations } from "next-intl";
-import { Camera, ChevronLeft, CirclePause, CirclePlay, MapPin, Monitor, Send, Square } from "lucide-react";
+import { Camera, ChevronLeft, Video, CirclePause, CirclePlay, MapPin, Monitor, Send, Square } from "lucide-react";
 import { Button } from "@/components/ui";
 import { PriorityText, WorkOrderStatusBadge } from "@/components/badges";
 import { MentionTextarea, type MentionMember } from "@/components/mention-textarea";
-import { shrinkImage } from "@/lib/upload-client";
+import { shrinkImage, UPLOAD_ERRORS } from "@/lib/upload-client";
+import { prepareVideo } from "@/lib/video-client";
 import { missingRequired } from "@/lib/offline/apply";
 import { newId } from "@/lib/offline/idb";
 import type { NewOp, OfflineArticle, OfflineWorkOrder } from "@/lib/offline-types";
@@ -48,6 +49,9 @@ export function WorkOrderView({
   const [holdNote, setHoldNote] = useState<string | null>(null);
   const [mode, setMode] = useState<"ONSITE" | "REMOTE">("ONSITE");
   const photoInput = useRef<HTMLInputElement>(null);
+  const videoInput = useRef<HTMLInputElement>(null);
+  const [converting, setConverting] = useState<number | null>(null);
+  const [videoError, setVideoError] = useState<string | null>(null);
   const runningHere = timer?.woId === wo.id;
   const closed = wo.status === "DONE" || wo.status === "CANCELLED";
 
@@ -86,6 +90,23 @@ export function WorkOrderView({
     for (const f of [...(files ?? [])]) {
       const small = await shrinkImage(f);
       await enqueue({ kind: "photo", woId: wo.id, itemId: null, blobKey: newId(), filename: small.name }, small);
+    }
+  };
+
+  /** Videos are converted on the device (small 720p MP4), then queued like photos. */
+  const addVideos = async (files: FileList | null) => {
+    setVideoError(null);
+    for (const f of [...(files ?? [])]) {
+      try {
+        setConverting(0);
+        const video = await prepareVideo(f, (p) => setConverting(Math.round(p * 100)));
+        await enqueue({ kind: "photo", woId: wo.id, itemId: null, blobKey: newId(), filename: video.name }, video);
+      } catch (e) {
+        const code = e instanceof Error ? e.message : "";
+        setVideoError(UPLOAD_ERRORS.includes(code) ? code : "failed");
+      } finally {
+        setConverting(null);
+      }
     }
   };
 
@@ -273,12 +294,20 @@ export function WorkOrderView({
         <div className="mb-2 flex items-center justify-between">
           <h2 className="text-sm font-medium">{t("field.photos")}</h2>
           <input ref={photoInput} type="file" accept="image/*" capture="environment" multiple className="sr-only" onChange={(e) => void addPhotos(e.target.files).then(() => (e.target.value = ""))} />
-          <Button size="sm" variant="secondary" onClick={() => photoInput.current?.click()}>
-            <Camera className="size-4" />
-            {t("field.takePhoto")}
-          </Button>
+          <input ref={videoInput} type="file" accept="video/*" capture="environment" className="sr-only" onChange={(e) => void addVideos(e.target.files).then(() => (e.target.value = ""))} />
+          <div className="flex gap-2">
+            <Button size="sm" variant="secondary" onClick={() => photoInput.current?.click()}>
+              <Camera className="size-4" />
+              {t("field.takePhoto")}
+            </Button>
+            <Button size="sm" variant="secondary" disabled={converting !== null} onClick={() => videoInput.current?.click()}>
+              <Video className="size-4" />
+              {converting !== null ? t("files.converting", { progress: converting }) : t("field.takeVideo")}
+            </Button>
+          </div>
         </div>
         <p className="text-xs text-muted">{t("field.photosHint")}</p>
+        {videoError && <p className="mt-1 text-xs text-danger">{t(`files.${videoError}`)}</p>}
       </section>
 
       <section className="mt-3 border-y border-border bg-surface px-4 py-3">
