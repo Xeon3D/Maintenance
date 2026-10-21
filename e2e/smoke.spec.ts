@@ -5,7 +5,7 @@ test.describe("signed out", () => {
   test("sign-in rejects a wrong password", async ({ page }) => {
     await page.goto("/login");
     await page.getByLabel("Email").fill("viewer@demo.test");
-    await page.getByLabel("Password").fill("not-the-password");
+    await page.getByLabel("Password", { exact: true }).fill("not-the-password");
     await page.getByRole("button", { name: "Sign in" }).click();
     await expect(page.getByText("Invalid email or password.")).toBeVisible();
     await expect(page).toHaveURL(/\/login/); // the password never ends up in the URL
