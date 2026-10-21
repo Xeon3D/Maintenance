@@ -8,6 +8,7 @@ import { requirePermission } from "@/lib/context";
 import { optStr, parseForm, type FormResult } from "@/lib/forms";
 import { lockServerAdmin, requireServerAdmin, unlockServerAdmin } from "@/lib/server-admin";
 import { getAppName, getServerSettings, updateServerSettings } from "@/lib/server-settings";
+import { signupLockedByEnv } from "@/lib/signup";
 import { normalizeSchedule, validTimezone } from "@/lib/backup-schedule";
 import { BackupError, createBackup, deleteBackup, restartSoon, restoreBackup, updateNow } from "@/lib/backups";
 import { checkForUpdate, updaterConfigured } from "@/lib/updates";
@@ -58,9 +59,14 @@ export async function saveGeneralAction(_: FormResult, form: FormData): Promise<
   const parsed = parseForm(z.object({ appName: optStr(40) }), form);
   if (parsed.error) return parsed.error;
   const before = await getServerSettings();
-  const next = { appName: parsed.data.appName, showVersion: form.get("showVersion") === "on" };
+  const next = {
+    appName: parsed.data.appName,
+    showVersion: form.get("showVersion") === "on",
+    // ALLOW_SIGNUP=false disables the checkbox (so it isn't sent): keep the stored choice.
+    allowSignup: signupLockedByEnv() ? before.allowSignup : form.get("allowSignup") === "on",
+  };
   await updateServerSettings(next);
-  const { changes } = changesOf({ appName: before.appName, showVersion: before.showVersion }, next);
+  const { changes } = changesOf({ appName: before.appName, showVersion: before.showVersion, allowSignup: before.allowSignup }, next);
   if (Object.keys(changes).length) await serverAudit(ctx, "settings", { changes });
   revalidatePath("/", "layout");
   return { ok: true };

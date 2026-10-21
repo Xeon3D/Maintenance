@@ -13,7 +13,7 @@ export function OnboardingForm() {
       <Field label={t("auth.companyName")}>
         <Input name="company" required autoFocus />
       </Field>
-      <FormError message={state?.error ? t("common.somethingWrong") : null} />
+      <FormError message={state?.error ? t(state.error === "signupClosed" ? "auth.signupClosed" : "common.somethingWrong") : null} />
       <Button className="w-full" disabled={pending}>
         {t("common.create")}
       </Button>

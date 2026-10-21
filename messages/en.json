@@ -46,6 +46,8 @@
     "signIn": "Sign in",
     "signUp": "Create account",
     "noAccount": "No account yet?",
+    "signupClosedTitle": "Sign-up is closed",
+    "signupClosed": "This server doesn't accept new accounts. Ask your company's administrator for an invitation.",
     "haveAccount": "Already have an account?",
     "invalidCredentials": "Invalid email or password.",
     "emailTaken": "An account with this email already exists.",
@@ -78,6 +80,8 @@
   },
   "onboarding": {
     "title": "Create your organization",
+    "closedTitle": "No organization yet",
+    "closed": "You're not part of any organization yet, and new ones can't be created on this server. Ask your administrator for an invitation link.",
     "description": "You're not part of any organization yet. Create one, or ask your administrator for an invitation link."
   },
   "invite": {
@@ -1446,6 +1450,9 @@
     "appNameHint": "Shown on the sign-in page, in the browser tab, in the installed app and in e-mails. Leave empty for \"{default}\".",
     "showVersion": "Show the version next to the name",
     "showVersionHint": "Adds the installed version (on a development server, the current commit) after the software name, top left.",
+    "allowSignup": "Anyone can create an account",
+    "allowSignupHint": "Shows \"Create account\" on the sign-in page, where anyone who reaches this server can create a new company. Turn it off once your company exists: invited people can still create their accounts.",
+    "allowSignupLocked": "Turned off by ALLOW_SIGNUP=false in the server's environment.",
     "updates": "Updates",
     "currentVersion": "Installed version",
     "latestVersion": "Latest release",
@@ -2181,6 +2188,7 @@
       "cleared": "Cleared",
       "appName": "Software name",
       "showVersion": "Show version",
+      "allowSignup": "Public sign-up",
       "backups": "Backup schedule",
       "autoUpdate": "Automatic updates",
       "roleRates": "Role prices",

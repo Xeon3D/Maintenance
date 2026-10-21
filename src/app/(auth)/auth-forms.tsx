@@ -12,7 +12,7 @@ function useErrorText(state: FormState) {
   return t.has(`auth.${state.error}`) ? t(`auth.${state.error}`) : t("common.somethingWrong");
 }
 
-export function LoginForm({ next, reset, factory, canFactoryReset }: { next?: string; reset?: boolean; factory?: boolean; canFactoryReset?: boolean }) {
+export function LoginForm({ next, reset, factory, canFactoryReset, canSignUp }: { next?: string; reset?: boolean; factory?: boolean; canFactoryReset?: boolean; canSignUp?: boolean }) {
   const t = useTranslations("auth");
   const [state, action, pending] = useActionForm(loginAction);
   const error = useErrorText(state);
@@ -39,12 +39,14 @@ export function LoginForm({ next, reset, factory, canFactoryReset }: { next?: st
           {t("signIn")}
         </Button>
       </form>
-      <p className="mt-5 text-center text-sm text-muted">
-        {t("noAccount")}{" "}
-        <Link href={next ? `/signup?next=${encodeURIComponent(next)}` : "/signup"} className="font-medium text-brand">
-          {t("signUp")}
-        </Link>
-      </p>
+      {canSignUp && (
+        <p className="mt-5 text-center text-sm text-muted">
+          {t("noAccount")}{" "}
+          <Link href={next ? `/signup?next=${encodeURIComponent(next)}` : "/signup"} className="font-medium text-brand">
+            {t("signUp")}
+          </Link>
+        </p>
+      )}
       {canFactoryReset && (
         <p className="mt-3 text-center text-xs">
           <Link href="/factory-reset" className="text-muted hover:text-danger">

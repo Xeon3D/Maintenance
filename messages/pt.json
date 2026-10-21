@@ -46,6 +46,8 @@
     "signIn": "Iniciar sessão",
     "signUp": "Criar conta",
     "noAccount": "Ainda não tem conta?",
+    "signupClosedTitle": "Registo fechado",
+    "signupClosed": "Este servidor não aceita novas contas. Peça um convite ao administrador da sua empresa.",
     "haveAccount": "Já tem conta?",
     "invalidCredentials": "Email ou palavra-passe inválidos.",
     "emailTaken": "Já existe uma conta com este email.",
@@ -78,6 +80,8 @@
   },
   "onboarding": {
     "title": "Crie a sua organização",
+    "closedTitle": "Ainda sem organização",
+    "closed": "Ainda não pertence a nenhuma organização e este servidor não permite criar novas. Peça ao seu administrador um link de convite.",
     "description": "Ainda não pertence a nenhuma organização. Crie uma ou peça ao seu administrador um link de convite."
   },
   "invite": {
@@ -1446,6 +1450,9 @@
     "appNameHint": "Aparece na página de início de sessão, no separador do navegador, na aplicação instalada e nos e-mails. Deixe vazio para \"{default}\".",
     "showVersion": "Mostrar a versão a seguir ao nome",
     "showVersionHint": "Acrescenta a versão instalada (num servidor de desenvolvimento, o commit atual) a seguir ao nome do software, no canto superior esquerdo.",
+    "allowSignup": "Qualquer pessoa pode criar uma conta",
+    "allowSignupHint": "Mostra \"Criar conta\" na página de início de sessão, onde qualquer pessoa que chegue a este servidor pode criar uma nova empresa. Desative depois de criar a sua empresa: as pessoas convidadas continuam a poder criar a sua conta.",
+    "allowSignupLocked": "Desativado por ALLOW_SIGNUP=false no ambiente do servidor.",
     "updates": "Atualizações",
     "currentVersion": "Versão instalada",
     "latestVersion": "Última versão",
@@ -2181,6 +2188,7 @@
       "cleared": "Apagado",
       "appName": "Nome do software",
       "showVersion": "Mostrar versão",
+      "allowSignup": "Registo público",
       "backups": "Agendamento dos backups",
       "autoUpdate": "Atualizações automáticas",
       "roleRates": "Preços das funções",
