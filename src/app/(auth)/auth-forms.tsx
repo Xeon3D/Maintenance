@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useActionForm } from "@/lib/use-action-form";
 import { useTranslations } from "next-intl";
 import { Button, Card, Field, FormError, Input } from "@/components/ui";
+import { PasswordInput } from "@/components/password-input";
 import { factoryResetAction, loginAction, requestResetAction, resetPasswordAction, signupAction, type FormState } from "./actions";
 
 function useErrorText(state: FormState) {
@@ -27,7 +28,7 @@ export function LoginForm({ next, reset, factory, canFactoryReset, canSignUp }: 
           <Input name="email" type="email" autoComplete="email" required autoFocus />
         </Field>
         <Field label={t("password")}>
-          <Input name="password" type="password" autoComplete="current-password" required />
+          <PasswordInput name="password" autoComplete="current-password" required />
         </Field>
         <p className="-mt-2 text-right text-xs">
           <Link href="/forgot-password" className="text-muted hover:text-brand">
@@ -76,7 +77,7 @@ export function FactoryResetForm() {
         className="space-y-4"
       >
         <Field label={t("factoryResetPassword")}>
-          <Input name="password" type="password" autoComplete="off" required autoFocus />
+          <PasswordInput name="password" autoComplete="off" required autoFocus />
         </Field>
         <FormError message={error} />
         <Button variant="danger" className="w-full" disabled={pending}>
@@ -114,7 +115,7 @@ export function SignupForm({ next, withCompany, email }: { next?: string; withCo
           <Input name="email" type="email" autoComplete="email" required defaultValue={email} readOnly={!!email} />
         </Field>
         <Field label={t("password")} hint={t("passwordRule")}>
-          <Input name="password" type="password" autoComplete="new-password" minLength={8} required />
+          <PasswordInput name="password" autoComplete="new-password" minLength={8} required />
         </Field>
         <FormError message={error} />
         <Button className="w-full" disabled={pending}>
@@ -174,10 +175,10 @@ export function ResetPasswordForm({ token, email }: { token: string; email: stri
       <form method="post" onSubmit={action} className="space-y-4">
         <input type="hidden" name="token" value={token} />
         <Field label={t("newPassword")} hint={t("passwordRule")}>
-          <Input name="password" type="password" autoComplete="new-password" minLength={8} required autoFocus />
+          <PasswordInput name="password" autoComplete="new-password" minLength={8} required autoFocus />
         </Field>
         <Field label={t("confirmPassword")}>
-          <Input name="confirm" type="password" autoComplete="new-password" minLength={8} required />
+          <PasswordInput name="confirm" autoComplete="new-password" minLength={8} required />
         </Field>
         <FormError message={error} />
         <Button className="w-full" disabled={pending}>
