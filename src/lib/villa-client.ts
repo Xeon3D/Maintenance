@@ -21,3 +21,12 @@ export function normalizeBillTo(v: { clientId: string | null; managerId: string 
 export function villaClientIds(v: { clientId: string | null; managerId: string | null }): string[] {
   return [v.clientId, v.managerId].filter((id): id is string => !!id);
 }
+
+/** How many villas each client has as owner or manager; a villa counts once even when it is both. */
+export function villaCountByClient(villas: { clientId: string | null; managerId: string | null }[]): Map<string, number> {
+  const counts = new Map<string, number>();
+  for (const v of villas) {
+    for (const id of new Set(villaClientIds(v))) counts.set(id, (counts.get(id) ?? 0) + 1);
+  }
+  return counts;
+}

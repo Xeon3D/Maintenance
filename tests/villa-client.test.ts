@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { normalizeBillTo, villaClient, villaClientIds } from "@/lib/villa-client";
+import { normalizeBillTo, villaClient, villaClientIds, villaCountByClient } from "@/lib/villa-client";
 
 const owner = { id: "o", name: "Owner" };
 const manager = { id: "m", name: "Manager" };
@@ -30,5 +30,20 @@ describe("villaClientIds", () => {
     expect(villaClientIds({ clientId: "o", managerId: "m" })).toEqual(["o", "m"]);
     expect(villaClientIds({ clientId: null, managerId: "m" })).toEqual(["m"]);
     expect(villaClientIds({ clientId: "o", managerId: null })).toEqual(["o"]);
+  });
+});
+
+describe("villaCountByClient", () => {
+  it("counts villas a client owns or manages, once each", () => {
+    const counts = villaCountByClient([
+      { clientId: "o", managerId: "m" },
+      { clientId: null, managerId: "m" },
+      { clientId: "o", managerId: null },
+      { clientId: "x", managerId: "x" },
+    ]);
+    expect(counts.get("o")).toBe(2);
+    expect(counts.get("m")).toBe(2);
+    expect(counts.get("x")).toBe(1);
+    expect(counts.get("none")).toBeUndefined();
   });
 });
