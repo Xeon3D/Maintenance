@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import { Send } from "lucide-react";
 import { FieldError, FieldErrorsProvider } from "@/components/action-form";
 import { Button, Field, FormError, Input, Select } from "@/components/ui";
+import { PasswordInput } from "@/components/password-input";
 import { useActionForm } from "@/lib/use-action-form";
 import type { EmailProvider, SmtpSecurity } from "@/lib/email-settings";
 import { saveEmailAction } from "./actions";
@@ -74,7 +75,7 @@ export function EmailForm({ values, userEmail }: { values: EmailFormValues; user
                 <Input name="smtpUser" defaultValue={values.smtp.user} autoComplete="off" maxLength={300} />
               </Field>
               <Field label={t("smtpPassword")} hint={values.smtp.hasPassword ? t("secretSaved") : t("secretHint")}>
-                <Input name="smtpPassword" type="password" autoComplete="new-password" placeholder={values.smtp.hasPassword ? "••••••••" : ""} />
+                <PasswordInput name="smtpPassword" autoComplete="new-password" placeholder={values.smtp.hasPassword ? "••••••••" : ""} />
                 {values.smtp.hasPassword && (
                   <label className="mt-1 flex items-center gap-2 text-xs text-muted">
                     <input type="checkbox" name="smtpPasswordClear" className="size-3.5" />
@@ -90,7 +91,7 @@ export function EmailForm({ values, userEmail }: { values: EmailFormValues; user
         {provider === "resend" && (
           <div className="rounded-md bg-gray-50 p-4">
             <Field label={t("resendKey")} hint={values.hasResendKey ? t("secretSaved") : t("resendHint")}>
-              <Input name="resendKey" type="password" autoComplete="off" placeholder={values.hasResendKey ? "••••••••" : "re_…"} />
+              <PasswordInput name="resendKey" autoComplete="off" placeholder={values.hasResendKey ? "••••••••" : "re_…"} />
               <FieldError name="resendKey" />
             </Field>
           </div>

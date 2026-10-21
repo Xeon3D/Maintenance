@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { ActionForm, FieldError } from "@/components/action-form";
 import { Badge, Button, Card, Field, Input, PageHeader, Select } from "@/components/ui";
+import { PasswordInput } from "@/components/password-input";
 import { getContext } from "@/lib/context";
 import { isServerAdmin, serverAdminEnabled } from "@/lib/server-admin";
 import { DEFAULT_APP_NAME, getServerSettings } from "@/lib/server-settings";
@@ -54,7 +55,7 @@ export default async function ServerSettingsPage({ searchParams }: PageProps<"/s
           <p className="mb-4 text-sm text-muted">{t("server.lockedHint")}</p>
           <ActionForm action={unlockAction} submitLabel={t("server.unlock")}>
             <Field label={t("server.password")}>
-              <Input name="password" type="password" autoComplete="off" required autoFocus />
+              <PasswordInput name="password" autoComplete="off" required autoFocus />
             </Field>
           </ActionForm>
         </Card>
