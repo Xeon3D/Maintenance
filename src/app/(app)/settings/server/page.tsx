@@ -6,6 +6,7 @@ import { Badge, Button, Card, Field, Input, PageHeader, Select } from "@/compone
 import { getContext } from "@/lib/context";
 import { isServerAdmin, serverAdminEnabled } from "@/lib/server-admin";
 import { DEFAULT_APP_NAME, getServerSettings } from "@/lib/server-settings";
+import { signupLockedByEnv } from "@/lib/signup";
 import { backupsAvailable, busyState, listBackups } from "@/lib/backups";
 import { backupPassword } from "@/lib/backup-crypto";
 import { checkForUpdate, updaterConfigured } from "@/lib/updates";
@@ -98,6 +99,19 @@ export default async function ServerSettingsPage({ searchParams }: PageProps<"/s
               <span>
                 <span className="font-medium">{t("server.showVersion")}</span>
                 <span className="block text-xs text-muted">{t("server.showVersionHint")}</span>
+              </span>
+            </label>
+            <label className="flex items-start gap-2 text-sm">
+              <input
+                type="checkbox"
+                name="allowSignup"
+                defaultChecked={settings.allowSignup && !signupLockedByEnv()}
+                disabled={signupLockedByEnv()}
+                className="mt-0.5 size-4 accent-[var(--brand)]"
+              />
+              <span>
+                <span className="font-medium">{t("server.allowSignup")}</span>
+                <span className="block text-xs text-muted">{t(signupLockedByEnv() ? "server.allowSignupLocked" : "server.allowSignupHint")}</span>
               </span>
             </label>
           </ActionForm>

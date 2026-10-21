@@ -18,6 +18,8 @@ Up to 0.3.0 it was `xeon3d/maintenance`: on those servers change the compose `im
    - `FACTORY_RESET_PASSWORD`: set it to enable the **Factory reset** page; leave empty to disable.
      If `SERVER_ADMIN_PASSWORD` is empty, this one also unlocks Settings → Server.
    - `SEED_DEMO`: `"true"` creates the demo company on an empty database; set `"false"` for real use.
+   - `ALLOW_SIGNUP`: `"false"` closes public sign-up (*Create account* on the sign-in page), so strangers can't create
+     companies on the server; invitations still work. Empty leaves it to **Settings → Server → General** (open by default).
    - `DEMO_MODE`: `"true"` on a public demo shows a banner asking people not to enter real personal data.
    - `BACKUP_PASSWORD`: encrypts new backups (AES-256-GCM). Store it somewhere safe: an encrypted backup can only be
      restored on a server with the same password.
@@ -92,7 +94,7 @@ npm run db:seed        # demo org — sign in as owner@demo.test / demo1234
 npm run dev            # http://localhost:3000
 ```
 
-`.env` needs `DATABASE_URL`, `AUTH_SECRET`, `AUTH_TRUST_HOST`, `FIELD_ENCRYPTION_KEY` (32 random bytes, base64), `UPLOAD_DIR` and `CRON_SECRET`. Optional: `APP_URL`, `VAPID_PUBLIC_KEY`/`VAPID_PRIVATE_KEY`, `RESEND_API_KEY`/`EMAIL_FROM`, `SERVER_ADMIN_PASSWORD`, `FACTORY_RESET_PASSWORD`, `SEED_DEMO`, `DEMO_MODE` (public demo banner), `BACKUP_PASSWORD` (encrypts backups), `APP_NAME` (default software name). Dev keeps server settings in `./.data` and backups in `./backups` (backups need `pg_dump`/`pg_restore`/`psql`/`tar` on PATH, so in practice only in Docker).
+`.env` needs `DATABASE_URL`, `AUTH_SECRET`, `AUTH_TRUST_HOST`, `FIELD_ENCRYPTION_KEY` (32 random bytes, base64), `UPLOAD_DIR` and `CRON_SECRET`. Optional: `APP_URL`, `VAPID_PUBLIC_KEY`/`VAPID_PRIVATE_KEY`, `RESEND_API_KEY`/`EMAIL_FROM`, `SERVER_ADMIN_PASSWORD`, `FACTORY_RESET_PASSWORD`, `SEED_DEMO`, `DEMO_MODE` (public demo banner), `ALLOW_SIGNUP` (`false` closes public sign-up), `BACKUP_PASSWORD` (encrypts backups), `APP_NAME` (default software name). Dev keeps server settings in `./.data` and backups in `./backups` (backups need `pg_dump`/`pg_restore`/`psql`/`tar` on PATH, so in practice only in Docker).
 
 ## Audit log
 

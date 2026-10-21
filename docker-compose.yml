@@ -29,6 +29,9 @@ services:
       # Enables the "Factory reset" page (erases everything, restores the demo). Leave empty to disable.
       # If SERVER_ADMIN_PASSWORD is empty, this password also unlocks Settings → Server.
       FACTORY_RESET_PASSWORD: ""
+      # "false" closes public sign-up ("Create account" on the sign-in page) whatever Settings → Server says.
+      # Invited people can still create their accounts. Empty: decided in Settings → Server (open by default).
+      ALLOW_SIGNUP: ""
       # Encrypts new backups (AES-256). Keep it safe: encrypted backups can't be restored without it.
       BACKUP_PASSWORD: ""
       # E-mail is set up in Settings → Server → E-mail (SMTP account or Resend). These two are only

@@ -17,6 +17,7 @@ import en from "../../../messages/en.json";
 import pt from "../../../messages/pt.json";
 import { appOrigin } from "@/lib/qr";
 import { getAppName } from "@/lib/server-settings";
+import { signupAllowed, signupOpen } from "@/lib/signup";
 import { emailLayout, sendEmail } from "@/lib/email";
 import { background } from "@/lib/notify";
 import { clearResetTokens, createResetToken, userForResetToken } from "@/lib/password-reset";
@@ -57,7 +58,8 @@ const signupSchema = z.object({
 export async function signupAction(_: FormState, form: FormData): Promise<FormState> {
   const parsed = signupSchema.safeParse(Object.fromEntries(form));
   if (!parsed.success) return { error: "passwordRule" };
-  const { name, company, email, password } = parsed.data;
+  const { name, company, email, password, next } = parsed.data;
+  if (!(await signupAllowed({ email, company, next }))) return { error: "signupClosed" };
 
   if (await prisma.user.findUnique({ where: { email } })) return { error: "emailTaken" };
 
@@ -75,6 +77,7 @@ export async function signupAction(_: FormState, form: FormData): Promise<FormSt
 
 export async function createOrgAction(_: FormState, form: FormData): Promise<FormState> {
   const user = await requireUser();
+  if (!(await signupOpen())) return { error: "signupClosed" };
   const name = z.string().trim().min(1).max(100).safeParse(form.get("company"));
   if (!name.success) return { error: "somethingWrong" };
   const org = await createOrganization(user.id, name.data, isLocale(user.locale) ? user.locale : "en");

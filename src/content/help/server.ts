@@ -11,7 +11,7 @@ Settings for the whole installation rather than one company: the software name, 
 
 One installation of the app can hold several companies. **Server** (under **Settings** in the menu) looks after the installation itself:
 
-- **General**: the name of the software.
+- **General**: the name of the software and whether anyone can create an account.
 - **E-mail**: how the app sends invitations, password resets, notifications and service reports.
 - **Updates**: the installed version and one-click updates.
 - **Backups**: the backup schedule, manual backups, downloads and restores.
@@ -33,6 +33,12 @@ If the page says that server administration is off, no server password has been 
 ## Software name
 
 Under **General**, the **Software name** is shown on the sign-in page, in the browser tab, in the installed app and in e-mails. Leave it empty to use the standard name. Click **Save**.
+
+## Closing sign-up
+
+While **Anyone can create an account** is ticked, the sign-in page offers **Create account**, and anyone who reaches the server can create a new company on it. Once your company exists, untick it and click **Save**: the link disappears and the sign-up page refuses new companies. People invited to a company can still create their accounts through the invitation link.
+
+If the box is greyed out, whoever runs the server has closed sign-up with the ALLOW_SIGNUP setting.
 
 ## E-mail delivery
 
@@ -121,7 +127,7 @@ Definições de toda a instalação e não de uma só empresa: o nome do softwar
 
 Uma instalação da aplicação pode ter várias empresas. **Servidor** (em **Definições** no menu) trata da instalação em si:
 
-- **Geral**: o nome do software.
+- **Geral**: o nome do software e se qualquer pessoa pode criar uma conta.
 - **E-mail**: como a aplicação envia convites, recuperação de palavra-passe, notificações e relatórios de serviço.
 - **Atualizações**: a versão instalada e as atualizações num clique.
 - **Cópias de segurança**: o agendamento, as cópias manuais, as transferências e as reposições.
@@ -143,6 +149,12 @@ Se a página disser que a administração do servidor está desligada, não foi 
 ## Nome do software
 
 Em **Geral**, o **Nome do software** aparece na página de início de sessão, no separador do navegador, na aplicação instalada e nos e-mails. Deixe-o vazio para usar o nome habitual. Clique em **Guardar**.
+
+## Fechar o registo
+
+Enquanto **Qualquer pessoa pode criar uma conta** estiver assinalado, a página de início de sessão mostra **Criar conta**, e qualquer pessoa que chegue ao servidor pode criar nele uma nova empresa. Depois de criar a sua empresa, desmarque-o e clique em **Guardar**: a ligação desaparece e a página de registo recusa novas empresas. As pessoas convidadas para uma empresa continuam a poder criar a sua conta através do link do convite.
+
+Se a caixa estiver a cinzento, quem gere o servidor fechou o registo com a definição ALLOW_SIGNUP.
 
 ## Envio de e-mail
 
