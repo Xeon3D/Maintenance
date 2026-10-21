@@ -100,7 +100,8 @@ restart `next dev` after adding a file. `npx playwright install --with-deps chro
   be committed or printed**: the repo is public. The ZimaOS server has its own copy in the compose env.
 
 ### Docker & releases
-- `next.config.ts` has `output: "standalone"`. `Dockerfile` (node:24-bookworm-slim, multi-stage):
+- `next.config.ts` has `output: "standalone"`. `Dockerfile` (node:24-trixie-slim, multi-stage; `apt-get upgrade` in the
+  base stage, which the release workflow rebuilds without cache; npm/npx/corepack removed from the runtime image):
   standalone server + a separate `/migrator` folder with the pinned Prisma CLI, `prisma/` and `prisma.config.ts`.
 - `docker/entrypoint.sh`: generates missing `AUTH_SECRET`, `FIELD_ENCRYPTION_KEY`, `CRON_SECRET` and VAPID
   keys (plain node crypto: `web-push` is bundled, not in `node_modules`) into `/data/secrets.env`, runs

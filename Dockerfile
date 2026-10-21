@@ -1,8 +1,9 @@
 # VillaOps CMMS — production image (Next.js standalone server + Prisma migrations).
 # Build: docker build -t maintenance .   Run: see docker-compose.yml
 
-FROM node:24-bookworm-slim AS base
-RUN apt-get update && apt-get install -y --no-install-recommends openssl ca-certificates && rm -rf /var/lib/apt/lists/*
+FROM node:24-trixie-slim AS base
+# Debian security updates (openssl, util-linux, perl…) on every build; the release workflow skips the cache here.
+RUN apt-get update && apt-get upgrade -y && apt-get install -y --no-install-recommends openssl ca-certificates && rm -rf /var/lib/apt/lists/*
 WORKDIR /app
 
 # ── Dependencies (postinstall runs `prisma generate`, which needs the schema)
@@ -20,7 +21,7 @@ RUN npx prisma generate && npm run build
 # ── Prisma CLI for `migrate deploy` at start-up (kept apart from the traced app bundle)
 FROM base AS migrator
 WORKDIR /migrator
-RUN npm init -y >/dev/null && npm install --omit=dev --no-audit --no-fund prisma@7.10.0 dotenv@18.0.4
+RUN npm init -y >/dev/null && npm install --omit=dev --no-audit --no-fund prisma@7.10.1 dotenv@18.0.4
 
 # ── Runtime
 FROM base AS runner
@@ -29,9 +30,13 @@ FROM base AS runner
 RUN apt-get update && apt-get install -y --no-install-recommends curl \
  && install -d /usr/share/postgresql-common/pgdg \
  && curl -fsSL -o /usr/share/postgresql-common/pgdg/apt.postgresql.org.asc https://www.postgresql.org/media/keys/ACCC4CF8.asc \
- && echo "deb [signed-by=/usr/share/postgresql-common/pgdg/apt.postgresql.org.asc] https://apt.postgresql.org/pub/repos/apt bookworm-pgdg main" > /etc/apt/sources.list.d/pgdg.list \
+ && echo "deb [signed-by=/usr/share/postgresql-common/pgdg/apt.postgresql.org.asc] https://apt.postgresql.org/pub/repos/apt trixie-pgdg main" > /etc/apt/sources.list.d/pgdg.list \
  && apt-get update && apt-get install -y --no-install-recommends postgresql-client-18 ffmpeg \
  && apt-get purge -y curl && apt-get autoremove -y && rm -rf /var/lib/apt/lists/*
+# The server runs with plain `node`; drop npm/npx/corepack so their bundled packages (undici,
+# brace-expansion…) aren't shipped.
+RUN rm -rf /usr/local/lib/node_modules/npm /usr/local/lib/node_modules/corepack \
+      /usr/local/bin/npm /usr/local/bin/npx /usr/local/bin/corepack
 ENV NODE_ENV=production \
     APP_RUNTIME=docker \
     BACKUP_DIR=/backups \
