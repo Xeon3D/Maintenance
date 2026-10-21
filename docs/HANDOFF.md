@@ -103,7 +103,8 @@ restart `next dev` after adding a file. `npx playwright install --with-deps chro
 - `next.config.ts` has `output: "standalone"`. `Dockerfile` (node:24-trixie-slim, multi-stage; `apt-get upgrade` in the
   base stage, which the release workflow rebuilds without cache; npm/npx/corepack/yarn removed from the runtime image;
   `ffmpeg`/`ffprobe` built from the ffmpeg.org source in an `ffmpeg` stage with only libx264 + libdav1d, pinned by
-  `FFMPEG_VERSION`/`FFMPEG_SHA256`, which Docker Scout does not track: bump it on ffmpeg security releases):
+  `FFMPEG_VERSION`/`FFMPEG_SHA256`, which Docker Scout does not track; the weekly `ffmpeg-check.yml` workflow fails
+  (GitHub e-mails it) when ffmpeg.org has a newer release of the branch, with the new values in its summary):
   standalone server + a separate `/migrator` folder with the pinned Prisma CLI, `prisma/` and `prisma.config.ts`.
 - `docker/entrypoint.sh`: generates missing `AUTH_SECRET`, `FIELD_ENCRYPTION_KEY`, `CRON_SECRET` and VAPID
   keys (plain node crypto: `web-push` is bundled, not in `node_modules`) into `/data/secrets.env`, runs
