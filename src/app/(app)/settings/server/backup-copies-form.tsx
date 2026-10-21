@@ -5,6 +5,7 @@ import { useFormatter, useTranslations } from "next-intl";
 import { Cloud, Copy, Link2Off, Mail, Upload } from "lucide-react";
 import { FieldError, FieldErrorsProvider } from "@/components/action-form";
 import { Button, Field, FormError, Input, Textarea } from "@/components/ui";
+import { PasswordInput } from "@/components/password-input";
 import { useActionForm } from "@/lib/use-action-form";
 import { COPY_KINDS, type CloudProvider, type CopyKind } from "@/lib/backup-copies-settings";
 import { disconnectCloudAction, saveBackupCopiesAction } from "./actions";
@@ -162,7 +163,7 @@ export function BackupCopiesForm({
                     <Input name="odClientId" defaultValue={values.cloud.onedrive.clientId} autoComplete="off" />
                   </Field>
                   <Field label={t("clientSecret")} hint={secretHint(values.cloud.onedrive.hasSecret)}>
-                    <Input name="odClientSecret" type="password" autoComplete="new-password" placeholder={values.cloud.onedrive.hasSecret ? "••••••••" : ""} />
+                    <PasswordInput name="odClientSecret" autoComplete="new-password" placeholder={values.cloud.onedrive.hasSecret ? "••••••••" : ""} />
                   </Field>
                   <Field label={t("tenant")} hint={t("tenantHint")}>
                     <Input name="odTenant" defaultValue={values.cloud.onedrive.tenant} />
@@ -179,7 +180,7 @@ export function BackupCopiesForm({
                     <Input name="gdClientId" defaultValue={values.cloud.gdrive.clientId} autoComplete="off" />
                   </Field>
                   <Field label={t("clientSecret")} hint={secretHint(values.cloud.gdrive.hasSecret)}>
-                    <Input name="gdClientSecret" type="password" autoComplete="new-password" placeholder={values.cloud.gdrive.hasSecret ? "••••••••" : ""} />
+                    <PasswordInput name="gdClientSecret" autoComplete="new-password" placeholder={values.cloud.gdrive.hasSecret ? "••••••••" : ""} />
                   </Field>
                 </div>
               )}
@@ -219,7 +220,7 @@ export function BackupCopiesForm({
                     <Input name="webdavUser" defaultValue={values.cloud.webdav.user} autoComplete="off" />
                   </Field>
                   <Field label={tr("server.email.smtpPassword")} hint={secretHint(values.cloud.webdav.hasPassword)}>
-                    <Input name="webdavPassword" type="password" autoComplete="new-password" placeholder={values.cloud.webdav.hasPassword ? "••••••••" : ""} />
+                    <PasswordInput name="webdavPassword" autoComplete="new-password" placeholder={values.cloud.webdav.hasPassword ? "••••••••" : ""} />
                   </Field>
                 </div>
               )}

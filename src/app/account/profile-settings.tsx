@@ -3,6 +3,7 @@ import { getTranslations } from "next-intl/server";
 import { Download } from "lucide-react";
 import { ActionForm, FieldError } from "@/components/action-form";
 import { Card, Field, Input } from "@/components/ui";
+import { PasswordInput } from "@/components/password-input";
 import { requireUser } from "@/lib/context";
 import { vapidPublicKey } from "@/lib/push";
 import { privacyPath } from "@/lib/privacy";
@@ -60,16 +61,16 @@ export async function ProfileSettings({ portal = false, org }: { portal?: boolea
           <ActionForm action={changePasswordAction} submitLabel={t("profile.changePassword")} successMessage={t("profile.passwordChanged")}>
             {user.passwordHash && (
               <Field label={t("profile.currentPassword")}>
-                <Input name="current" type="password" autoComplete="current-password" required />
+                <PasswordInput name="current" autoComplete="current-password" required />
                 <FieldError name="current" />
               </Field>
             )}
             <Field label={t("auth.newPassword")} hint={t("auth.passwordRule")}>
-              <Input name="password" type="password" autoComplete="new-password" minLength={8} required />
+              <PasswordInput name="password" autoComplete="new-password" minLength={8} required />
               <FieldError name="password" />
             </Field>
             <Field label={t("auth.confirmPassword")}>
-              <Input name="confirm" type="password" autoComplete="new-password" minLength={8} required />
+              <PasswordInput name="confirm" autoComplete="new-password" minLength={8} required />
               <FieldError name="confirm" />
             </Field>
           </ActionForm>
