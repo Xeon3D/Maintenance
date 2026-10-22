@@ -41,7 +41,7 @@ export async function ArticleForm({
         </Field>
       </div>
       <Field label={t("knowledge.body")}>
-        <MarkdownEditor name="body" defaultValue={article?.body ?? ""} />
+        <MarkdownEditor name="body" defaultValue={article?.body ?? ""} imageTarget={{ draftForVillaId: villaId }} />
         <FieldError name="body" />
       </Field>
       {assets.length > 0 && (

@@ -660,7 +660,16 @@ markers), Message, VerificationToken (password reset).
   `/[articleId]` (rendered text, linked assets, files), `/[articleId]/edit` (+ delete, which removes the stored files).
   `<KnowledgeCard>` shows pinned/latest articles on the villa page and on asset pages (linked ones).
 - `lib/markdown.ts` (pure, tested): a small Markdown subset parsed into blocks; `<Markdown>` renders React elements,
-  never HTML; links only http(s)/mailto/tel/in-app. No regex lookbehind (old iPhone Safari runs it in the field app).
+  never HTML; links only http(s)/mailto/tel/in-app; images `![alt](/api/files/<id> | https://…)`; `\*` etc. escape a
+  marker (not `\\`, so UNC paths stay). No regex lookbehind (old iPhone Safari runs it in the field app).
+- **Editor** (`components/knowledge/markdown-editor.tsx`, 2026-10-22): Tiptap 3 visual editor with a toolbar + a
+  **Markdown** tab (the old textarea). `lib/markdown-doc.ts` (pure, tested) converts Markdown ⇄ editor JSON; the editor's
+  schema is limited to what the subset holds (headings 2–4, flat lists, notes of paragraphs, one mark per run, inline
+  images), and Markdown input rules still fire (`# `/`## `/`### ` = the three heading sizes). Keep the Tiptap packages on
+  one version. Images (button, paste, drop) upload with target `draftForVillaId`: an attachment with **no owner**
+  (`NO_OWNER` in `lib/uploads.ts`) until `saveArticleAction` adopts the ids in the text (`imageFileIds`) for the
+  article; `runRetention` deletes owner-less attachments older than 2 days. Images in the text are left out of the
+  article's Files card.
 - `lib/knowledge.ts` (pure, tested): `filterArticles()` — same matching as the work-order search (`lib/search-text.ts`:
   accents, partial words, typos, every word must appear) over title + text + linked asset names, in memory (a villa has
   tens of articles). Shared by the web list and the field app.

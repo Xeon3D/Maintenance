@@ -7,6 +7,8 @@ import { requirePermission } from "@/lib/context";
 import { assertOwned } from "@/lib/db/tenant";
 import { optEnumOf, parseForm, str, type FormResult } from "@/lib/forms";
 import { deleteObject } from "@/lib/storage";
+import { imageFileIds } from "@/lib/markdown";
+import { NO_OWNER } from "@/lib/uploads";
 import { SystemType } from "@/generated/prisma/enums";
 
 const base = (villaId: string) => `/villas/${villaId}/knowledge`;
@@ -38,6 +40,11 @@ export async function saveArticleAction(villaId: string, articleId: string | nul
       data: { ...data, organizationId: ctx.organization.id, villaId, createdById: ctx.user.id, assets: { connect: assets } },
     });
     id = created.id;
+  }
+  // Images pasted or uploaded in the editor were stored without an owner (upload target draftForVillaId).
+  const images = imageFileIds(data.body);
+  if (images.length) {
+    await ctx.db.attachment.updateMany({ where: { id: { in: images }, uploadedById: ctx.user.id, ...NO_OWNER }, data: { articleId: id } });
   }
   revalidatePath(`/villas/${villaId}`);
   revalidatePath(base(villaId));

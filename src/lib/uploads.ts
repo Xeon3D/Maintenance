@@ -5,7 +5,9 @@ import type { AppContext } from "@/lib/context";
 
 // Shared by /api/uploads (photos, PDFs) and /api/uploads/video.
 
-// Exactly one owner. Comment/message links are attached later by their actions.
+// Exactly one owner. Comment/message links are attached later by their actions. `draftForVillaId` = an image in
+// the text of a knowledge article being written: stored without an owner until the article is saved
+// (`adoptArticleImages`); the daily retention run removes the ones never saved.
 export const targetSchema = z.union([
   z.object({ workOrderId: z.string() }),
   z.object({ workOrderItemId: z.string() }),
@@ -14,8 +16,24 @@ export const targetSchema = z.union([
   z.object({ partId: z.string() }),
   z.object({ purchaseOrderId: z.string() }),
   z.object({ articleId: z.string() }),
+  z.object({ draftForVillaId: z.string() }),
 ]);
 export type Target = z.infer<typeof targetSchema>;
+
+/** Where every owner of an attachment is empty: a draft article image not saved (yet). */
+export const NO_OWNER = {
+  workOrderId: null,
+  workOrderItemId: null,
+  commentId: null,
+  requestId: null,
+  assetId: null,
+  villaId: null,
+  procedureId: null,
+  partId: null,
+  purchaseOrderId: null,
+  messageId: null,
+  articleId: null,
+} as const;
 
 type Denied = { error: "forbidden" | "notFound"; status: 403 | 404 };
 
@@ -43,6 +61,10 @@ export async function denyTarget(ctx: AppContext, t: Target): Promise<Denied | n
     if (!ctx.can("knowledge.manage")) return forbidden;
     return (await ctx.db.knowledgeArticle.count({ where: { id: t.articleId } })) ? null : notFound;
   }
+  if ("draftForVillaId" in t) {
+    if (!ctx.can("knowledge.manage")) return forbidden;
+    return (await ctx.db.villa.count({ where: { id: t.draftForVillaId } })) ? null : notFound;
+  }
   if (!ctx.can("assets.manage")) return forbidden;
   const ok = "assetId" in t ? await ctx.db.asset.count({ where: { id: t.assetId } }) : await ctx.db.villa.count({ where: { id: t.villaId } });
   return ok ? null : notFound;
@@ -68,7 +90,7 @@ export async function createAttachment(ctx: AppContext, t: Target, file: { ref: 
       mimeType: file.mimeType,
       size: file.size,
       uploadedById: ctx.user.id,
-      ...t,
+      ...("draftForVillaId" in t ? {} : t),
       workOrderId,
     },
   });

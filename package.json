@@ -1,6 +1,6 @@
 {
   "name": "villa-cmms",
-  "version": "0.4.10",
+  "version": "0.4.11",
   "private": true,
   "scripts": {
     "predev": "node scripts/copy-ocr.mjs",
@@ -24,6 +24,14 @@
     "@prisma/client": "^7.10.1",
     "@react-pdf/renderer": "^4.9.0",
     "@tesseract.js-data/eng": "^1.0.0",
+    "@tiptap/core": "^3.32.0",
+    "@tiptap/extension-blockquote": "^3.32.0",
+    "@tiptap/extension-heading": "^3.32.0",
+    "@tiptap/extension-image": "^3.32.0",
+    "@tiptap/extension-list": "^3.32.0",
+    "@tiptap/pm": "^3.32.0",
+    "@tiptap/react": "^3.32.0",
+    "@tiptap/starter-kit": "^3.32.0",
     "@zxing/library": "^0.23.0",
     "bcryptjs": "^3.0.3",
     "clsx": "^2.1.1",
