@@ -86,6 +86,11 @@ export function rolePermissionsFor(role: EditableRole, overrides: RolePermission
   return overrides[role] ?? GRANTABLE.filter((p) => defaultPermissions(role).includes(p));
 }
 
+/** What a custom role may do: its own list, else its access level's (possibly overridden) list. */
+export function jobRolePermissionsFor(access: string, own: unknown, overrides: RolePermissions): Permission[] {
+  return parsePermissionList(own) ?? (isEditableRole(access) ? rolePermissionsFor(access, overrides) : []);
+}
+
 /**
  * Effective permissions of a member: everything for the Super Admin, the fixed set for clients, else the
  * custom role's own list, or its access level's (possibly overridden) list — plus access to the staff app.
