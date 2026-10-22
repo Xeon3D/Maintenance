@@ -55,7 +55,7 @@ The knowledge base keeps what the team has learned about a villa, so the next te
 
 1. Click **New article**.
 2. Give it a **Title** and, if it is about one system, the **System** (leave **General** otherwise).
-3. Write the **Text**. Simple formatting works: headings, bold and italic, lists and numbered steps, notes, code blocks for configurations, and links; the line under the text box shows how to type each one. Click **Preview** to see how it will look.
+3. Write the **Text**. The toolbar above it formats as you go: bold, italic, code, three heading sizes, lists and numbered steps, notes, code blocks for configurations, links, images and dividers. Markdown still works as you type: a # and a space start a heading, two stars around a word make it bold, a dash and a space start a list, a > starts a note. To add a picture, click the image button, or paste or drop it into the text. The **Markdown** tab shows the text with its formatting characters, to edit it that way.
 4. Tick the **Assets** it is about: the article then also shows on those assets' pages, and first in jobs on them.
 5. Tick **Pin to the top** for the articles everyone should read first.
 6. Click **Create**. On the article page you can then add photos and PDFs (schematics, manuals) under **Files**.
@@ -158,7 +158,7 @@ A base de conhecimento guarda o que a equipa aprendeu sobre uma moradia, para qu
 
 1. Clique em **Novo artigo**.
 2. Dê-lhe um **Título** e, se for sobre um sistema, o **Sistema** (caso contrário deixe **Geral**).
-3. Escreva o **Texto**. Funciona uma formatação simples: títulos, negrito e itálico, listas e passos numerados, notas, blocos de código para configurações e ligações; a linha por baixo da caixa de texto mostra como escrever cada um. Clique em **Pré-visualizar** para ver o aspeto final.
+3. Escreva o **Texto**. A barra de ferramentas por cima formata enquanto escreve: negrito, itálico, código, três tamanhos de título, listas e passos numerados, notas, blocos de código para configurações, ligações, imagens e separadores. O Markdown continua a funcionar enquanto escreve: um # e um espaço começam um título, dois asteriscos à volta de uma palavra põem-na a negrito, um hífen e um espaço começam uma lista, um > começa uma nota. Para juntar uma imagem, clique no botão de imagem, ou cole-a ou arraste-a para o texto. O separador **Markdown** mostra o texto com os caracteres de formatação, para o editar dessa forma.
 4. Marque os **Equipamentos** a que diz respeito: o artigo aparece também na página desses equipamentos e em primeiro lugar nos trabalhos sobre eles.
 5. Marque **Fixar no topo** nos artigos que todos devem ler primeiro.
 6. Clique em **Criar**. Na página do artigo pode depois juntar fotografias e PDFs (esquemas, manuais) em **Ficheiros**.

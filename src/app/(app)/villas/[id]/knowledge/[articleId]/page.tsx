@@ -7,6 +7,7 @@ import { BackLink } from "@/components/back-link";
 import { AttachmentsPanel } from "@/components/attachments-panel";
 import { SystemBadge } from "@/components/badges";
 import { Markdown } from "@/components/markdown";
+import { imageFileIds } from "@/lib/markdown";
 import { getContext } from "@/lib/context";
 import { fileUrl } from "@/lib/storage";
 import { titled } from "@/lib/metadata";
@@ -33,6 +34,9 @@ export default async function ArticlePage({ params }: PageProps<"/villas/[id]/kn
   const format = await getFormatter();
   const canManage = ctx.can("knowledge.manage");
   const date = (d: Date) => format.dateTime(d, { dateStyle: "medium", timeStyle: "short" });
+  // Images shown in the text aren't listed again under Files (one taken out of the text shows up there again).
+  const inText = new Set(imageFileIds(article.body));
+  const files = article.attachments.filter((f) => !inText.has(f.id));
 
   return (
     <>
@@ -85,14 +89,14 @@ export default async function ArticlePage({ params }: PageProps<"/villas/[id]/kn
 
           <Card className="p-5">
             <h2 className="mb-3 font-medium">{t("knowledge.files")}</h2>
-            {article.attachments.length === 0 && !canManage ? (
+            {files.length === 0 && !canManage ? (
               <p className="text-sm text-muted">—</p>
             ) : (
               <AttachmentsPanel
                 target={{ articleId: article.id }}
                 canEdit={canManage}
                 onDelete={deleteArticleAttachmentAction.bind(null, id, article.id)}
-                files={article.attachments.map((f) => ({ id: f.id, url: fileUrl(f.id), filename: f.filename, mimeType: f.mimeType }))}
+                files={files.map((f) => ({ id: f.id, url: fileUrl(f.id), filename: f.filename, mimeType: f.mimeType }))}
               />
             )}
           </Card>

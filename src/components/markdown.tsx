@@ -29,6 +29,14 @@ function Inline({ content }: { content: MdInline[] }) {
           </a>
         );
       }
+      case "image":
+        // Opens full size in a new tab. Offline (field app) the alt text shows instead.
+        return (
+          <a key={i} href={c.src} target="_blank" rel="noreferrer" className="my-1 inline-block max-w-full align-top">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={c.src} alt={c.text} loading="lazy" className="max-h-[32rem] max-w-full rounded-md border border-border bg-white" />
+          </a>
+        );
       default:
         return <span key={i}>{c.text}</span>;
     }
