@@ -1,12 +1,14 @@
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
+import { ShieldCheck } from "lucide-react";
 import { ActionForm, FieldError } from "@/components/action-form";
-import { Card, Input, PageHeader, Select } from "@/components/ui";
+import { Button, Card, Input, PageHeader, Select } from "@/components/ui";
 import { getContext } from "@/lib/context";
+import { defaultPermissions, GRANTABLE, isEditableRole, jobRolePermissionsFor, parseRolePermissions, rolePermissionsFor } from "@/lib/rbac";
 import { CUSTOM_ROLE_ACCESS, parseRoleRates, RATED_ROLES } from "@/lib/roles";
 import { saveJobRoleAction, saveRoleRatesAction } from "./actions";
 import { DeleteJobRoleButton } from "./delete-button";
-import { PermissionsMatrix } from "./permissions-matrix";
 import { titled } from "@/lib/metadata";
 
 export const generateMetadata = titled("nav.roles");
@@ -27,6 +29,21 @@ export default async function RolesPage() {
       <span className="w-8 text-xs text-muted">{currency}</span>
     </div>
   );
+  // Each role's "Permissions" button opens its own page, with how many of the permissions it has.
+  const overrides = parseRolePermissions(ctx.organization.rolePermissions);
+  const grantedCount = (role: string) =>
+    role === "OWNER" ? GRANTABLE.length : isEditableRole(role) ? rolePermissionsFor(role, overrides).length : GRANTABLE.filter((p) => defaultPermissions("REQUESTER").includes(p)).length;
+  const permissions = (key: string, count: number) => (
+    <div className="flex items-center gap-2">
+      <span className="hidden text-xs tabular-nums text-muted sm:inline">{t("perms.summary", { on: count, total: GRANTABLE.length })}</span>
+      <Link href={`/settings/roles/${key}/permissions`}>
+        <Button type="button" size="sm" variant="secondary">
+          <ShieldCheck className="size-4" />
+          {t("perms.title")}
+        </Button>
+      </Link>
+    </div>
+  );
 
   return (
     <>
@@ -43,6 +60,7 @@ export default async function RolesPage() {
                     <div className="text-sm font-medium">{t(`roles.${r}`)}</div>
                     <div className="text-xs text-muted">{t(`roles.can.${r}`)}</div>
                   </div>
+                  {permissions(r, grantedCount(r))}
                   <div>
                     {rateInput(r, rates[r])}
                     <FieldError name={r} />
@@ -55,7 +73,8 @@ export default async function RolesPage() {
                     <div className="text-sm font-medium">{t(`roles.${r}`)}</div>
                     <div className="text-xs text-muted">{t(`roles.can.${r}`)}</div>
                   </div>
-                  <span className="text-xs text-muted">{t("roles.notBillable")}</span>
+                  {permissions(r, grantedCount(r))}
+                  <span className="w-[9.5rem] text-right text-xs text-muted">{t("roles.notBillable")}</span>
                 </div>
               ))}
             </div>
@@ -68,7 +87,13 @@ export default async function RolesPage() {
           <div className="space-y-3">
             {jobRoles.map((r) => (
               <div key={r.id} className="rounded-md border border-border p-3">
-                <ActionForm action={saveJobRoleAction.bind(null, r.id)} successMessage={t("common.saved")} footer={<DeleteJobRoleButton id={r.id} name={r.name} members={r._count.memberships} />}>
+                <ActionForm action={saveJobRoleAction.bind(null, r.id)} successMessage={t("common.saved")} footer={
+                    <>
+                      {permissions(r.id, jobRolePermissionsFor(r.access, r.permissions, overrides).length)}
+                      <DeleteJobRoleButton id={r.id} name={r.name} members={r._count.memberships} />
+                    </>
+                  }
+                >
                   <JobRoleFields t={t} name={r.name} access={r.access} rate={rateInput("hourlyRate", r.hourlyRate)} members={r._count.memberships} />
                 </ActionForm>
               </div>
@@ -82,8 +107,6 @@ export default async function RolesPage() {
             </div>
           </div>
         </Card>
-
-        <PermissionsMatrix rolePermissions={ctx.organization.rolePermissions} jobRoles={jobRoles} editable={ctx.role === "OWNER"} />
       </div>
     </>
   );

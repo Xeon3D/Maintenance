@@ -84,38 +84,45 @@ async function auditPermissionChanges(ctx: Awaited<ReturnType<typeof requireOwne
 }
 
 /**
- * Saves the permission matrix. Checkboxes are named "role:<ROLE>" / "job:<id>" with a permission as value.
- * A role left equal to its default (or a custom role equal to its access level) is stored as "no override",
- * so it keeps following the defaults.
+ * Saves one role's permissions (Settings → Roles → Permissions). `key` is a built-in staff role or a custom role's id;
+ * checkboxes are named "perm". A list equal to the default (or, for a custom role, to its access level) is stored as
+ * "no override", so the role keeps following it.
  */
-export async function saveRolePermissionsAction(_: FormResult, form: FormData): Promise<FormResult> {
+export async function saveRolePermissionsAction(key: string, _: FormResult, form: FormData): Promise<FormResult> {
   const ctx = await requireOwner();
-  const pick = (key: string) => GRANTABLE.filter((p) => form.getAll(key).includes(p));
+  const submitted = GRANTABLE.filter((p) => form.getAll("perm").includes(p));
   const before = parseRolePermissions(ctx.organization.rolePermissions);
 
-  const overrides: RolePermissions = {};
-  for (const r of EDITABLE_ROLES) {
-    const list = builtInRoleToStore(r, pick(`role:${r}`));
-    if (list) overrides[r] = list;
-  }
-  // Organization isn't a tenant-scoped model; scope by id explicitly.
-  await prisma.organization.update({ where: { id: ctx.organization.id }, data: { rolePermissions: Object.keys(overrides).length ? overrides : Prisma.DbNull } });
-  await auditPermissionChanges(ctx, before, overrides);
-
-  for (const j of await ctx.db.jobRole.findMany({ select: { id: true, access: true, permissions: true } })) {
-    if (!form.has(`present:job:${j.id}`) || !isEditableRole(j.access)) continue; // created after the page was opened: leave it alone
-    const list = customRoleToStore(j.permissions, pick(`job:${j.id}`), rolePermissionsFor(j.access, before), rolePermissionsFor(j.access, overrides));
+  if (isEditableRole(key)) {
+    const after: RolePermissions = { ...before };
+    delete after[key];
+    const list = builtInRoleToStore(key, submitted);
+    if (list) after[key] = list;
+    // Organization isn't a tenant-scoped model; scope by id explicitly.
+    await prisma.organization.update({ where: { id: ctx.organization.id }, data: { rolePermissions: Object.keys(after).length ? after : Prisma.DbNull } });
+    await auditPermissionChanges(ctx, before, after);
+  } else {
+    const j = await ctx.db.jobRole.findFirst({ where: { id: key }, select: { id: true, access: true, permissions: true } });
+    if (!j || !isEditableRole(j.access)) return { error: "somethingWrong" };
+    const level = rolePermissionsFor(j.access, before);
+    const list = customRoleToStore(j.permissions, submitted, level, level);
     await ctx.db.jobRole.update({ where: { id: j.id }, data: { permissions: list ?? Prisma.DbNull } });
   }
   revalidatePath("/", "layout");
   return { ok: true };
 }
 
-/** Puts every role back to the default permissions. */
-export async function resetRolePermissionsAction() {
+/** Puts one role back to the default permissions (a custom role: back to following its access level). */
+export async function resetRolePermissionsAction(key: string) {
   const ctx = await requireOwner();
-  await prisma.organization.update({ where: { id: ctx.organization.id }, data: { rolePermissions: Prisma.DbNull } });
-  await auditPermissionChanges(ctx, parseRolePermissions(ctx.organization.rolePermissions), {});
-  await ctx.db.jobRole.updateMany({ data: { permissions: Prisma.DbNull } });
+  if (isEditableRole(key)) {
+    const before = parseRolePermissions(ctx.organization.rolePermissions);
+    const after: RolePermissions = { ...before };
+    delete after[key];
+    await prisma.organization.update({ where: { id: ctx.organization.id }, data: { rolePermissions: Object.keys(after).length ? after : Prisma.DbNull } });
+    await auditPermissionChanges(ctx, before, after);
+  } else {
+    await ctx.db.jobRole.updateMany({ where: { id: key }, data: { permissions: Prisma.DbNull } });
+  }
   revalidatePath("/", "layout");
 }
