@@ -5,6 +5,7 @@ import { z } from "zod";
 import { prisma } from "@/lib/db/client";
 import { addressFrom, loginBlocked, recordLoginFailure, recordLoginSuccess } from "@/lib/login-limit";
 import { auditUser } from "@/lib/audit";
+import { recordSignIn } from "@/lib/online-users";
 import { authConfig } from "./auth.config";
 
 const credentialsSchema = z.object({
@@ -43,6 +44,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         }
         recordLoginSuccess(email);
         await auditUser(user.id, "auth.signIn", undefined, ip);
+        await recordSignIn(user.id);
         return { id: user.id, email: user.email, name: user.name };
       },
     }),

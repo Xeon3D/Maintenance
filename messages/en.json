@@ -1463,6 +1463,15 @@
     "checkFailed": "Couldn't reach Docker Hub to check for updates.",
     "checkedAt": "Checked {date}",
     "checkNow": "Check now",
+    "online": {
+      "title": "Who is online",
+      "hint": "People in this company who used the app in the last {minutes} minutes. Activity is recorded at most once a minute; signing out removes someone at once.",
+      "refresh": "Refresh",
+      "none": "Nobody is online right now.",
+      "name": "Name",
+      "lastSeen": "Last activity",
+      "signedIn": "Signed in"
+    },
     "updateTo": "Update to {version}",
     "preparingUpdate": "Backing up…",
     "updateConfirm": "Update to version {version}? A backup is made first, then the app restarts on the new version (about a minute).",

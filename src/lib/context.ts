@@ -8,6 +8,7 @@ import { tenantDb } from "@/lib/db/tenant";
 import { requestIp } from "@/lib/audit";
 import { effectivePermissions, type Permission } from "@/lib/rbac";
 import { hourlyRateFor, parseRoleRates } from "@/lib/roles";
+import { touchLastSeen } from "@/lib/online-users";
 
 export const ACTIVE_ORG_COOKIE = "active_org";
 
@@ -38,6 +39,7 @@ export const getContext = cache(async () => {
 
   const wanted = (await cookies()).get(ACTIVE_ORG_COOKIE)?.value;
   const membership = memberships.find((m) => m.organizationId === wanted) ?? memberships[0];
+  await touchLastSeen(membership);
   // The company's permission settings (Settings → Roles) applied to this member's role / custom role.
   const permissions = effectivePermissions(membership.role, membership.organization.rolePermissions, membership.jobRole?.permissions);
 

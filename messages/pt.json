@@ -1463,6 +1463,15 @@
     "checkFailed": "Não foi possível contactar o Docker Hub para procurar atualizações.",
     "checkedAt": "Verificado em {date}",
     "checkNow": "Verificar agora",
+    "online": {
+      "title": "Quem está ligado",
+      "hint": "Pessoas desta empresa que usaram a aplicação nos últimos {minutes} minutos. A atividade é registada no máximo uma vez por minuto; ao terminar sessão, a pessoa sai da lista de imediato.",
+      "refresh": "Atualizar",
+      "none": "Neste momento não há ninguém ligado.",
+      "name": "Nome",
+      "lastSeen": "Última atividade",
+      "signedIn": "Sessão iniciada"
+    },
     "updateTo": "Atualizar para {version}",
     "preparingUpdate": "A criar cópia…",
     "updateConfirm": "Atualizar para a versão {version}? Primeiro é feita uma cópia de segurança; depois a aplicação reinicia na nova versão (cerca de um minuto).",

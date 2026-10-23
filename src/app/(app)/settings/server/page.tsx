@@ -22,6 +22,8 @@ import { deliveryStatus } from "@/lib/email";
 import { BackupCopiesForm } from "./backup-copies-form";
 import { copyStatus } from "@/lib/backup-copies";
 import { cloudRedirectUri } from "@/lib/cloud/oauth-paths";
+import { listOnlineUsers, ONLINE_MINUTES } from "@/lib/online-users";
+import { OnlineUsers } from "./online-users";
 
 // Results of coming back from Microsoft / Google (Settings → Server → Backup copies → Connect).
 const CLOUD_RESULTS = ["connected", "denied", "failed", "badState", "locked", "noRefresh", "noDriveScope", "missingApp"];
@@ -36,12 +38,21 @@ export default async function ServerSettingsPage({ searchParams }: PageProps<"/s
   if (!ctx.can("org.manage")) notFound();
   const t = await getTranslations();
   const header = <PageHeader title={t("server.title")} description={t("server.description")} />;
+  // This company's people only, so it needs no server password and shows whether or not the server is unlocked.
+  const onlineCard = (
+    <Card className="max-w-4xl">
+      <OnlineUsers initial={await listOnlineUsers(ctx.db)} minutes={ONLINE_MINUTES} timezone={ctx.organization.timezone} />
+    </Card>
+  );
 
   if (!serverAdminEnabled()) {
     return (
       <>
         {header}
-        <Card className="max-w-2xl p-6 text-sm text-muted">{t("server.disabled")}</Card>
+        <div className="space-y-6">
+          {onlineCard}
+          <Card className="max-w-2xl p-6 text-sm text-muted">{t("server.disabled")}</Card>
+        </div>
       </>
     );
   }
@@ -50,6 +61,8 @@ export default async function ServerSettingsPage({ searchParams }: PageProps<"/s
     return (
       <>
         {header}
+        <div className="space-y-6">
+        {onlineCard}
         <Card className="max-w-md p-6">
           <h2 className="mb-1 font-medium">{t("server.locked")}</h2>
           <p className="mb-4 text-sm text-muted">{t("server.lockedHint")}</p>
@@ -59,6 +72,7 @@ export default async function ServerSettingsPage({ searchParams }: PageProps<"/s
             </Field>
           </ActionForm>
         </Card>
+        </div>
       </>
     );
   }
@@ -117,6 +131,9 @@ export default async function ServerSettingsPage({ searchParams }: PageProps<"/s
             </label>
           </ActionForm>
         </Card>
+
+        {/* ── Who is online */}
+        {onlineCard}
 
         {/* ── E-mail */}
         <Card className="p-6">

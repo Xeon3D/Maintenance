@@ -200,6 +200,8 @@ model User {
   erasedAt          DateTime?
   // Secret in the personal calendar feed URL (/api/calendar/<token>.ics); a new one cuts off the old link.
   calendarToken     String?  @unique
+  // Last successful sign-in, shown in "Who is online" (lib/online-users).
+  lastSignInAt      DateTime?
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
 
@@ -324,6 +326,9 @@ model Membership {
   // In the on-call team: can be given on-call weeks (OnCallWeek). Staff only (not clients or viewers).
   onCall         Boolean  @default(false)
   active         Boolean  @default(true)
+  // Last request made in this company, for "Who is online": stamped at most once a minute (lib/online-users),
+  // cleared on sign-out.
+  lastSeenAt     DateTime?
   createdAt      DateTime @default(now())
 
   organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)

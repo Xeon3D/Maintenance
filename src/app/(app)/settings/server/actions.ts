@@ -23,6 +23,7 @@ import path from "node:path";
 import { cloudTarget, removeCloudCopy } from "@/lib/backup-copies";
 import { audit, changesOf, requestIp, writeAudit } from "@/lib/audit";
 import { prisma } from "@/lib/db/client";
+import { listOnlineUsers } from "@/lib/online-users";
 
 /** Server operations are logged in the company of the admin who did them. */
 const serverAudit = (ctx: { organization: { id: string }; user: { id: string } }, action: string, meta?: Record<string, unknown>) =>
@@ -46,6 +47,12 @@ export async function unlockAction(_: FormResult, form: FormData): Promise<FormR
   if (result !== "ok") return { error: "server.errors.wrongPassword" };
   revalidatePath(PAGE);
   return { ok: true };
+}
+
+/** Refresh button of "Who is online" (this company only, no server password): the list without reloading the page. */
+export async function onlineUsersAction() {
+  const ctx = await requirePermission("org.manage");
+  return listOnlineUsers(ctx.db);
 }
 
 export async function lockAction() {

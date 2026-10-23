@@ -22,6 +22,7 @@ import { emailLayout, sendEmail } from "@/lib/email";
 import { background } from "@/lib/notify";
 import { clearResetTokens, createResetToken, userForResetToken } from "@/lib/password-reset";
 import { auditUser, writeAudit } from "@/lib/audit";
+import { clearLastSeen } from "@/lib/online-users";
 import { checkFactoryResetPassword, factoryReset, factoryResetBlocked, factoryResetEnabled, recordFactoryResetFailure } from "@/lib/factory-reset";
 
 export type FormState = { error?: string } | undefined;
@@ -121,7 +122,10 @@ export async function resetPasswordAction(_: FormState, form: FormData): Promise
 
 export async function signOutAction() {
   const session = await auth();
-  if (session?.user?.id) await auditUser(session.user.id, "auth.signOut");
+  if (session?.user?.id) {
+    await auditUser(session.user.id, "auth.signOut");
+    await clearLastSeen(session.user.id);
+  }
   await signOut({ redirectTo: "/login" });
 }
 
