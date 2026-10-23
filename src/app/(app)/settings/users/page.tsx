@@ -32,10 +32,11 @@ export default async function UsersPage() {
     ctx.db.jobRole.findMany({ select: { id: true, name: true }, orderBy: { name: "asc" } }),
   ]);
   const rates = parseRoleRates(ctx.organization.roleRates);
-  const roleOptions: RoleOptions = {
-    builtIn: ASSIGNABLE_ROLES.filter((r) => r !== "REQUESTER").map((r) => ({ value: r, label: t(`roles.${r}`) })),
-    custom: jobRoles.map((r) => ({ value: `job:${r.id}`, label: r.name })),
-  };
+  // One list of roles, built-in and created alike.
+  const roleOptions: RoleOptions = [
+    ...ASSIGNABLE_ROLES.filter((r) => r !== "REQUESTER").map((r) => ({ value: r, label: t(`roles.${r}`) })),
+    ...jobRoles.map((r) => ({ value: `job:${r.id}`, label: r.name })),
+  ].sort((a, b) => a.label.localeCompare(b.label));
   const money = (n: number) => format.number(n, { style: "currency", currency: ctx.organization.currency });
 
   return (

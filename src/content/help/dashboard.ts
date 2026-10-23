@@ -61,7 +61,7 @@ Click a step to go to the page where you do it. Steps that are done are crossed 
 - Everyone who works in the company (every role except clients) sees the full dashboard: counters, lists and the checklist.
 - The **POs to approve** card only appears for people who can approve purchase orders (by default the Super Admin and Administrators).
 - The **New work order** buttons only appear for people who can create work orders (by default everyone except Viewers and Accountants).
-- A custom role without access to internal information sees only the greeting.
+- A role without access to internal information sees only the greeting.
 - Clients never see this page: they go straight to the client portal.
 
 > Looking for your jobs on a phone in the field? The [Field app](/help/field-app) shows the same assigned work and keeps working without signal.
@@ -124,7 +124,7 @@ Clique num passo para ir à página onde o faz. Os passos concluídos aparecem r
 - Todas as pessoas que trabalham na empresa (todas as funções exceto clientes) veem o painel completo: contadores, listas e a lista de primeiros passos.
 - O cartão **Encomendas por aprovar** só aparece a quem pode aprovar encomendas (por defeito o Super Admin e os Administradores).
 - Os botões **Nova ordem de trabalho** só aparecem a quem pode criar ordens de trabalho (por defeito todos exceto Observadores e Contabilistas).
-- Uma função personalizada sem acesso à informação interna vê apenas a saudação.
+- Uma função sem acesso à informação interna vê apenas a saudação.
 - Os clientes nunca veem esta página: entram diretamente no portal do cliente.
 
 > Procura os seus trabalhos no telemóvel, no terreno? A [App de campo](/help/field-app) mostra o mesmo trabalho atribuído e continua a funcionar sem rede.

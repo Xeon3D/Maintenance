@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { hourlyRateFor, parseRoleRates, roleName } from "@/lib/roles";
+import { DEFAULT_JOB_ROLES, hourlyRateFor, parseRoleRates, roleName, workOrderRateFor } from "@/lib/roles";
 
 describe("role rates", () => {
   const rates = parseRoleRates({ OWNER: 70, TECHNICIAN: "45", MANAGER: -5, VIEWER: 99, junk: 1 });
@@ -26,5 +26,28 @@ describe("role rates", () => {
     const builtIn = (r: string) => `built-in ${r}`;
     expect(roleName({ role: "TECHNICIAN", jobRole: { name: "Engineer" } }, builtIn)).toBe("Engineer");
     expect(roleName({ role: "MANAGER", jobRole: null }, builtIn)).toBe("built-in MANAGER");
+  });
+});
+
+describe("rate on a work order", () => {
+  const rates = parseRoleRates({ OWNER: 70, MANAGER: 60, TECHNICIAN: 45 });
+  const manager = { role: "MANAGER" as const, jobRole: null };
+
+  it("charges the person's own role when they took none on the job", () => {
+    expect(workOrderRateFor(manager, null, rates)).toBe(60);
+    expect(workOrderRateFor(manager, { role: null, jobRole: null }, rates)).toBe(60);
+  });
+
+  it("charges the role taken on the job: Technician, or a company role", () => {
+    expect(workOrderRateFor(manager, { role: "TECHNICIAN", jobRole: null }, rates)).toBe(45);
+    expect(workOrderRateFor(manager, { role: null, jobRole: { access: "TECHNICIAN", hourlyRate: "25.00" } }, rates)).toBe(25);
+  });
+
+  it("charges a company role without a rate at the Technician rate", () => {
+    expect(workOrderRateFor(manager, { role: null, jobRole: { access: "TECHNICIAN", hourlyRate: null } }, rates)).toBe(45);
+  });
+
+  it("starts new companies with the default roles", () => {
+    expect(DEFAULT_JOB_ROLES).toEqual(["Designer", "Electrician", "Engineer", "Helper", "Integrator"]);
   });
 });

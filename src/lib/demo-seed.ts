@@ -3,6 +3,7 @@
 // Relative imports only: this also runs under tsx outside Next.
 import bcrypt from "bcryptjs";
 import type { PrismaClient } from "../generated/prisma/client";
+import { DEFAULT_JOB_ROLES } from "./roles";
 
 export const DEMO_PASSWORD = "demo1234";
 export const DEMO_OWNER = "owner@demo.test";
@@ -72,8 +73,9 @@ export async function seedDemo(prisma: PrismaClient) {
     prisma.client.create({ data: { organizationId: org.id, name: "Bergström Family", type: "PRIVATE_OWNER", email: "family@bergstrom.test" } }),
   ]);
 
-  // A custom role with technician access and its own rate.
-  const engineer = await prisma.jobRole.create({ data: { organizationId: org.id, name: "Electrical engineer", access: "TECHNICIAN", hourlyRate: 65 } });
+  // The default roles, as a new company gets them; Engineer has its own rate.
+  await prisma.jobRole.createMany({ data: DEFAULT_JOB_ROLES.map((name) => ({ organizationId: org.id, name, hourlyRate: name === "Engineer" ? 65 : null })) });
+  const engineer = await prisma.jobRole.findFirstOrThrow({ where: { organizationId: org.id, name: "Engineer" } });
 
   await prisma.membership.createMany({
     data: [

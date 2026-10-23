@@ -1,7 +1,7 @@
 import { revalidatePath } from "next/cache";
 import { z, ZodError } from "zod";
 import { getContext } from "@/lib/context";
-import { changeStatus, WorkOrderError } from "@/lib/work-orders";
+import { changeStatus, myRateOn, WorkOrderError } from "@/lib/work-orders";
 import { addComment, addTimeEntry, answerItem, clampAt, setClientAbsent, signOff } from "@/lib/wo-ops";
 import { enumOf } from "@/lib/forms";
 import { WorkOrderStatus } from "@/generated/prisma/enums";
@@ -63,7 +63,7 @@ export async function POST(req: Request) {
         await addComment(ctx, o.woId, o.body, [], clampAt(o.at));
         result = { id: o.id, status: "applied" };
       } else if (o.kind === "time") {
-        await addTimeEntry(ctx, o.woId, ctx.hourlyRate, clampAt(o.startedAt), clampAt(o.endedAt), o.note ?? null, o.mode ?? "ONSITE");
+        await addTimeEntry(ctx, o.woId, await myRateOn(ctx, o.woId), clampAt(o.startedAt), clampAt(o.endedAt), o.note ?? null, o.mode ?? "ONSITE");
         result = { id: o.id, status: "applied" };
       } else if (o.kind === "signoff") {
         await signOff(ctx, o.woId, o.name, o.attachmentId, clampAt(o.at));

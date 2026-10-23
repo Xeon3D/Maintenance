@@ -6,8 +6,6 @@ import type { Role } from "@/generated/prisma/enums";
 // and portal clients never log time, so they have no rate.
 
 export const RATED_ROLES = ["OWNER", "ADMIN", "MANAGER", "TECHNICIAN"] as const satisfies readonly Role[];
-/** Access levels a custom role can have (never OWNER, and never the non-staff roles). */
-export const CUSTOM_ROLE_ACCESS = ["ADMIN", "MANAGER", "TECHNICIAN"] as const satisfies readonly Role[];
 
 export type RoleRates = Partial<Record<Role, number>>;
 
@@ -39,4 +37,22 @@ export function hourlyRateFor(m: MemberLike, rates: RoleRates): number | null {
 /** Display name: the custom role's name, else the built-in role (translated by the caller). */
 export function roleName(m: { role: Role; jobRole?: { name: string } | null }, builtIn: (role: Role) => string) {
   return m.jobRole?.name ?? builtIn(m.role);
+}
+
+/** Roles every new company starts with, besides the built-in ones (technician access; rename or delete freely). */
+export const DEFAULT_JOB_ROLES = ["Designer", "Electrician", "Engineer", "Helper", "Integrator"];
+
+/**
+ * The only built-in role someone can take on a work order; the company's own roles can all be taken too.
+ * Super Admin, administrator, manager, accountant, viewer and client are office or outside roles, never a job role.
+ */
+export const WORK_ORDER_BUILT_IN_ROLE = "TECHNICIAN" satisfies Role;
+
+type AssigneeLike = { role: Role | null; jobRole: { access: Role; hourlyRate: unknown } | null } | null | undefined;
+
+/** Cost per hour of a member's time on a job: the role they took on it (Technician or a company role), else their own. */
+export function workOrderRateFor(m: MemberLike, a: AssigneeLike, rates: RoleRates): number | null {
+  if (a?.jobRole) return hourlyRateFor({ role: a.jobRole.access, hourlyRate: m.hourlyRate, jobRole: a.jobRole }, rates);
+  if (a?.role) return hourlyRateFor({ role: a.role, hourlyRate: m.hourlyRate }, rates);
+  return hourlyRateFor(m, rates);
 }

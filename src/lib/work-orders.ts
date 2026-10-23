@@ -7,6 +7,7 @@ import { assertOwned, nextNumber } from "@/lib/db/tenant";
 import { notify, notifyExternal } from "@/lib/notify";
 import { contractFor } from "@/lib/contracts";
 import { effectivePermissions } from "@/lib/rbac";
+import { parseRoleRates, workOrderRateFor } from "@/lib/roles";
 import { billedTime, type TimeEntryLike } from "@/lib/billing-time";
 import { NO_SURCHARGE, urgentSurcharge, type UrgentRule } from "@/lib/urgent-surcharge";
 import { travelCharge, type TravelContext, type TripEntry } from "@/lib/travel-charge";
@@ -288,4 +289,24 @@ export function workOrderCosts(
     perTrip: trips?.perTrip ?? 0,
     total: time.labor + parts + other + urgent + travelCost,
   };
+}
+
+const ASSIGNEE_ROLE = { role: true, jobRole: { select: { access: true, hourlyRate: true } } } as const;
+
+/** My cost per hour on this job (the role I took on it, else my own): stamped on the time I log on it. */
+export async function myRateOn(ctx: AppContext, woId: string) {
+  const wo = await ctx.db.workOrder.findUnique({ where: { id: woId }, select: { assignees: { where: { userId: ctx.user.id }, select: ASSIGNEE_ROLE } } });
+  const a = wo?.assignees[0];
+  return a?.role || a?.jobRole ? workOrderRateFor(ctx.membership, a, parseRoleRates(ctx.organization.roleRates)) : ctx.hourlyRate;
+}
+
+/** After someone's role on a job changes, their time on it is charged at the new role's rate. */
+export async function restampRate(ctx: AppContext, woId: string, userId: string) {
+  const [wo, member] = await Promise.all([
+    ctx.db.workOrder.findUnique({ where: { id: woId }, select: { assignees: { where: { userId }, select: ASSIGNEE_ROLE } } }),
+    ctx.db.membership.findFirst({ where: { userId }, select: { role: true, hourlyRate: true, jobRole: { select: { hourlyRate: true } } } }),
+  ]);
+  if (!wo || !member) return;
+  const rate = workOrderRateFor(member, wo.assignees[0], parseRoleRates(ctx.organization.roleRates));
+  await ctx.db.timeEntry.updateMany({ where: { workOrderId: woId, userId }, data: { hourlyRate: rate } });
 }
