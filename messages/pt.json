@@ -1460,7 +1460,7 @@
     "updateAvailable": "Atualização disponível",
     "upToDate": "Atualizado",
     "unknown": "Ainda não verificado",
-    "checkFailed": "Não foi possível contactar o GitHub para procurar atualizações.",
+    "checkFailed": "Não foi possível contactar o Docker Hub para procurar atualizações.",
     "checkedAt": "Verificado em {date}",
     "checkNow": "Verificar agora",
     "updateTo": "Atualizar para {version}",

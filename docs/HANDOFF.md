@@ -121,9 +121,9 @@ restart `next dev` after adding a file. `npx playwright install --with-deps chro
   `FACTORY_RESET_PASSWORD` via a `.env` next to it, `docker compose up -d`, then `down -v` afterwards.
 - Release: bump `version` in `package.json` (+ lock file; it is the app's version and what the update check
   compares), merge, then push a `vX.Y.Z` tag. `release.yml` checks the tag matches, runs the checks, pushes
-  `:<v>` and `:latest` (amd64 only: ZimaOS is x86-64) and only then creates the GitHub release (the release is what
-  installed servers see as "update available", and the updater pulls `:latest`). Secrets: `DOCKERHUB_USERNAME`,
-  `DOCKERHUB_TOKEN`. Update checks read `malves-dc/Maintenance` releases (`UPDATE_REPO` overrides).
+  `:<v>` and `:latest` (amd64 only: ZimaOS is x86-64) with the release notes as an index annotation, then creates
+  the GitHub release. The `:<v>` tag on Docker Hub is what installed servers see as "update available" (the GitHub
+  repository is private), and the updater pulls `:latest`. Secrets: `DOCKERHUB_USERNAME`, `DOCKERHUB_TOKEN`.
 
 ### Server administration (Settings → Server, v0.2.0)
 - Gate: `src/lib/server-admin.ts`. Needs `org.manage` **and** the server password (`SERVER_ADMIN_PASSWORD`,
@@ -137,13 +137,17 @@ restart `next dev` after adding a file. `npx playwright install --with-deps chro
   CASCADE` + `pg_restore` (rolls back to the safety copy on failure), replace uploads, merge keys into
   `DATA_DIR/secrets.env`, then `process.exit(0)` so Docker restarts it and the entrypoint re-runs migrations.
   Scheduler: `runServerJobs()` every minute from `src/instrumentation-node.ts`; period keys in `BACKUP_DIR/.state.json`.
-- Updates (`src/lib/updates.ts`): GitHub `releases/latest` (6 h cache) vs `APP_VERSION`; "Update now" =
+- Updates (`src/lib/updates.ts`, since 0.4.13): the `X.Y.Z` tags of `APP_IMAGE` (default `malvesdc/maintenance`)
+  from the Docker Hub API (6 h cache) vs `APP_VERSION`. Notes of up to 5 newer versions come from the image index
+  annotation `io.villaops.release-notes` (base64 JSON array, written by `scripts/release-notes.mjs` in
+  `release.yml`; anonymous registry token, one manifest GET per version, cached per process). Up to 0.4.12 the
+  check read GitHub releases, which stopped working when the repository went private. "Update now" =
   `pre-update` backup + `POST $UPDATER_URL/v1/update?image=malvesdc/maintenance&async=true` with the token the
   entrypoint writes to `DATA_DIR/updater-token` (Watchtower reads it from its read-only mount). Watchtower
   fork `nickfedor/watchtower` (the original containrrr one is archived); HTTP API mode disables its polling.
 - Tested 2026-09-29 in a local compose stack: scheduled + manual backups, download, upload (valid/invalid),
   restore (data + files back, restart, migrations), lock/unlock, and a real Watchtower recreate. To force
-  "update available" in a test, set `UPDATE_REPO` to a repo with a higher release number.
+  "update available" in a test, set `APP_IMAGE` to an image whose newest version tag is higher.
 - `/api/server/backups/upload` is excluded from the proxy matcher (no 16 MB buffer) and checks access itself.
 - **Backup copies** (`lib/backup-copies.ts`, settings in `lib/backup-copies-settings.ts` → `ServerSettings.backupCopies`):
   `doBackup()` calls `copyBackup(file, kind, removed)` after pruning — in the background, but awaited (≤10 min) for
