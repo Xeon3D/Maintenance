@@ -185,9 +185,12 @@ export default async function ServerSettingsPage({ searchParams }: PageProps<"/s
                       </a>
                       {r.publishedAt && <span className="text-xs text-muted">{dayFmt.format(new Date(r.publishedAt))}</span>}
                     </div>
-                    {r.html ? (
-                      // Release notes as rendered and sanitized by GitHub, cleaned again in cleanReleaseHtml().
-                      <div className="release-notes text-sm" dangerouslySetInnerHTML={{ __html: r.html }} />
+                    {r.notes.length > 0 ? (
+                      <ul className="list-disc space-y-1 pl-5 text-sm">
+                        {r.notes.map((line, i) => (
+                          <li key={i}>{line}</li>
+                        ))}
+                      </ul>
                     ) : (
                       <p className="text-sm text-muted">{t("server.noNotes")}</p>
                     )}

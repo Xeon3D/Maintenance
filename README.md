@@ -44,8 +44,9 @@ because it acts on the whole installation rather than one company:
 - **E-mail** — how invitations, password resets, notifications and service reports are sent: an **SMTP account**
   (Microsoft 365, Google Workspace, the domain's mail server…) or **Resend** (API key), with a *Send test e-mail*
   button. Passwords and keys are stored encrypted. Left on *Environment variables*, `RESEND_API_KEY`/`EMAIL_FROM` are used.
-- **Updates** — shows the installed and latest version (from the GitHub releases of
-  [`malves-dc/Maintenance`](https://github.com/malves-dc/Maintenance/releases); `UPDATE_REPO` overrides it). *Update to x.y.z*
+- **Updates** — shows the installed and latest version (from the version tags of the
+  [`malvesdc/maintenance`](https://hub.docker.com/r/malvesdc/maintenance/tags) image on Docker Hub, with each
+  version's notes; `APP_IMAGE` overrides the image). *Update to x.y.z*
   makes a backup, then asks the `updater` service ([Watchtower](https://github.com/nicholas-fedor/watchtower))
   to pull `malvesdc/maintenance:latest` and recreate only the app container; database changes are applied
   as it starts. *Install updates automatically* does the same every day at the backup hour.
@@ -65,9 +66,16 @@ because it acts on the whole installation rather than one company:
   `https://<APP_URL>/privacy` and `https://<APP_URL>/terms`) or **WebDAV** (Nextcloud, NAS…). Backups the schedule removes are removed from the
   folder too (optional). *Send test e-mail* and *Test upload* check the settings; the last result is shown.
 
+### Updating from 0.4.12 or earlier
+
+Up to 0.4.12 the update check read the GitHub releases, which stopped answering when the repository became
+private. A server still on one of those versions doesn't see new versions: update it once by hand (in the app's
+compose, `docker compose pull` and `docker compose up -d`; on ZimaOS, the app's *Update*/*Rebuild*). From 0.4.13
+the check reads Docker Hub.
+
 ### Updating from 0.3.0
 
-From 0.3.1 the image is `malvesdc/maintenance` and updates come from the `malves-dc/Maintenance` releases, so a
+From 0.3.1 the image is `malvesdc/maintenance`, so a
 0.3.0 server is moved over once by hand. In the app's compose (ZimaOS: the app's settings), change
 `image: xeon3d/maintenance:latest` to `image: malvesdc/maintenance:latest` and save (or run `docker compose pull`
 and `docker compose up -d`). The data stays where it is; from then on, updates come from Settings → Server.
@@ -146,8 +154,9 @@ Releases are built and published by GitHub Actions (`.github/workflows/release.y
 
 1. Bump `version` in `package.json` and `package-lock.json` (`npm version 0.4.0 --no-git-tag-version`), commit, merge to `main`.
 2. Tag and push: `git tag v0.4.0 && git push origin v0.4.0`.
-3. The workflow runs the checks, pushes `malvesdc/maintenance:0.4.0` and `:latest` to Docker Hub, and then creates
-   the GitHub release, which installed servers see as "update available" (Settings → Server).
+3. The workflow runs the checks, pushes `malvesdc/maintenance:0.4.0` and `:latest` to Docker Hub (the new version tag
+   is what installed servers see as "update available" in Settings → Server, with the release notes attached to the
+   image), and then creates the GitHub release with the same notes.
 
 One-time setup: repository secrets `DOCKERHUB_USERNAME` and `DOCKERHUB_TOKEN` (a Docker Hub access token with
 Read & Write), and optionally a `DOCKERHUB_IMAGE` variable to publish under another image name (servers then need
