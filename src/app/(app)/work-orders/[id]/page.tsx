@@ -17,10 +17,12 @@ import { StatusBar } from "./status-bar";
 import { Checklist } from "./checklist";
 import { CommentBox, CostsPanel, Gallery, SignOff, TimeTracker, WorkOrderActions } from "./panels";
 import { PartsPanel } from "./parts-panel";
+import { Assignees } from "./assignees";
 import { AttachmentThumb } from "@/components/attachment-thumb";
 import { SendReportPanel } from "./send-report";
 import { reportRecipients } from "@/lib/report-email";
 import { villaClient } from "@/lib/villa-client";
+import { roleName, WORK_ORDER_BUILT_IN_ROLE } from "@/lib/roles";
 
 export default async function WorkOrderPage({ params }: PageProps<"/work-orders/[id]">) {
   const { id } = await params;
@@ -38,7 +40,13 @@ export default async function WorkOrderPage({ params }: PageProps<"/work-orders/
       team: { select: { name: true, color: true } },
       createdBy: { select: { name: true } },
       completedBy: { select: { name: true } },
-      assignees: { select: { user: { select: { id: true, name: true } } } },
+      assignees: {
+        select: {
+          role: true,
+          jobRole: { select: { id: true, name: true } },
+          user: { select: { id: true, name: true, memberships: { where: { organizationId: ctx.organization.id }, select: { role: true, jobRole: { select: { id: true, name: true } } } } } },
+        },
+      },
       items: { orderBy: { sortOrder: "asc" }, include: { completedBy: { select: { name: true } } } },
       comments: { include: { user: { select: { name: true } }, attachments: true }, orderBy: { createdAt: "asc" } },
       statusLogs: { include: { user: { select: { name: true } } }, orderBy: { createdAt: "asc" } },
@@ -55,7 +63,7 @@ export default async function WorkOrderPage({ params }: PageProps<"/work-orders/
 
   const canExecute = ctx.can("workOrders.execute");
   const canUseParts = canExecute && ctx.can("inventory.use");
-  const [meters, procedures, partOptions, locations, staff] = await Promise.all([
+  const [meters, procedures, partOptions, locations, staff, jobRoles] = await Promise.all([
     wo.assetId ? ctx.db.meter.findMany({ where: { assetId: wo.assetId }, select: { id: true, name: true, unit: true }, orderBy: { name: "asc" } }) : [],
     ctx.db.procedure.findMany({ where: { archivedAt: null }, select: { id: true, name: true }, orderBy: { name: "asc" } }),
     canUseParts
@@ -80,6 +88,7 @@ export default async function WorkOrderPage({ params }: PageProps<"/work-orders/
     canExecute
       ? ctx.db.membership.findMany({ where: { active: true, role: { not: "REQUESTER" } }, select: { user: { select: { id: true, name: true } } }, orderBy: { user: { name: "asc" } } })
       : [],
+    canExecute && wo.status !== "DONE" && wo.status !== "CANCELLED" ? ctx.db.jobRole.findMany({ select: { id: true, name: true }, orderBy: { name: "asc" } }) : [],
   ]);
   // Parts come out of my van by default, else the first warehouse.
   const defaultLocationId =
@@ -129,7 +138,29 @@ export default async function WorkOrderPage({ params }: PageProps<"/work-orders/
     [t("wo.estimatedHours"), wo.estimatedMinutes != null && `${+(wo.estimatedMinutes / 60).toFixed(2)} h`],
     [t("wo.team"), wo.team && (<span className="inline-flex items-center gap-1.5"><span className="size-2 rounded-full" style={{ backgroundColor: wo.team.color }} />{wo.team.name}</span>)],
     [t("categories.title"), wo.categories.length > 0 && <span className="flex flex-wrap gap-1">{wo.categories.map((c) => <CategoryChip key={c.id} name={c.name} color={c.color} />)}</span>],
-    [t("wo.assignees"), wo.assignees.map((a) => a.user.name).join(", ") || <span className="text-muted">{t("wo.unassigned")}</span>],
+    [
+      t("wo.assignees"),
+      <Assignees
+        key="assignees"
+        woId={wo.id}
+        options={[{ value: WORK_ORDER_BUILT_IN_ROLE, label: t(`roles.${WORK_ORDER_BUILT_IN_ROLE}`) }, ...jobRoles.map((r) => ({ value: r.id, label: r.name }))]}
+        assignees={wo.assignees.map((a) => {
+          const own = a.user.memberships[0];
+          const ownName = own ? roleName(own, (r) => t(`roles.${r}`)) : "";
+          // The role taken on this job, else the person's own (shown as such when it can't be taken on a job).
+          const ownValue = own?.jobRole?.id ?? (own?.role === WORK_ORDER_BUILT_IN_ROLE ? WORK_ORDER_BUILT_IN_ROLE : "");
+          return {
+            id: a.user.id,
+            name: a.user.name,
+            value: a.jobRole?.id ?? a.role ?? ownValue,
+            label: a.jobRole?.name ?? (a.role ? t(`roles.${a.role}`) : ownName),
+            ownName,
+            // Each assignee picks their own role on the job; managers set anyone's.
+            editable: canExecute && !closed && (a.user.id === ctx.user.id || ctx.can("workOrders.manage")),
+          };
+        })}
+      />,
+    ],
     [t("wo.createdBy"), `${wo.createdBy.name} · ${dt(wo.createdAt)}`],
     [t("wo.completedBy"), wo.completedBy && wo.completedAt && `${wo.completedBy.name} · ${dt(wo.completedAt)}`],
     [t("wo.fromRequest"), wo.request && `#${wo.request.number}`],

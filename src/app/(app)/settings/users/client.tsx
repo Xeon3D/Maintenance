@@ -6,27 +6,17 @@ import { useTranslations } from "next-intl";
 import { Button, Field, FormError, Input, Select } from "@/components/ui";
 import { eraseMemberAction, inviteUserAction, revokeInviteAction, updateMemberAction } from "../actions";
 
-/** Built-in roles, then the company's custom roles (value "job:<id>"). Labels come from the server. */
-export type RoleOptions = { builtIn: { value: string; label: string }[]; custom: { value: string; label: string }[] };
+/** The company's roles, by name: built-in ones (value = the role) and created ones (value "job:<id>") alike. Labels come from the server. */
+export type RoleOptions = { value: string; label: string }[];
 
 function RoleSelectOptions({ options }: { options: RoleOptions }) {
-  const t = useTranslations("roles");
   return (
     <>
-      {options.builtIn.map((o) => (
+      {options.map((o) => (
         <option key={o.value} value={o.value}>
           {o.label}
         </option>
       ))}
-      {options.custom.length > 0 && (
-        <optgroup label={t("customGroup")}>
-          {options.custom.map((o) => (
-            <option key={o.value} value={o.value}>
-              {o.label}
-            </option>
-          ))}
-        </optgroup>
-      )}
     </>
   );
 }

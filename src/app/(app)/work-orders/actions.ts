@@ -12,8 +12,10 @@ import { contractFor } from "@/lib/contracts";
 import {
   changeStatus,
   createWorkOrder,
+  myRateOn,
   notifyAssigned,
   resolveRefs,
+  restampRate,
   stopRunningTimers,
   validateAssignees,
   validateCategories,
@@ -22,6 +24,7 @@ import {
 import { ChecklistItemType, Priority, SystemType, WorkMode, WorkOrderStatus, WorkOrderType } from "@/generated/prisma/enums";
 import { emailConfigured } from "@/lib/email";
 import { reportRecipients, sendServiceReport } from "@/lib/report-email";
+import { WORK_ORDER_BUILT_IN_ROLE } from "@/lib/roles";
 import { MAX_EXTRA, parseEmailList } from "@/lib/report-recipients";
 
 const path = (id: string) => `/work-orders/${id}`;
@@ -86,7 +89,14 @@ export async function saveWorkOrderAction(id: string | null, _: FormResult, form
           ...refs,
           // Villa or system may have changed: re-pick the covering contract (as of when the job was opened).
           contractId: await contractFor(ctx.db, refs.villaId, refs.system, before.createdAt),
-          assignees: { deleteMany: {}, create: ids.map((userId) => ({ userId })) },
+          // People who stay on the job keep the role they took on it.
+          assignees: {
+            deleteMany: {},
+            create: ids.map((userId) => {
+              const was = before.assignees.find((a) => a.userId === userId);
+              return { userId, role: was?.role, jobRoleId: was?.jobRoleId };
+            }),
+          },
           categories: { set: cats.map((c) => ({ id: c })) },
         },
       });
@@ -110,6 +120,34 @@ export async function deleteWorkOrderAction(id: string) {
   await Promise.all(atts.map((a) => deleteObject(a.url)));
   revalidatePath("/work-orders");
   redirect("/work-orders");
+}
+
+// ── Assignee roles
+
+/**
+ * The role someone takes on this job: "" (their own), Technician, or one of the company's roles (its id); never the
+ * office, finance or client roles. Their time on the job is then charged at that role's rate. Assignees set their
+ * own, managers anyone's; locked once the job is closed.
+ */
+export async function setAssigneeRoleAction(id: string, userId: string, choice: string) {
+  const ctx = await requirePermission("workOrders.execute");
+  if (userId !== ctx.user.id && !ctx.can("workOrders.manage")) throw new Error("Forbidden");
+  const wo = await ctx.db.workOrder.findUnique({ where: { id }, select: { status: true, assignees: { where: { userId }, select: { userId: true } } } });
+  if (!wo || !wo.assignees.length) throw new Error("Not found");
+  if (wo.status === "DONE" || wo.status === "CANCELLED") throw new Error("Closed");
+  let data: { role: typeof WORK_ORDER_BUILT_IN_ROLE | null; jobRoleId: string | null } = { role: null, jobRoleId: null };
+  if (choice === WORK_ORDER_BUILT_IN_ROLE) data = { role: WORK_ORDER_BUILT_IN_ROLE, jobRoleId: null };
+  else if (choice) {
+    const jobRole = await ctx.db.jobRole.findFirst({ where: { id: choice }, select: { id: true } });
+    if (!jobRole) throw new Error("Invalid role");
+    data = { role: null, jobRoleId: jobRole.id };
+  }
+  await ctx.db.workOrder.update({
+    where: { id },
+    data: { assignees: { update: { where: { workOrderId_userId: { workOrderId: id, userId } }, data } } },
+  });
+  await restampRate(ctx, id, userId);
+  revalidatePath(path(id));
 }
 
 // ── Status
@@ -216,7 +254,7 @@ export async function startTimerAction(woId: string, mode: WorkMode = WorkMode.O
   const running = await ctx.db.timeEntry.findFirst({ where: { workOrderId: woId, userId: ctx.user.id, endedAt: null } });
   if (!running) {
     await ctx.db.timeEntry.create({
-      data: { workOrderId: woId, userId: ctx.user.id, startedAt: new Date(), hourlyRate: ctx.hourlyRate, mode: workMode(mode) },
+      data: { workOrderId: woId, userId: ctx.user.id, startedAt: new Date(), hourlyRate: await myRateOn(ctx, woId), mode: workMode(mode) },
     });
   }
   if (wo.status === "OPEN" || wo.status === "ON_HOLD") await changeStatus(ctx, woId, "IN_PROGRESS");
@@ -248,7 +286,7 @@ export async function addTimeAction(woId: string, _: FormResult, form: FormData)
       endedAt: new Date(date.getTime() + minutes * 60_000),
       minutes,
       note,
-      hourlyRate: ctx.hourlyRate,
+      hourlyRate: await myRateOn(ctx, woId),
       mode: workMode(form.get("mode")),
     },
   });

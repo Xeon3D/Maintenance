@@ -390,6 +390,7 @@ model JobRole {
   organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
   memberships  Membership[]
   invitations  Invitation[]
+  assignees    WorkOrderAssignee[]
 
   @@unique([organizationId, name])
   @@index([organizationId])
@@ -780,9 +781,14 @@ model WorkOrder {
 model WorkOrderAssignee {
   workOrderId String
   userId      String
+  // The role the person takes on this job (it sets the rate of their time on it): Technician, or one of the
+  // company's roles. Both empty = their own role.
+  role        Role?
+  jobRoleId   String?
 
   workOrder WorkOrder @relation(fields: [workOrderId], references: [id], onDelete: Cascade)
   user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  jobRole   JobRole?  @relation(fields: [jobRoleId], references: [id], onDelete: SetNull)
 
   @@id([workOrderId, userId])
   @@index([userId])

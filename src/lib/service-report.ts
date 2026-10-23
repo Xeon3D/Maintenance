@@ -35,7 +35,7 @@ export async function renderServiceReport(ctx: Pick<AppContext, "db" | "organiza
       villa: { select: { name: true, address: true, city: true, client: { select: { name: true } }, manager: { select: { name: true } }, billTo: true } },
       area: { select: { name: true } },
       asset: { select: { name: true, manufacturer: true, model: true, serialNumber: true } },
-      assignees: { select: { user: { select: { name: true } } } },
+      assignees: { select: { role: true, jobRole: { select: { name: true } }, user: { select: { name: true } } } },
       completedBy: { select: { name: true } },
       items: { orderBy: { sortOrder: "asc" } },
       timeEntries: { where: { minutes: { not: null } }, include: { user: { select: { name: true } } }, orderBy: { startedAt: "asc" } },
@@ -98,7 +98,8 @@ export async function renderServiceReport(ctx: Pick<AppContext, "db" | "organiza
     // Trips charged for on-site work: the client sees how many, without amounts.
     [t("report.trips"), trips > 0 ? String(trips) : null],
     [t("common.status"), t(`woStatus.${wo.status}`)],
-    [t("wo.technicians"), wo.assignees.map((a) => a.user.name).join(", ")],
+    // With the role each took on the job, when they picked one (Helper, Engineer…).
+    [t("wo.technicians"), wo.assignees.map((a) => { const role = a.jobRole?.name ?? (a.role && t(`roles.${a.role}`)); return role ? `${a.user.name} (${role})` : a.user.name; }).join(", ")],
     [t("wo.createdAt"), dt(wo.createdAt)],
     [t("wo.completedAt"), wo.completedAt && dt(wo.completedAt)],
   ];

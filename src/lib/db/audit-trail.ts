@@ -75,9 +75,10 @@ function replacedIds(op: unknown): { key: string; ids: string[] } | null {
   if (Array.isArray(op.set)) return { key: "id", ids: op.set.map((x) => String((x as Row).id)) };
   if (isObj(op.deleteMany) && Object.keys(op.deleteMany).length === 0) {
     const items = list(op.create);
-    // Only join rows ({ userId }), not records with their own fields (checklist items…).
-    if (items.some((i) => Object.keys(i).length !== 1)) return null;
-    const key = items.length ? Object.keys(items[0])[0] : "id";
+    // Only join rows ({ userId }, assignees also keep their role on the job), not records with their own fields (checklist items…).
+    const keysOf = (i: Row) => Object.keys(i).filter((k) => k !== "role" && k !== "jobRoleId");
+    if (items.some((i) => keysOf(i).length !== 1)) return null;
+    const key = items.length ? keysOf(items[0])[0] : "id";
     if (!key.endsWith("Id") && key !== "id") return null;
     return { key, ids: items.map((i) => String(i[key])) };
   }

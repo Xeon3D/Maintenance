@@ -86,6 +86,12 @@ At the top are the title, the status, the system, the priority and, if it applie
 
 On the right, the details card sums up the job: villa, client, area, asset, type, dates, team, categories, who it's assigned to, who created and completed it, the request it came from and the contract. Below it are the panels for time, photos and files, parts, amounts to bill, client sign-off and e-mailing the report.
 
+## Your role on the job
+
+Under **Assigned to**, each person has a role on this job, next to their name. By default it is their own role. To take another one, for example **Helper** when you only help on a job outside your field, pick it in the list next to your name. The choices are Technician and every role the company created in [Roles](/help/roles); Super Admin, Administrator, Manager, Accountant, Viewer and Client can't be taken on a job. Managers can set anyone's role.
+
+Your time on the job is charged at the price of the role you take on it, including the time you already logged. The service report shows the role next to the name of anyone who took one. Once the job is done or cancelled the role can no longer be changed.
+
 ## Statuses
 
 The status buttons at the top of the page move the job along:
@@ -293,6 +299,12 @@ Para alterar uma ordem de trabalho mais tarde, abra-a e clique em **Editar**. Se
 No topo estão o título, o estado, o sistema, a prioridade e, se for o caso, **Em atraso**. Os botões à direita abrem o **Relatório de serviço** (PDF), permitem **Editar** a ordem de trabalho e eliminá-la.
 
 À direita, o cartão de detalhes resume o trabalho: moradia, cliente, área, equipamento, tipo, datas, equipa, categorias, a quem está atribuída, quem a criou e concluiu, o pedido de origem e o contrato. Por baixo estão os painéis de tempo, fotografias e ficheiros, peças, valores a faturar, aprovação do cliente e envio do relatório por e-mail.
+
+## A sua função no trabalho
+
+Em **Atribuída a**, cada pessoa tem uma função neste trabalho, junto ao seu nome. Por defeito é a sua própria função. Para ter outra, por exemplo **Helper** quando só ajuda num trabalho fora da sua área, escolha-a na lista junto ao seu nome. As opções são Técnico e todas as funções criadas pela empresa em [Funções](/help/roles); Super Admin, Administrador, Gestor, Contabilista, Observador e Cliente não podem ser escolhidas num trabalho. Os gestores podem definir a função de qualquer pessoa.
+
+O seu tempo no trabalho é cobrado ao preço da função que tem nele, incluindo o tempo já registado. O relatório de serviço mostra a função junto ao nome de quem escolheu uma. Depois de o trabalho ficar concluído ou cancelado, a função já não pode ser alterada.
 
 ## Estados
 

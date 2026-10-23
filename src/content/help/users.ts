@@ -22,7 +22,7 @@ The page has three parts:
 ## Inviting someone
 
 1. In **Invite user**, type the person's **Email**.
-2. Choose a **Role**. The built-in roles come first; your own roles appear under **Custom roles**.
+2. Choose a **Role**. The list has every role, by name, including the ones your company created.
 3. Click **Create invitation**.
 
 The person receives an e-mail with a link to join (in the language you are using). The link is also shown on the page, with a **Copy** button, so you can send it another way, for example by WhatsApp. It expires in 7 days.
@@ -82,7 +82,7 @@ A página tem três partes:
 ## Convidar uma pessoa
 
 1. Em **Convidar utilizador**, escreva o **Email** da pessoa.
-2. Escolha uma **Função**. Primeiro aparecem as funções base; as suas próprias funções aparecem em **Funções personalizadas**.
+2. Escolha uma **Função**. A lista tem todas as funções, por nome, incluindo as criadas pela sua empresa.
 3. Clique em **Criar convite**.
 
 A pessoa recebe um e-mail com uma ligação para entrar (no idioma que está a usar). A ligação também aparece na página, com um botão **Copiar**, para a poder enviar de outra forma, por exemplo por WhatsApp. Expira dentro de 7 dias.

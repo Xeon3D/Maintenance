@@ -43,7 +43,7 @@ Each person has a role in the company. The usual defaults are:
 - **Viewer**: can look at everything internal but not change it.
 - **Client (requester)**: only sees the client portal: their villas, their requests and the jobs shared with them.
 
-> The Super Admin can change these permissions, and create custom roles, in [Settings → Roles](/help/roles). If a button or menu entry described in this help is missing for you, your role doesn't include it.
+> The Super Admin can change these permissions, and create roles, in [Settings → Roles](/help/roles). If a button or menu entry described in this help is missing for you, your role doesn't include it.
 
 ## Things that work the same everywhere
 
@@ -98,7 +98,7 @@ Cada pessoa tem uma função na empresa. Por defeito:
 - **Observador**: vê toda a informação interna, mas não a altera.
 - **Cliente (requerente)**: só vê o portal do cliente: as suas moradias, os seus pedidos e os trabalhos partilhados com ele.
 
-> O Super Admin pode alterar estas permissões, e criar funções personalizadas, em [Definições → Funções](/help/roles). Se lhe faltar um botão ou entrada de menu descritos nesta ajuda, a sua função não o inclui.
+> O Super Admin pode alterar estas permissões, e criar funções, em [Definições → Funções](/help/roles). Se lhe faltar um botão ou entrada de menu descritos nesta ajuda, a sua função não o inclui.
 
 ## O que funciona igual em todo o lado
 

@@ -13,8 +13,8 @@ import { PermissionList, ResetRolePermissionsButton } from "./client";
 export const generateMetadata = titled("perms.title");
 
 /**
- * What one role may do, opened from its "Permissions" button in Settings → Roles. `role` is a built-in role or a
- * custom role's id. The Super Admin edits it; everyone else with access to Roles sees it read-only.
+ * What one role may do, opened from its "Permissions" button in Settings → Roles. `role` is a built-in role or the
+ * id of a role the company created. The Super Admin edits it; everyone else with access to Roles sees it read-only.
  * Super Admin (everything) and the client role are fixed.
  */
 export default async function RolePermissionsPage({ params }: PageProps<"/settings/roles/[role]/permissions">) {
@@ -28,7 +28,6 @@ export default async function RolePermissionsPage({ params }: PageProps<"/settin
   let granted: Permission[];
   let customised = false;
   let fixed = false;
-  let sub: string | undefined;
   if (key === "OWNER" || key === "REQUESTER") {
     name = t(`roles.${key}`);
     granted = key === "OWNER" ? GRANTABLE : GRANTABLE.filter((p) => defaultPermissions("REQUESTER").includes(p));
@@ -41,7 +40,6 @@ export default async function RolePermissionsPage({ params }: PageProps<"/settin
     const j = await ctx.db.jobRole.findFirst({ where: { id: key }, select: { name: true, access: true, permissions: true } });
     if (!j) notFound();
     name = j.name;
-    sub = t("roles.accessLike", { role: t(`roles.${j.access}`) });
     granted = jobRolePermissionsFor(j.access, j.permissions, overrides);
     customised = parsePermissionList(j.permissions) !== null;
   }
@@ -60,7 +58,7 @@ export default async function RolePermissionsPage({ params }: PageProps<"/settin
       <BackLink href="/settings/roles" label={t("roles.title")} />
       <PageHeader
         title={t("perms.pageTitle", { role: name })}
-        description={[sub, t(fixed ? (key === "OWNER" ? "perms.fixedAllHint" : "perms.fixedClientHint") : "perms.pageHint")].filter(Boolean).join(" · ")}
+        description={t(fixed ? (key === "OWNER" ? "perms.fixedAllHint" : "perms.fixedClientHint") : "perms.pageHint")}
         actions={customised && <Badge className="bg-amber-50 text-amber-800">{t("perms.customised")}</Badge>}
       />
       <div className="max-w-3xl">

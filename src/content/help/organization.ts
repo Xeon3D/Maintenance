@@ -67,7 +67,7 @@ The company has a public privacy notice, linked from request forms, the client p
 
 When someone e-mails a service report from a work order, the client is offered as a recipient. The **Service report copies** section adds company recipients that are offered every time, besides the client:
 
-- **Everyone in these roles**: tick roles, including your custom roles.
+- **Everyone in these roles**: tick roles, including the ones your company created.
 - **These people**: tick individual staff members.
 - **These addresses**: other e-mail addresses, one per line (for example your accounts department).
 
@@ -161,7 +161,7 @@ A **Conservação de dados** define durante quanto tempo se guardam os registos 
 
 Quando alguém envia por e-mail um relatório de serviço a partir de uma ordem de trabalho, o cliente é sugerido como destinatário. A secção **Cópias dos relatórios de serviço** acrescenta destinatários da empresa que são sugeridos sempre, além do cliente:
 
-- **Todas as pessoas destas funções**: marque funções, incluindo as suas funções personalizadas.
+- **Todas as pessoas destas funções**: marque funções, incluindo as criadas pela sua empresa.
 - **Estas pessoas**: marque colaboradores individuais.
 - **Estes endereços**: outros endereços de e-mail, um por linha (por exemplo a contabilidade).
 
