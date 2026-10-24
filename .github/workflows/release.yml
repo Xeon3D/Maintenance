@@ -7,7 +7,7 @@ name: Release
 #      io.villaops.release-notes index annotation (base64 JSON array of lines; see src/lib/updates.ts);
 #   2. then creates the GitHub release with the same notes.
 # Needs repository secrets DOCKERHUB_USERNAME and DOCKERHUB_TOKEN (a Docker Hub access token with
-# Read & Write). The image name defaults to malvesdc/maintenance; override with the DOCKERHUB_IMAGE variable.
+# Read & Write). The image name defaults to xeon3d/maintenance; override with the DOCKERHUB_IMAGE variable.
 
 on:
   push:
@@ -26,7 +26,7 @@ concurrency:
   cancel-in-progress: false
 
 env:
-  IMAGE: ${{ vars.DOCKERHUB_IMAGE || 'malvesdc/maintenance' }}
+  IMAGE: ${{ vars.DOCKERHUB_IMAGE || 'xeon3d/maintenance' }}
   TAG: ${{ inputs.tag || github.ref_name }}
 
 jobs:

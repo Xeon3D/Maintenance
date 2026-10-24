@@ -137,12 +137,12 @@ restart `next dev` after adding a file. `npx playwright install --with-deps chro
   CASCADE` + `pg_restore` (rolls back to the safety copy on failure), replace uploads, merge keys into
   `DATA_DIR/secrets.env`, then `process.exit(0)` so Docker restarts it and the entrypoint re-runs migrations.
   Scheduler: `runServerJobs()` every minute from `src/instrumentation-node.ts`; period keys in `BACKUP_DIR/.state.json`.
-- Updates (`src/lib/updates.ts`, since 0.4.13): the `X.Y.Z` tags of `APP_IMAGE` (default `malvesdc/maintenance`)
+- Updates (`src/lib/updates.ts`, since 0.4.13): the `X.Y.Z` tags of `APP_IMAGE` (default `xeon3d/maintenance`)
   from the Docker Hub API (6 h cache) vs `APP_VERSION`. Notes of up to 5 newer versions come from the image index
   annotation `io.villaops.release-notes` (base64 JSON array, written by `scripts/release-notes.mjs` in
   `release.yml`; anonymous registry token, one manifest GET per version, cached per process). Up to 0.4.12 the
   check read GitHub releases, which stopped working when the repository went private. "Update now" =
-  `pre-update` backup + `POST $UPDATER_URL/v1/update?image=malvesdc/maintenance&async=true` with the token the
+  `pre-update` backup + `POST $UPDATER_URL/v1/update?image=xeon3d/maintenance&async=true` with the token the
   entrypoint writes to `DATA_DIR/updater-token` (Watchtower reads it from its read-only mount). Watchtower
   fork `nickfedor/watchtower` (the original containrrr one is archived); HTTP API mode disables its polling.
 - Tested 2026-09-29 in a local compose stack: scheduled + manual backups, download, upload (valid/invalid),

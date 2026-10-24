@@ -8,7 +8,7 @@ import { dataDir } from "@/lib/server-settings";
 // repository), and the trigger for the Watchtower sidecar ("updater" in docker-compose.yml) that
 // pulls the new image and recreates only the app container.
 
-const IMAGE = () => process.env.APP_IMAGE || "malvesdc/maintenance";
+const IMAGE = () => process.env.APP_IMAGE || "xeon3d/maintenance";
 const CHECK_TTL = 6 * 3_600_000;
 /** Index annotation that release.yml puts on each image: base64 of a JSON array of release-note lines. */
 export const NOTES_ANNOTATION = "io.villaops.release-notes";
@@ -32,7 +32,7 @@ let cache: { at: number; releases: ReleaseInfo[]; error: string | null } | null 
 /** Notes never change for a published version, so they are read once per process. */
 const notesCache = new Map<string, string[]>();
 
-/** "docker.io/malvesdc/maintenance:latest" → "malvesdc/maintenance" (official images live in "library/"). */
+/** "docker.io/xeon3d/maintenance:latest" → "xeon3d/maintenance" (official images live in "library/"). */
 export function hubRepository(image: string) {
   const name = image.replace(/^(?:docker\.io|index\.docker\.io|registry-1\.docker\.io)\//, "").replace(/[:@].*$/, "");
   return name.includes("/") ? name : `library/${name}`;
