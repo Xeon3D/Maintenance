@@ -18,7 +18,7 @@ export default async function PortalRequestPage({ params }: PageProps<"/portal/r
   const r = await ctx.db.request.findFirst({
     where: { id, ...ctx.requestWhere },
     include: {
-      villa: { select: { name: true } },
+      villa: { select: { id: true, name: true } },
       asset: { select: { name: true } },
       attachments: { orderBy: { createdAt: "asc" } },
       workOrder: {
@@ -55,7 +55,7 @@ export default async function PortalRequestPage({ params }: PageProps<"/portal/r
 
   return (
     <>
-      <BackLink href="/portal" label={t("portal.title")} />
+      {r.villa ? <BackLink href={`/portal/villas/${r.villa.id}/requests`} label={t("portal.pastRequests")} /> : <BackLink href="/portal" label={t("portal.yourVillas")} />}
       <h1 className="text-xl font-semibold">{r.title}</h1>
       <p className="mb-5 mt-1 text-sm text-muted">
         R{r.number} · {r.villa?.name}
@@ -104,9 +104,8 @@ export default async function PortalRequestPage({ params }: PageProps<"/portal/r
           )}
           {wo?.status === "DONE" && (
             <Link
-              href={`/work-orders/${wo.id}/report`}
+              href={`/report/${wo.id}`}
               prefetch={false}
-              target="_blank"
               className="mt-3 inline-flex items-center gap-1 text-sm font-medium text-brand"
             >
               <FileDown className="size-4" />

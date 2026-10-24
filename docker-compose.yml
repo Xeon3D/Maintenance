@@ -6,7 +6,7 @@ name: maintenance
 services:
   app:
     # "latest" lets Settings → Server install new versions with one click (through the updater below).
-    image: xeon3d/maintenance:latest
+    image: malvesdc/maintenance:latest
     restart: unless-stopped
     depends_on:
       db:
@@ -22,12 +22,20 @@ services:
       APP_URL: https://maintenance.example.com
       # Create the demo company (owner@demo.test / demo1234) when the database is empty.
       SEED_DEMO: "true"
+      # Public demo server: shows a banner on every page asking people not to enter real personal data.
+      DEMO_MODE: "false"
       # Server password: unlocks Settings → Server (software name, updates, backups).
       SERVER_ADMIN_PASSWORD: ""
       # Enables the "Factory reset" page (erases everything, restores the demo). Leave empty to disable.
       # If SERVER_ADMIN_PASSWORD is empty, this password also unlocks Settings → Server.
       FACTORY_RESET_PASSWORD: ""
-      # Optional e-mail delivery through Resend; without it e-mails are only logged.
+      # "false" closes public sign-up ("Create account" on the sign-in page) whatever Settings → Server says.
+      # Invited people can still create their accounts. Empty: decided in Settings → Server (open by default).
+      ALLOW_SIGNUP: ""
+      # Encrypts new backups (AES-256). Keep it safe: encrypted backups can't be restored without it.
+      BACKUP_PASSWORD: ""
+      # E-mail is set up in Settings → Server → E-mail (SMTP account or Resend). These two are only
+      # used when that is left on "Environment variables"; without either, e-mails are only logged.
       RESEND_API_KEY: ""
       EMAIL_FROM: ""
       # Watchtower sidecar that installs updates (see "updater" below).

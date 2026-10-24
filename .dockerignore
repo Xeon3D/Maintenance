@@ -12,3 +12,6 @@ coverage
 next-env.d.ts
 Dockerfile
 docker-compose*.yml
+test-results
+playwright-report
+e2e

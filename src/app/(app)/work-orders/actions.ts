@@ -12,13 +12,20 @@ import { contractFor } from "@/lib/contracts";
 import {
   changeStatus,
   createWorkOrder,
+  myRateOn,
   notifyAssigned,
   resolveRefs,
+  restampRate,
   stopRunningTimers,
   validateAssignees,
+  validateCategories,
   WorkOrderError,
 } from "@/lib/work-orders";
-import { ChecklistItemType, Priority, SystemType, WorkOrderStatus, WorkOrderType } from "@/generated/prisma/enums";
+import { ChecklistItemType, Priority, SystemType, WorkMode, WorkOrderStatus, WorkOrderType } from "@/generated/prisma/enums";
+import { emailConfigured } from "@/lib/email";
+import { reportRecipients, sendServiceReport } from "@/lib/report-email";
+import { WORK_ORDER_BUILT_IN_ROLE } from "@/lib/roles";
+import { MAX_EXTRA, parseEmailList } from "@/lib/report-recipients";
 
 const path = (id: string) => `/work-orders/${id}`;
 
@@ -64,7 +71,8 @@ export async function saveWorkOrderAction(id: string | null, _: FormResult, form
   const { estimatedHours, ...data } = parsed.data;
   const assigneeIds = form.getAll("assigneeIds").map(String).filter(Boolean);
   const fields = { ...data, estimatedMinutes: estimatedHours === null ? null : Math.round(estimatedHours * 60) };
-  const input = { ...fields, assigneeIds };
+  const categoryIds = form.getAll("categoryIds").map(String).filter(Boolean);
+  const input = { ...fields, assigneeIds, categoryIds };
 
   let woId = id;
   try {
@@ -72,6 +80,7 @@ export async function saveWorkOrderAction(id: string | null, _: FormResult, form
       const before = await editableWorkOrder(ctx, id);
       const refs = await resolveRefs(ctx, input);
       const ids = await validateAssignees(ctx, assigneeIds);
+      const cats = await validateCategories(ctx, categoryIds);
       const wo = await ctx.db.workOrder.update({
         where: { id },
         data: {
@@ -80,7 +89,16 @@ export async function saveWorkOrderAction(id: string | null, _: FormResult, form
           ...refs,
           // Villa or system may have changed: re-pick the covering contract (as of when the job was opened).
           contractId: await contractFor(ctx.db, refs.villaId, refs.system, before.createdAt),
-          assignees: { deleteMany: {}, create: ids.map((userId) => ({ userId })) } },
+          // People who stay on the job keep the role they took on it.
+          assignees: {
+            deleteMany: {},
+            create: ids.map((userId) => {
+              const was = before.assignees.find((a) => a.userId === userId);
+              return { userId, role: was?.role, jobRoleId: was?.jobRoleId };
+            }),
+          },
+          categories: { set: cats.map((c) => ({ id: c })) },
+        },
       });
       const had = new Set(before.assignees.map((a) => a.userId));
       await notifyAssigned(ctx, wo, ids.filter((u) => !had.has(u)));
@@ -102,6 +120,34 @@ export async function deleteWorkOrderAction(id: string) {
   await Promise.all(atts.map((a) => deleteObject(a.url)));
   revalidatePath("/work-orders");
   redirect("/work-orders");
+}
+
+// ── Assignee roles
+
+/**
+ * The role someone takes on this job: "" (their own), Technician, or one of the company's roles (its id); never the
+ * office, finance or client roles. Their time on the job is then charged at that role's rate. Assignees set their
+ * own, managers anyone's; locked once the job is closed.
+ */
+export async function setAssigneeRoleAction(id: string, userId: string, choice: string) {
+  const ctx = await requirePermission("workOrders.execute");
+  if (userId !== ctx.user.id && !ctx.can("workOrders.manage")) throw new Error("Forbidden");
+  const wo = await ctx.db.workOrder.findUnique({ where: { id }, select: { status: true, assignees: { where: { userId }, select: { userId: true } } } });
+  if (!wo || !wo.assignees.length) throw new Error("Not found");
+  if (wo.status === "DONE" || wo.status === "CANCELLED") throw new Error("Closed");
+  let data: { role: typeof WORK_ORDER_BUILT_IN_ROLE | null; jobRoleId: string | null } = { role: null, jobRoleId: null };
+  if (choice === WORK_ORDER_BUILT_IN_ROLE) data = { role: WORK_ORDER_BUILT_IN_ROLE, jobRoleId: null };
+  else if (choice) {
+    const jobRole = await ctx.db.jobRole.findFirst({ where: { id: choice }, select: { id: true } });
+    if (!jobRole) throw new Error("Invalid role");
+    data = { role: null, jobRoleId: jobRole.id };
+  }
+  await ctx.db.workOrder.update({
+    where: { id },
+    data: { assignees: { update: { where: { workOrderId_userId: { workOrderId: id, userId } }, data } } },
+  });
+  await restampRate(ctx, id, userId);
+  revalidatePath(path(id));
 }
 
 // ── Status
@@ -200,12 +246,15 @@ export async function answerItemAction(woId: string, itemId: string, value: stri
 
 // ── Time tracking
 
-export async function startTimerAction(woId: string) {
+/** On site unless the value says remote (a stale client or a bad value never makes work remote by accident). */
+const workMode = (v: unknown): WorkMode => (v === WorkMode.REMOTE ? WorkMode.REMOTE : WorkMode.ONSITE);
+
+export async function startTimerAction(woId: string, mode: WorkMode = WorkMode.ONSITE) {
   const { ctx, wo } = await executableWorkOrder(woId);
   const running = await ctx.db.timeEntry.findFirst({ where: { workOrderId: woId, userId: ctx.user.id, endedAt: null } });
   if (!running) {
     await ctx.db.timeEntry.create({
-      data: { workOrderId: woId, userId: ctx.user.id, startedAt: new Date(), hourlyRate: ctx.hourlyRate },
+      data: { workOrderId: woId, userId: ctx.user.id, startedAt: new Date(), hourlyRate: await myRateOn(ctx, woId), mode: workMode(mode) },
     });
   }
   if (wo.status === "OPEN" || wo.status === "ON_HOLD") await changeStatus(ctx, woId, "IN_PROGRESS");
@@ -237,11 +286,20 @@ export async function addTimeAction(woId: string, _: FormResult, form: FormData)
       endedAt: new Date(date.getTime() + minutes * 60_000),
       minutes,
       note,
-      hourlyRate: ctx.hourlyRate,
+      hourlyRate: await myRateOn(ctx, woId),
+      mode: workMode(form.get("mode")),
     },
   });
   revalidatePath(path(woId));
   return { ok: true };
+}
+
+/** Corrects where a time entry was worked (on site / remote): my own entries, or anyone's with workOrders.manage. */
+export async function setTimeModeAction(woId: string, entryId: string, mode: WorkMode) {
+  const { ctx } = await executableWorkOrder(woId);
+  const own = ctx.can("workOrders.manage") ? {} : { userId: ctx.user.id };
+  await ctx.db.timeEntry.updateMany({ where: { id: entryId, workOrderId: woId, ...own }, data: { mode: workMode(mode) } });
+  revalidatePath(path(woId));
 }
 
 export async function deleteTimeAction(woId: string, entryId: string) {
@@ -306,8 +364,9 @@ export async function addPartAction(woId: string, _: FormResult, form: FormData)
   const parsed = parseForm(partUseSchema, form);
   if (parsed.error) return parsed.error;
   const { partId, locationId, quantity } = parsed.data;
+  const serials = String(form.get("serials") ?? "").split(/[\n,;]+/);
   try {
-    await consumePart(ctx, woId, partId, locationId, quantity);
+    await consumePart(ctx, woId, partId, locationId, quantity, serials);
   } catch (e) {
     if (e instanceof InventoryError) return { error: `stock.${e.code}` };
     throw e;
@@ -350,4 +409,27 @@ export async function clearSignOffAction(woId: string) {
   }
   await ctx.db.workOrder.update({ where: { id: woId }, data: { signatureUrl: null, signedByName: null, signedAt: null } });
   revalidatePath(path(woId));
+}
+
+// ── Service report by e-mail
+
+/**
+ * Sends the PDF service report. Ticked addresses must come from the work order's default recipients
+ * (recomputed here, so the form can't add hidden ones); extra addresses are typed by the sender.
+ */
+export async function sendReportAction(woId: string, _: FormResult, form: FormData): Promise<FormResult> {
+  const ctx = await requirePermission("workOrders.sendReport");
+  if (!(await emailConfigured())) return { error: "reportEmail.notConfigured" };
+  const found = await reportRecipients(ctx, woId);
+  if (!found) return { error: "somethingWrong" };
+  const offered = new Set(found.recipients.map((r) => r.email));
+  const ticked = form.getAll("to").map(String).filter((e) => offered.has(e));
+  const extra = parseEmailList(String(form.get("extra") ?? ""));
+  if (extra.invalid.length) return { error: "validation", fieldErrors: { extra: "badEmails" } };
+  if (extra.emails.length > MAX_EXTRA) return { error: "validation", fieldErrors: { extra: "too_big" } };
+  const to = [...new Set([...ticked, ...extra.emails])];
+  if (to.length === 0) return { error: "reportEmail.noRecipients" };
+  await sendServiceReport(ctx, woId, to);
+  revalidatePath(path(woId));
+  return { ok: true };
 }

@@ -1,7 +1,7 @@
 import { revalidatePath } from "next/cache";
 import { z, ZodError } from "zod";
 import { getContext } from "@/lib/context";
-import { changeStatus, WorkOrderError } from "@/lib/work-orders";
+import { changeStatus, myRateOn, WorkOrderError } from "@/lib/work-orders";
 import { addComment, addTimeEntry, answerItem, clampAt, setClientAbsent, signOff } from "@/lib/wo-ops";
 import { enumOf } from "@/lib/forms";
 import { WorkOrderStatus } from "@/generated/prisma/enums";
@@ -13,7 +13,7 @@ const base = { id, woId: z.string().min(1).max(40), at: z.string().max(40) };
 const opSchema = z.discriminatedUnion("kind", [
   z.object({ ...base, kind: z.literal("answer"), itemId: z.string().min(1).max(40), value: z.string().max(5000).nullable(), note: z.string().max(2000).nullish() }),
   z.object({ ...base, kind: z.literal("comment"), body: z.string().max(5000) }),
-  z.object({ ...base, kind: z.literal("time"), startedAt: z.string().max(40), endedAt: z.string().max(40), note: z.string().max(500).nullish() }),
+  z.object({ ...base, kind: z.literal("time"), startedAt: z.string().max(40), endedAt: z.string().max(40), note: z.string().max(500).nullish(), mode: z.enum(["ONSITE", "REMOTE"]).optional() }),
   z.object({ ...base, kind: z.literal("status"), status: enumOf(WorkOrderStatus), note: z.string().max(1000).nullish() }),
   z.object({ ...base, kind: z.literal("signoff"), name: z.string().max(150), attachmentId: z.string().min(1).max(40) }),
   z.object({ ...base, kind: z.literal("clientAbsent"), absent: z.boolean() }),
@@ -63,7 +63,7 @@ export async function POST(req: Request) {
         await addComment(ctx, o.woId, o.body, [], clampAt(o.at));
         result = { id: o.id, status: "applied" };
       } else if (o.kind === "time") {
-        await addTimeEntry(ctx, o.woId, ctx.hourlyRate, clampAt(o.startedAt), clampAt(o.endedAt), o.note ?? null);
+        await addTimeEntry(ctx, o.woId, await myRateOn(ctx, o.woId), clampAt(o.startedAt), clampAt(o.endedAt), o.note ?? null, o.mode ?? "ONSITE");
         result = { id: o.id, status: "applied" };
       } else if (o.kind === "signoff") {
         await signOff(ctx, o.woId, o.name, o.attachmentId, clampAt(o.at));

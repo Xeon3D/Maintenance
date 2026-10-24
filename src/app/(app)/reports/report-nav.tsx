@@ -3,8 +3,9 @@
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { Input, Select } from "@/components/ui";
+import { Select } from "@/components/ui";
 import { cn } from "@/lib/utils";
+import { DateInput } from "@/components/date-input";
 
 const TABS = [
   { href: "/reports", key: "overview" },
@@ -18,7 +19,7 @@ const TABS = [
 type Option = { id: string; name: string };
 
 /** One filter row above everything it scopes, then the tabs (which keep the filters). */
-export function ReportNav({ clients, villas, systems }: { clients: Option[]; villas: (Option & { clientId: string })[]; systems: string[] }) {
+export function ReportNav({ clients, villas, systems, showCosts }: { clients: Option[]; villas: (Option & { clientId: string | null; managerId: string | null })[]; systems: string[]; showCosts: boolean }) {
   const t = useTranslations();
   const router = useRouter();
   const pathname = usePathname();
@@ -47,9 +48,9 @@ export function ReportNav({ clients, villas, systems }: { clients: Option[]; vil
         </Select>
         {range === "custom" && (
           <>
-            <Input type="date" aria-label={t("reports.from")} className="w-auto" defaultValue={params.get("from") ?? ""} onChange={(e) => set({ from: e.target.value })} />
+            <DateInput aria-label={t("reports.from")} className="w-36" defaultValue={params.get("from") ?? ""} onChange={(v) => set({ from: v })} />
             <span className="text-sm text-muted">–</span>
-            <Input type="date" aria-label={t("reports.to")} className="w-auto" defaultValue={params.get("to") ?? ""} onChange={(e) => set({ to: e.target.value })} />
+            <DateInput aria-label={t("reports.to")} className="w-36" defaultValue={params.get("to") ?? ""} onChange={(v) => set({ to: v })} />
           </>
         )}
         <Select aria-label={t("villas.client")} value={clientId} onChange={(e) => set({ clientId: e.target.value, villaId: "" })}>
@@ -63,7 +64,7 @@ export function ReportNav({ clients, villas, systems }: { clients: Option[]; vil
         <Select aria-label={t("assets.villa")} value={params.get("villaId") ?? ""} onChange={(e) => set({ villaId: e.target.value })}>
           <option value="">{t("assets.allVillas")}</option>
           {villas
-            .filter((v) => !clientId || v.clientId === clientId)
+            .filter((v) => !clientId || v.clientId === clientId || v.managerId === clientId)
             .map((v) => (
               <option key={v.id} value={v.id}>
                 {v.name}
@@ -80,7 +81,7 @@ export function ReportNav({ clients, villas, systems }: { clients: Option[]; vil
         </Select>
       </div>
       <nav className="-mb-px flex gap-1 overflow-x-auto border-b border-border">
-        {TABS.map((tab) => {
+        {TABS.filter((tab) => showCosts || tab.key !== "costs").map((tab) => {
           const active = pathname === tab.href;
           return (
             <Link

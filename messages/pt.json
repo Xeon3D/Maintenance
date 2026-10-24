@@ -22,6 +22,7 @@
     "comingSoon": "Em breve",
     "you": "você",
     "somethingWrong": "Algo correu mal. Tente novamente.",
+    "holdToShowPassword": "Mantenha premido para ver a palavra-passe",
     "phone": "Telefone",
     "notes": "Notas",
     "add": "Adicionar",
@@ -46,6 +47,8 @@
     "signIn": "Iniciar sessão",
     "signUp": "Criar conta",
     "noAccount": "Ainda não tem conta?",
+    "signupClosedTitle": "Registo fechado",
+    "signupClosed": "Este servidor não aceita novas contas. Peça um convite ao administrador da sua empresa.",
     "haveAccount": "Já tem conta?",
     "invalidCredentials": "Email ou palavra-passe inválidos.",
     "emailTaken": "Já existe uma conta com este email.",
@@ -74,10 +77,12 @@
     "factoryResetConfirm": "Apagar TODOS os dados deste servidor e repor a demonstração? Não é possível anular.",
     "factoryResetDone": "O servidor foi reposto com os dados de demonstração. Inicie sessão com owner@demo.test / demo1234.",
     "wrongResetPassword": "Palavra-passe de reposição incorreta.",
-    "tooManyAttempts": "Demasiadas tentativas. Tente novamente dentro de 15 minutos."
+    "tooManyAttempts": "Demasiadas tentativas de início de sessão falhadas. Aguarde 15 minutos e tente novamente, ou reponha a palavra-passe."
   },
   "onboarding": {
     "title": "Crie a sua organização",
+    "closedTitle": "Ainda sem organização",
+    "closed": "Ainda não pertence a nenhuma organização e este servidor não permite criar novas. Peça ao seu administrador um link de convite.",
     "description": "Ainda não pertence a nenhuma organização. Crie uma ou peça ao seu administrador um link de convite."
   },
   "invite": {
@@ -105,7 +110,7 @@
     "reports": "Relatórios",
     "settings": "Definições",
     "organization": "Organização",
-    "users": "Utilizadores",
+    "users": "Colaboradores",
     "teams": "Equipas",
     "operations": "Operações",
     "sites": "Locais e equipamentos",
@@ -116,39 +121,31 @@
     "field": "App de campo (offline)",
     "scan": "Ler código",
     "server": "Servidor",
-    "roles": "Funções"
+    "roles": "Funções",
+    "categories": "Categorias",
+    "audit": "Registo de auditoria",
+    "search": "Pesquisa",
+    "onCall": "Prevenção",
+    "clientUsers": "Clientes"
   },
   "roles": {
-    "OWNER": "Proprietário",
+    "OWNER": "Super Admin",
     "ADMIN": "Administrador",
     "MANAGER": "Gestor",
     "TECHNICIAN": "Técnico",
     "REQUESTER": "Cliente (requerente)",
     "VIEWER": "Observador",
     "title": "Funções",
-    "description": "O que cada função pode fazer e quanto custa uma hora do seu tempo. O tempo registado nos trabalhos é custeado com o valor da função da pessoa nesse momento.",
-    "builtIn": "Funções base",
-    "builtInHint": "Deixe o valor vazio se não controla custos dessa função. As alterações aplicam-se ao tempo registado a partir de agora.",
-    "can": {
-      "OWNER": "Tudo, incluindo a faturação.",
-      "ADMIN": "Tudo exceto a faturação: definições, utilizadores, aprovações.",
-      "MANAGER": "Planeia e atribui trabalho, gere clientes, stock e compras.",
-      "TECHNICIAN": "Executa o trabalho: ordens de trabalho, listas de verificação, tempo, peças.",
-      "VIEWER": "Observação: vê tudo, não altera nada.",
-      "REQUESTER": "Portal do cliente: apenas as suas moradias e pedidos."
-    },
-    "notBillable": "Sem custo (não regista tempo)",
-    "custom": "Funções personalizadas",
-    "customHint": "Funções próprias, como Engenharia ou Eletricista. Cada uma tem o seu custo por hora e o acesso de uma das funções base. Atribua-as em Utilizadores.",
+    "description": "O que cada função pode fazer e o preço de uma hora do seu tempo. O tempo registado numa ordem de trabalho é cobrado ao valor da função que a pessoa tem nessa ordem.",
+    "listHint": "As funções que vêm com o programa e as que criar funcionam da mesma forma. Deixe o valor vazio se o tempo dessa função não é cobrado (uma função criada sem valor é cobrada ao valor de Técnico). As alterações de valor aplicam-se ao tempo registado a partir de agora. Uma função nova começa com as permissões de Técnico.",
+    "notBillable": "Não cobrado (não regista tempo)",
     "new": "Nova função",
     "namePlaceholder": "ex.: Engenharia",
     "members": "{count, plural, =0 {Ninguém nesta função} one {# pessoa} other {# pessoas}}",
-    "access": "Acesso",
-    "accessLike": "Mesmo acesso que {role}",
-    "costPerHour": "Custo por hora",
+    "costPerHour": "Preço por hora",
     "delete": "Eliminar",
-    "deleteConfirm": "Eliminar a função \"{name}\"? {count, plural, =0 {} one {A # pessoa nesta função mantém o mesmo acesso com a função base.} other {As # pessoas nesta função mantêm o mesmo acesso com a função base.}}",
-    "customGroup": "Funções personalizadas"
+    "deleteConfirm": "Eliminar a função \"{name}\"? {count, plural, =0 {} one {A # pessoa nesta função volta a ser Técnico.} other {As # pessoas nesta função voltam a ser Técnicos.}}",
+    "ACCOUNTANT": "Contabilista"
   },
   "systems": {
     "ELECTRICAL": "Eletricidade",
@@ -176,7 +173,8 @@
     "myWorkOrders": "As minhas ordens abertas",
     "overdueWorkOrders": "Em atraso",
     "lowStock": "Peças com stock baixo",
-    "poApprovals": "Encomendas por aprovar"
+    "poApprovals": "Encomendas por aprovar",
+    "searchPlaceholder": "Pesquisar ordens de trabalho anteriores e notas dos técnicos…"
   },
   "settings": {
     "orgTitle": "Organização",
@@ -184,8 +182,8 @@
     "timezone": "Fuso horário",
     "currency": "Moeda",
     "defaultLanguage": "Idioma predefinido",
-    "usersTitle": "Utilizadores",
-    "usersDescription": "Pessoas que podem entrar nesta organização.",
+    "usersTitle": "Colaboradores",
+    "usersDescription": "As pessoas da empresa, e observadores, que podem entrar. Os utilizadores clientes estão em Definições → Clientes.",
     "invite": "Convidar utilizador",
     "inviteSend": "Criar convite",
     "inviteLink": "Enviámos um convite por email para {email}. Também pode partilhar este link diretamente; expira dentro de 7 dias.",
@@ -203,7 +201,12 @@
     "addMember": "Adicionar membro",
     "specialty": "Especialidade",
     "noTeams": "Ainda não há equipas.",
-    "cannotChangeOwner": "A função do proprietário não pode ser alterada."
+    "cannotChangeOwner": "A função do Super Admin não pode ser alterada.",
+    "clientUsersTitle": "Clientes",
+    "clientUsersDescription": "Proprietários de vilas e property managers que entram no portal do cliente.",
+    "noClientUsers": "Ainda não há utilizadores clientes",
+    "villaOwner": "Proprietário · {count, plural, one {# vila} other {# vilas}}",
+    "propertyManager": "Property manager · {count, plural, one {# vila} other {# vilas}}"
   },
   "validation": {
     "invalid": "Valor inválido.",
@@ -227,7 +230,13 @@
     "logoTooLarge": "O logótipo não pode ter mais de 2 MB.",
     "logoType": "Use uma imagem PNG ou JPEG.",
     "managerIsOwner": "A gestão tem de ser um cliente diferente do proprietário.",
-    "roleNameTaken": "Já existe uma função com este nome."
+    "roleNameTaken": "Já existe uma função com este nome.",
+    "closesBeforeOpens": "A hora de fecho tem de ser depois da hora de abertura.",
+    "badHoliday": "Indique uma data por linha, no formato AAAA-MM-DD.",
+    "categoryTaken": "Já existe uma categoria com este nome.",
+    "badEmails": "Um ou mais endereços não são endereços de e-mail válidos.",
+    "badFrom": "Indique um endereço, ou um nome e endereço: Empresa '<'nome@empresa.pt'>'.",
+    "ownerOrManager": "Escolha um proprietário, uma gestão da propriedade, ou ambos."
   },
   "clients": {
     "description": "Proprietários, family offices e gestores de propriedades para quem trabalha.",
@@ -252,7 +261,7 @@
     "description": "Todas as propriedades que mantém, com as suas divisões e sistemas instalados.",
     "new": "Nova moradia",
     "empty": "Ainda não há moradias.",
-    "needClient": "Crie primeiro um cliente; cada moradia pertence a um cliente.",
+    "needClient": "Crie primeiro um cliente; cada moradia pertence a um proprietário, a uma gestão da propriedade, ou a ambos.",
     "allClients": "Todos os clientes",
     "client": "Cliente",
     "owner": "Proprietário",
@@ -271,12 +280,21 @@
     "openMaps": "Abrir no Maps",
     "secrets": "Códigos de acesso",
     "manager": "Gestão da propriedade / empresa",
-    "managerHint": "Opcional. Os utilizadores do portal deste cliente também veem esta moradia e podem pedir trabalhos. Os utilizadores do portal do proprietário só veem as moradias do próprio proprietário.",
+    "managerHint": "Os utilizadores do portal deste cliente também veem esta moradia e podem pedir trabalhos. Os utilizadores do portal do proprietário só veem as moradias do próprio proprietário. Escolha um proprietário, uma gestão, ou ambos.",
     "noManager": "Nenhuma",
     "managedBy": "Gerida por {name}",
     "managedVillas": "Moradias geridas",
     "managedVillasHint": "Moradias de outros proprietários que este cliente gere. Os utilizadores do portal deste cliente podem pedir trabalhos nelas.",
-    "ownedBy": "Proprietário: {name}"
+    "ownedBy": "Proprietário: {name}",
+    "ownerHint": "Deixe vazio se a moradia for só acompanhada por uma gestão da propriedade.",
+    "noOwner": "Nenhum",
+    "billTo": "Faturar a",
+    "billToHint": "A quem se fatura o trabalho e se enviam os relatórios de serviço, quando a moradia tem proprietário e gestão.",
+    "billed": "faturada",
+    "distanceKm": "Distância à empresa",
+    "distanceHint": "Distância por estrada em km, só ida. Define o valor da deslocação no trabalho no local (Definições → Empresa).",
+    "distanceValue": "{km, number} km",
+    "distanceUnset": "Não definida (valor fixo de deslocação)"
   },
   "areas": {
     "title": "Pisos e divisões",
@@ -436,6 +454,7 @@
     "anyone": "Qualquer pessoa",
     "assignedToMe": "Atribuídas a mim",
     "unassigned": "Sem atribuição",
+    "assigneeRoleOf": "Função de {name} nesta ordem de trabalho",
     "anyPriority": "Qualquer prioridade",
     "anyDue": "Qualquer prazo",
     "overdueOnly": "Só em atraso",
@@ -497,12 +516,13 @@
     "pf": {
       "PASS": "OK",
       "FLAG": "Alerta",
-      "FAIL": "Falha"
+      "FAIL": "Falha",
+      "NA": "N/A"
     },
     "types": {
       "HEADING": "Título de secção",
       "CHECKBOX": "Caixa de verificação",
-      "PASS_FAIL": "OK / alerta / falha",
+      "PASS_FAIL": "OK / alerta / falha / N/A",
       "TEXT": "Texto",
       "NUMBER": "Número",
       "MULTIPLE_CHOICE": "Escolha múltipla",
@@ -522,33 +542,51 @@
     "minutes": "Minutos",
     "notePlaceholder": "Nota (opcional)",
     "running": "a decorrer",
-    "total": "Total"
+    "total": "Total",
+    "billed": "Faturado",
+    "billedHint": "O tempo de cada técnico arredondado para cima a blocos de {block} minutos (Definições → Empresa).",
+    "billedFrom": "{billed} (registado {logged})",
+    "mode": "Local",
+    "modes": {
+      "ONSITE": "No local",
+      "REMOTE": "Remoto"
+    },
+    "switchTo": "Mudar para {mode}"
   },
   "costs": {
-    "title": "Custos",
+    "title": "Valores a faturar",
     "labor": "Mão de obra",
     "total": "Total",
-    "add": "Adicionar custo",
+    "add": "Adicionar valor",
     "descriptionPlaceholder": "ex.: Aluguer de grua, estacionamento",
     "parts": "Peças",
     "timeSpent": "Tempo gasto",
     "hours": "{hours} h",
-    "other": "Outros custos"
+    "other": "Outros valores",
+    "timeBilled": "Tempo faturado",
+    "urgent": "Taxa de urgência",
+    "travel": "Deslocações",
+    "trips": "{count, plural, one {# deslocação} other {# deslocações}}"
   },
   "files": {
     "title": "Fotografias e ficheiros",
     "add": "Adicionar fotografias ou ficheiros",
-    "failed": "Alguns ficheiros não foram carregados (JPEG, PNG, WebP ou PDF até 15 MB).",
+    "failed": "Não foi possível carregar (fotografias e PDF até 15 MB, vídeos até 1 minuto).",
     "notFound": "A ordem de trabalho ou o passo já não existe.",
     "forbidden": "Não tem permissão para adicionar ficheiros aqui.",
     "badTarget": "A ordem de trabalho ou o passo já não existe.",
     "badType": "Tipo de ficheiro não suportado.",
-    "tooLarge": "Ficheiro demasiado grande."
+    "tooLarge": "Ficheiro demasiado grande.",
+    "addMedia": "Adicionar fotografias, vídeos ou ficheiros",
+    "converting": "A preparar o vídeo {progress}%",
+    "videoTooLong": "Os vídeos podem ter no máximo 1 minuto.",
+    "badVideo": "Não foi possível ler este vídeo.",
+    "videoUnavailable": "De momento, o servidor não consegue processar vídeos."
   },
   "activity": {
     "title": "Atividade",
     "placeholder": "Adicione uma atualização ou nota…",
-    "attach": "Fotografia",
+    "attach": "Fotografia ou vídeo",
     "send": "Publicar",
     "changedStatus": "alterou o estado para",
     "created": "criou esta ordem de trabalho"
@@ -568,8 +606,12 @@
   },
   "report": {
     "title": "Relatório de serviço",
+    "back": "Voltar",
     "photos": "Fotografias",
-    "seePhotos": "Ver fotografias"
+    "seePhotos": "Ver fotografias",
+    "service": "Serviço",
+    "urgentService": "Urgente",
+    "trips": "Deslocações"
   },
   "procedures": {
     "description": "Checklists reutilizáveis que a equipa segue em obra. Use-as em ordens de trabalho e planos preventivos.",
@@ -704,16 +746,12 @@
   },
   "portal": {
     "title": "Portal do cliente",
-    "subtitle": "Reporte um problema e acompanhe os trabalhos nas suas propriedades.",
     "newRequest": "Reportar um problema",
     "newRequestHint": "Diga-nos o que se passa. As fotografias ajudam os técnicos a chegar preparados.",
     "noVillas": "A sua conta ainda não está associada a nenhuma propriedade. Por favor contacte-nos.",
     "yourVillas": "As suas propriedades",
     "inProgress": "{count, plural, one {# trabalho em curso} other {# trabalhos em curso}}",
     "allGood": "Sem trabalhos em aberto",
-    "yourRequests": "Os seus pedidos",
-    "noRequests": "Ainda não reportou nada.",
-    "recentWork": "Concluídos recentemente",
     "report": "Relatório",
     "whereInHouse": "Onde na casa?",
     "whichEquipment": "Que equipamento?",
@@ -753,8 +791,11 @@
     "stepInProgress": "Técnico a tratar",
     "stepDone": "Concluído",
     "downloadReport": "Descarregar relatório de serviço",
-    "workHistory": "Histórico de trabalhos",
-    "installedSystems": "Sistemas instalados"
+    "pickVilla": "Escolha uma propriedade para reportar um problema ou ver os pedidos anteriores e os seus relatórios.",
+    "pastRequests": "Pedidos anteriores",
+    "pastRequestsHint": "O que pediu e os trabalhos feitos, com os relatórios de serviço.",
+    "noPastRequests": "Ainda não há nada aqui.",
+    "requestNumber": "Pedido R{number}"
   },
   "vendors": {
     "description": "Fornecedores, subempreiteiros e fabricantes a quem compra peças e equipamento.",
@@ -790,7 +831,7 @@
     "onHandLower": "em stock",
     "minQuantity": "Ponto de encomenda",
     "minQuantityHint": "Alerta de stock baixo quando o total for igual ou inferior. 0 = sem controlo.",
-    "unitCost": "Custo unitário",
+    "unitCost": "Preço de venda",
     "reorder": "Repor stock baixo",
     "reorderConfirm": "Criar notas de encomenda em rascunho para {count, plural, one {# peça com stock baixo} other {# peças com stock baixo}}, uma por fornecedor preferencial?",
     "reorderResult": "{created, plural, =0 {Não foi criada nenhuma nota de encomenda.} one {Foi criada # nota de encomenda em rascunho.} other {Foram criadas # notas de encomenda em rascunho.}}",
@@ -804,14 +845,17 @@
     "vendor": "Fornecedor preferencial",
     "openingQuantity": "Stock inicial",
     "openingHint": "Opcional: quantas tem neste momento.",
-    "stockValue": "Valor em stock",
+    "stockValue": "Valor em stock (ao custo)",
     "photos": "Fotografias e fichas técnicas",
     "onOrder": "Em encomenda",
     "compatibleAssets": "Serve nestes equipamentos",
     "compatibleHint": "Associe peças na página de cada equipamento.",
     "compatibleParts": "Peças de substituição compatíveis",
     "noCompatible": "Ainda não há peças associadas a este equipamento.",
-    "pickPart": "Associar uma peça…"
+    "pickPart": "Associar uma peça…",
+    "unitCostHint": "O valor cobrado por unidade nas ordens de trabalho.",
+    "purchaseCost": "Custo de compra",
+    "purchaseCostHint": "Quanto custa uma unidade ao fornecedor: usado nas encomendas e no valor do stock. É atualizado ao receber uma encomenda."
   },
   "stock": {
     "location": "Local",
@@ -849,7 +893,9 @@
     "sameLocation": "Escolha dois locais diferentes.",
     "notEditable": "Esta nota de encomenda não pode ser alterada no estado atual.",
     "overReceive": "Não pode receber mais do que o que está em falta numa linha.",
-    "noLines": "Nada deste fornecedor está com stock baixo."
+    "noLines": "Nada deste fornecedor está com stock baixo.",
+    "notYourVan": "Só pode repor a sua própria carrinha.",
+    "tooManySerials": "Há mais números de série do que unidades usadas."
   },
   "locationType": {
     "WAREHOUSE": "Armazém",
@@ -884,7 +930,7 @@
     "shipping": "Portes",
     "notesHint": "Aparece no PDF enviado ao fornecedor.",
     "prefillLowStock": "Adicionar as peças deste fornecedor com stock baixo",
-    "awaitingApproval": "A aguardar aprovação de um proprietário ou administrador.",
+    "awaitingApproval": "A aguardar aprovação de alguém que possa aprovar encomendas.",
     "lines": "Artigos",
     "noLines": "Ainda não há artigos.",
     "needLines": "Adicione primeiro pelo menos um artigo.",
@@ -894,7 +940,7 @@
     "freeTextOption": "Texto livre (não é uma peça em stock)",
     "fromVendor": "De {vendor}",
     "otherParts": "Outras peças",
-    "unitCostHint": "Vazio = custo atual da peça.",
+    "unitCostHint": "Vazio = custo de compra atual da peça.",
     "received": "Recebido",
     "lineTotal": "Total",
     "subtotal": "Subtotal",
@@ -903,7 +949,7 @@
     "addLowStock": "Adicionar peças com stock baixo",
     "lowStockAdded": "{count, plural, one {# artigo adicionado.} other {# artigos adicionados.}}",
     "receive": "Receber artigos",
-    "receiveHint": "Indique o que chegou. As peças em stock entram no local escolhido e o custo unitário passa a ser este preço.",
+    "receiveHint": "Indique o que chegou. As peças em stock entram no local escolhido e o custo de compra passa a ser este preço (o preço de venda não muda).",
     "receiveInto": "Receber em",
     "outstanding": "{qty} em falta",
     "noStockUpdate": "não atualiza stock",
@@ -923,7 +969,8 @@
       "order": "Marcar como encomendada",
       "cancel": "Cancelar encomenda",
       "reopen": "Reabrir como rascunho"
-    }
+    },
+    "unitPrice": "Preço unitário"
   },
   "poStatus": {
     "DRAFT": "Rascunho",
@@ -1002,7 +1049,8 @@
     "inviteCta": "Aceitar convite",
     "resetSubject": "Redefinir a palavra-passe",
     "resetBody": "Foi pedida a redefinição da palavra-passe desta conta. Se foi você, use o botão abaixo dentro de uma hora. Caso contrário, pode ignorar este email.",
-    "resetCta": "Escolher nova palavra-passe"
+    "resetCta": "Escolher nova palavra-passe",
+    "privacy": "Aviso de privacidade"
   },
   "notifications": {
     "title": "Notificações",
@@ -1074,7 +1122,9 @@
       "LOW_STOCK": "Peças a esgotar",
       "PO_APPROVAL": "Notas de encomenda a aguardar aprovação",
       "PO_UPDATE": "Atualizações das minhas notas de encomenda"
-    }
+    },
+    "appearance": "Idioma e aspeto",
+    "language": "Idioma"
   },
   "contractStatus": {
     "DRAFT": "Rascunho",
@@ -1085,7 +1135,8 @@
   "sla": {
     "met": "Cumprido",
     "breached": "Falhado",
-    "pending": "Em prazo"
+    "pending": "Em prazo",
+    "paused": "Em pausa"
   },
   "contracts": {
     "description": "Acordos de manutenção com tempos de resposta e de resolução. As ordens de trabalho são associadas automaticamente ao contrato correspondente.",
@@ -1134,10 +1185,18 @@
     "deleteConfirm": "Eliminar este contrato? As ordens de trabalho mantêm-se, mas deixam de ter SLA associado.",
     "pickClientFirst": "Escolha primeiro o cliente.",
     "ownedVillas": "Próprias",
-    "managedVillas": "Geridas para outros proprietários"
+    "managedVillas": "Geridas para outros proprietários",
+    "businessHoursOnly": "Contar apenas horário laboral",
+    "businessHoursOnlyHint": "Os prazos só contam durante o horário de funcionamento da empresa (Definições → Organização), sem noites, dias de fecho nem feriados.",
+    "pauseOnHold": "Pausar quando em espera",
+    "pauseOnHoldHint": "O relógio para enquanto o trabalho está em espera (por exemplo, à espera do cliente ou de material) e retoma quando o trabalho continua.",
+    "slaClock": "Relógio do SLA",
+    "clockAlways": "24 horas por dia",
+    "clockBusiness": "Horário laboral",
+    "clockPauses": "pausa quando em espera"
   },
   "reports": {
-    "description": "Desempenho, SLA, custos, técnicos e fiabilidade dos equipamentos.",
+    "description": "Desempenho, SLA, faturação, técnicos e fiabilidade dos equipamentos.",
     "period": "Período",
     "from": "De",
     "to": "Até",
@@ -1152,7 +1211,7 @@
       "overview": "Resumo",
       "workOrders": "Ordens de trabalho",
       "sla": "SLA",
-      "costs": "Custos",
+      "costs": "Faturação",
       "technicians": "Técnicos",
       "assets": "Equipamentos"
     },
@@ -1173,8 +1232,8 @@
       "slaResponse": "SLA de resposta cumprido",
       "slaResolution": "SLA de resolução cumprido",
       "pm": "Cumprimento da manutenção preventiva",
-      "cost": "Custo total",
-      "costHint": "Mão de obra, peças e outros custos"
+      "cost": "Valor do trabalho",
+      "costHint": "Mão de obra, peças, outros valores e taxas de urgência"
     },
     "pmSub": "{onTime} de {due} a tempo",
     "trendTitle": "Abertas vs concluídas",
@@ -1216,16 +1275,16 @@
     "breachedJobs": "Ordens de trabalho com SLA falhado",
     "latest50": "Últimas 50",
     "noBreaches": "Nenhuma falha de SLA neste período.",
-    "otherCosts": "Outros",
-    "costNote": "Custos das ordens de trabalho abertas de {from} a {to}: mão de obra ao custo/hora de cada técnico, peças a preço de custo e outros custos.",
+    "otherCosts": "Outros valores",
+    "costNote": "Valores das ordens de trabalho abertas de {from} a {to}: mão de obra ao preço/hora de cada técnico (tempo faturado), peças ao preço de venda, outros valores e taxas de urgência.",
     "jobCount": "{count, plural, one {# ordem de trabalho} other {# ordens de trabalho}}",
-    "costByVilla": "Custo por moradia",
-    "costByClient": "Custo por cliente",
-    "costBySystem": "Custo por sistema",
-    "noCosts": "Nenhum custo registado neste período.",
-    "feesNote": "Mensalidades = valor dos contratos no período, proporcional aos dias. Margem = mensalidades menos o custo do trabalho.",
+    "costByVilla": "Valor por moradia",
+    "costByClient": "Valor por cliente",
+    "costBySystem": "Valor por sistema",
+    "noCosts": "Nada a faturar neste período.",
+    "feesNote": "Mensalidades = valor dos contratos no período, proporcional aos dias. Mensalidades − trabalho = mensalidades menos o valor do trabalho feito.",
     "fees": "Mensalidades",
-    "margin": "Margem",
+    "margin": "Mensalidades − trabalho",
     "techNote": "Tempo registado de {from} a {to}. A utilização compara as horas registadas com {hours} h disponíveis ({perDay} h por dia útil).",
     "hoursLogged": "Horas registadas",
     "noTime": "Nenhum tempo registado neste período.",
@@ -1254,8 +1313,12 @@
       "firstResponse": "Primeira resposta",
       "minutes": "Minutos registados",
       "downHours": "Horas avariado",
-      "degradedHours": "Horas degradado"
-    }
+      "degradedHours": "Horas degradado",
+      "billedMinutes": "Minutos faturados",
+      "trips": "Deslocações"
+    },
+    "billedHoursCol": "Horas faturadas",
+    "billedHoursHint": "Horas cobradas: o tempo de cada técnico por ordem de trabalho arredondado ao período de faturação. A utilização usa as horas registadas."
   },
   "scan": {
     "title": "Ler código",
@@ -1269,7 +1332,19 @@
     "notFound": "Nada corresponde a “{code}”.",
     "again": "Ler código",
     "scanPart": "Ler código de barras",
-    "partNotFound": "Nenhuma peça com o código de barras ou referência “{code}”."
+    "partNotFound": "Nenhuma peça com o código de barras ou referência “{code}”.",
+    "titleSerial": "Ler número de série",
+    "titleMac": "Ler endereço MAC",
+    "hintSerial": "Aponte para a etiqueta: um código de barras é lido de imediato. Para texto impresso, enquadre-o na caixa e toque em Ler texto.",
+    "hintMac": "Aponte para a etiqueta: um código de barras é lido de imediato. Para texto impresso, enquadre o MAC na caixa e toque em Ler texto.",
+    "readText": "Ler texto",
+    "ocrLoading": "A preparar o leitor de texto (na primeira vez descarrega cerca de 15 MB)…",
+    "ocrReading": "A ler a etiqueta…",
+    "ocrPick": "Toque no valor certo:",
+    "ocrNothing": "Não encontrei nenhum código. Aproxime a câmara, com o texto dentro da caixa, e tente outra vez.",
+    "ocrFailed": "O leitor de texto não arrancou neste dispositivo. Escreva o valor em baixo.",
+    "ocrRetry": "Tentar outra vez",
+    "scanField": "Ler com a câmara"
   },
   "field": {
     "title": "App de campo",
@@ -1307,13 +1382,19 @@
     "hold": "Em espera",
     "done": "Marcar como concluída",
     "logged": "{minutes, plural, =0 {Sem tempo registado} other {# min registados}}",
-    "photos": "Fotografias",
-    "photosHint": "As fotografias ficam guardadas neste dispositivo e são enviadas quando houver rede.",
+    "photos": "Fotografias e vídeos",
+    "photosHint": "As fotografias e os vídeos (até 1 minuto) ficam guardados neste dispositivo e são enviados quando houver rede.",
     "takePhoto": "Tirar fotografia",
     "retake": "Repetir",
     "savedOnDevice": "Guardada neste dispositivo — é enviada quando houver rede.",
     "signedBy": "Assinado por {name}",
-    "waitingUpload": "será enviado quando houver rede"
+    "waitingUpload": "será enviado quando houver rede",
+    "section": {
+      "now": "Para fazer",
+      "next30": "Próximos 30 dias",
+      "later": "Mais tarde"
+    },
+    "takeVideo": "Gravar vídeo"
   },
   "company": {
     "details": "Dados da empresa",
@@ -1354,15 +1435,29 @@
     "general": "Geral",
     "appName": "Nome do software",
     "appNameHint": "Aparece na página de início de sessão, no separador do navegador, na aplicação instalada e nos e-mails. Deixe vazio para \"{default}\".",
+    "showVersion": "Mostrar a versão a seguir ao nome",
+    "showVersionHint": "Acrescenta a versão instalada (num servidor de desenvolvimento, o commit atual) a seguir ao nome do software, no canto superior esquerdo.",
+    "allowSignup": "Qualquer pessoa pode criar uma conta",
+    "allowSignupHint": "Mostra \"Criar conta\" na página de início de sessão, onde qualquer pessoa que chegue a este servidor pode criar uma nova empresa. Desative depois de criar a sua empresa: as pessoas convidadas continuam a poder criar a sua conta.",
+    "allowSignupLocked": "Desativado por ALLOW_SIGNUP=false no ambiente do servidor.",
     "updates": "Atualizações",
     "currentVersion": "Versão instalada",
     "latestVersion": "Última versão",
     "updateAvailable": "Atualização disponível",
     "upToDate": "Atualizado",
     "unknown": "Ainda não verificado",
-    "checkFailed": "Não foi possível contactar o GitHub para procurar atualizações.",
+    "checkFailed": "Não foi possível contactar o Docker Hub para procurar atualizações.",
     "checkedAt": "Verificado em {date}",
     "checkNow": "Verificar agora",
+    "online": {
+      "title": "Quem está ligado",
+      "hint": "Pessoas desta empresa que usaram a aplicação nos últimos {minutes} minutos. A atividade é registada no máximo uma vez por minuto; ao terminar sessão, a pessoa sai da lista de imediato.",
+      "refresh": "Atualizar",
+      "none": "Neste momento não há ninguém ligado.",
+      "name": "Nome",
+      "lastSeen": "Última atividade",
+      "signedIn": "Sessão iniciada"
+    },
     "updateTo": "Atualizar para {version}",
     "preparingUpdate": "A criar cópia…",
     "updateConfirm": "Atualizar para a versão {version}? Primeiro é feita uma cópia de segurança; depois a aplicação reinicia na nova versão (cerca de um minuto).",
@@ -1423,15 +1518,912 @@
       "noUpdate": "Não há nenhuma versão mais recente para instalar.",
       "updaterNotConfigured": "O serviço de atualização não está configurado (ver docker-compose.yml).",
       "updateInProgress": "Já está a decorrer uma atualização.",
-      "updaterError": "O serviço de atualização não aceitou o pedido. Verifique se está a funcionar."
+      "updaterError": "O serviço de atualização não aceitou o pedido. Verifique se está a funcionar.",
+      "encryptedNoPassword": "Esta cópia está encriptada. Defina neste servidor a BACKUP_PASSWORD com que foi feita.",
+      "wrongBackupPassword": "Não é possível desencriptar esta cópia: foi feita com outra BACKUP_PASSWORD, ou o ficheiro está danificado."
     },
     "whatsNew": "Novidades",
-    "noNotes": "Sem notas de versão."
+    "noNotes": "Sem notas de versão.",
+    "encrypted": "Encriptada",
+    "encryptionOn": "As novas cópias são encriptadas com a BACKUP_PASSWORD (AES-256). Guarde bem essa palavra-passe: sem ela não podem ser repostas.",
+    "encryptionOff": "As cópias de segurança não estão encriptadas. Defina BACKUP_PASSWORD no ambiente do servidor para encriptar as novas (recomendado quando há cópias fora do servidor).",
+    "email": {
+      "title": "E-mail",
+      "hint": "Como a app envia convites, recuperação de palavra-passe, notificações e relatórios de serviço. Neste momento:",
+      "statusSmtp": "SMTP através de {host}.",
+      "statusResend": "Resend (chave gravada aqui).",
+      "statusResendEnv": "Resend (RESEND_API_KEY no ambiente).",
+      "statusNone": "não configurado — os e-mails não são enviados.",
+      "provider": "Enviar através de",
+      "providers": {
+        "smtp": "Conta SMTP",
+        "resend": "Resend",
+        "env": "Variáveis de ambiente"
+      },
+      "providerHints": {
+        "smtp": "Qualquer caixa de correio: Microsoft 365, Google Workspace, o servidor de correio do seu domínio…",
+        "resend": "O serviço de envio Resend, com uma chave de API.",
+        "env": "Como até agora: RESEND_API_KEY e EMAIL_FROM no docker-compose."
+      },
+      "from": "Remetente",
+      "fromHint": "O endereço de onde saem os e-mails, opcionalmente com um nome: Manutenção '<'manutencao@empresa.pt'>'. Com SMTP costuma ser a própria caixa de correio.",
+      "smtpHost": "Servidor SMTP",
+      "smtpPort": "Porta",
+      "smtpSecurity": "Segurança",
+      "security": {
+        "starttls": "STARTTLS (normalmente 587)",
+        "ssl": "SSL/TLS (normalmente 465)",
+        "none": "Nenhuma (não recomendado)"
+      },
+      "smtpUser": "Utilizador",
+      "smtpPassword": "Palavra-passe",
+      "secretHint": "Guardada encriptada.",
+      "secretSaved": "Gravada (encriptada). Deixe vazio para a manter.",
+      "clearPassword": "Remover a palavra-passe gravada",
+      "smtpTips": "Microsoft 365: smtp.office365.com, 587, STARTTLS; o SMTP AUTH tem de estar ativo na caixa de correio. Google: smtp.gmail.com, 587, STARTTLS, com uma palavra-passe de aplicação. Servidor do seu domínio: veja as definições de correio.",
+      "resendKey": "Chave de API",
+      "resendHint": "Em resend.com → API Keys; o domínio do remetente tem de estar verificado lá.",
+      "envActive": "RESEND_API_KEY e EMAIL_FROM estão definidas no ambiente, por isso o e-mail sai através do Resend.",
+      "envNone": "Não há variáveis de e-mail no ambiente: os e-mails não são enviados. Escolha SMTP ou Resend acima.",
+      "testTo": "Enviar um teste para",
+      "testHint": "Usa o que está no formulário, mesmo antes de gravar.",
+      "test": "Enviar e-mail de teste",
+      "testing": "A enviar…",
+      "testSent": "E-mail de teste enviado para {to}. Veja a caixa de entrada (e a pasta de spam).",
+      "testFailed": "O teste falhou:",
+      "testNeedsProvider": "Escolha SMTP ou Resend para enviar um teste.",
+      "testSubject": "{app}: e-mail de teste",
+      "testBody": "Esta é uma mensagem de teste. Se a está a ler, o e-mail da app de manutenção está a funcionar."
+    }
   },
   "theme": {
     "label": "Aspeto",
     "light": "Claro",
     "dark": "Escuro",
     "system": "Igual ao dispositivo"
+  },
+  "demo": {
+    "banner": "Demonstração pública: não introduza dados pessoais reais. Tudo é apagado a cada reposição."
+  },
+  "privacy": {
+    "title": "Aviso de privacidade",
+    "qrNotice": "Os seus dados são usados apenas para tratar este pedido e para o contactar sobre ele.",
+    "contactFallback": "os contactos indicados acima",
+    "yourData": "Os seus dados",
+    "yourDataHint": "Descarregue uma cópia de tudo o que está guardado sobre si (JSON), ou leia como os seus dados são usados.",
+    "download": "Descarregar os meus dados",
+    "customNotice": "Aviso de privacidade personalizado",
+    "customNoticeHint": "Texto simples; deixe uma linha em branco entre parágrafos. Deixe vazio para usar o aviso incluído, preenchido com os dados da empresa acima. É público e tem ligação nos formulários de pedido, no portal do cliente e nos e-mails.",
+    "view": "Ver o aviso público",
+    "default": {
+      "controller": {
+        "title": "Responsável pelo tratamento",
+        "body": "A {company} é a responsável pelo tratamento dos dados pessoais neste sistema de manutenção. Para qualquer questão sobre os seus dados, contacte-nos: {contact}."
+      },
+      "data": {
+        "title": "Que dados recolhemos",
+        "body": "Contactos (nome, e-mail, telefone) de clientes, contactos das moradias, colaboradores e pessoas que comunicam avarias; moradas e notas de acesso das propriedades que mantemos; pedidos de manutenção, ordens de trabalho, fotografias, assinaturas de clientes e mensagens; no caso dos colaboradores, o tempo registado nos trabalhos; e registos técnicos, como inícios de sessão e registos de segurança."
+      },
+      "purposes": {
+        "title": "Para que os usamos",
+        "body": "Para prestar os serviços de manutenção acordados com os nossos clientes (execução de contrato), responder a pedidos e avarias comunicados, planear e documentar o nosso trabalho, cumprir obrigações legais como a faturação e a conservação de registos, e manter o sistema seguro (interesse legítimo)."
+      },
+      "recipients": {
+        "title": "Quem os recebe",
+        "body": "Apenas os nossos colaboradores que deles precisam para o seu trabalho, e prestadores de serviços que alojam o sistema ou enviam e-mails em nosso nome, ao abrigo de um acordo de tratamento de dados. Não vendemos os seus dados nem os usamos para publicidade."
+      },
+      "retention": {
+        "title": "Durante quanto tempo os guardamos",
+        "body": "Enquanto lhe prestarmos serviços e, depois, pelos prazos exigidos por lei (por exemplo, registos contabilísticos). Os dados que deixem de ser necessários são apagados ou anonimizados."
+      },
+      "security": {
+        "title": "Como os protegemos",
+        "body": "O acesso é limitado por função, as palavras-passe são guardadas cifradas (hash), os códigos de acesso e credenciais de equipamentos são encriptados e cada consulta fica registada, e as ligações são encriptadas."
+      },
+      "rights": {
+        "title": "Os seus direitos",
+        "body": "Pode pedir o acesso, a retificação ou o apagamento dos seus dados, a limitação ou oposição ao tratamento, e recebê-los num formato portável. Os utilizadores podem descarregar os seus dados no perfil. Pode também apresentar reclamação à autoridade de proteção de dados (em Portugal, a CNPD)."
+      }
+    }
+  },
+  "retention": {
+    "title": "Conservação de dados",
+    "hint": "Os registos mais antigos são apagados (ou, nos formulários de pedido, os contactos removidos) uma vez por dia. 0 guarda-os para sempre.",
+    "notificationsDays": "Notificações (dias)",
+    "auditMonths": "Registo de segurança (meses)",
+    "requestersMonths": "Contactos de quem fez pedidos por QR (meses após a decisão)",
+    "chatMonths": "Mensagens de chat (meses)"
+  },
+  "erasure": {
+    "formerUser": "Antigo utilizador",
+    "formerClient": "Antigo cliente",
+    "erased": "Apagado",
+    "erase": "Apagar dados",
+    "eraseHint": "Remove o nome, e-mail, telefone e acesso desta pessoa; o histórico de trabalho fica, sem o nome.",
+    "eraseConfirm": "Apagar os dados pessoais desta pessoa? O nome, e-mail, telefone, palavra-passe e notificações são removidos definitivamente e deixa de poder iniciar sessão. Os trabalhos e o tempo registado ficam, como \"Antigo utilizador\". Não é possível desfazer.",
+    "anonymize": "Apagar dados pessoais",
+    "anonymizeHint": "Remove o nome, contactos, NIF, notas e pessoas de contacto deste cliente; as moradias e os trabalhos ficam.",
+    "anonymizeConfirm": "Apagar os dados pessoais deste cliente? O nome, e-mail, telefone, NIF, morada de faturação, notas e todas as pessoas de contacto são removidos definitivamente. As moradias, trabalhos e contratos ficam, como \"Antigo cliente\". Não é possível desfazer.",
+    "deactivateFirst": "Desative primeiro o membro.",
+    "otherCompanies": "Esta pessoa pertence também a outra empresa, por isso a conta não pode ser apagada aqui. Desativá-la remove o acesso a esta empresa.",
+    "archiveFirst": "Arquive primeiro o cliente.",
+    "portalUsers": "Este cliente ainda tem utilizadores do portal ativos. Desative-os e apague-os primeiro."
+  },
+  "businessHours": {
+    "title": "Horário de funcionamento",
+    "hint": "Usado pelos contratos de serviço que contam os tempos de resposta e resolução apenas em horário laboral. As horas estão no fuso horário da empresa.",
+    "from": "abre",
+    "to": "fecha",
+    "holidays": "Feriados",
+    "holidaysHint": "Dias em que o relógio do SLA não conta, um por linha (AAAA-MM-DD)."
+  },
+  "categories": {
+    "title": "Categorias",
+    "description": "Etiquetas para ordens de trabalho, como Garantia, Faturável ou Chamada. Filtre a lista de ordens de trabalho por elas.",
+    "new": "Nova categoria",
+    "none": "Ainda não há categorias.",
+    "placeholder": "p. ex. Garantia",
+    "color": "Cor",
+    "uses": "{n, plural, =0 {Sem uso} one {# ordem de trabalho} other {# ordens de trabalho}}",
+    "deleteConfirm": "Eliminar esta categoria? É removida das ordens de trabalho; as ordens de trabalho ficam.",
+    "all": "Todas as categorias"
+  },
+  "dateInput": {
+    "datePlaceholder": "DD/MM/AAAA",
+    "timePlaceholder": "HH:MM",
+    "pick": "Escolher data",
+    "badDate": "Indique uma data válida no formato DD/MM/AAAA.",
+    "badTime": "Indique uma hora no formato HH:MM (24 horas)."
+  },
+  "perms": {
+    "title": "Permissões",
+    "pageTitle": "Permissões · {role}",
+    "pageHint": "As alterações aplicam-se de imediato a todas as pessoas com esta função.",
+    "summary": "{on} de {total} permissões",
+    "count": "{on} de {total}",
+    "fixedAllHint": "O Super Admin pode sempre fazer tudo; isto não pode ser alterado.",
+    "fixedClientHint": "As contas de cliente só veem o portal do cliente; isto não pode ser alterado.",
+    "ownerOnly": "Só o Super Admin pode alterar as permissões.",
+    "customised": "Alterada",
+    "reset": "Repor as permissões por defeito",
+    "resetConfirm": "Repor as permissões por defeito desta função?",
+    "staffApp": "Usar a app da equipa",
+    "staffAppHint": "Sempre ativo nas funções da equipa; as contas de cliente só veem o portal do cliente."
+  },
+  "permGroup": {
+    "admin": "Administração",
+    "work": "Trabalho",
+    "sites": "Clientes, moradias e ativos",
+    "supply": "Stock e compras",
+    "insights": "Relatórios",
+    "finance": "Finanças"
+  },
+  "perm": {
+    "org": {
+      "manage": {
+        "label": "Definições da empresa",
+        "hint": "Perfil da empresa, privacidade, conservação de dados, horário; com a palavra-passe do servidor, Definições → Servidor."
+      }
+    },
+    "users": {
+      "manage": {
+        "label": "Utilizadores e funções",
+        "hint": "Convidar, desativar e apagar pessoas; mudar a função; preços das funções."
+      }
+    },
+    "teams": {
+      "manage": {
+        "label": "Equipas",
+        "hint": "Criar equipas e escolher os membros."
+      }
+    },
+    "workOrders": {
+      "create": {
+        "label": "Criar ordens de trabalho",
+        "hint": "Abrir trabalhos e editar os que criou ou lhe estão atribuídos."
+      },
+      "execute": {
+        "label": "Executar trabalho",
+        "hint": "Listas de verificação, tempo, comentários, assinatura e estado; a app de campo."
+      },
+      "manage": {
+        "label": "Gerir todas as ordens de trabalho",
+        "hint": "Atribuir, editar e eliminar as ordens de trabalho de qualquer pessoa; categorias."
+      },
+      "sendReport": {
+        "label": "Enviar relatórios de serviço",
+        "hint": "Enviar por e-mail o relatório de serviço em PDF ao cliente e a outros destinatários."
+      }
+    },
+    "requests": {
+      "create": {
+        "label": "Fazer pedidos",
+        "hint": "Comunicar uma avaria ou pedir trabalho."
+      },
+      "approve": {
+        "label": "Aprovar pedidos",
+        "hint": "Transformar pedidos em ordens de trabalho, ou recusá-los."
+      }
+    },
+    "pm": {
+      "manage": {
+        "label": "Manutenção preventiva",
+        "hint": "Planos, contadores e o agendador."
+      }
+    },
+    "procedures": {
+      "manage": {
+        "label": "Procedimentos",
+        "hint": "A biblioteca de listas de verificação reutilizáveis."
+      }
+    },
+    "clients": {
+      "manage": {
+        "label": "Clientes e moradias",
+        "hint": "Criar e editar clientes, contactos, moradias e áreas."
+      }
+    },
+    "contracts": {
+      "manage": {
+        "label": "Contratos de serviço",
+        "hint": "Contratos, níveis de serviço e mensalidades."
+      }
+    },
+    "assets": {
+      "manage": {
+        "label": "Ativos",
+        "hint": "Criar, editar e importar equipamentos; etiquetas QR."
+      }
+    },
+    "secrets": {
+      "view": {
+        "label": "Ver códigos de acesso",
+        "hint": "Códigos das moradias e palavras-passe de equipamentos (cada consulta fica registada)."
+      }
+    },
+    "inventory": {
+      "use": {
+        "label": "Usar peças",
+        "hint": "Retirar peças do stock para ordens de trabalho."
+      },
+      "manage": {
+        "label": "Gerir stock",
+        "hint": "Peças, locais de stock, contagens e transferências."
+      }
+    },
+    "vendors": {
+      "manage": {
+        "label": "Fornecedores",
+        "hint": "Fornecedores e os seus contactos."
+      }
+    },
+    "purchasing": {
+      "manage": {
+        "label": "Encomendas",
+        "hint": "Criar, enviar e receber encomendas."
+      },
+      "approve": {
+        "label": "Aprovar encomendas",
+        "hint": "Aprovar ou rejeitar encomendas que aguardam aprovação."
+      }
+    },
+    "reports": {
+      "view": {
+        "label": "Relatórios",
+        "hint": "Painéis, SLA, faturação e exportações."
+      }
+    },
+    "costs": {
+      "view": {
+        "label": "Ver valores",
+        "hint": "Mão de obra, peças, taxas de urgência e totais nas ordens de trabalho e pedidos, relatório de faturação, preços das peças e mensalidades dos contratos."
+      }
+    },
+    "billing": {
+      "manage": {
+        "label": "Faturação",
+        "hint": "Faturação. Reservada para o módulo de faturação e a integração com a contabilidade (ainda sem ecrãs)."
+      }
+    },
+    "audit": {
+      "view": {
+        "label": "Registo de auditoria",
+        "hint": "Ver quem fez o quê e a partir de onde: inícios de sessão, alterações e eliminações, utilizadores e permissões, operações do servidor."
+      }
+    },
+    "knowledge": {
+      "manage": {
+        "label": "Base de conhecimento",
+        "hint": "Escrever, editar e eliminar artigos da base de conhecimento das moradias. Toda a equipa os pode ler."
+      }
+    },
+    "onCall": {
+      "manage": {
+        "label": "Gerir prevenção",
+        "hint": "Escolher quem faz parte da equipa de prevenção e atribuir cada semana a alguém."
+      }
+    }
+  },
+  "reportEmail": {
+    "title": "Enviar o relatório de serviço por e-mail",
+    "hint": "Envia o relatório de serviço em PDF (sem valores) a cada endereço em separado.",
+    "noDefaults": "Sem destinatários por defeito: acrescente o e-mail do cliente, contactos que recebem relatórios ou cópias da empresa, ou escreva endereços abaixo.",
+    "extra": "Outros endereços (um por linha)",
+    "send": "Enviar relatório",
+    "sending": "A enviar…",
+    "sent": "Enviado.",
+    "lastSent": "Último envio {at} para {count, plural, one {# endereço} other {# endereços}}.",
+    "notConfigured": "O e-mail não está configurado neste servidor (Definições → Servidor → E-mail), por isso o relatório não pode ser enviado.",
+    "noRecipients": "Escolha ou escreva pelo menos um endereço.",
+    "source": {
+      "client": "Cliente",
+      "contact": "Contacto do cliente",
+      "clientExtra": "Cópia do cliente",
+      "company": "Cópia da empresa"
+    },
+    "clientEmails": "Cópias dos relatórios de serviço",
+    "clientEmailsHint": "Endereços extra sugeridos ao enviar os relatórios de serviço deste cliente (por exemplo, um family office), um por linha.",
+    "contactCheckbox": "Recebe relatórios de serviço",
+    "contactOn": "Recebe relatórios",
+    "contactOff": "Sem relatórios",
+    "contactToggleHint": "Se este contacto é sugerido ao enviar relatórios de serviço",
+    "companyTitle": "Cópias dos relatórios de serviço",
+    "companyHint": "Sugeridos como destinatários sempre que um relatório de serviço é enviado, além do cliente. Quem envia pode desmarcá-los.",
+    "companyRoles": "Todas as pessoas destas funções",
+    "companyPeople": "Estas pessoas",
+    "companyEmails": "Estes endereços",
+    "onePerLine": "Um por linha.",
+    "subject": "Relatório de serviço n.º {number}: {title}",
+    "body": "Segue em anexo o relatório de serviço da ordem de trabalho n.º {number}, \"{title}\".",
+    "bodyVilla": "Segue em anexo o relatório de serviço da ordem de trabalho n.º {number}, \"{title}\", na {villa}.",
+    "signature": "Com os melhores cumprimentos,\n{company}",
+    "privacy": "Aviso de privacidade"
+  },
+  "backupCopies": {
+    "title": "Cópias dos backups",
+    "hint": "Guarde cópias dos backups fora deste servidor: por e-mail e/ou numa pasta na cloud, à medida que cada backup é feito.",
+    "emailTitle": "Por e-mail",
+    "emailEnabled": "Enviar backups por e-mail",
+    "emailTo": "Enviar para",
+    "emailToHint": "Até 5 endereços, um por linha. Cada um recebe o ficheiro do backup em anexo.",
+    "whichBackups": "Que backups",
+    "encryptedOnly": "Enviar só backups encriptados",
+    "encryptedOnlyHint": "Um backup tem todos os dados e as chaves de encriptação. Sem encriptação, qualquer pessoa que receba o e-mail o pode ler.",
+    "notEncryptedWillSkip": "Os backups deste servidor não estão encriptados (BACKUP_PASSWORD não está definida), por isso com esta opção só é enviado um aviso, sem o ficheiro.",
+    "notEncryptedWarning": "Os backups deste servidor não estão encriptados: as cópias enviadas por e-mail podem ser lidas por quem as receber. Defina BACKUP_PASSWORD para os encriptar.",
+    "maxMb": "Anexo máximo (MB)",
+    "maxMbHint": "Backups maiores não são anexados: é enviado um aviso. A maioria dos servidores de correio aceita 20–35 MB.",
+    "testEmail": "Enviar e-mail de teste",
+    "testEmailSent": "Teste enviado para {to}.",
+    "cloudTitle": "Para uma pasta na cloud",
+    "providers": {
+      "off": "Desligado",
+      "onedrive": "OneDrive / SharePoint",
+      "gdrive": "Google Drive",
+      "webdav": "WebDAV"
+    },
+    "folder": "Pasta",
+    "folderHint": "Caminho dentro da drive, p. ex. Backups/Manutencao. É criada se não existir.",
+    "folderHintGdrive": "Criada pela app em O meu disco (com a permissão drive.file, a app só vê as pastas que criou).",
+    "mirrorDeletes": "Remover da cloud os backups removidos aqui",
+    "mirrorDeletesHint": "Os backups antigos apagados pelo agendamento (ou à mão) também são apagados da pasta, para não a encher.",
+    "onedriveSetup": "Uma vez: no Microsoft Entra ID (portal.azure.com) → Registos de aplicações → Novo registo (contas: qualquer diretório organizacional e contas Microsoft pessoais, ou só o seu), acrescente este URI de redirecionamento (Web) e crie um segredo de cliente em Certificados e segredos. Cole abaixo o ID da aplicação (cliente) e o segredo, grave e depois Ligar.",
+    "gdriveSetup": "Uma vez: na Google Cloud Console crie um projeto, ative a Google Drive API, configure o ecrã de consentimento OAuth e publique-o (em \"Teste\" a ligação expira ao fim de 7 dias), e crie um cliente OAuth (aplicação Web) com este URI de redirecionamento. Cole abaixo o ID e o segredo do cliente, grave e depois Ligar.",
+    "copy": "Copiar",
+    "clientId": "ID do cliente",
+    "clientSecret": "Segredo do cliente",
+    "tenant": "Inquilino (tenant)",
+    "tenantHint": "\"common\" para qualquer conta, ou o ID do seu diretório (tenant) se a aplicação for de inquilino único.",
+    "siteUrl": "Site do SharePoint (opcional)",
+    "siteUrlHint": "Deixe vazio para usar o OneDrive da conta ligada; ou o endereço de um site para usar a sua biblioteca de documentos.",
+    "connect": "Ligar",
+    "reconnect": "Ligar novamente",
+    "disconnect": "Desligar",
+    "connectedAs": "Ligado como {account}.",
+    "notConnected": "Ainda não ligado.",
+    "saveFirst": "Preencha o ID e o segredo do cliente e grave; depois ligue.",
+    "webdavUrl": "Endereço WebDAV",
+    "webdavUrlHint": "Nextcloud: https://servidor/remote.php/dav/files/UTILIZADOR",
+    "testCloud": "Testar envio",
+    "testCloudOk": "Ficheiro de teste enviado para \"{folder}\", listado e removido.",
+    "lastOk": "Última cópia: {name} ({at}).",
+    "lastFailed": "A última cópia falhou: {name} ({at})",
+    "testFailed": "O teste falhou:",
+    "cloudNotReady": "Escolha um destino e preencha-o (e, no OneDrive ou Google Drive, ligue a conta) primeiro.",
+    "oauth": {
+      "connected": "Ligado. Os backups vão ser copiados para a pasta na cloud.",
+      "denied": "O início de sessão foi cancelado ou recusado.",
+      "failed": "Não foi possível ligar.",
+      "badState": "A ligação expirou. Desbloqueie Definições → Servidor e ligue novamente.",
+      "locked": "Inicie sessão na app e ligue novamente.",
+      "noRefresh": "A conta não concedeu acesso offline. Ligue novamente e aceite todas as permissões.",
+      "noDriveScope": "O acesso ao Google Drive não foi concedido. Ligue novamente e, no ecrã da Google, marque a permissão do Google Drive (ou \"Selecionar tudo\").",
+      "missingApp": "Grave primeiro o ID e o segredo do cliente."
+    },
+    "mail": {
+      "subject": "Backup {app}: {name}",
+      "attachedEncrypted": "Foi feito um backup: {name} ({size}). Segue em anexo, encriptado: para o repor é precisa a BACKUP_PASSWORD deste servidor.",
+      "attachedPlain": "Foi feito um backup: {name} ({size}). Segue em anexo. Não está encriptado: guarde-o num local seguro.",
+      "tooBig": "Foi feito um backup: {name} ({size}), mas é maior do que o limite de {max} para e-mail, por isso não vai em anexo. Descarregue-o em Definições → Servidor.",
+      "notEncrypted": "Foi feito um backup: {name} ({size}). Não vai em anexo porque só são enviados backups encriptados e este não está.",
+      "testSubject": "{app}: teste de envio de backups",
+      "testBody": "Isto é um teste. Os backups vão ser enviados para este endereço."
+    }
+  },
+  "terms": {
+    "title": "Termos de utilização",
+    "sections": {
+      "service": {
+        "title": "O serviço",
+        "body": "Este sistema de manutenção é operado pela {company} para planear, executar e documentar a manutenção dos imóveis e sistemas a seu cargo, e para permitir aos seus clientes comunicar avarias e acompanhar os trabalhos feitos. Estes termos aplicam-se a todos os que iniciam sessão ou usam as suas páginas públicas (como o formulário de pedido por QR)."
+      },
+      "accounts": {
+        "title": "Contas",
+        "body": "As contas são criadas pela {company} ou por convite. Não partilhe a sua palavra-passe e avise-nos de imediato se suspeitar que outra pessoa usou a sua conta. Podemos suspender ou encerrar contas mal utilizadas ou que deixem de ser necessárias, por exemplo no fim de um contrato ou de uma relação de trabalho."
+      },
+      "use": {
+        "title": "Utilização aceitável",
+        "body": "Use o sistema apenas para o seu fim: pedidos de manutenção, ordens de trabalho e a comunicação relacionada. Não tente aceder a dados a que não lhe foi dado acesso, perturbar o seu funcionamento ou segurança, carregar conteúdos ilícitos ou malware, nem usá-lo para enviar mensagens não solicitadas."
+      },
+      "content": {
+        "title": "Os seus conteúdos",
+        "body": "Os pedidos, fotografias, comentários, assinaturas e outros conteúdos que acrescentar continuam a ser seus; autoriza a {company} a guardá-los e usá-los para prestar e documentar o serviço. Garanta que pode partilhar o que carrega (por exemplo, fotografias de propriedade alheia). Os códigos de acesso e as credenciais de equipamentos são confidenciais e não podem ser transmitidos a terceiros."
+      },
+      "privacy": {
+        "title": "Dados pessoais",
+        "body": "Os dados pessoais são tratados conforme descrito no aviso de privacidade da {company}."
+      },
+      "availability": {
+        "title": "Disponibilidade e responsabilidade",
+        "body": "Procuramos manter o sistema disponível e os seus dados com cópias de segurança, mas é fornecido tal como está e pode ser interrompido para manutenção ou por factos alheios ao nosso controlo. Os serviços de manutenção em si regem-se pelo acordo entre a {company} e cada cliente; na medida permitida por lei, a {company} não responde por danos indiretos resultantes da utilização, ou da impossibilidade de utilização, do sistema."
+      },
+      "law": {
+        "title": "Alterações, lei aplicável e contacto",
+        "body": "Podemos atualizar estes termos; a versão em vigor está sempre nesta página, e continuar a usar o sistema significa aceitá-la. Estes termos regem-se pela lei portuguesa. Questões: {contact}."
+      }
+    }
+  },
+  "help": {
+    "title": "Ajuda",
+    "description": "Como funciona cada área da aplicação, com guias passo a passo. O botão ? no fundo do menu abre a ajuda da página em que está.",
+    "searchPlaceholder": "Pesquisar na ajuda…",
+    "results": "{count, plural, one {# resultado} other {# resultados}} para “{q}”",
+    "noResults": "Nada encontrado para “{q}”",
+    "noResultsHint": "Experimente menos palavras ou palavras diferentes, ou percorra os temas.",
+    "allTopics": "Todos os temas de ajuda",
+    "openArea": "Abrir esta área",
+    "onThisPage": "Nesta página",
+    "thisPage": "Ajuda para esta página",
+    "groups": {
+      "start": "Para começar",
+      "operations": "Operações",
+      "sites": "Locais e equipamentos",
+      "supply": "Aprovisionamento",
+      "insights": "Análise",
+      "settings": "Definições"
+    }
+  },
+  "audit": {
+    "description": "Quem fez o quê, quando e a partir de onde. Guardado durante o período definido em Definições → Empresa → Conservação de dados.",
+    "searchPlaceholder": "Procurar nome, ação, endereço…",
+    "category": "Categoria",
+    "allCategories": "Todas as categorias",
+    "categories": {
+      "security": "Segurança",
+      "users": "Utilizadores e permissões",
+      "records": "Registos",
+      "server": "Servidor"
+    },
+    "user": "Utilizador",
+    "allUsers": "Todos",
+    "system": "Sistema",
+    "removedUser": "Utilizador removido",
+    "entity": "Tipo",
+    "allEntities": "Todos os tipos",
+    "from": "De",
+    "to": "Até",
+    "when": "Quando",
+    "what": "O quê",
+    "target": "Item",
+    "ip": "Endereço",
+    "detailsColumn": "Detalhes",
+    "details": "{count, plural, one {# detalhe} other {# detalhes}}",
+    "empty": "Ainda não há nada registado.",
+    "open": "abrir",
+    "relations": "Itens ligados",
+    "hidden": "(oculto)",
+    "yes": "Sim",
+    "no": "Não",
+    "verbs": {
+      "create": "Criou: {entity}",
+      "update": "Alterou: {entity}",
+      "delete": "Eliminou: {entity}"
+    },
+    "entities": {
+      "WorkOrder": "ordem de trabalho",
+      "Request": "pedido",
+      "Client": "cliente",
+      "Villa": "moradia",
+      "villa": "moradia",
+      "Area": "zona",
+      "Asset": "ativo",
+      "asset": "ativo",
+      "ServiceContract": "contrato",
+      "Procedure": "procedimento",
+      "Category": "categoria",
+      "PMSchedule": "plano preventivo",
+      "Meter": "contador",
+      "Part": "peça",
+      "StockLocation": "local de stock",
+      "Vendor": "fornecedor",
+      "PurchaseOrder": "encomenda",
+      "Team": "equipa",
+      "JobRole": "função personalizada",
+      "Membership": "membro",
+      "Invitation": "convite",
+      "Attachment": "anexo",
+      "Organization": "empresa",
+      "User": "utilizador",
+      "Server": "servidor",
+      "KnowledgeArticle": "artigo da base de conhecimento"
+    },
+    "actions": {
+      "auth": {
+        "signIn": "Iniciou sessão",
+        "signInFailed": "Início de sessão falhado (palavra-passe errada)",
+        "signInBlocked": "Início de sessão bloqueado (demasiadas tentativas)",
+        "signOut": "Terminou sessão",
+        "passwordChanged": "Alterou a palavra-passe",
+        "passwordChangeFailed": "Alteração de palavra-passe falhada (palavra-passe atual errada)",
+        "passwordResetRequested": "Pediu um link para repor a palavra-passe",
+        "passwordReset": "Repôs a palavra-passe com um link",
+        "calendarLink": "Criou um novo link de calendário"
+      },
+      "server": {
+        "unlock": "Desbloqueou Definições → Servidor",
+        "unlockFailed": "Palavra-passe do servidor errada",
+        "unlockBlocked": "Palavra-passe do servidor bloqueada (demasiadas tentativas)",
+        "settings": "Alterou o nome do software",
+        "backupSchedule": "Alterou o agendamento dos backups / atualizações automáticas",
+        "backup": "Fez um backup",
+        "backupDelete": "Apagou um backup",
+        "backupDownload": "Descarregou um backup",
+        "backupUpload": "Carregou um backup",
+        "restore": "Iniciou um restauro",
+        "restored": "Restaurou um backup",
+        "update": "Iniciou uma atualização do software",
+        "email": "Alterou as definições de email",
+        "backupCopies": "Alterou as cópias dos backups",
+        "cloudConnect": "Ligou uma pasta na cloud",
+        "cloudDisconnect": "Desligou uma pasta na cloud",
+        "factoryReset": "Reposição de fábrica",
+        "factoryResetFailed": "Reposição de fábrica: palavra-passe errada"
+      },
+      "organization": {
+        "update": "Alterou as definições da empresa",
+        "logo": "Alterou o logótipo da empresa",
+        "roleRates": "Alterou os preços das funções",
+        "permissions": "Alterou as permissões das funções"
+      },
+      "villa": {
+        "secrets": {
+          "view": "Viu os códigos de acesso da moradia",
+          "update": "Alterou os códigos de acesso da moradia"
+        }
+      },
+      "asset": {
+        "secrets": {
+          "view": "Viu as credenciais do equipamento",
+          "update": "Alterou as credenciais do equipamento"
+        }
+      },
+      "user": {
+        "erased": "Apagou os dados de uma pessoa"
+      },
+      "client": {
+        "anonymized": "Anonimizou um cliente"
+      },
+      "workOrder": {
+        "reportSent": "Enviou o relatório de serviço por email"
+      },
+      "stock": {
+        "transfer": "Movimentou stock",
+        "vanRestock": "Repôs a carrinha"
+      }
+    },
+    "fields": {
+      "name": "Nome",
+      "title": "Título",
+      "description": "Descrição",
+      "status": "Estado",
+      "priority": "Prioridade",
+      "type": "Tipo",
+      "system": "Sistema",
+      "role": "Função",
+      "access": "Nível de acesso",
+      "active": "Ativo",
+      "email": "Email",
+      "phone": "Telefone",
+      "address": "Morada",
+      "notes": "Notas",
+      "dueDate": "Prazo",
+      "startDate": "Início",
+      "completedAt": "Concluída",
+      "villaId": "Moradia",
+      "assetId": "Ativo",
+      "clientId": "Cliente",
+      "teamId": "Equipa",
+      "vendorId": "Fornecedor",
+      "jobRoleId": "Função personalizada",
+      "assignees": "Atribuídos",
+      "categories": "Categorias",
+      "items": "Lista de verificação",
+      "lines": "Linhas",
+      "permissions": "Permissões",
+      "hourlyRate": "Preço por hora",
+      "unitCost": "Preço de venda",
+      "minQuantity": "Quantidade mínima",
+      "quantity": "Quantidade",
+      "sku": "Referência",
+      "barcode": "Código de barras",
+      "serialNumber": "N.º de série",
+      "macAddress": "Endereço MAC",
+      "ipAddress": "Endereço IP",
+      "firmware": "Firmware",
+      "manufacturer": "Fabricante",
+      "model": "Modelo",
+      "archivedAt": "Arquivado",
+      "credentialsEnc": "Credenciais do equipamento",
+      "accessCodesEnc": "Códigos de acesso",
+      "provider": "Fornecedor do serviço",
+      "account": "Conta",
+      "from": "De",
+      "to": "Para",
+      "by": "Por",
+      "count": "Registos",
+      "version": "Versão",
+      "removed": "Removido",
+      "cleared": "Apagado",
+      "appName": "Nome do software",
+      "showVersion": "Mostrar versão",
+      "allowSignup": "Registo público",
+      "backups": "Agendamento dos backups",
+      "autoUpdate": "Atualizações automáticas",
+      "roleRates": "Preços das funções",
+      "retention": "Conservação de dados",
+      "businessHours": "Horário laboral",
+      "reportRecipients": "Destinatários dos relatórios",
+      "brandColor": "Cor da marca",
+      "timezone": "Fuso horário",
+      "privacyNotice": "Aviso de privacidade",
+      "part": "Peça",
+      "warehouse": "Armazém",
+      "van": "Carrinha",
+      "direction": "Sentido",
+      "parts": "Peças",
+      "note": "Nota",
+      "timeRounding": "Blocos de faturação do tempo",
+      "urgentFee": "Taxa de urgência (fixa)",
+      "urgentPercent": "Taxa de urgência (%)",
+      "purchaseCost": "Custo de compra",
+      "body": "Texto",
+      "pinned": "Fixado",
+      "assets": "Equipamentos",
+      "updatedById": "Atualizado por",
+      "onCallHours": "Horário de prevenção"
+    }
+  },
+  "van": {
+    "title": "A minha carrinha",
+    "description": "O que está na sua carrinha, e carregar peças de um armazém ou devolvê-las.",
+    "noVan": "Não tem nenhuma carrinha",
+    "noVanHint": "Peça a quem gere o inventário que crie um local de stock do tipo carrinha (Peças → Locais de stock) e que lho atribua.",
+    "noWarehouse": "Ainda não há nenhum armazém de onde carregar.",
+    "choose": "Carrinha",
+    "open": "Abrir",
+    "inVanHint": "Uma quantidade a vermelho está abaixo do mínimo da carrinha (definido na página da peça).",
+    "empty": "Ainda não há nada nesta carrinha.",
+    "part": "Peça",
+    "inVan": "Na carrinha",
+    "min": "Mínimo",
+    "restock": "Carregar ou devolver",
+    "direction": "Sentido",
+    "load": "Carregar do armazém",
+    "unload": "Devolver ao armazém",
+    "fromWarehouse": "Do armazém",
+    "toWarehouse": "Para o armazém",
+    "addPart": "Adicionar peça…",
+    "nothingToAdd": "Não há peças disponíveis aí",
+    "fillShort": "Adicionar o que falta ({count})",
+    "available": "Disponível: {qty} {unit}",
+    "note": "Nota",
+    "notePlaceholder": "Opcional, p. ex. kit para o trabalho na Quinta do Lago",
+    "submitLoad": "{count, plural, =0 {Carregar} one {Carregar # peça} other {Carregar # peças}}",
+    "submitUnload": "{count, plural, =0 {Devolver} one {Devolver # peça} other {Devolver # peças}}",
+    "done": "{count, plural, one {# peça movimentada.} other {# peças movimentadas.}}",
+    "quantity": "Quantidade"
+  },
+  "serials": {
+    "label": "Números de série",
+    "short": "N/S",
+    "placeholder": "N.º de série (opcional)",
+    "full": "Um número de série por unidade",
+    "add": "Adicionar número de série",
+    "scan": "Ler número de série com a câmara",
+    "remove": "Remover {serial}"
+  },
+  "timeBilling": {
+    "title": "Faturação do tempo",
+    "rounding": "Faturar o tempo em blocos de",
+    "hint": "O tempo de cada técnico numa ordem de trabalho é arredondado para cima a blocos inteiros quando é faturado: mão de obra e relatório de serviço (p. ex. 34 minutos são faturados como 1 hora com blocos de 30 minutos). O tempo registado mantém-se tal como foi registado.",
+    "none": "Sem arredondamento (minutos registados)",
+    "block": "{minutes} minutos"
+  },
+  "urgent": {
+    "title": "Ordens de trabalho urgentes",
+    "hint": "As ordens de trabalho com prioridade Urgente têm uma taxa extra: um valor fixo mais uma percentagem da sua mão de obra (deixe ambos a 0 para não haver). Cada contrato de manutenção pode ter a sua. O relatório de serviço indica \"Serviço: Urgente\", sem valores.",
+    "fee": "Valor fixo ({currency})",
+    "percent": "Percentagem da mão de obra (%)",
+    "contractTitle": "Taxa de urgência",
+    "contractHint": "Taxa extra cobrada nas ordens de trabalho urgentes deste contrato. Deixe ambos vazios para usar a da empresa (Definições → Empresa); 0 significa sem taxa.",
+    "none": "Nenhuma",
+    "fromCompany": "{value} (da empresa)"
+  },
+  "calendarFeed": {
+    "title": "Calendário",
+    "hint": "Veja as ordens de trabalho atribuídas a si no Google Calendar, no Outlook ou no calendário do telemóvel. Subscreva este link privado (as aplicações de calendário atualizam-no de poucas em poucas horas). Quem tiver o link vê os seus trabalhos, por isso não o partilhe.",
+    "create": "Criar link do calendário",
+    "link": "Link do calendário",
+    "copy": "Copiar",
+    "copied": "Copiado",
+    "open": "Abrir na app de calendário",
+    "reset": "Novo link",
+    "resetConfirm": "Criar um link novo? Os calendários que subscreveram o atual deixam de ser atualizados."
+  },
+  "travel": {
+    "title": "Deslocações (trabalho no local)",
+    "hint": "O tempo registado no local cobra deslocações; o tempo remoto não cobra nenhuma. As moradias até ao raio a partir da empresa (ou sem distância) pagam o valor fixo; as mais distantes pagam o valor por km × toda a distância da moradia (só ida). Deixe o valor fixo e o valor por km a 0 para não cobrar deslocações. Cada contrato de manutenção pode incluir as deslocações ou ter os seus próprios valores.",
+    "fee": "Valor fixo por deslocação ({currency})",
+    "radius": "Raio do valor fixo (km)",
+    "kmRate": "Acima do raio, por km ({currency})",
+    "kmRateHint": "Cobrado sobre toda a distância da moradia (só ida), não só os km acima do raio.",
+    "perTripRule": "{amount} cada",
+    "perKmRule": "{km} km × {rate} cada",
+    "chargedPerKm": "deslocações cobradas ao km",
+    "countBy": "Cobrar deslocações",
+    "perTechnician": "Uma por técnico e por dia",
+    "perWorkOrder": "Uma por ordem de trabalho e por dia",
+    "contractTitle": "Deslocações",
+    "contractHint": "Deslocações cobradas pelo trabalho no local nas ordens de trabalho deste contrato. Deixe um campo vazio para usar o valor da empresa (Definições → Empresa); 0 significa nenhum.",
+    "included": "Deslocações incluídas no contrato (não são cobradas)",
+    "includedInContract": "incluídas no contrato",
+    "feeTerm": "{amount} por deslocação",
+    "kmTerm": "{amount} por km"
+  },
+  "search": {
+    "title": "Pesquisa",
+    "description": "Encontre trabalhos anteriores por qualquer palavra escrita neles (título, descrição, comentários, notas da lista de verificação e notas de tempo) e os artigos da base de conhecimento das moradias.",
+    "placeholder": "ex.: processador, condensação, switch PoE…",
+    "villa": "Moradia",
+    "allVillas": "Todas as moradias",
+    "system": "Sistema",
+    "allSystems": "Todos os sistemas",
+    "hint": "Escreva uma ou mais palavras. Maiúsculas, acentos e pequenos erros de escrita não importam.",
+    "none": "Nenhuma ordem de trabalho nem artigo da base de conhecimento menciona estas palavras.",
+    "count": "{count, plural, one {# ordem de trabalho} other {# ordens de trabalho}}",
+    "countTop": "As {count} ordens de trabalho mais relevantes",
+    "completedOn": "Concluída a {date}",
+    "openedOn": "Aberta a {date}",
+    "moreHits": "{count, plural, one {Mais # nota} other {Mais # notas}} com estas palavras",
+    "back": "Voltar",
+    "searching": "A pesquisar…",
+    "offline": "A pesquisa precisa de ligação. Os seus trabalhos continuam disponíveis sem rede.",
+    "kind": {
+      "description": "Descrição",
+      "request": "Pedido do cliente",
+      "comment": "Comentário",
+      "itemNote": "Nota em \"{step}\"",
+      "itemAnswer": "Resposta a \"{step}\"",
+      "timeNote": "Nota de tempo",
+      "statusNote": "Nota ao passar a {status}"
+    },
+    "articles": "{count, plural, one {# artigo da base de conhecimento} other {# artigos da base de conhecimento}}",
+    "articlesMore": "{count, plural, one {Mais # artigo} other {Mais # artigos}}: acrescente palavras para restringir a pesquisa."
+  },
+  "knowledge": {
+    "title": "Base de conhecimento",
+    "description": "Como estão configurados os sistemas desta moradia: configurações, soluções, onde fica cada coisa, cuidados a ter.",
+    "new": "Novo artigo",
+    "edit": "Editar artigo",
+    "delete": "Eliminar artigo",
+    "deleteConfirm": "Eliminar este artigo e os seus ficheiros? Não é possível anular.",
+    "empty": "Ainda não há artigos.",
+    "emptyHint": "Registe o que o próximo técnico precisa de saber sobre esta moradia: como está configurado um sistema, uma solução que funciona, onde está a chave do bastidor.",
+    "emptyAsset": "Ainda não há nada escrito sobre este equipamento.",
+    "viewAll": "Ver todos",
+    "searchPlaceholder": "Pesquisar nos artigos…",
+    "allSystems": "Todos os sistemas",
+    "allAssets": "Todos os equipamentos",
+    "noMatches": "Nenhum artigo corresponde.",
+    "found": "{count, plural, one {# artigo} other {# artigos}}",
+    "articleTitle": "Título",
+    "titlePlaceholder": "ex.: KNX: reiniciar o router IP",
+    "system": "Sistema",
+    "general": "Geral",
+    "body": "Texto",
+    "formatHint": "# título · **negrito** · *itálico* · `código` · - lista · 1. passos · > nota · ``` bloco de código ``` · [texto](https://…) · ![descrição](endereço da imagem)",
+    "assets": "Equipamentos",
+    "assetsHint": "O artigo aparece também na página destes equipamentos e em primeiro lugar nos trabalhos sobre eles.",
+    "pin": "Fixar no topo",
+    "pinHint": "Os artigos fixados aparecem primeiro, aqui e na página da moradia.",
+    "pinned": "Fixado",
+    "files": "Ficheiros",
+    "noText": "Sem texto.",
+    "created": "Escrito a {when}",
+    "createdBy": "Escrito por {name}, {when}",
+    "updated": "Atualizado a {when}",
+    "updatedBy": "Atualizado por {name}, {when}",
+    "filesOnline": "{count, plural, one {# ficheiro} other {# ficheiros}} (requer ligação)",
+    "editor": {
+      "visual": "Visual",
+      "markdown": "Markdown",
+      "toolbar": "Formatação",
+      "bold": "Negrito (Ctrl+B)",
+      "italic": "Itálico (Ctrl+I)",
+      "code": "Código (Ctrl+E)",
+      "heading": "Título",
+      "subheading": "Subtítulo",
+      "smallHeading": "Título pequeno",
+      "bulletList": "Lista",
+      "orderedList": "Passos numerados",
+      "note": "Nota",
+      "codeBlock": "Bloco de código",
+      "link": "Ligação",
+      "image": "Inserir imagem",
+      "divider": "Separador",
+      "undo": "Anular (Ctrl+Z)",
+      "redo": "Refazer (Ctrl+Y)",
+      "linkAddress": "Endereço da ligação",
+      "applyLink": "Aplicar",
+      "removeLink": "Remover ligação",
+      "close": "Fechar",
+      "uploading": "A enviar a imagem…",
+      "visualHint": "O Markdown continua a funcionar enquanto escreve: # título, **negrito**, *itálico*, `código`, - lista, 1. passos, > nota, ``` bloco de código. Também pode colar ou arrastar imagens."
+    }
+  },
+  "onCall": {
+    "description": "Escolha a equipa de prevenção e quem está de prevenção em cada semana. Quem está de prevenção recebe os novos pedidos dos clientes no horário de prevenção (Definições → Empresa); havendo várias pessoas, recebem-nos as da equipa do sistema do pedido, ou todas quando nenhuma é.",
+    "thisWeek": "De prevenção esta semana ({from} – {to})",
+    "you": "você",
+    "nobodyNow": "Ninguém está de prevenção esta semana: os novos pedidos vão apenas para quem aprova pedidos.",
+    "today": "Este mês",
+    "weekShort": "Sem.",
+    "onCall": "De prevenção",
+    "weekNumber": "Semana {n}",
+    "leftTeam": "{name} (saiu da equipa)",
+    "nobody": "Ninguém",
+    "team": "Equipa de prevenção",
+    "teamHint": "Marque quem pode estar de prevenção. Cada semana pode ter uma ou mais destas pessoas. Clientes e observadores não podem participar.",
+    "inTeam": "{name} faz parte da equipa de prevenção",
+    "removeConfirm": "Retirar {name} da equipa de prevenção? As semanas atribuídas a partir desta ficam livres.",
+    "requestOnCall": "De prevenção quando chegou",
+    "viewDescription": "Quem está de prevenção em cada semana. Quem está de prevenção recebe os novos pedidos dos clientes no horário de prevenção e pode aprová-los ou recusá-los.",
+    "seeCalendar": "Ver calendário completo",
+    "youToo": "incluindo você",
+    "removeFromWeek": "Retirar {name} desta semana",
+    "add": "Adicionar",
+    "addTo": "Adicionar alguém de prevenção de {range}"
+  },
+  "onCallHours": {
+    "title": "Horário de prevenção",
+    "hint": "Quando quem está de prevenção recebe os novos pedidos dos clientes (Definições → Colaboradores → Prevenção). Fora deste horário, os pedidos vão apenas para quem aprova pedidos, como habitualmente.",
+    "always": "A qualquer hora",
+    "hours": "Só neste horário",
+    "nextDayHint": "Uma hora de fim igual ou anterior à de início termina no dia seguinte: 18:00–02:00 acaba às 2h do dia seguinte, 02:00–02:00 dura 24 horas.",
+    "from": "das",
+    "to": "às",
+    "nextDay": "até ao dia seguinte",
+    "allDay": "24 horas",
+    "holidays": "Feriados da empresa (do horário de funcionamento): todo o dia"
   }
 }

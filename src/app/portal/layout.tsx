@@ -1,18 +1,14 @@
 import Link from "next/link";
 import { getTranslations } from "next-intl/server";
-import { LogOut, Plus, UserRound } from "lucide-react";
+import { LogOut, UserRound } from "lucide-react";
 import { NotificationBell } from "@/components/notifications/bell";
-import { LocaleSwitcher } from "@/components/locale-switcher";
-import { ThemeToggle } from "@/components/theme-toggle";
-import { getTheme } from "@/lib/theme-server";
-import { Button } from "@/components/ui";
 import { getPortalContext } from "@/lib/portal";
 import { signOutAction } from "@/app/(auth)/actions";
 import { brandStyle, logoSrc } from "@/lib/branding";
+import { privacyPath } from "@/lib/privacy";
 
 export default async function PortalLayout({ children }: { children: React.ReactNode }) {
   const ctx = await getPortalContext();
-  const theme = await getTheme();
   const t = await getTranslations();
   const logo = logoSrc(ctx.organization);
   const unread = await ctx.db.notification.count({ where: { userId: ctx.user.id, readAt: null } });
@@ -31,14 +27,6 @@ export default async function PortalLayout({ children }: { children: React.React
             </span>
           </Link>
           <div className="flex items-center gap-2">
-            <Link href="/portal/requests/new" className="hidden sm:block">
-              <Button size="sm">
-                <Plus className="size-4" />
-                {t("portal.newRequest")}
-              </Button>
-            </Link>
-            <LocaleSwitcher className="hidden sm:inline-flex" />
-            <ThemeToggle initial={theme} className="hidden sm:inline-flex" />
             <NotificationBell key={unread} initial={unread} href="/portal/notifications" />
             <Link href="/portal/profile" title={t("nav.profile")} className="rounded-md p-2 text-muted hover:bg-gray-100">
               <UserRound className="size-4" />
@@ -52,18 +40,11 @@ export default async function PortalLayout({ children }: { children: React.React
         </div>
       </header>
       <main className="mx-auto max-w-4xl px-4 py-6">{children}</main>
-      {/* Mobile: the main action is always one tap away. */}
-      <Link
-        href="/portal/requests/new"
-        className="fixed bottom-5 right-5 flex items-center gap-2 rounded-full bg-brand px-5 py-3 text-sm font-medium text-brand-foreground shadow-lg sm:hidden"
-      >
-        <Plus className="size-4" />
-        {t("portal.newRequest")}
-      </Link>
-      <div className="flex justify-center gap-2 pb-24 sm:hidden">
-        <LocaleSwitcher />
-        <ThemeToggle initial={theme} />
-      </div>
+      <footer className="pb-6 text-center text-xs">
+        <Link href={privacyPath(ctx.organization)} className="text-muted hover:text-brand">
+          {t("privacy.title")}
+        </Link>
+      </footer>
     </div>
   );
 }

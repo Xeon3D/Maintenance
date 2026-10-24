@@ -9,8 +9,9 @@ import { getContext } from "@/lib/context";
 import { pageOf, PAGE_SIZE, searchWhere, sp } from "@/lib/list";
 import { ContractStatus } from "@/generated/prisma/enums";
 import { ContractStatusBadge } from "./status-badge";
+import { titled } from "@/lib/metadata";
 
-export const metadata = { title: "Service contracts" };
+export const generateMetadata = titled("nav.contracts");
 
 export default async function ContractsPage({ searchParams }: PageProps<"/contracts">) {
   const ctx = await getContext();
@@ -88,7 +89,7 @@ export default async function ContractsPage({ searchParams }: PageProps<"/contra
                 <th>{t("common.status")}</th>
                 <th>{t("contracts.period")}</th>
                 <th>{t("contracts.sla")}</th>
-                <th className="text-right">{t("contracts.monthlyFee")}</th>
+                {ctx.can("costs.view") && <th className="text-right">{t("contracts.monthlyFee")}</th>}
               </tr>
             </thead>
             <tbody>
@@ -113,7 +114,7 @@ export default async function ContractsPage({ searchParams }: PageProps<"/contra
                       ? t("contracts.slaShort", { response: c.responseTimeHours ?? "—", resolution: c.resolutionTimeHours ?? "—" })
                       : "—"}
                   </td>
-                  <td className="text-right tabular-nums">{c.monthlyFee != null ? money(Number(c.monthlyFee)) : "—"}</td>
+                  {ctx.can("costs.view") && <td className="text-right tabular-nums">{c.monthlyFee != null ? money(Number(c.monthlyFee)) : "—"}</td>}
                 </tr>
               ))}
             </tbody>

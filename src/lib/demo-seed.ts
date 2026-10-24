@@ -3,6 +3,7 @@
 // Relative imports only: this also runs under tsx outside Next.
 import bcrypt from "bcryptjs";
 import type { PrismaClient } from "../generated/prisma/client";
+import { DEFAULT_JOB_ROLES } from "./roles";
 
 export const DEMO_PASSWORD = "demo1234";
 export const DEMO_OWNER = "owner@demo.test";
@@ -14,7 +15,7 @@ export async function seedDemo(prisma: PrismaClient) {
   const mk = (email: string, name: string, locale = "en") =>
     prisma.user.create({ data: { email, name, passwordHash, locale } });
 
-  const [owner, manager, techNet, techElec, viewer, clientUser, pmUser] = await Promise.all([
+  const [owner, manager, techNet, techElec, viewer, clientUser, pmUser, accountant] = await Promise.all([
     mk(DEMO_OWNER, "Sofia Almeida", "pt"),
     mk("manager@demo.test", "Miguel Costa", "pt"),
     mk("tech.network@demo.test", "Rui Ferreira", "pt"),
@@ -22,6 +23,7 @@ export async function seedDemo(prisma: PrismaClient) {
     mk("viewer@demo.test", "Ana Viewer"),
     mk("client@demo.test", "James Whitmore"),
     mk("pm@demo.test", "Carla Mendes", "pt"),
+    mk("accountant@demo.test", "Teresa Lopes", "pt"),
   ]);
 
   const org = await prisma.organization.create({
@@ -71,8 +73,9 @@ export async function seedDemo(prisma: PrismaClient) {
     prisma.client.create({ data: { organizationId: org.id, name: "Bergström Family", type: "PRIVATE_OWNER", email: "family@bergstrom.test" } }),
   ]);
 
-  // A custom role with technician access and its own rate.
-  const engineer = await prisma.jobRole.create({ data: { organizationId: org.id, name: "Electrical engineer", access: "TECHNICIAN", hourlyRate: 65 } });
+  // The default roles, as a new company gets them; Engineer has its own rate.
+  await prisma.jobRole.createMany({ data: DEFAULT_JOB_ROLES.map((name) => ({ organizationId: org.id, name, hourlyRate: name === "Engineer" ? 65 : null })) });
+  const engineer = await prisma.jobRole.findFirstOrThrow({ where: { organizationId: org.id, name: "Engineer" } });
 
   await prisma.membership.createMany({
     data: [
@@ -81,6 +84,7 @@ export async function seedDemo(prisma: PrismaClient) {
       { organizationId: org.id, userId: techNet.id, role: "TECHNICIAN" },
       { organizationId: org.id, userId: techElec.id, role: "TECHNICIAN", jobRoleId: engineer.id },
       { organizationId: org.id, userId: viewer.id, role: "VIEWER" },
+      { organizationId: org.id, userId: accountant.id, role: "ACCOUNTANT" },
       { organizationId: org.id, userId: clientUser.id, role: "REQUESTER", clientId: client.id },
       { organizationId: org.id, userId: pmUser.id, role: "REQUESTER", clientId: pmClient.id },
     ],
@@ -183,7 +187,8 @@ export async function seedDemo(prisma: PrismaClient) {
   ] as const;
   for (const s of spares) {
     const part = await prisma.part.create({
-      data: { organizationId: org.id, name: s.name, sku: s.sku, system: s.system, unitCost: s.unitCost, minQuantity: s.min, vendorId: s.vendorId },
+      // Bought at about 65% of the sale price.
+      data: { organizationId: org.id, name: s.name, sku: s.sku, system: s.system, unitCost: s.unitCost, purchaseCost: Math.round(s.unitCost * 65) / 100, minQuantity: s.min, vendorId: s.vendorId },
     });
     for (const [loc, quantity] of s.stock) {
       await prisma.partStock.create({ data: { partId: part.id, locationId: loc.id, quantity } });

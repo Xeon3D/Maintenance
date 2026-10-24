@@ -12,8 +12,9 @@ import { cn } from "@/lib/utils";
 import { SystemType } from "@/generated/prisma/enums";
 import { describeSchedule } from "./describe";
 import { RunSchedulerButton } from "./run-button";
+import { titled } from "@/lib/metadata";
 
-export const metadata = { title: "Preventive maintenance" };
+export const generateMetadata = titled("nav.preventive");
 
 const COMPLIANCE_DAYS = 90;
 

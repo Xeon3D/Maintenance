@@ -8,7 +8,7 @@ type Params = Record<string, string | string[] | undefined>;
 /**
  * Work order `where` from list params.
  * status: "" = active (open/in progress/on hold), "all", or a specific status.
- * assignee: "me", "unassigned" or a user id.
+ * assignee: "me", "unassigned", a user id, or "all" / absent for anyone.
  */
 export function woFilter(params: Params, userId: string, opts: { ignoreStatus?: boolean } = {}): Prisma.WorkOrderWhereInput {
   const q = sp(params, "q");
@@ -28,7 +28,10 @@ export function woFilter(params: Params, userId: string, opts: { ignoreStatus?: 
   if (system && system in SystemType) where.system = system as SystemType;
   if (sp(params, "villaId")) where.villaId = sp(params, "villaId");
   if (sp(params, "assetId")) where.assetId = sp(params, "assetId");
-  if (assignee === "me") where.assignees = { some: { userId } };
+  if (sp(params, "category")) where.categories = { some: { id: sp(params, "category") } };
+  if (assignee === "all") {
+    // anyone
+  } else if (assignee === "me") where.assignees = { some: { userId } };
   else if (assignee === "unassigned") where.assignees = { none: {} };
   else if (assignee) where.assignees = { some: { userId: assignee } };
   if (sp(params, "overdue") === "1") {

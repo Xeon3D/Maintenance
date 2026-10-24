@@ -4,12 +4,17 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState, useTransition } from "react";
 import { useTranslations } from "next-intl";
-import { FileDown, ImagePlus, Paperclip, Pencil, Play, Send, Square, Trash2, X } from "lucide-react";
+import { FileDown, ImagePlus, MapPin, Monitor, Pencil, Play, Send, Square, Trash2, X } from "lucide-react";
 import { ActionForm, FieldError } from "@/components/action-form";
 import { Button, Field, Input } from "@/components/ui";
 import { MentionTextarea, type MentionMember } from "@/components/mention-textarea";
 import { SignaturePad, type SignaturePadHandle } from "@/components/signature-pad";
 import { uploadFile, type Uploaded } from "@/lib/upload-client";
+import { useUploader } from "@/lib/use-uploader";
+import { AttachmentThumb } from "@/components/attachment-thumb";
+import { DateInput } from "@/components/date-input";
+import { cn } from "@/lib/utils";
+import type { WorkMode } from "@/generated/prisma/enums";
 import {
   addCommentAction,
   addCostAction,
@@ -20,6 +25,7 @@ import {
   deleteTimeAction,
   deleteWorkOrderAction,
   setClientAbsentAction,
+  setTimeModeAction,
   signOffAction,
   startTimerAction,
   stopTimerAction,
@@ -33,25 +39,62 @@ function formatDuration(totalMinutes: number) {
 
 // ── Time
 
-export type TimeRow = { id: string; user: string; mine: boolean; minutes: number | null; startedAt: string; label: string; note: string | null };
+export type TimeRow = { id: string; user: string; mine: boolean; minutes: number | null; startedAt: string; label: string; note: string | null; mode: WorkMode };
+
+const MODE_ICON = { ONSITE: MapPin, REMOTE: Monitor } as const;
+
+/** On site / remote, as a two-button switch. */
+function ModeSwitch({ value, onChange }: { value: WorkMode; onChange: (m: WorkMode) => void }) {
+  const t = useTranslations();
+  return (
+    <div role="radiogroup" aria-label={t("time.mode")} className="inline-flex rounded-md border border-border p-0.5 text-sm">
+      {(["ONSITE", "REMOTE"] as const).map((m) => {
+        const Icon = MODE_ICON[m];
+        return (
+          <button
+            key={m}
+            type="button"
+            role="radio"
+            aria-checked={value === m}
+            onClick={() => onChange(m)}
+            className={cn("inline-flex items-center gap-1.5 rounded px-2.5 py-1", value === m ? "bg-brand text-white" : "text-muted hover:text-foreground")}
+          >
+            <Icon className="size-3.5" />
+            {t(`time.modes.${m}`)}
+          </button>
+        );
+      })}
+    </div>
+  );
+}
 
 export function TimeTracker({
   woId,
   entries,
   runningSince,
+  runningMode,
+  defaultMode,
   canExecute,
   canDeleteAny,
+  billed,
 }: {
   woId: string;
   entries: TimeRow[];
   runningSince: string | null; // my running timer
+  runningMode: WorkMode | null;
+  /** Where a new entry is worked unless changed: my last entry's mode on this work order. */
+  defaultMode: WorkMode;
   canExecute: boolean;
   canDeleteAny: boolean;
+  /** Time billed per technician (rounded up to the billing period); null when the company doesn't round. */
+  billed: { block: number; total: number; people: { name: string; minutes: number; billed: number }[] } | null;
 }) {
   const t = useTranslations();
   const [pending, start] = useTransition();
   const [now, setNow] = useState(() => Date.now());
   const [manual, setManual] = useState(false);
+  const [mode, setMode] = useState<WorkMode>(defaultMode);
+  const other = (m: WorkMode): WorkMode => (m === "ONSITE" ? "REMOTE" : "ONSITE");
 
   useEffect(() => {
     if (!runningSince) return;
@@ -65,15 +108,17 @@ export function TimeTracker({
 
   return (
     <div className="space-y-3">
+      {canExecute && !runningSince && <ModeSwitch value={mode} onChange={setMode} />}
       {canExecute && (
         <div className="flex items-center gap-2">
           {runningSince ? (
             <Button variant="danger" disabled={pending} onClick={() => start(() => stopTimerAction(woId))} className="flex-1">
               <Square className="size-4" />
               {t("time.stop")} <span className="font-mono tabular-nums">{clock}</span>
+              {runningMode && <span className="text-xs font-normal opacity-90">· {t(`time.modes.${runningMode}`)}</span>}
             </Button>
           ) : (
-            <Button disabled={pending} onClick={() => start(() => startTimerAction(woId))} className="flex-1">
+            <Button disabled={pending} onClick={() => start(() => startTimerAction(woId, mode))} className="flex-1">
               <Play className="size-4" />
               {t("time.start")}
             </Button>
@@ -87,7 +132,7 @@ export function TimeTracker({
         <ActionForm action={addTimeAction.bind(null, woId)} submitLabel={t("common.add")} className="rounded-md border border-border p-3">
           <div className="grid grid-cols-2 gap-2">
             <Field label={t("time.date")}>
-              <Input name="date" type="date" required defaultValue={new Date().toISOString().slice(0, 10)} />
+              <DateInput name="date" required defaultValue={new Date().toISOString().slice(0, 10)} />
             </Field>
             <Field label={t("time.minutes")}>
               <Input name="minutes" type="number" min={1} max={1440} required />
@@ -95,15 +140,39 @@ export function TimeTracker({
             </Field>
           </div>
           <Input name="note" placeholder={t("time.notePlaceholder")} />
+          <input type="hidden" name="mode" value={mode} />
+          {runningSince && <ModeSwitch value={mode} onChange={setMode} />}
         </ActionForm>
       )}
       {entries.length > 0 && (
         <ul className="divide-y divide-border text-sm">
-          {entries.map((e) => (
+          {entries.map((e) => {
+            const Icon = MODE_ICON[e.mode];
+            const canChange = canExecute && (e.mine || canDeleteAny);
+            const badge = (
+              <>
+                <Icon className="size-3" />
+                {t(`time.modes.${e.mode}`)}
+              </>
+            );
+            return (
             <li key={e.id} className="flex items-center justify-between gap-2 py-1.5">
               <span className="min-w-0">
                 <span className="font-medium">{e.user}</span>
                 <span className="ml-1.5 text-xs text-muted">{e.label}</span>
+                {canChange ? (
+                  <button
+                    type="button"
+                    disabled={pending}
+                    title={t("time.switchTo", { mode: t(`time.modes.${other(e.mode)}`) })}
+                    onClick={() => start(() => setTimeModeAction(woId, e.id, other(e.mode)))}
+                    className="ml-1.5 inline-flex items-center gap-1 rounded border border-border px-1.5 text-xs text-muted hover:border-brand hover:text-brand"
+                  >
+                    {badge}
+                  </button>
+                ) : (
+                  <span className="ml-1.5 inline-flex items-center gap-1 text-xs text-muted">{badge}</span>
+                )}
                 {e.note && <span className="block truncate text-xs text-muted">{e.note}</span>}
               </span>
               <span className="flex items-center gap-1">
@@ -119,11 +188,30 @@ export function TimeTracker({
                 )}
               </span>
             </li>
-          ))}
+            );
+          })}
           <li className="flex justify-between py-1.5 font-medium">
             <span>{t("time.total")}</span>
             <span className="tabular-nums">{formatDuration(total)}</span>
           </li>
+          {billed && billed.total > 0 && (
+            <li className="py-1.5">
+              <div className="flex justify-between font-medium">
+                <span title={t("time.billedHint", { block: billed.block })}>{t("time.billed")}</span>
+                <span className="tabular-nums">{formatDuration(billed.total)}</span>
+              </div>
+              {billed.people.length > 0 && (
+                <ul className="mt-0.5 space-y-0.5 text-xs text-muted">
+                  {billed.people.map((p) => (
+                    <li key={p.name} className="flex justify-between">
+                      <span>{p.name}</span>
+                      <span className="tabular-nums">{t("time.billedFrom", { billed: formatDuration(p.billed), logged: formatDuration(p.minutes) })}</span>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </li>
+          )}
         </ul>
       )}
     </div>
@@ -140,7 +228,7 @@ export function CostsPanel({
 }: {
   woId: string;
   costs: { id: string; description: string; amount: string }[];
-  summary: { labor: string; parts: string | null; other: string; total: string };
+  summary: { labor: string; parts: string | null; other: string; total: string; urgent: { amount: string; rule: string } | null; travel: { amount: string; trips: number; rule: string } | null };
   canExecute: boolean;
 }) {
   const t = useTranslations();
@@ -156,6 +244,22 @@ export function CostsPanel({
         <div className="flex justify-between">
           <span className="text-muted">{t("costs.parts")}</span>
           <span className="tabular-nums">{summary.parts}</span>
+        </div>
+      )}
+      {summary.urgent && (
+        <div className="flex justify-between gap-2">
+          <span className="text-muted">
+            {t("costs.urgent")} <span className="text-xs">({summary.urgent.rule})</span>
+          </span>
+          <span className="tabular-nums">{summary.urgent.amount}</span>
+        </div>
+      )}
+      {summary.travel && (
+        <div className="flex justify-between gap-2">
+          <span className="text-muted">
+            {t("costs.trips", { count: summary.travel.trips })} <span className="text-xs">({summary.travel.rule})</span>
+          </span>
+          <span className="tabular-nums">{summary.travel.amount}</span>
         </div>
       )}
       {costs.map((c) => (
@@ -198,8 +302,7 @@ export type Photo = { id: string; url: string; filename: string; mimeType: strin
 export function Gallery({ woId, files, canExecute, canDeleteAny }: { woId: string; files: Photo[]; canExecute: boolean; canDeleteAny: boolean }) {
   const t = useTranslations();
   const input = useRef<HTMLInputElement>(null);
-  const [busy, setBusy] = useState(false);
-  const [error, setError] = useState(false);
+  const uploader = useUploader();
   const [pending, start] = useTransition();
   const router = useRouter();
 
@@ -210,15 +313,7 @@ export function Gallery({ woId, files, canExecute, canDeleteAny }: { woId: strin
           {files.map((f) => (
             <div key={f.id} className="group relative">
               <a href={f.url} target="_blank" rel="noreferrer" title={f.filename}>
-                {f.mimeType.startsWith("image/") ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img src={f.url} alt={f.filename} className="aspect-square w-full rounded-md border border-border object-cover" />
-                ) : (
-                  <div className="flex aspect-square flex-col items-center justify-center gap-1 rounded-md border border-border bg-gray-50 p-1 text-center text-[10px] text-muted">
-                    <Paperclip className="size-4" />
-                    <span className="line-clamp-2 break-all">{f.filename}</span>
-                  </div>
-                )}
+                <AttachmentThumb url={f.url} filename={f.filename} mimeType={f.mimeType} />
               </a>
               {canExecute && (f.mine || canDeleteAny) && (
                 <button
@@ -240,28 +335,20 @@ export function Gallery({ woId, files, canExecute, canDeleteAny }: { woId: strin
             ref={input}
             type="file"
             multiple
-            accept="image/*,application/pdf"
+            accept="image/*,video/*,application/pdf"
             className="sr-only"
             onChange={async (e) => {
               const list = [...(e.target.files ?? [])];
               e.target.value = "";
-              setBusy(true);
-              setError(false);
-              try {
-                for (const f of list) await uploadFile(f, { workOrderId: woId });
-              } catch {
-                setError(true);
-              } finally {
-                setBusy(false);
-                router.refresh();
-              }
+              await uploader.upload(list, { workOrderId: woId });
+              router.refresh();
             }}
           />
-          <Button size="sm" variant="secondary" disabled={busy} onClick={() => input.current?.click()}>
+          <Button size="sm" variant="secondary" disabled={uploader.busy} onClick={() => input.current?.click()}>
             <ImagePlus className="size-4" />
-            {busy ? t("checklist.uploading") : t("files.add")}
+            {uploader.busy ? uploader.label : t("files.addMedia")}
           </Button>
-          {error && <p className="mt-2 text-xs text-danger">{t("files.failed")}</p>}
+          {uploader.error && <p className="mt-2 text-xs text-danger">{uploader.error}</p>}
         </>
       )}
     </div>
@@ -274,7 +361,7 @@ export function CommentBox({ woId, members }: { woId: string; members: MentionMe
   const t = useTranslations();
   const [body, setBody] = useState("");
   const [files, setFiles] = useState<Uploaded[]>([]);
-  const [busy, setBusy] = useState(false);
+  const uploader = useUploader();
   const [pending, start] = useTransition();
   const input = useRef<HTMLInputElement>(null);
 
@@ -294,36 +381,30 @@ export function CommentBox({ woId, members }: { woId: string; members: MentionMe
       {files.length > 0 && (
         <div className="flex flex-wrap gap-2">
           {files.map((f) => (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img key={f.id} src={f.url} alt="" className="size-14 rounded border border-border object-cover" />
+            <AttachmentThumb key={f.id} url={f.url} filename={f.filename} mimeType={f.mimeType} className="size-14" />
           ))}
         </div>
       )}
+      {uploader.error && <p className="text-xs text-danger">{uploader.error}</p>}
       <div className="flex justify-between">
         <input
           ref={input}
           type="file"
-          accept="image/*"
+          accept="image/*,video/*"
           multiple
           className="sr-only"
           onChange={async (e) => {
             const list = [...(e.target.files ?? [])];
             e.target.value = "";
-            setBusy(true);
-            try {
-              const ups: Uploaded[] = [];
-              for (const f of list) ups.push(await uploadFile(f, { workOrderId: woId }));
-              setFiles((prev) => [...prev, ...ups]);
-            } finally {
-              setBusy(false);
-            }
+            const ups = await uploader.upload(list, { workOrderId: woId });
+            setFiles((prev) => [...prev, ...ups]);
           }}
         />
-        <Button type="button" size="sm" variant="ghost" disabled={busy} onClick={() => input.current?.click()}>
+        <Button type="button" size="sm" variant="ghost" disabled={uploader.busy} onClick={() => input.current?.click()}>
           <ImagePlus className="size-4" />
-          {busy ? t("checklist.uploading") : t("activity.attach")}
+          {uploader.busy ? uploader.label : t("activity.attach")}
         </Button>
-        <Button size="sm" disabled={pending || busy || (!body.trim() && files.length === 0)}>
+        <Button size="sm" disabled={pending || uploader.busy || (!body.trim() && files.length === 0)}>
           <Send className="size-4" />
           {t("activity.send")}
         </Button>
@@ -446,7 +527,7 @@ export function WorkOrderActions({ woId, canEdit, canDelete }: { woId: string; c
   const [pending, start] = useTransition();
   return (
     <>
-      <Link href={`/work-orders/${woId}/report`} prefetch={false} target="_blank">
+      <Link href={`/report/${woId}`} prefetch={false}>
         <Button variant="secondary">
           <FileDown className="size-4" />
           {t("wo.report")}

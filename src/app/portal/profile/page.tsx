@@ -2,6 +2,7 @@ import { getTranslations } from "next-intl/server";
 import { PageHeader } from "@/components/ui";
 import { BackLink } from "@/components/back-link";
 import { ProfileSettings } from "@/app/account/profile-settings";
+import { getPortalContext } from "@/lib/portal";
 
 export default async function PortalProfilePage() {
   const t = await getTranslations();
@@ -9,7 +10,7 @@ export default async function PortalProfilePage() {
     <>
       <BackLink href="/portal" label={t("portal.title")} />
       <PageHeader title={t("profile.title")} />
-      <ProfileSettings portal />
+      <ProfileSettings portal org={(await getPortalContext()).organization} />
     </>
   );
 }

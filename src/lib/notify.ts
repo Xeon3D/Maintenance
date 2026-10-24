@@ -5,9 +5,10 @@ import en from "../../messages/en.json";
 import pt from "../../messages/pt.json";
 import { prisma } from "@/lib/db/client";
 import type { TenantDb } from "@/lib/db/tenant";
-import { PERMISSIONS, type Permission } from "@/lib/rbac";
+import { effectivePermissions, type Permission } from "@/lib/rbac";
 import { emailLayout, sendEmail } from "@/lib/email";
 import { brandColor, logoSrc } from "@/lib/branding";
+import { privacyPath } from "@/lib/privacy";
 import { sendPush } from "@/lib/push";
 import { NOTIFICATION_DEFAULTS, prefsOf, type NotificationType } from "@/lib/notification-types";
 import type { Role } from "@/generated/prisma/enums";
@@ -90,18 +91,19 @@ export async function notify(actor: NotifyActor, userIds: (string | null | undef
   });
 }
 
-type Brand = { org: string; logo: string | null; color: string };
+export type Brand = { org: string; logo: string | null; color: string; privacyUrl: string };
 
 /** Name, absolute logo URL and colour for emails. */
-async function orgBrand(orgId: string, base: string): Promise<Brand> {
-  const org = await prisma.organization.findUniqueOrThrow({ where: { id: orgId }, select: { id: true, name: true, logoUrl: true, updatedAt: true, brandColor: true } });
-  return { org: org.name, logo: logoSrc(org, base), color: brandColor(org) };
+export async function orgBrand(orgId: string, base: string): Promise<Brand> {
+  const org = await prisma.organization.findUniqueOrThrow({ where: { id: orgId }, select: { id: true, name: true, slug: true, logoUrl: true, updatedAt: true, brandColor: true } });
+  return { org: org.name, logo: logoSrc(org, base), color: brandColor(org), privacyUrl: base + privacyPath(org) };
 }
 
 function notificationEmail(locale: string, brand: Brand, r: { title: string; body: string | null }, url: string, settingsUrl: string) {
   const t = createTranslator({ locale, messages: MESSAGES[locale === "pt" ? "pt" : "en"], namespace: "email" });
   return emailLayout({
     ...brand,
+    privacy: { label: t("privacy"), url: brand.privacyUrl },
     heading: r.title,
     paragraphs: r.body ? [r.body] : [],
     cta: { label: t("open"), url },
@@ -115,12 +117,14 @@ export async function notifyExternal(org: { id: string; name: string }, to: stri
   const brand = await orgBrand(org.id, await origin());
   const r = renderNotification(locale, type, data);
   const t = createTranslator({ locale, messages: MESSAGES[locale === "pt" ? "pt" : "en"], namespace: "email" });
-  background(() => sendEmail({ to, subject: r.title, ...emailLayout({ ...brand, heading: r.title, paragraphs: r.body ? [r.body] : [], footer: t("externalFooter") }) }));
+  background(() => sendEmail({ to, subject: r.title, ...emailLayout({ ...brand, heading: r.title, paragraphs: r.body ? [r.body] : [], footer: t("externalFooter"), privacy: { label: t("privacy"), url: brand.privacyUrl } }) }));
 }
 
-/** Active members whose role has `permission` (e.g. everyone who can approve requests). */
+/** Active members who have `permission` with the company's permission settings (e.g. everyone who can approve requests). */
 export async function membersWith(db: TenantDb, permission: Permission, extra: { excludeRoles?: Role[] } = {}) {
-  const roles = (PERMISSIONS[permission] as readonly Role[]).filter((r) => !extra.excludeRoles?.includes(r));
-  const rows = await db.membership.findMany({ where: { active: true, role: { in: roles } }, select: { userId: true } });
-  return rows.map((r) => r.userId);
+  const rows = await db.membership.findMany({
+    where: { active: true, ...(extra.excludeRoles?.length ? { role: { notIn: extra.excludeRoles } } : {}) },
+    select: { userId: true, role: true, jobRole: { select: { permissions: true } }, organization: { select: { rolePermissions: true } } },
+  });
+  return rows.filter((r) => effectivePermissions(r.role, r.organization.rolePermissions, r.jobRole?.permissions).has(permission)).map((r) => r.userId);
 }

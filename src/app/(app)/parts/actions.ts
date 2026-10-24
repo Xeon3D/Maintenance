@@ -10,6 +10,7 @@ import { deleteObject } from "@/lib/storage";
 import {
   createLowStockPurchaseOrders,
   InventoryError,
+  restockVan,
   setLocationMin,
   setStockLevel,
   transferStock,
@@ -41,7 +42,8 @@ const partSchema = z.object({
   manufacturer: optStr(100),
   model: optStr(100),
   unit: str(20),
-  unitCost: money(),
+  unitCost: money(), // sale price
+  purchaseCost: money(),
   minQuantity: qty(),
   vendorId: optId(),
 });
@@ -197,4 +199,43 @@ export async function setLocationArchivedAction(id: string, archived: boolean) {
   const ctx = await requirePermission("inventory.manage");
   await ctx.db.stockLocation.update({ where: { id }, data: { archivedAt: archived ? new Date() : null } });
   revalidatePath("/parts/locations");
+}
+
+// ── Van restock (technicians, for their own van)
+
+export type RestockResult = { ok?: boolean; error?: string; detail?: string; moved?: number } | undefined;
+
+const restockSchema = z.object({
+  vanId: z.string().min(1).max(40),
+  warehouseId: z.string().min(1).max(40),
+  direction: z.enum(["load", "unload"]),
+  note: z.string().max(500).optional(),
+  lines: z.array(z.object({ partId: z.string().min(1).max(40), quantity: z.number().finite().positive().max(1_000_000) })).max(200),
+});
+
+/** Loads parts from a warehouse into the van, or puts them back; all lines or none. */
+export async function restockVanAction(_: RestockResult, form: FormData): Promise<RestockResult> {
+  const ctx = await requirePermission("inventory.use");
+  let lines: unknown;
+  try {
+    lines = JSON.parse(String(form.get("lines") ?? "[]"));
+  } catch {
+    return { error: "stock.noLines" };
+  }
+  const parsed = restockSchema.safeParse({
+    vanId: form.get("vanId"),
+    warehouseId: form.get("warehouseId"),
+    direction: form.get("direction"),
+    note: String(form.get("note") ?? "").trim() || undefined,
+    lines,
+  });
+  if (!parsed.success) return { error: "stock.noLines" };
+  try {
+    const { moved } = await restockVan(ctx, { ...parsed.data, anyVan: ctx.can("inventory.manage") });
+    revalidatePath("/parts", "layout");
+    return { ok: true, moved };
+  } catch (e) {
+    if (e instanceof InventoryError) return { error: `stock.${e.code}`, detail: e.detail };
+    throw e;
+  }
 }

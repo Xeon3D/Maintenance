@@ -2,17 +2,19 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useFormatter, useTranslations } from "next-intl";
-import { Camera, ChevronLeft, CirclePause, CirclePlay, MapPin, Send, Square } from "lucide-react";
+import { Camera, ChevronLeft, Video, CirclePause, CirclePlay, MapPin, Monitor, Send, Square } from "lucide-react";
 import { Button } from "@/components/ui";
 import { PriorityText, WorkOrderStatusBadge } from "@/components/badges";
 import { MentionTextarea, type MentionMember } from "@/components/mention-textarea";
-import { shrinkImage } from "@/lib/upload-client";
+import { shrinkImage, UPLOAD_ERRORS } from "@/lib/upload-client";
+import { prepareVideo } from "@/lib/video-client";
 import { missingRequired } from "@/lib/offline/apply";
 import { newId } from "@/lib/offline/idb";
-import type { NewOp, OfflineWorkOrder } from "@/lib/offline-types";
+import type { NewOp, OfflineArticle, OfflineWorkOrder } from "@/lib/offline-types";
 import type { WorkOrderStatus } from "@/generated/prisma/enums";
 import { SignaturePad, type SignaturePadHandle } from "@/components/signature-pad";
 import { ChecklistItemInput } from "./checklist-item";
+import { KnowledgeSection } from "./knowledge-view";
 import type { Timer } from "./field-app";
 
 type Enqueue = (op: NewOp, blob?: Blob) => Promise<void>;
@@ -23,6 +25,7 @@ function clock(sec: number) {
 
 export function WorkOrderView({
   wo,
+  articles,
   members,
   timer,
   setTimer,
@@ -30,6 +33,8 @@ export function WorkOrderView({
   onBack,
 }: {
   wo: OfflineWorkOrder;
+  /** The villa's knowledge-base articles. */
+  articles: OfflineArticle[];
   members: MentionMember[];
   timer: Timer;
   setTimer: (t: Timer) => Promise<void>;
@@ -42,7 +47,11 @@ export function WorkOrderView({
   const [comment, setComment] = useState("");
   const [blocked, setBlocked] = useState<{ items: string[]; signOff: boolean } | null>(null);
   const [holdNote, setHoldNote] = useState<string | null>(null);
+  const [mode, setMode] = useState<"ONSITE" | "REMOTE">("ONSITE");
   const photoInput = useRef<HTMLInputElement>(null);
+  const videoInput = useRef<HTMLInputElement>(null);
+  const [converting, setConverting] = useState<number | null>(null);
+  const [videoError, setVideoError] = useState<string | null>(null);
   const runningHere = timer?.woId === wo.id;
   const closed = wo.status === "DONE" || wo.status === "CANCELLED";
 
@@ -57,7 +66,7 @@ export function WorkOrderView({
     if (!timer) return;
     const end = new Date();
     if (end.getTime() - new Date(timer.startedAt).getTime() >= 60_000) {
-      await enqueue({ kind: "time", woId: timer.woId, startedAt: timer.startedAt, endedAt: end.toISOString(), at: end.toISOString() });
+      await enqueue({ kind: "time", woId: timer.woId, startedAt: timer.startedAt, endedAt: end.toISOString(), at: end.toISOString(), mode: timer.mode ?? "ONSITE" });
     }
     await setTimer(null);
   };
@@ -81,6 +90,23 @@ export function WorkOrderView({
     for (const f of [...(files ?? [])]) {
       const small = await shrinkImage(f);
       await enqueue({ kind: "photo", woId: wo.id, itemId: null, blobKey: newId(), filename: small.name }, small);
+    }
+  };
+
+  /** Videos are converted on the device (small 720p MP4), then queued like photos. */
+  const addVideos = async (files: FileList | null) => {
+    setVideoError(null);
+    for (const f of [...(files ?? [])]) {
+      try {
+        setConverting(0);
+        const video = await prepareVideo(f, (p) => setConverting(Math.round(p * 100)));
+        await enqueue({ kind: "photo", woId: wo.id, itemId: null, blobKey: newId(), filename: video.name }, video);
+      } catch (e) {
+        const code = e instanceof Error ? e.message : "";
+        setVideoError(UPLOAD_ERRORS.includes(code) ? code : "failed");
+      } finally {
+        setConverting(null);
+      }
     }
   };
 
@@ -137,6 +163,8 @@ export function WorkOrderView({
         )}
         {wo.description && <p className="whitespace-pre-wrap pt-1">{wo.description}</p>}
       </section>
+
+      {articles.length > 0 && <KnowledgeSection articles={articles} assetId={wo.asset?.id ?? null} />}
 
       {!closed && (
         <section className="space-y-3 border-b border-border bg-surface px-4 py-3">
@@ -203,11 +231,32 @@ export function WorkOrderView({
             </div>
           )}
 
+          {!runningHere && (
+            <div role="radiogroup" aria-label={t("time.mode")} className="grid grid-cols-2 rounded-md border border-border p-0.5 text-sm">
+              {(["ONSITE", "REMOTE"] as const).map((m) => {
+                const Icon = m === "ONSITE" ? MapPin : Monitor;
+                return (
+                  <button
+                    key={m}
+                    type="button"
+                    role="radio"
+                    aria-checked={mode === m}
+                    onClick={() => setMode(m)}
+                    className={`inline-flex h-9 items-center justify-center gap-1.5 rounded ${mode === m ? "bg-brand text-white" : "text-muted"}`}
+                  >
+                    <Icon className="size-4" />
+                    {t(`time.modes.${m}`)}
+                  </button>
+                );
+              })}
+            </div>
+          )}
           <div className="flex items-center gap-3">
             {runningHere ? (
               <Button variant="danger" onClick={stopTimer} className="h-11 flex-1">
                 <Square className="size-4" />
                 {t("time.stop")} <span className="font-mono tabular-nums">{clock(elapsed)}</span>
+                <span className="text-xs font-normal opacity-90">· {t(`time.modes.${timer!.mode ?? "ONSITE"}`)}</span>
               </Button>
             ) : (
               <Button
@@ -215,7 +264,7 @@ export function WorkOrderView({
                 className="h-11 flex-1"
                 onClick={async () => {
                   if (timer) await stopTimer(); // one timer at a time
-                  await setTimer({ woId: wo.id, startedAt: new Date().toISOString() });
+                  await setTimer({ woId: wo.id, startedAt: new Date().toISOString(), mode });
                   if (wo.status === "OPEN" || wo.status === "ON_HOLD") await enqueue({ kind: "status", woId: wo.id, status: "IN_PROGRESS" });
                 }}
               >
@@ -245,12 +294,20 @@ export function WorkOrderView({
         <div className="mb-2 flex items-center justify-between">
           <h2 className="text-sm font-medium">{t("field.photos")}</h2>
           <input ref={photoInput} type="file" accept="image/*" capture="environment" multiple className="sr-only" onChange={(e) => void addPhotos(e.target.files).then(() => (e.target.value = ""))} />
-          <Button size="sm" variant="secondary" onClick={() => photoInput.current?.click()}>
-            <Camera className="size-4" />
-            {t("field.takePhoto")}
-          </Button>
+          <input ref={videoInput} type="file" accept="video/*" capture="environment" className="sr-only" onChange={(e) => void addVideos(e.target.files).then(() => (e.target.value = ""))} />
+          <div className="flex gap-2">
+            <Button size="sm" variant="secondary" onClick={() => photoInput.current?.click()}>
+              <Camera className="size-4" />
+              {t("field.takePhoto")}
+            </Button>
+            <Button size="sm" variant="secondary" disabled={converting !== null} onClick={() => videoInput.current?.click()}>
+              <Video className="size-4" />
+              {converting !== null ? t("files.converting", { progress: converting }) : t("field.takeVideo")}
+            </Button>
+          </div>
         </div>
         <p className="text-xs text-muted">{t("field.photosHint")}</p>
+        {videoError && <p className="mt-1 text-xs text-danger">{t(`files.${videoError}`)}</p>}
       </section>
 
       <section className="mt-3 border-y border-border bg-surface px-4 py-3">

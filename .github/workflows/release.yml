@@ -1,0 +1,111 @@
+name: Release
+
+# Push a tag vX.Y.Z (matching "version" in package.json) to publish a release:
+#   1. checks, then builds the Docker image and pushes <image>:X.Y.Z and <image>:latest to Docker Hub —
+#      installed servers treat a new X.Y.Z tag on Docker Hub as "update available" (the repository is
+#      private) and their updater pulls :latest. The release notes travel with the image as the
+#      io.villaops.release-notes index annotation (base64 JSON array of lines; see src/lib/updates.ts);
+#   2. then creates the GitHub release with the same notes.
+# Needs repository secrets DOCKERHUB_USERNAME and DOCKERHUB_TOKEN (a Docker Hub access token with
+# Read & Write). The image name defaults to malvesdc/maintenance; override with the DOCKERHUB_IMAGE variable.
+
+on:
+  push:
+    tags: ["v*.*.*"]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Existing tag to (re)publish, e.g. v0.4.0"
+        required: true
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+env:
+  IMAGE: ${{ vars.DOCKERHUB_IMAGE || 'malvesdc/maintenance' }}
+  TAG: ${{ inputs.tag || github.ref_name }}
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.TAG }}
+
+      - name: Check the tag matches package.json
+        id: version
+        run: |
+          version="${TAG#v}"
+          pkg=$(node -p "require('./package.json').version")
+          if [ "$version" != "$pkg" ]; then
+            echo "::error::Tag $TAG doesn't match package.json version $pkg"
+            exit 1
+          fi
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npx next typegen
+      - run: npm run typecheck
+      - run: npm run lint
+      - run: npm test
+
+      - name: Release notes
+        id: notes
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            gh release view "$TAG" --json body --jq .body > "$RUNNER_TEMP/notes.md"
+          else
+            gh api "repos/${{ github.repository }}/releases/generate-notes" -f tag_name="$TAG" --jq .body > "$RUNNER_TEMP/notes.md"
+          fi
+          echo "b64=$(node scripts/release-notes.mjs "$RUNNER_TEMP/notes.md")" >> "$GITHUB_OUTPUT"
+
+      - uses: docker/setup-buildx-action@v3
+      - uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      # ZimaOS servers are x86-64, so amd64 only.
+      - uses: docker/build-push-action@v6
+        with:
+          context: .
+          platforms: linux/amd64
+          push: true
+          tags: |
+            ${{ env.IMAGE }}:${{ steps.version.outputs.version }}
+            ${{ env.IMAGE }}:latest
+          labels: |
+            org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
+            org.opencontainers.image.version=${{ steps.version.outputs.version }}
+            org.opencontainers.image.revision=${{ github.sha }}
+          # On the image index, which the provenance attestation guarantees exists.
+          provenance: mode=min
+          annotations: |
+            index:io.villaops.release-notes=${{ steps.notes.outputs.b64 }}
+          # Fresh node base image and Debian security updates on every release (the base stage's
+          # `apt-get upgrade` would otherwise come from the cache); the other stages still use it.
+          pull: true
+          no-cache-filters: base
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Create the GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            echo "Release $TAG already exists; image re-published only."
+          else
+            gh release create "$TAG" --title "$TAG" --notes-file "$RUNNER_TEMP/notes.md" --verify-tag
+          fi

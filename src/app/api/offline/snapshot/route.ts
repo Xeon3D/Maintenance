@@ -1,9 +1,11 @@
 import { getContext } from "@/lib/context";
 import { ACTIVE_STATUSES } from "@/lib/work-orders";
 import type { Snapshot } from "@/lib/offline-types";
+import { ARTICLE_LIST_SELECT, listedArticle } from "@/lib/knowledge-select";
 
 const MAX_WORK_ORDERS = 50;
 const COMMENTS = 20;
+const MAX_ARTICLES = 500;
 
 /**
  * What a technician needs offline: their open work orders with checklists, recent comments, the
@@ -27,9 +29,13 @@ export async function GET() {
     take: MAX_WORK_ORDERS,
   });
   const villaIds = [...new Set(wos.map((w) => w.villa?.id).filter((x): x is string => !!x))];
-  const [assets, members] = await Promise.all([
+  const [assets, members, articles] = await Promise.all([
     ctx.db.asset.findMany({ where: { villaId: { in: villaIds }, archivedAt: null }, select: { id: true, name: true, qrToken: true, villa: { select: { name: true } } } }),
     ctx.db.membership.findMany({ where: { active: true, role: { not: "REQUESTER" } }, select: { user: { select: { id: true, name: true } } } }),
+    // The villas' knowledge base (text; files need a connection). Staff only, like the rest of the app.
+    ctx.can("internal.view")
+      ? ctx.db.knowledgeArticle.findMany({ where: { villaId: { in: villaIds } }, select: { ...ARTICLE_LIST_SELECT, villaId: true }, take: MAX_ARTICLES })
+      : [],
   ]);
 
   const body: Snapshot = {
@@ -44,7 +50,8 @@ export async function GET() {
       priority: w.priority,
       type: w.type,
       dueDate: w.dueDate?.toISOString() ?? null,
-      villa: w.villa && { name: w.villa.name, address: w.villa.address, city: w.villa.city, accessNotes: w.villa.accessNotes },
+      startDate: w.startDate?.toISOString() ?? null,
+      villa: w.villa && { id: w.villa.id, name: w.villa.name, address: w.villa.address, city: w.villa.city, accessNotes: w.villa.accessNotes },
       area: w.area?.name ?? null,
       asset: w.asset && {
         id: w.asset.id,
@@ -70,6 +77,7 @@ export async function GET() {
     })),
     assets: assets.map((a) => ({ id: a.id, name: a.name, qrToken: a.qrToken, villa: a.villa.name })),
     members: members.map((m) => m.user),
+    knowledge: articles.map((a) => ({ ...listedArticle(a), villaId: a.villaId, updatedAt: a.updatedAt.toISOString(), updatedBy: a.updatedBy?.name ?? null, files: a._count.attachments })),
   };
   return Response.json(body, { headers: { "Cache-Control": "private, no-store" } });
 }

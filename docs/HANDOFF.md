@@ -5,8 +5,10 @@ State as of **2026-09-29**, phase 9 of 10 done (see `git log` for the commit). R
 **on hold**: the app runs for one company for now. Next candidate work: the Odoo integration in
 `docs/ODOO_INTEGRATION.md` (waiting on the decisions in its §10).
 
-**Released as v0.2.0** (v0.1.0 before): public GitHub repo `Xeon3D/Maintenance`, public Docker Hub image
-`xeon3d/maintenance` (built and pushed from this PC with Docker Desktop; `gh` is logged in as Xeon3D).
+**Repository:** `malves-dc/Maintenance` since 2026-10-14 (a fork of the original `Xeon3D/Maintenance`, which has the
+v0.1.0–v0.3.0 releases, recreated here). Docker Hub image `malvesdc/maintenance` (up to v0.3.0 it was `xeon3d/maintenance`), published by `.github/workflows/release.yml`
+on every `vX.Y.Z` tag (it was built by hand with Docker Desktop up to v0.3.0). Servers on v0.3.0 or older run
+`xeon3d/maintenance` and check `Xeon3D/Maintenance`: change their compose `image:` to `malvesdc/maintenance:latest` once.
 The user runs it on a ZimaOS server behind Nginx Proxy Manager as an **open public demo** (nothing
 locked down, by choice) with a password-protected **factory reset**. 0.2.0 added **Settings → Server**
 (software name, one-click updates, scheduled backups with restore); see "Docker & releases" and
@@ -29,7 +31,8 @@ and lighting. The user chose, and does not want re-litigated:
 1. Build a whole phase, including translations, tests and browser verification.
 2. Run `typecheck`, `lint` and `test`, then verify in the preview browser (details in §6).
 3. Commit at the end of the phase (the message style is in `git log`), ending with the
-   `Co-Authored-By: Claude …` trailer. The repo-local git identity is `xeon4 <xeon4d@gmail.com>`.
+   `Co-Authored-By: Claude …` trailer. The repo-local git identity is `Marcos Alves <malves@diniscoelho.pt>`
+   (since 2026-10-14; older commits are `xeon4`).
 4. Send a short summary covering: what's new, what was tested, what was fixed along the way,
    and things to know. Then ask whether to continue with the next phase.
 
@@ -58,6 +61,13 @@ are mostly UI and logic plus small additive migrations.
 
 ## 3. Environment (Windows 11)
 
+**Docker-only machines (2026-10-14):** a PC without Node can develop entirely in containers: a compose stack
+with `postgres:17-alpine` and `node:24-bookworm-slim` (repo bind-mounted at `/app`, named volumes for
+`node_modules` and `.next`, `WATCHPACK_POLLING=true`, port 3000), `.env` pointing at `db:5432`, and every
+`npm`/`npx` command run with `docker compose exec`. Turbopack misses **new** files over the Windows bind mount:
+restart `next dev` after adding a file. `npx playwright install --with-deps chromium` works in that container.
+
+
 - **Node 24** was installed after the Claude app started, so the app's inherited PATH lacks it.
   - PowerShell: prefix commands with
     `$env:Path = [System.Environment]::GetEnvironmentVariable("Path","Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path","User");`
@@ -79,6 +89,8 @@ are mostly UI and logic plus small additive migrations.
   - Optional `APP_URL`, used for QR label links and email/push links (else the request host).
   - `VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`, `VAPID_SUBJECT`: web push (generated 2026-09-28; rotating
     them invalidates every browser subscription). Without them push is simply off.
+  - E-mail delivery is chosen in **Settings → Server → E-mail** (`lib/email-settings.ts`, stored in server-settings.json,
+    secrets via `encryptField`): SMTP (nodemailer **8.x**: next-auth's peer range) or Resend; "env" falls back to:
   - `RESEND_API_KEY` + `EMAIL_FROM` (commented out): real email via Resend's HTTP API. Without them,
     dev writes each email to `.mail/*.html` (gitignored) and production logs a warning.
 - **Prisma:** `prisma@latest` resolves to an 8.0 RC. **Keep `prisma` and `@prisma/client` pinned to 7.x.**
@@ -88,7 +100,11 @@ are mostly UI and logic plus small additive migrations.
   be committed or printed**: the repo is public. The ZimaOS server has its own copy in the compose env.
 
 ### Docker & releases
-- `next.config.ts` has `output: "standalone"`. `Dockerfile` (node:24-bookworm-slim, multi-stage):
+- `next.config.ts` has `output: "standalone"`. `Dockerfile` (node:24-trixie-slim, multi-stage; `apt-get upgrade` in the
+  base stage, which the release workflow rebuilds without cache; npm/npx/corepack/yarn removed from the runtime image;
+  `ffmpeg`/`ffprobe` built from the ffmpeg.org source in an `ffmpeg` stage with only libx264 + libdav1d, pinned by
+  `FFMPEG_VERSION`/`FFMPEG_SHA256`, which Docker Scout does not track; the weekly `ffmpeg-check.yml` workflow fails
+  (GitHub e-mails it) when ffmpeg.org has a newer release of the branch, with the new values in its summary):
   standalone server + a separate `/migrator` folder with the pinned Prisma CLI, `prisma/` and `prisma.config.ts`.
 - `docker/entrypoint.sh`: generates missing `AUTH_SECRET`, `FIELD_ENCRYPTION_KEY`, `CRON_SECRET` and VAPID
   keys (plain node crypto: `web-push` is bundled, not in `node_modules`) into `/data/secrets.env`, runs
@@ -104,9 +120,10 @@ are mostly UI and logic plus small additive migrations.
 - Test a build: copy `docker-compose.yml` to the scratchpad, map port 3200, use named volumes, set
   `FACTORY_RESET_PASSWORD` via a `.env` next to it, `docker compose up -d`, then `down -v` afterwards.
 - Release: bump `version` in `package.json` (+ lock file; it is the app's version and what the update check
-  compares), `docker build -t xeon3d/maintenance:<v> -t xeon3d/maintenance:latest .`, push both tags **before**
-  `git tag v<v>` + `gh release create` (the release is what installed servers see as "update available", and
-  the updater pulls `:latest`). ZimaOS is x86-64, so amd64 only. Compose uses `:latest`.
+  compares), merge, then push a `vX.Y.Z` tag. `release.yml` checks the tag matches, runs the checks, pushes
+  `:<v>` and `:latest` (amd64 only: ZimaOS is x86-64) with the release notes as an index annotation, then creates
+  the GitHub release. The `:<v>` tag on Docker Hub is what installed servers see as "update available" (the GitHub
+  repository is private), and the updater pulls `:latest`. Secrets: `DOCKERHUB_USERNAME`, `DOCKERHUB_TOKEN`.
 
 ### Server administration (Settings → Server, v0.2.0)
 - Gate: `src/lib/server-admin.ts`. Needs `org.manage` **and** the server password (`SERVER_ADMIN_PASSWORD`,
@@ -120,14 +137,27 @@ are mostly UI and logic plus small additive migrations.
   CASCADE` + `pg_restore` (rolls back to the safety copy on failure), replace uploads, merge keys into
   `DATA_DIR/secrets.env`, then `process.exit(0)` so Docker restarts it and the entrypoint re-runs migrations.
   Scheduler: `runServerJobs()` every minute from `src/instrumentation-node.ts`; period keys in `BACKUP_DIR/.state.json`.
-- Updates (`src/lib/updates.ts`): GitHub `releases/latest` (6 h cache) vs `APP_VERSION`; "Update now" =
-  `pre-update` backup + `POST $UPDATER_URL/v1/update?image=xeon3d/maintenance&async=true` with the token the
+- Updates (`src/lib/updates.ts`, since 0.4.13): the `X.Y.Z` tags of `APP_IMAGE` (default `malvesdc/maintenance`)
+  from the Docker Hub API (6 h cache) vs `APP_VERSION`. Notes of up to 5 newer versions come from the image index
+  annotation `io.villaops.release-notes` (base64 JSON array, written by `scripts/release-notes.mjs` in
+  `release.yml`; anonymous registry token, one manifest GET per version, cached per process). Up to 0.4.12 the
+  check read GitHub releases, which stopped working when the repository went private. "Update now" =
+  `pre-update` backup + `POST $UPDATER_URL/v1/update?image=malvesdc/maintenance&async=true` with the token the
   entrypoint writes to `DATA_DIR/updater-token` (Watchtower reads it from its read-only mount). Watchtower
   fork `nickfedor/watchtower` (the original containrrr one is archived); HTTP API mode disables its polling.
 - Tested 2026-09-29 in a local compose stack: scheduled + manual backups, download, upload (valid/invalid),
   restore (data + files back, restart, migrations), lock/unlock, and a real Watchtower recreate. To force
-  "update available" in a test, set `UPDATE_REPO` to a repo with a higher release number.
+  "update available" in a test, set `APP_IMAGE` to an image whose newest version tag is higher.
 - `/api/server/backups/upload` is excluded from the proxy matcher (no 16 MB buffer) and checks access itself.
+- **Backup copies** (`lib/backup-copies.ts`, settings in `lib/backup-copies-settings.ts` → `ServerSettings.backupCopies`):
+  `doBackup()` calls `copyBackup(file, kind, removed)` after pruning — in the background, but awaited (≤10 min) for
+  `pre-update` since the container is replaced next. E-mail via `sendEmail` with the file attached (`emailPlan`:
+  attach / tooBig / notEncrypted / skip). Cloud targets in `lib/cloud/` (`CloudTarget`: upload in parts, list,
+  remove): Graph upload sessions (10 MiB), Drive resumable uploads (8 MiB, `drive.file` scope → the app creates the
+  folder), WebDAV PUT/MKCOL/PROPFIND. OAuth: `/api/server/cloud/connect` → provider → `/api/server/cloud/callback`
+  (signed `state` stands in for the SameSite=Strict server-admin cookie). Client secrets / refresh tokens / passwords
+  stored with `encryptField`; Microsoft rotates refresh tokens (`onRefresh` saves them). Last results in
+  `DATA_DIR/backup-copies-status.json`. Only names matching the backup pattern are ever deleted remotely.
 
 ### Tooling gotchas that already cost time
 - **Don't patch TS/TSX through PowerShell double-quoted strings.** The backtick is PowerShell's
@@ -161,10 +191,27 @@ are mostly UI and logic plus small additive migrations.
   reached through a parent loaded via `ctx.db`.
 - **A model that gains `organizationId` must be added to `TENANT_MODELS`.** `tests/tenant-models.test.ts`
   enforces this.
-- **RBAC:** matrix in `src/lib/rbac.ts`. Use `ctx.can("x")` in pages (`notFound()` when denied) and
-  `requirePermission("x")` in server actions. Roles: OWNER, ADMIN, MANAGER, TECHNICIAN, REQUESTER
-  (the client portal) and VIEWER. Permissions for inventory, purchasing, vendors and reports
-  already exist in the matrix.
+- **RBAC:** default matrix in `src/lib/rbac.ts`. Use `ctx.can("x")` in pages (`notFound()` when denied) and
+  `requirePermission("x")` in server actions; never `can(role, …)` (it ignores the company's settings).
+  Roles: OWNER (shown as **"Super Admin"**), ADMIN, MANAGER, TECHNICIAN, ACCOUNTANT ("Contabilista": reports, costs,
+  billing; not billable, not a van owner), REQUESTER (the client portal) and VIEWER.
+  - **Configurable permissions** (Settings → Roles, editable only by OWNER via `requireOwner()`): overrides for
+    ADMIN/MANAGER/TECHNICIAN/VIEWER/ACCOUNTANT in `Organization.rolePermissions`, and per custom role in
+    `JobRole.permissions` (null = follow its access level). `effectivePermissions()` resolves them; `ctx.can` and
+    `membersWith()` use it. OWNER always has everything; REQUESTER is fixed (portal users must never get internal
+    permissions); `internal.view` is always on for staff roles. A new permission goes in `PERMISSIONS` **and**
+    `PERMISSION_GROUPS` (a test checks), with `perm.<key>.label/hint` messages.
+  - `costs.view` gates labour/parts/totals (WO costs card, request cost summary, cost report + money columns in CSV
+    exports, overview cost KPI, technician labour column) and contract fees (a form without it keeps the stored fee).
+    Purchase prices (parts, POs, vendors) stay with the inventory/purchasing permissions. `billing.manage` is
+    grantable but has no screens yet.
+  - **E-mailed service reports** (manual, `workOrders.sendReport`): WO page panel → `sendReportAction` →
+    `lib/report-email.ts` (`reportRecipients`: client e-mail, contacts with `receivesReports`, `Client.reportEmails`,
+    company list `Organization.reportRecipients` {userIds, roles incl. "job:<id>", emails}; `sendServiceReport`:
+    PDF from `lib/service-report.ts` in the company language, one e-mail per address, `WorkOrder.reportSentAt/To`,
+    audit log). Pure rules in `lib/report-recipients.ts`. In production it refuses when e-mail isn't configured.
+  - Structural checks stay on the role itself: REQUESTER = portal user, OWNER can't be changed or erased.
+  - Not to be confused with `User.isSuperAdmin` (unused; meant for a future platform console in phase 10).
 - **Custom roles** (`JobRole`, Settings → Roles): a name, a cost per hour and an access level (ADMIN,
   MANAGER or TECHNICIAN). A member in a custom role has `jobRoleId` set and `role` = its access level,
   so RBAC is unchanged; changing a role's access updates its members. Built-in role rates live in
@@ -207,7 +254,11 @@ are mostly UI and logic plus small additive migrations.
 - **Error codes returned from actions are message keys**, e.g. `"wo.requiredItems"` or
   `"requests.notPending"`. `ActionForm` resolves `common.<code>`, then `<code>`.
 - **Dates:**
-  - Datetime inputs use `<DateTimeField name>`, which submits ISO in the browser's time zone.
+  - European formats in both languages: next-intl's `locale` is `en-GB` / `pt-PT` (`INTL_LOCALE` in
+    `src/i18n/config.ts`), so read the app language with `appLocale(await getLocale())`, never `=== "pt"`.
+  - Never use native `type="date|time|datetime-local"` inputs (they follow the browser's language, e.g.
+    MM/DD/YYYY and AM/PM). Use `<DateInput>` / `<TimeInput>` (`src/components/date-input.tsx`; they submit
+    `yyyy-mm-dd` / `HH:MM`) or `<DateTimeField name>`, which submits ISO in the browser's time zone.
   - Rendering uses next-intl with the org time zone (`src/i18n/request.ts` looks it up per request).
   - Recurrence maths is time-zone aware (`src/lib/pm-schedule.ts`).
 
@@ -218,13 +269,13 @@ are mostly UI and logic plus small additive migrations.
   `node scripts/merge-messages.mjs en <file>` (and the same for `pt`).
 - ICU plurals are used, e.g. `pm.every.MONTHLY` has `=3 {Quarterly}`. Don't create a key that is
   also a namespace: `pm.every` vs `pm.every.DAILY` broke once.
-- Known gap: `metadata.title` strings are English-only.
+- Browser titles: `export const generateMetadata = titled("nav.x")` (`src/lib/metadata.ts`), never a static English `metadata.title`.
 
 ### Files and secrets
 - **Storage:** `src/lib/storage.ts` (`putObject/getObject/deleteObject`). Refs look like
   `local:<org>/<yyyy-mm>/<hex>.<ext>` and are served by `/api/files/[id]`: auth-checked, `ETag`,
   `Cache-Control: private, no-cache`.
-  - Upload endpoint `/api/uploads`: targets `workOrderId | workOrderItemId | assetId | villaId | partId | purchaseOrderId`.
+  - Upload endpoint `/api/uploads`: targets `workOrderId | workOrderItemId | assetId | villaId | partId | purchaseOrderId | articleId`.
     `<AttachmentsPanel target>` (`src/components/attachments-panel.tsx`) is the generic upload/thumbnail/delete UI.
   - The client downsizes photos first (`src/lib/upload-client.ts` → `shrinkImage`).
   - Portal and QR forms send photos inside the server-action FormData instead
@@ -262,6 +313,13 @@ are mostly UI and logic plus small additive migrations.
   - PO workflow is `poActions(status, {canApprove, hasReceipts})`: approvers approve straight from DRAFT;
     others submit → PENDING_APPROVAL. Only drafts are editable; cancel is blocked once anything is received.
   - Domain errors surface as `stock.<code>` message keys.
+- **On site / remote time and trips** (`src/lib/travel-charge.ts`, pure, tested): `TimeEntry.mode` (ONSITE default,
+  REMOTE); chosen before the timer / manual entry (web and field app, `time` op `mode`), switchable per entry
+  (`setTimeModeAction`). One trip per day (org time zone) with finished on-site time, per technician or per work order
+  (`Organization.travelPerTechnician`); cost = `travelFee` within `travelRadiusKm` of the company (or when
+  `Villa.distanceKm` is unset), else `travelKmRate` × the whole one-way distance. A contract can include trips
+  (`travelIncluded`) or set its own `travelFee` / `travelKmRate` (null = company). Pass `travelOf(org, contract)` to `workOrderCosts` (select `villa.distanceKm` and the
+  entries' `startedAt`/`mode`). The service report shows the count and each person's mode, no amounts.
 - **Per-org counters** via `nextNumber(orgId, key)`. Keys in use: `workOrder`, `request`, `purchaseOrder`.
 
 ### UI kit
@@ -300,7 +358,8 @@ markers), Message, VerificationToken (password reset).
 
 **Exist but have no UI yet (the remaining phases):**
 - **Phase 10:** `Subscription` (a trial is created at sign-up).
-- **Not on any phase yet** (mention to the user): `Category` (WO categories). Email verification
+- **Work-order categories** (`Category`, M2M): Settings → Categories (`workOrders.manage`), chips on the WO form/list/detail, `?category=` list filter.
+- **Not on any phase yet** (mention to the user): email verification
   at sign-up isn't done either.
 
 **Built in phase 8 (no migration):** `ServiceContract` UI; `WorkOrder.contractId` is now set automatically.
@@ -369,20 +428,18 @@ markers), Message, VerificationToken (password reset).
    Serverless hosts don't persist files.
 2. **Scheduler on the host:** configure a 15-minute cron calling `/api/cron/pm`.
    `SCHEDULER_INTERVAL_MINUTES` is only for self-hosting.
-3. **Email provider not configured.** Set `RESEND_API_KEY` + `EMAIL_FROM` (a verified sending domain).
+3. **Email provider not configured.** Settings → Server → E-mail: SMTP or Resend (or `RESEND_API_KEY` + `EMAIL_FROM`).
    Until then nothing is emailed in production (invites still show a copyable link).
 4. **Web push needs HTTPS** in production (localhost is exempt) and `VAPID_SUBJECT` set to a real
    contact address.
 5. **The user should rotate the Neon password.** `.env` then needs the new URL.
 
 **Smaller**
-- Browser `<title>`s are English-only (`export const metadata` in pages; switch to `generateMetadata` with translations).
 - `NextIntlClientProvider` ships every message to the client (fine now; scope it later for performance).
-- CSV asset import inserts one row at a time (slow near the 2,000-row limit).
 - Staff can't create a request manually (they create WOs directly). Probably fine.
 - The public QR form has no CAPTCHA; it relies on a honeypot plus DB-count rate limits.
-- `AuditLog` only covers secrets so far; phase 8/10 may want broader auditing and a viewer UI.
-- No Playwright e2e yet (listed in the roadmap stack).
+- Audit log (Settings → Audit log, permission `audit.view`): see "Audit log, van restock, scanning" in §8.
+- Playwright e2e smoke tests in `e2e/` (`npm run test:e2e`; against a running server with `E2E_BASE_URL=http://localhost:3000`); CI job `e2e` builds and runs them on a seeded Postgres.
 - `next-auth` is a v5 beta.
 
 ---
@@ -390,8 +447,7 @@ markers), Message, VerificationToken (password reset).
 ## 8. Plan for the next phases
 
 ### Phase 6 — Inventory & purchasing (✅ done; notes for later)
-- Not done, possible follow-ups: barcode scanning (phase 9 PWA), editing PO lines in place (delete +
-  re-add today), PO emailing to the vendor (phase 7 email), technicians restocking their own van
+- Not done, possible follow-ups: barcode scanning (phase 9 PWA), PO emailing to the vendor (phase 7 email), technicians restocking their own van
   (transfers need `inventory.manage`), a stock-valuation report (phase 8).
 - Deleting a WO keeps its stock movements (parts were physically used); only "return" puts stock back.
 
@@ -479,7 +535,10 @@ markers), Message, VerificationToken (password reset).
   `relinkClientWorkOrders`, so earlier jobs are (re)attributed.
 - **SLA** (`slaStates`): calendar hours from WO creation. Response = `firstResponseAt` (or completion);
   resolution = completion. States met/breached/pending/na; compliance counts only decided ones.
-  **No business-hours calendar or pause-on-hold** — likely the next thing a real client asks for.
+  Per contract, `businessHoursOnly` counts only the company's business hours (Settings → Organization: hours per
+  weekday + holidays, in the org time zone) and `pauseOnHold` stops the clock while ON_HOLD (periods from
+  `WorkOrderStatusLog`; load them with `SLA_STATUS_LOGS` and pass `slaCalendar(org)` to `slaStates`). Maths in
+  `src/lib/sla-clock.ts` (tested); a job on hold before its target shows "Paused" with no due date.
   The WO page shows respond-by / resolve-by with `<SlaBadge>` (icon + word).
 - **Reports** (`/reports/*`, `reports.view` = owner/admin/manager/viewer): one URL-driven filter row
   (`src/lib/report-filters.ts`: 30d/90d/12m/ytd/custom ≤3y, client, villa, system) scopes every tab
@@ -551,6 +610,104 @@ markers), Message, VerificationToken (password reset).
   Chromium-only; we sync whenever the app is open); parts usage, new WOs and requests offline (stock
   must not oversell); offline viewing of already-uploaded photos; chat offline. iOS needs the app
   added to the home screen for push and keeps storage less reliably.
+
+### In-app help (added 2026-10-14)
+- `/help` (index with grouped topics + server-side search `?q=`) and `/help/[slug]` (article, "On this page" TOC,
+  "Open this area"). The **?** link in the sidebar footer / mobile top bar opens the article for the current page
+  (`helpHref()` in `src/lib/help.ts`, longest path prefix). Topics are filtered with the same permission as their nav item.
+- Registry + a small Markdown subset parser in `src/lib/help.ts` (pure, tested in `tests/help.test.ts`); one file per
+  article in `src/content/help/<slug>.ts` with `{ en, pt }` text and its `shots`, listed in `src/content/help/index.ts`.
+  Articles are content, not UI strings, so they are **not** in `messages/*.json` (that would ship them to every page);
+  only the help chrome is (`help.*`). A new area needs a topic in `HELP_TOPICS` + an article (the test enforces both).
+- **Keep articles in step with the UI**: when a screen changes, update its article (both languages).
+- Screenshots: `public/help-shots/<locale>/<name>.png`, taken by `npm run help:shots [slug|shot …]` (Playwright,
+  signs in as the demo owner, light theme, Lisbon time zone). Take them on a throwaway DB, not the dev one:
+  a compose stack with its own Postgres + `next dev -p 3300` on this repo (reuse the dev `node_modules` volume),
+  then `prisma migrate deploy`, `tsx prisma/seed.ts`, `tsx scripts/help-sample-data.ts` (realistic WOs, requests,
+  PM, meters, procedures, chat). Run the capture from the dev container (it has Chromium) with
+  `HELP_BASE_URL=http://localhost:3300 HELP_HOST_RULES="MAP localhost:3300 host.docker.internal:3300"` (next dev only
+  hydrates for its own origin). The test fails if an article uses a screenshot that doesn't exist.
+
+### Audit log, van restock, scanning (added 2026-10-14)
+- **Audit trail:** `tenantDb(orgId, actor)` (`lib/db/tenant.ts`) passes every write on the models in
+  `AUDITED` (`lib/db/audit-trail.ts`) through `withAuditTrail`: it loads the row(s) first, runs the write, then
+  logs `<entity>.create|update|delete` with a `label` (name / #number, kept after deletion) and, for updates,
+  `changes` `{field: [old, new]}` from `changesOf()` (`lib/audit.ts`). Relations a form rewrites wholesale
+  (assignees `{deleteMany, create:[{userId}]}`, categories `{set}`) are compared and shown as names, or dropped
+  when unchanged. Secret-looking fields (`*Enc`, password, token, hash) are masked. `getContext()` passes the
+  user + IP; the PM scheduler passes `{userId: null}` ("System"); public QR pages pass no actor (not logged).
+  Logging never throws (`writeAudit`). A write inside a transaction that later rolls back is still logged.
+- **Explicit events:** `audit(ctx, action, …)` / `auditUser(userId, action)` (every company of the user) for
+  sign-in ok / failed / blocked, sign-out, password change / reset, server unlock, organization settings and
+  role permissions (diff per role), and all Settings → Server operations (`server.*`, incl. backup download /
+  upload, restore — re-written into the restored database as `server.restored` — and factory reset).
+- **Viewer:** `/settings/audit` (+ CSV `/api/export/audit`), filters in `lib/audit-filter.ts` (days in the
+  company time zone), text in `lib/audit-text.ts` (`audit.actions.*` are nested by the action's dots: next-intl
+  reads dots as nesting). Retention: Settings → Organization → Data retention (`auditMonths`).
+- **Van restock:** `/parts/van` + `restockVan()` (`lib/inventory.ts`): a technician (`inventory.use`) moves parts
+  between a warehouse and their own van in one transaction (all lines or none; `notYourVan` otherwise; managers:
+  any van). Logged as TRANSFER movements and `stock.vanRestock`.
+- **Scanner:** `components/scanner.tsx` uses BarcodeDetector when it reads 1D codes, else ZXing
+  (`@zxing/library`, iPhone/Firefox/Windows). `purpose="serial" | "mac"` adds "Read text": OCR with
+  tesseract.js, served from `public/ocr` (copied from node_modules by `scripts/copy-ocr.mjs` in predev/prebuild;
+  not committed; CSP has `'wasm-unsafe-eval'`). `lib/scan-codes.ts` normalises MACs and picks serial candidates.
+  `ScanField` (asset serial / MAC, part barcode), `SerialList` (serial numbers of units used on a WO,
+  `WorkOrderPart.serialNumbers`, shown in the service report). The scanner renders in a portal (it is opened
+  inside forms). `/api/scan` also finds assets by MAC in any notation.
+
+### Villa knowledge base (added 2026-10-19)
+- `KnowledgeArticle` (tenant model, audited): per villa, title, Markdown `body`, optional `system`, `pinned`,
+  created/updated by, M2M `assets` (`_ArticleAssets`), files via `Attachment.articleId` (upload target `articleId`).
+  Staff only: never in the portal. Read = `internal.view`; write = new permission `knowledge.manage` (group "sites";
+  default owner/admin/manager/technician).
+- Pages: `/villas/[id]/knowledge` (list, URL filters `q`, `system`, `assetId`), `/new` (`?assetId=` prefills),
+  `/[articleId]` (rendered text, linked assets, files), `/[articleId]/edit` (+ delete, which removes the stored files).
+  `<KnowledgeCard>` shows pinned/latest articles on the villa page and on asset pages (linked ones).
+- `lib/markdown.ts` (pure, tested): a small Markdown subset parsed into blocks; `<Markdown>` renders React elements,
+  never HTML; links only http(s)/mailto/tel/in-app; images `![alt](/api/files/<id> | https://…)`; `\*` etc. escape a
+  marker (not `\\`, so UNC paths stay). No regex lookbehind (old iPhone Safari runs it in the field app).
+- **Editor** (`components/knowledge/markdown-editor.tsx`, 2026-10-22): Tiptap 3 visual editor with a toolbar + a
+  **Markdown** tab (the old textarea). `lib/markdown-doc.ts` (pure, tested) converts Markdown ⇄ editor JSON; the editor's
+  schema is limited to what the subset holds (headings 2–4, flat lists, notes of paragraphs, one mark per run, inline
+  images), and Markdown input rules still fire (`# `/`## `/`### ` = the three heading sizes). Keep the Tiptap packages on
+  one version. Images (button, paste, drop) upload with target `draftForVillaId`: an attachment with **no owner**
+  (`NO_OWNER` in `lib/uploads.ts`) until `saveArticleAction` adopts the ids in the text (`imageFileIds`) for the
+  article; `runRetention` deletes owner-less attachments older than 2 days. Images in the text are left out of the
+  article's Files card.
+- `lib/knowledge.ts` (pure, tested): `filterArticles()` — same matching as the work-order search (`lib/search-text.ts`:
+  accents, partial words, typos, every word must appear) over title + text + linked asset names, in memory (a villa has
+  tens of articles). Shared by the web list and the field app.
+- Field app: the snapshot carries `knowledge` (text of the articles of the villas of the user's jobs, max 500) and
+  `villa.id`; both optional for older cached snapshots. `app/m/knowledge-view.tsx` shows them inside each job.
+- Global search: `lib/knowledge-search.ts` (`searchArticles`, max 3000 newest rows matched in memory) adds the top 5
+  articles above the work orders on `/search` (villa/system filters apply) and in `/api/search` (field app).
+
+### On call (added 2026-10-19)
+- `Membership.onCall` = in the on-call team (staff only: `ON_CALL_ROLES` excludes REQUESTER and VIEWER). `OnCallWeek` (tenant
+  model, audited): one row per member per week (a week can have several), `weekStart` = the Monday as a DATE. Weeks are Monday–Sunday in the
+  company time zone (`lib/on-call.ts`, pure, tested: `weekOf`, `monthWeeks`, `isoWeek`…).
+- Two pages share `components/on-call-calendar.tsx` (`OnCallNow`, `OnCallCalendar editable?`): `/on-call` (nav "On call",
+  `internal.view`) is **read-only** for all staff, and `OnCallNow href="/on-call"` is the dashboard card; `/settings/users/on-call` (no nav item: reached only from the **On call** button
+  on Settings → Staff; page and writes need the new permission `onCall.manage`, group "admin", default owner/admin) has a select
+  per week and the team checkboxes. Removing someone from the team frees their weeks from the current one on; past weeks stay.
+- **Settings → Staff / Clients** (split 2026-10-19): `/settings/users` ("Staff" / "Colaboradores") lists non-REQUESTER members and
+  invites; `/settings/client-users` ("Clients" / "Clientes") lists portal users (REQUESTER) with their client marked owner and/or
+  property manager (villa counts), and invites them with a client (no role picker). `updateMemberAction` refuses role changes
+  across the staff/client boundary; `revalidateUsers()` refreshes both pages. Note the sidebar now has two "Clients" entries
+  (client companies under Sites, client users under Settings).
+- `createRequest` links `Request.onCallUsers` (M2M `_RequestOnCall`; was `onCallUserId` until migration `on_call_several`) from `requestOnCallUsers()` (`lib/on-call-db.ts`: the week's member, if still active
+  and in the team) and adds them to the REQUEST_NEW recipients (approvers still get it). That member may approve/decline that
+  request whatever their role (`handlerOf` in `requests/actions.ts`), is pre-selected as assignee, and sees it in the Requests
+  nav badge. Shown on the request page and list ("On call when it arrived").
+- **On-call hours** (Settings → Organization, `Organization.onCallHours`, null = at any time): per weekday one period, an end at or
+  before the start runs into the next day (equal = 24 h), plus "company holidays all day" (holidays from business hours). Defaults
+  offered: weekdays 18:00–02:00, weekend 02:00–02:00. `onCallShiftDay()` (`lib/on-call.ts`, tested) returns the day the period
+  holding a request started (yesterday first), and `requestOnCallUser()` gives the request to that day's week member, so Monday
+  01:00 still goes to the previous week's person. Outside the hours only approvers are notified. The calendar and the dashboard
+  card (`onCallUsersAt`) show the week's members regardless of the hours.
+- **Several on call**: `pickOnCall()` (tested) gives a request to those of the week's members in a team whose specialty
+  (`Team.system`) is the request's system; to all of them when none is, or the request has no system. Requests have no team of
+  their own, so the system is the link. Management UI: chips per week with × and a "+ Add" picker (`WeekPeople`).
 
 ### Phase 10 — SaaS layer
 Stripe checkout and portal (`Subscription`), plan limits (seats, villas, storage), trial expiry

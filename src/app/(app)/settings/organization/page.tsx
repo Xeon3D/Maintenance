@@ -1,14 +1,31 @@
+import Link from "next/link";
 import { notFound } from "next/navigation";
-import { getTranslations } from "next-intl/server";
+import { getFormatter, getTranslations } from "next-intl/server";
 import { Card, Field, Input, PageHeader, Select, Textarea } from "@/components/ui";
 import { ActionForm, FieldError } from "@/components/action-form";
 import { getContext } from "@/lib/context";
 import { brandColor, DEFAULT_BRAND, logoSrc } from "@/lib/branding";
 import { TIMEZONES } from "@/lib/timezones";
+import { TIME_ROUNDING_OPTIONS, timeRoundingOf } from "@/lib/billing-time";
+import { privacyPath } from "@/lib/privacy";
+import { parseRetention, RETENTION_KEYS, RETENTION_MAX } from "@/lib/retention-rules";
+import { parseBusinessHours } from "@/lib/sla-clock";
+import { parseOnCallHours } from "@/lib/on-call";
+import { parseCompanyRecipients } from "@/lib/report-recipients";
+
+// Roles that can be sent copies of service reports (custom roles are added from the company's list).
+const REPORT_ROLES = ["ADMIN", "MANAGER", "TECHNICIAN", "ACCOUNTANT", "VIEWER"] as const;
+const NL = "\n";
+
+// Monday first, Sunday last (day numbers: 0 = Sunday).
+const WEEK = [1, 2, 3, 4, 5, 6, 0];
 import { updateOrgAction } from "../actions";
 import { BrandColorField, LogoUploader } from "./form";
+import { OnCallHoursFields } from "./on-call-hours";
+import { titled } from "@/lib/metadata";
+import { TimeInput } from "@/components/date-input";
 
-export const metadata = { title: "Organization" };
+export const generateMetadata = titled("nav.organization");
 
 const CURRENCIES = ["EUR", "GBP", "USD", "AED", "BRL", "CHF"];
 
@@ -17,6 +34,20 @@ export default async function OrgSettingsPage() {
   if (!ctx.can("org.manage")) notFound();
   const t = await getTranslations();
   const o = ctx.organization;
+  const retention = parseRetention(o.retention);
+  const hours = parseBusinessHours(o.businessHours);
+  const reports = parseCompanyRecipients(o.reportRecipients);
+  const [staff, jobRoles] = await Promise.all([
+    ctx.db.membership.findMany({ where: { active: true, role: { not: "REQUESTER" } }, select: { user: { select: { id: true, name: true, email: true } } }, orderBy: { user: { name: "asc" } } }),
+    ctx.db.jobRole.findMany({ select: { id: true, name: true }, orderBy: { name: "asc" } }),
+  ]);
+  const roleOptions = [
+    ...REPORT_ROLES.map((r) => ({ value: r as string, label: t(`roles.${r}`) })),
+    ...jobRoles.map((j) => ({ value: `job:${j.id}`, label: j.name })),
+  ];
+  const format = await getFormatter();
+  // 2026-10-04 is a Sunday: day d of the week is 4 + d October.
+  const weekday = (d: number) => format.dateTime(new Date(Date.UTC(2026, 9, 4 + d, 12)), { weekday: "long", timeZone: "UTC" });
 
   return (
     <>
@@ -64,6 +95,28 @@ export default async function OrgSettingsPage() {
               <Textarea name="reportFooter" defaultValue={o.reportFooter ?? ""} className="min-h-16" maxLength={500} />
             </Field>
 
+            <h2 className="border-t border-border pt-5 font-medium">{t("privacy.title")}</h2>
+            <Field label={t("privacy.customNotice")} hint={t("privacy.customNoticeHint")}>
+              <Textarea name="privacyNotice" defaultValue={o.privacyNotice ?? ""} className="min-h-40" maxLength={20000} />
+            </Field>
+            <p className="-mt-2 text-xs">
+              <Link href={privacyPath(o)} target="_blank" className="font-medium text-brand">
+                {t("privacy.view")}
+              </Link>
+            </p>
+            <div>
+              <h3 className="text-sm font-medium">{t("retention.title")}</h3>
+              <p className="mb-3 text-xs text-muted">{t("retention.hint")}</p>
+              <div className="grid gap-4 sm:grid-cols-2">
+                {RETENTION_KEYS.map((k) => (
+                  <Field key={k} label={t(`retention.${k}`)}>
+                    <Input name={k} type="number" min={0} max={RETENTION_MAX[k]} step={1} required defaultValue={retention[k]} className="w-28" />
+                    <FieldError name={k} />
+                  </Field>
+                ))}
+              </div>
+            </div>
+
             <h2 className="border-t border-border pt-5 font-medium">{t("company.regional")}</h2>
             <div className="grid gap-4 sm:grid-cols-3">
               <Field label={t("settings.timezone")}>
@@ -87,6 +140,116 @@ export default async function OrgSettingsPage() {
                 </Select>
               </Field>
             </div>
+
+            <h2 className="border-t border-border pt-5 font-medium">{t("timeBilling.title")}</h2>
+            <div className="grid gap-4 sm:grid-cols-2">
+              <Field label={t("timeBilling.rounding")} hint={t("timeBilling.hint")}>
+                <Select name="timeRounding" defaultValue={String(timeRoundingOf(o.timeRounding))}>
+                  {TIME_ROUNDING_OPTIONS.map((m) => (
+                    <option key={m} value={m}>
+                      {m === 0 ? t("timeBilling.none") : t("timeBilling.block", { minutes: m })}
+                    </option>
+                  ))}
+                </Select>
+              </Field>
+            </div>
+            <div>
+              <p className="mb-2 text-sm font-medium">{t("urgent.title")}</p>
+              <p className="mb-3 text-xs text-muted">{t("urgent.hint")}</p>
+              <div className="grid gap-4 sm:grid-cols-2">
+                <Field label={t("urgent.fee", { currency: o.currency })}>
+                  <Input name="urgentFee" type="number" min={0} step="0.01" defaultValue={Number(o.urgentFee)} />
+                  <FieldError name="urgentFee" />
+                </Field>
+                <Field label={t("urgent.percent")}>
+                  <Input name="urgentPercent" type="number" min={0} max={500} step={1} defaultValue={o.urgentPercent} />
+                  <FieldError name="urgentPercent" />
+                </Field>
+              </div>
+            </div>
+            <div>
+              <p className="mb-2 text-sm font-medium">{t("travel.title")}</p>
+              <p className="mb-3 text-xs text-muted">{t("travel.hint")}</p>
+              <div className="grid gap-4 sm:grid-cols-2">
+                <Field label={t("travel.fee", { currency: o.currency })}>
+                  <Input name="travelFee" type="number" min={0} step="0.01" defaultValue={Number(o.travelFee)} />
+                  <FieldError name="travelFee" />
+                </Field>
+                <Field label={t("travel.radius")}>
+                  <Input name="travelRadiusKm" type="number" min={0} max={1000} step={1} defaultValue={o.travelRadiusKm} />
+                  <FieldError name="travelRadiusKm" />
+                </Field>
+                <Field label={t("travel.kmRate", { currency: o.currency })} hint={t("travel.kmRateHint")}>
+                  <Input name="travelKmRate" type="number" min={0} step="0.01" defaultValue={Number(o.travelKmRate)} />
+                  <FieldError name="travelKmRate" />
+                </Field>
+                <Field label={t("travel.countBy")}>
+                  <Select name="travelPerTechnician" defaultValue={o.travelPerTechnician ? "technician" : "workOrder"}>
+                    <option value="technician">{t("travel.perTechnician")}</option>
+                    <option value="workOrder">{t("travel.perWorkOrder")}</option>
+                  </Select>
+                </Field>
+              </div>
+            </div>
+
+            <h2 className="border-t border-border pt-5 font-medium">{t("reportEmail.companyTitle")}</h2>
+            <p className="-mt-2 text-xs text-muted">{t("reportEmail.companyHint")}</p>
+            <div className="grid gap-4 sm:grid-cols-2">
+              <fieldset>
+                <legend className="mb-1.5 text-sm font-medium">{t("reportEmail.companyRoles")}</legend>
+                <div className="space-y-1">
+                  {roleOptions.map((r) => (
+                    <label key={r.value} className="flex items-center gap-2 text-sm">
+                      <input type="checkbox" name="reportRoles" value={r.value} defaultChecked={reports.roles.includes(r.value)} className="size-4 accent-brand" />
+                      {r.label}
+                    </label>
+                  ))}
+                </div>
+              </fieldset>
+              <fieldset>
+                <legend className="mb-1.5 text-sm font-medium">{t("reportEmail.companyPeople")}</legend>
+                <div className="max-h-48 space-y-1 overflow-y-auto">
+                  {staff.map(({ user: u }) => (
+                    <label key={u.id} className="flex items-center gap-2 text-sm">
+                      <input type="checkbox" name="reportUserIds" value={u.id} defaultChecked={reports.userIds.includes(u.id)} className="size-4 accent-brand" />
+                      <span className="truncate">{u.name}</span>
+                    </label>
+                  ))}
+                </div>
+              </fieldset>
+            </div>
+            <Field label={t("reportEmail.companyEmails")} hint={t("reportEmail.onePerLine")}>
+              <Textarea name="reportCompanyEmails" defaultValue={reports.emails.join(NL)} className="min-h-16" placeholder="contabilidade@exemplo.pt" />
+              <FieldError name="reportCompanyEmails" />
+            </Field>
+
+            <h2 className="border-t border-border pt-5 font-medium">{t("businessHours.title")}</h2>
+            <p className="-mt-2 text-xs text-muted">{t("businessHours.hint")}</p>
+            <div className="space-y-2">
+              {WEEK.map((d) => {
+                const h = hours.days[d];
+                return (
+                  <div key={d} className="flex flex-wrap items-center gap-3 text-sm">
+                    <label className="flex w-36 items-center gap-2">
+                      <input type="checkbox" name={`open${d}`} defaultChecked={!!h} className="size-4 accent-brand" />
+                      {weekday(d)}
+                    </label>
+                    <TimeInput name={`start${d}`} defaultValue={h?.start ?? "09:00"} className="w-24" aria-label={`${weekday(d)} ${t("businessHours.from")}`} />
+                    <span className="text-muted">–</span>
+                    <TimeInput name={`end${d}`} defaultValue={h?.end ?? "18:00"} className="w-24" aria-label={`${weekday(d)} ${t("businessHours.to")}`} />
+                    <FieldError name={`end${d}`} />
+                  </div>
+                );
+              })}
+            </div>
+            <Field label={t("businessHours.holidays")} hint={t("businessHours.holidaysHint")}>
+              <Textarea name="holidays" defaultValue={hours.holidays.join("\n")} className="min-h-24 font-mono" placeholder="2026-12-25" />
+              <FieldError name="holidays" />
+            </Field>
+
+            <h2 className="border-t border-border pt-5 font-medium">{t("onCallHours.title")}</h2>
+            <p className="-mt-2 text-xs text-muted">{t("onCallHours.hint")}</p>
+            <OnCallHoursFields hours={parseOnCallHours(o.onCallHours)} weekdays={[0, 1, 2, 3, 4, 5, 6].map(weekday)} />
           </ActionForm>
         </Card>
 

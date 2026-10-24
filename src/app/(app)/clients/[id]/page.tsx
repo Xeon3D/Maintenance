@@ -7,7 +7,7 @@ import { BackLink } from "@/components/back-link";
 import { ActionForm, FieldError } from "@/components/action-form";
 import { Field, Input } from "@/components/ui";
 import { ArchiveButton } from "@/components/archive-button";
-import { DeleteContactButton } from "./client";
+import { AnonymizeClientButton, ContactReportsToggle, DeleteContactButton } from "./client";
 import { ContractStatusBadge } from "../../contracts/status-badge";
 import { getContext } from "@/lib/context";
 import { addContactAction, setClientArchivedAction } from "../actions";
@@ -47,6 +47,7 @@ export default async function ClientPage({ params }: PageProps<"/clients/[id]">)
         actions={
           canManage && (
             <>
+              {client.archivedAt && !client.anonymizedAt && <AnonymizeClientButton clientId={client.id} />}
               <ArchiveButton archived={!!client.archivedAt} action={setClientArchivedAction.bind(null, client.id)} />
               <Link href={`/clients/${client.id}/edit`}>
                 <Button variant="secondary">
@@ -58,7 +59,7 @@ export default async function ClientPage({ params }: PageProps<"/clients/[id]">)
           )
         }
       />
-      {client.archivedAt && <Badge className="mb-4">{t("common.archived")}</Badge>}
+      {client.archivedAt && <Badge className="mb-4">{client.anonymizedAt ? t("erasure.erased") : t("common.archived")}</Badge>}
 
       <div className="grid gap-6 lg:grid-cols-[1fr_360px]">
         <div className="space-y-6">
@@ -109,7 +110,7 @@ export default async function ClientPage({ params }: PageProps<"/clients/[id]">)
                         {v.code && <span className="ml-2 font-mono text-xs text-muted">{v.code}</span>}
                         <span className="block text-xs text-muted">{[v.city, v.country].filter(Boolean).join(", ")}</span>
                       </span>
-                      <span className="text-right text-sm text-muted">{t("villas.ownedBy", { name: v.client.name })}</span>
+                      {v.client && <span className="text-right text-sm text-muted">{t("villas.ownedBy", { name: v.client.name })}</span>}
                     </Link>
                   </li>
                 ))}
@@ -205,12 +206,19 @@ export default async function ClientPage({ params }: PageProps<"/clients/[id]">)
                         {c.email}
                       </a>
                     )}
+                    {c.email && canManage && <ContactReportsToggle clientId={client.id} contactId={c.id} on={c.receivesReports} />}
+                    {c.email && !canManage && c.receivesReports && <div className="text-xs text-muted">{t("reportEmail.contactOn")}</div>}
                   </div>
                   {canManage && <DeleteContactButton clientId={client.id} contactId={c.id} />}
                 </li>
               ))}
               {client.contacts.length === 0 && <li className="text-sm text-muted">—</li>}
             </ul>
+            {client.reportEmails.length > 0 && (
+              <p className="mb-4 text-xs text-muted">
+                {t("reportEmail.clientEmails")}: {client.reportEmails.join(", ")}
+              </p>
+            )}
             {canManage && (
               <details className="rounded-md border border-border p-3 [&_summary]:cursor-pointer">
                 <summary className="text-sm font-medium">{t("clients.addContact")}</summary>
@@ -228,6 +236,10 @@ export default async function ClientPage({ params }: PageProps<"/clients/[id]">)
                   <Field label={t("common.email")}>
                     <Input name="email" type="email" />
                   </Field>
+                  <label className="flex items-center gap-2 text-sm">
+                    <input type="checkbox" name="receivesReports" className="size-4 accent-brand" />
+                    {t("reportEmail.contactCheckbox")}
+                  </label>
                 </ActionForm>
               </details>
             )}

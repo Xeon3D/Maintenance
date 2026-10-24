@@ -3,8 +3,9 @@ import { getContext } from "@/lib/context";
 import { brandStyle, logoSrc } from "@/lib/branding";
 import { getTheme } from "@/lib/theme-server";
 import { FieldApp } from "./field-app";
+import { titled } from "@/lib/metadata";
 
-export const metadata = { title: "Field" };
+export const generateMetadata = titled("nav.field");
 
 /**
  * The offline field app for technicians. The service worker keeps this page (and its scripts) so it

@@ -5,7 +5,9 @@ network, security & CCTV, A/V and lighting. See [docs/ROADMAP.md](docs/ROADMAP.m
 
 ## Install with Docker (ZimaOS, any Docker host)
 
-The image is published as [`xeon3d/maintenance`](https://hub.docker.com/r/xeon3d/maintenance) (linux/amd64).
+The image is published as [`malvesdc/maintenance`](https://hub.docker.com/r/malvesdc/maintenance) (linux/amd64).
+Up to 0.3.0 it was `xeon3d/maintenance`: on those servers change the compose `image:` line to
+`malvesdc/maintenance:latest` once, then update (see "Updating from 0.3.0" below).
 [`docker-compose.yml`](docker-compose.yml) runs it with PostgreSQL and an updater:
 
 1. **ZimaOS:** App Store → *Custom Install* → *Import* and paste `docker-compose.yml`
@@ -16,6 +18,11 @@ The image is published as [`xeon3d/maintenance`](https://hub.docker.com/r/xeon3d
    - `FACTORY_RESET_PASSWORD`: set it to enable the **Factory reset** page; leave empty to disable.
      If `SERVER_ADMIN_PASSWORD` is empty, this one also unlocks Settings → Server.
    - `SEED_DEMO`: `"true"` creates the demo company on an empty database; set `"false"` for real use.
+   - `ALLOW_SIGNUP`: `"false"` closes public sign-up (*Create account* on the sign-in page), so strangers can't create
+     companies on the server; invitations still work. Empty leaves it to **Settings → Server → General** (open by default).
+   - `DEMO_MODE`: `"true"` on a public demo shows a banner asking people not to enter real personal data.
+   - `BACKUP_PASSWORD`: encrypts new backups (AES-256-GCM). Store it somewhere safe: an encrypted backup can only be
+     restored on a server with the same password.
    - Change the PostgreSQL password (in both places) for anything beyond a demo.
    - If port 3000 is taken, change only the left number of `"3000:3000"` (e.g. `"3001:3000"`).
 3. **Nginx Proxy Manager:** add a Proxy Host for your domain forwarding (scheme `http`) to the
@@ -34,9 +41,14 @@ Owners and admins see *Settings → Server*; it asks for the server password (un
 because it acts on the whole installation rather than one company:
 
 - **Software name** — replaces "VillaOps" on the sign-in page, browser tab, installed app and e-mails.
-- **Updates** — shows the installed and latest version (from this repo's GitHub releases). *Update to x.y.z*
+- **E-mail** — how invitations, password resets, notifications and service reports are sent: an **SMTP account**
+  (Microsoft 365, Google Workspace, the domain's mail server…) or **Resend** (API key), with a *Send test e-mail*
+  button. Passwords and keys are stored encrypted. Left on *Environment variables*, `RESEND_API_KEY`/`EMAIL_FROM` are used.
+- **Updates** — shows the installed and latest version (from the version tags of the
+  [`malvesdc/maintenance`](https://hub.docker.com/r/malvesdc/maintenance/tags) image on Docker Hub, with each
+  version's notes; `APP_IMAGE` overrides the image). *Update to x.y.z*
   makes a backup, then asks the `updater` service ([Watchtower](https://github.com/nicholas-fedor/watchtower))
-  to pull `xeon3d/maintenance:latest` and recreate only the app container; database changes are applied
+  to pull `malvesdc/maintenance:latest` and recreate only the app container; database changes are applied
   as it starts. *Install updates automatically* does the same every day at the backup hour.
   The updater never updates on its own and only touches the labelled app container.
 - **Backups** — hourly / daily / monthly schedules, each keeping its last *N*; *Back up now*; download,
@@ -45,6 +57,28 @@ because it acts on the whole installation rather than one company:
   Before a restore the current state is backed up automatically (and put back if the restore fails);
   the app restarts afterwards. Backups go to `/backups` — map it to another disk, and download copies
   off the server now and then. Backups made by a newer version can't be restored on an older one.
+  With `BACKUP_PASSWORD` set, new backups are encrypted (a lock icon marks them) and restore/upload decrypt them.
+  An older backup restores on a newer version: its database is brought up to date by the migrations at restart.
+- **Backup copies** — as each backup is made, e-mail it (up to 5 addresses; choose which kinds, whether only
+  encrypted ones are sent, and the largest attachment — bigger ones send a notice instead) and/or copy it to a cloud
+  folder: **OneDrive / SharePoint** (work accounts), **Google Drive** (both need an OAuth app registered once; the page
+  shows the redirect URI and the steps; for the app's privacy policy and terms of service links use
+  `https://<APP_URL>/privacy` and `https://<APP_URL>/terms`) or **WebDAV** (Nextcloud, NAS…). Backups the schedule removes are removed from the
+  folder too (optional). *Send test e-mail* and *Test upload* check the settings; the last result is shown.
+
+### Updating from 0.4.12 or earlier
+
+Up to 0.4.12 the update check read the GitHub releases, which stopped answering when the repository became
+private. A server still on one of those versions doesn't see new versions: update it once by hand (in the app's
+compose, `docker compose pull` and `docker compose up -d`; on ZimaOS, the app's *Update*/*Rebuild*). From 0.4.13
+the check reads Docker Hub.
+
+### Updating from 0.3.0
+
+From 0.3.1 the image is `malvesdc/maintenance`, so a
+0.3.0 server is moved over once by hand. In the app's compose (ZimaOS: the app's settings), change
+`image: xeon3d/maintenance:latest` to `image: malvesdc/maintenance:latest` and save (or run `docker compose pull`
+and `docker compose up -d`). The data stays where it is; from then on, updates come from Settings → Server.
 
 ### Updating from 0.1.0
 
@@ -68,7 +102,27 @@ npm run db:seed        # demo org — sign in as owner@demo.test / demo1234
 npm run dev            # http://localhost:3000
 ```
 
-`.env` needs `DATABASE_URL`, `AUTH_SECRET`, `AUTH_TRUST_HOST`, `FIELD_ENCRYPTION_KEY` (32 random bytes, base64), `UPLOAD_DIR` and `CRON_SECRET`. Optional: `APP_URL`, `VAPID_PUBLIC_KEY`/`VAPID_PRIVATE_KEY`, `RESEND_API_KEY`/`EMAIL_FROM`, `SERVER_ADMIN_PASSWORD`, `FACTORY_RESET_PASSWORD`, `SEED_DEMO`, `APP_NAME` (default software name). Dev keeps server settings in `./.data` and backups in `./backups` (backups need `pg_dump`/`pg_restore`/`psql`/`tar` on PATH, so in practice only in Docker).
+`.env` needs `DATABASE_URL`, `AUTH_SECRET`, `AUTH_TRUST_HOST`, `FIELD_ENCRYPTION_KEY` (32 random bytes, base64), `UPLOAD_DIR` and `CRON_SECRET`. Optional: `APP_URL`, `VAPID_PUBLIC_KEY`/`VAPID_PRIVATE_KEY`, `RESEND_API_KEY`/`EMAIL_FROM`, `SERVER_ADMIN_PASSWORD`, `FACTORY_RESET_PASSWORD`, `SEED_DEMO`, `DEMO_MODE` (public demo banner), `ALLOW_SIGNUP` (`false` closes public sign-up), `BACKUP_PASSWORD` (encrypts backups), `APP_NAME` (default software name). Dev keeps server settings in `./.data` and backups in `./backups` (backups need `pg_dump`/`pg_restore`/`psql`/`tar` on PATH, so in practice only in Docker).
+
+## Audit log
+
+*Settings → Audit log* (Super Admin and Admins by default; the *Audit log* permission in Settings → Roles) shows who
+did what, when and from which address: sign-ins (and failed ones), password changes, every creation, change (old →
+new value of each field) and deletion of work orders, clients, villas, assets, parts, purchase orders, contracts,
+users and roles, permission changes, and every Settings → Server operation (backups, downloads, restores,
+updates, e-mail and cloud settings). Secret values are never logged. Filter by category, person, type and dates,
+and export to CSV. Entries are kept for the period set in Settings → Organization → Data retention.
+
+## Vans and scanning
+
+- **My van** (Parts → My van): technicians see their van's stock and what is under its minimum, and load parts from
+  a warehouse or return them (several at once, by list, "add what's short" or camera), without needing inventory
+  management rights. All lines move or none; it is logged.
+- **Camera:** part barcodes, asset labels (QR), and on serial-number / MAC fields also the label's printed text
+  (*Read text*, OCR, offering the likely values to pick). Works on iPhone too. The OCR engine is served by the app
+  itself from `public/ocr` (copied from `node_modules` by `scripts/copy-ocr.mjs` before `dev` / `build`); the first
+  use downloads about 15 MB to the device.
+- Parts used on a work order can carry the serial numbers of the units installed; they appear on the service report.
 
 ## Preventive maintenance scheduler
 
@@ -82,7 +136,7 @@ Run the scheduler one of two ways:
 Admins can also press "Run scheduler" on the Preventive maintenance page. Meter-based
 schedules and meter alerts run immediately when a reading is recorded.
 
-Demo users (password `demo1234`): `owner@`, `manager@`, `tech.network@`, `tech.electrical@`, `viewer@`, `client@` (villa owner portal), `pm@` (property manager portal: two owners' villas) — all `@demo.test`. Roles have demo costs per hour; Daniel is an "Electrical engineer" (custom role).
+Demo users (password `demo1234`): `owner@`, `manager@`, `tech.network@`, `tech.electrical@`, `viewer@`, `accountant@` (Accountant), `client@` (villa owner portal), `pm@` (property manager portal: two owners' villas) — all `@demo.test`. Roles have demo costs per hour; Daniel is an "Electrical engineer" (custom role).
 
 ## Scripts
 
@@ -90,5 +144,20 @@ Demo users (password `demo1234`): `owner@`, `manager@`, `tech.network@`, `tech.e
 |---|---|
 | `npm run dev` | Dev server |
 | `npm run typecheck` / `lint` / `test` | Checks |
+| `npm run test:e2e` | Playwright smoke tests (needs `npm run build` and a seeded DB, or `E2E_BASE_URL` pointing at a running server) |
 | `npm run db:migrate` | Create a migration after editing `prisma/schema.prisma` |
 | `npm run db:studio` | Browse the database |
+
+## Releasing
+
+Releases are built and published by GitHub Actions (`.github/workflows/release.yml`):
+
+1. Bump `version` in `package.json` and `package-lock.json` (`npm version 0.4.0 --no-git-tag-version`), commit, merge to `main`.
+2. Tag and push: `git tag v0.4.0 && git push origin v0.4.0`.
+3. The workflow runs the checks, pushes `malvesdc/maintenance:0.4.0` and `:latest` to Docker Hub (the new version tag
+   is what installed servers see as "update available" in Settings → Server, with the release notes attached to the
+   image), and then creates the GitHub release with the same notes.
+
+One-time setup: repository secrets `DOCKERHUB_USERNAME` and `DOCKERHUB_TOKEN` (a Docker Hub access token with
+Read & Write), and optionally a `DOCKERHUB_IMAGE` variable to publish under another image name (servers then need
+`APP_IMAGE` and the compose `image:` changed to match).

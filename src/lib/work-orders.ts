@@ -6,6 +6,11 @@ export type WoCtx = Pick<AppContext, "db" | "organization" | "user">;
 import { assertOwned, nextNumber } from "@/lib/db/tenant";
 import { notify, notifyExternal } from "@/lib/notify";
 import { contractFor } from "@/lib/contracts";
+import { effectivePermissions } from "@/lib/rbac";
+import { parseRoleRates, workOrderRateFor } from "@/lib/roles";
+import { billedTime, type TimeEntryLike } from "@/lib/billing-time";
+import { NO_SURCHARGE, urgentSurcharge, type UrgentRule } from "@/lib/urgent-surcharge";
+import { travelCharge, type TravelContext, type TripEntry } from "@/lib/travel-charge";
 import type { ChecklistItemType, Priority, SystemType, WorkOrderStatus, WorkOrderType } from "@/generated/prisma/enums";
 
 export const ACTIVE_STATUSES: WorkOrderStatus[] = ["OPEN", "IN_PROGRESS", "ON_HOLD"];
@@ -44,6 +49,7 @@ export type WorkOrderInput = {
   startDate?: Date | null;
   estimatedMinutes?: number | null;
   assigneeIds?: string[];
+  categoryIds?: string[];
   clientVisible?: boolean;
   items?: ChecklistItemInput[];
 };
@@ -69,17 +75,48 @@ export async function resolveRefs(ctx: WoCtx, input: WorkOrderInput) {
 }
 
 /** Assignees must be active, non-client members of the org. */
+/** Active members who can carry out work orders (with the company's permission settings), by name: the assignee choices. */
+export async function assignableUsers(db: WoCtx["db"]) {
+  const rows = await db.membership.findMany({
+    where: { active: true, role: { not: "REQUESTER" } },
+    select: { role: true, jobRole: { select: { permissions: true } }, organization: { select: { rolePermissions: true } }, user: { select: { id: true, name: true } } },
+  });
+  return rows
+    .filter((r) => effectivePermissions(r.role, r.organization.rolePermissions, r.jobRole?.permissions).has("workOrders.execute"))
+    .map((r) => r.user)
+    .sort((a, b) => a.name.localeCompare(b.name));
+}
+
 export async function validateAssignees(ctx: WoCtx, ids: string[] = []) {
   const unique = [...new Set(ids)];
   if (unique.length === 0) return unique;
-  const n = await ctx.db.membership.count({ where: { userId: { in: unique }, active: true, role: { not: "REQUESTER" } } });
-  if (n !== unique.length) throw new WorkOrderError("invalidAssignee");
+  const allowed = new Set((await assignableUsers(ctx.db)).map((u) => u.id));
+  if (!unique.every((id) => allowed.has(id))) throw new WorkOrderError("invalidAssignee");
+  return unique;
+}
+
+/** Drops ids that can no longer be assigned (left the company, or their role lost "carry out work orders"). */
+export async function stillAssignable(ctx: WoCtx, ids: string[]) {
+  if (ids.length === 0) return ids;
+  const allowed = new Set((await assignableUsers(ctx.db)).map((u) => u.id));
+  return ids.filter((id) => allowed.has(id));
+}
+
+/** Categories must be the org's own (they are connected, which the tenant guard doesn't check). */
+export async function validateCategories(ctx: WoCtx, ids: string[] = []) {
+  const unique = [...new Set(ids)];
+  try {
+    await assertOwned(ctx.db, "category", unique);
+  } catch {
+    throw new WorkOrderError("invalidRef");
+  }
   return unique;
 }
 
 export async function createWorkOrder(ctx: WoCtx, input: WorkOrderInput) {
   const refs = await resolveRefs(ctx, input);
   const assigneeIds = await validateAssignees(ctx, input.assigneeIds);
+  const categoryIds = await validateCategories(ctx, input.categoryIds);
 
   let items = input.items ?? [];
   if (input.procedureId && items.length === 0) {
@@ -110,6 +147,7 @@ export async function createWorkOrder(ctx: WoCtx, input: WorkOrderInput) {
       clientVisible: input.clientVisible ?? true,
       createdById: ctx.user.id,
       assignees: { create: assigneeIds.map((userId) => ({ userId })) },
+      categories: { connect: categoryIds.map((id) => ({ id })) },
       items: {
         create: items.map((it, i) => ({
           sortOrder: i,
@@ -214,15 +252,61 @@ export async function stopRunningTimers(ctx: WoCtx, workOrderId: string, at = ne
   }
 }
 
-/** Labour + parts + other costs for a work order. */
-export function workOrderCosts(wo: {
-  timeEntries: { minutes: number | null; hourlyRate: unknown }[];
-  otherCosts: { amount: unknown }[];
-  parts?: { quantity: unknown; unitCost: unknown }[];
-}) {
-  const labor = wo.timeEntries.reduce((s, e) => s + ((e.minutes ?? 0) / 60) * Number(e.hourlyRate ?? 0), 0);
-  const minutes = wo.timeEntries.reduce((s, e) => s + (e.minutes ?? 0), 0);
+/**
+ * Labour + parts + other costs (+ urgent surcharge and trips) for a work order. Labour uses billed time: each technician's minutes rounded up
+ * to `block` (the company's billing period, see lib/billing-time.ts); `minutes` is the time actually logged.
+ */
+export function workOrderCosts(
+  wo: {
+    priority?: string | null;
+    timeEntries: (TimeEntryLike & Partial<TripEntry>)[];
+    otherCosts: { amount: unknown }[];
+    parts?: { quantity: unknown; unitCost: unknown }[];
+    /** Select the villa's distanceKm and the entries' startedAt + mode whenever `travel` is passed. */
+    villa?: { distanceKm: number | null } | null;
+  },
+  block: number,
+  /** The urgent surcharge that applies to this work order (see lib/urgent-surcharge.ts); none when omitted. */
+  urgentRule: UrgentRule = NO_SURCHARGE,
+  /** The company's trip charges (see lib/travel-charge.ts); none when omitted. */
+  travel: TravelContext | null = null,
+) {
+  const time = billedTime(wo.timeEntries, block);
   const other = wo.otherCosts.reduce((s, c) => s + Number(c.amount), 0);
   const parts = (wo.parts ?? []).reduce((s, p) => s + Number(p.quantity) * Number(p.unitCost), 0);
-  return { minutes, labor, parts, other, total: labor + parts + other };
+  const urgent = urgentSurcharge(wo.priority, time.labor, urgentRule);
+  const trips = travel ? travelCharge(wo.timeEntries, wo.villa?.distanceKm, travel) : null;
+  const travelCost = trips?.amount ?? 0;
+  return {
+    minutes: time.minutes,
+    billedMinutes: time.billed,
+    labor: time.labor,
+    parts,
+    other,
+    urgent,
+    travel: travelCost,
+    trips: trips?.trips ?? 0,
+    perTrip: trips?.perTrip ?? 0,
+    total: time.labor + parts + other + urgent + travelCost,
+  };
+}
+
+const ASSIGNEE_ROLE = { role: true, jobRole: { select: { access: true, hourlyRate: true } } } as const;
+
+/** My cost per hour on this job (the role I took on it, else my own): stamped on the time I log on it. */
+export async function myRateOn(ctx: AppContext, woId: string) {
+  const wo = await ctx.db.workOrder.findUnique({ where: { id: woId }, select: { assignees: { where: { userId: ctx.user.id }, select: ASSIGNEE_ROLE } } });
+  const a = wo?.assignees[0];
+  return a?.role || a?.jobRole ? workOrderRateFor(ctx.membership, a, parseRoleRates(ctx.organization.roleRates)) : ctx.hourlyRate;
+}
+
+/** After someone's role on a job changes, their time on it is charged at the new role's rate. */
+export async function restampRate(ctx: AppContext, woId: string, userId: string) {
+  const [wo, member] = await Promise.all([
+    ctx.db.workOrder.findUnique({ where: { id: woId }, select: { assignees: { where: { userId }, select: ASSIGNEE_ROLE } } }),
+    ctx.db.membership.findFirst({ where: { userId }, select: { role: true, hourlyRate: true, jobRole: { select: { hourlyRate: true } } } }),
+  ]);
+  if (!wo || !member) return;
+  const rate = workOrderRateFor(member, wo.assignees[0], parseRoleRates(ctx.organization.roleRates));
+  await ctx.db.timeEntry.updateMany({ where: { workOrderId: woId, userId }, data: { hourlyRate: rate } });
 }

@@ -1,0 +1,19 @@
+name: ffmpeg updates
+
+# The image builds ffmpeg from source (Dockerfile, `ffmpeg` stage), which vulnerability scanners don't see.
+# Every Monday this checks ffmpeg.org; when a newer release of the same branch is out, the run FAILS (GitHub
+# e-mails a failed scheduled run) and its summary has the new FFMPEG_VERSION / FFMPEG_SHA256 to paste.
+on:
+  schedule:
+    - cron: "0 7 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: bash .github/scripts/ffmpeg-check.sh Dockerfile

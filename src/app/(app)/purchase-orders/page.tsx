@@ -11,8 +11,9 @@ import { pageOf, PAGE_SIZE, sp } from "@/lib/list";
 import { PO_OPEN_STATUSES, poTotals } from "@/lib/inventory-math";
 import { PurchaseOrderStatus } from "@/generated/prisma/enums";
 import { cn } from "@/lib/utils";
+import { titled } from "@/lib/metadata";
 
-export const metadata = { title: "Purchase orders" };
+export const generateMetadata = titled("nav.purchaseOrders");
 
 export default async function PurchaseOrdersPage({ searchParams }: PageProps<"/purchase-orders">) {
   const ctx = await getContext();

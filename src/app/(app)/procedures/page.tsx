@@ -11,14 +11,16 @@ import { searchWhere, sp } from "@/lib/list";
 import { localizeTemplate, PROCEDURE_TEMPLATES } from "@/lib/procedure-templates";
 import { SystemType } from "@/generated/prisma/enums";
 import { TemplatePicker } from "./template-picker";
+import { titled } from "@/lib/metadata";
+import { appLocale } from "@/i18n/config";
 
-export const metadata = { title: "Procedures" };
+export const generateMetadata = titled("nav.procedures");
 
 export default async function ProceduresPage({ searchParams }: PageProps<"/procedures">) {
   const ctx = await getContext();
   if (!ctx.can("internal.view")) notFound();
   const t = await getTranslations();
-  const locale = (await getLocale()) === "pt" ? "pt" : "en";
+  const locale = appLocale(await getLocale());
   const params = await searchParams;
   const system = sp(params, "system");
 

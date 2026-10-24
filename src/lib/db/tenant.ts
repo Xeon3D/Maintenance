@@ -1,5 +1,7 @@
 import "server-only";
 import { prisma } from "./client";
+import { withAuditTrail } from "./audit-trail";
+import type { AuditActor } from "@/lib/audit";
 
 /**
  * Models that carry `organizationId`. Kept in sync with schema.prisma by
@@ -33,6 +35,8 @@ export const TENANT_MODELS = new Set([
   "Attachment",
   "Subscription",
   "SyncOperation",
+  "KnowledgeArticle",
+  "OnCallWeek",
 ]);
 
 const WHERE_OPS = new Set([
@@ -69,7 +73,7 @@ type AnyArgs = Record<string, unknown> & {
  *  - Child models without `organizationId` (checklist items, PO lines…) are only reached
  *    through a parent that was loaded through this client.
  */
-export function tenantDb(organizationId: string) {
+export function tenantDb(organizationId: string, actor?: AuditActor) {
   return prisma.$extends({
     name: "tenant",
     query: {
@@ -91,6 +95,8 @@ export function tenantDb(organizationId: string) {
           if (operation === "upsert") {
             a.create = { ...(a.create ?? {}), organizationId };
           }
+          // With an actor (a signed-in request or the scheduler), writes to the main records are audited.
+          if (actor) return withAuditTrail(organizationId, actor, model, operation, a, (x) => query(x as typeof args));
           return query(a as typeof args);
         },
       },

@@ -15,6 +15,7 @@ export const NAV: NavGroup[] = [
   {
     items: [
       { href: "/dashboard", labelKey: "dashboard", icon: "LayoutDashboard", ready: true },
+      { href: "/search", labelKey: "search", icon: "Search", permission: "internal.view", ready: true },
       { href: "/m", labelKey: "field", icon: "Smartphone", permission: "workOrders.execute", ready: true },
       { href: "/scan", labelKey: "scan", icon: "ScanLine", permission: "internal.view", ready: true },
     ],
@@ -24,6 +25,7 @@ export const NAV: NavGroup[] = [
     items: [
       { href: "/work-orders", labelKey: "workOrders", icon: "ClipboardList", permission: "internal.view", ready: true },
       { href: "/requests", labelKey: "requests", icon: "Inbox", permission: "internal.view", ready: true },
+      { href: "/on-call", labelKey: "onCall", icon: "PhoneCall", permission: "internal.view", ready: true },
       { href: "/preventive", labelKey: "preventive", icon: "CalendarClock", permission: "internal.view", ready: true },
       { href: "/procedures", labelKey: "procedures", icon: "ListChecks", permission: "internal.view", ready: true },
       { href: "/messages", labelKey: "messages", icon: "MessagesSquare", permission: "internal.view", ready: true },
@@ -57,8 +59,11 @@ export const NAV: NavGroup[] = [
       { href: "/settings/profile", labelKey: "profile", icon: "UserRound", ready: true },
       { href: "/settings/organization", labelKey: "organization", icon: "Building2", permission: "org.manage", ready: true },
       { href: "/settings/users", labelKey: "users", icon: "UserCog", permission: "users.manage", ready: true },
+      { href: "/settings/client-users", labelKey: "clientUsers", icon: "Contact", permission: "users.manage", ready: true },
       { href: "/settings/roles", labelKey: "roles", icon: "BadgeCheck", permission: "users.manage", ready: true },
       { href: "/settings/teams", labelKey: "teams", icon: "UsersRound", permission: "teams.manage", ready: true },
+      { href: "/settings/categories", labelKey: "categories", icon: "Tags", permission: "workOrders.manage", ready: true },
+      { href: "/settings/audit", labelKey: "audit", icon: "ScrollText", permission: "audit.view", ready: true },
       { href: "/settings/server", labelKey: "server", icon: "Server", permission: "org.manage", ready: true },
     ],
   },

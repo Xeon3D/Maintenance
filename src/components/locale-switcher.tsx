@@ -4,13 +4,13 @@ import { useLocale } from "next-intl";
 import { useRouter } from "next/navigation";
 import { useTransition } from "react";
 import { setLocaleAction } from "@/app/(auth)/actions";
-import { LOCALES } from "@/i18n/config";
+import { appLocale, LOCALES } from "@/i18n/config";
 import { cn } from "@/lib/utils";
 
 const LABELS: Record<string, string> = { en: "English", pt: "Português" };
 
 export function LocaleSwitcher({ className }: { className?: string }) {
-  const locale = useLocale();
+  const locale = appLocale(useLocale());
   const router = useRouter();
   const [pending, start] = useTransition();
 

@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useFormatter, useTranslations } from "next-intl";
-import { AlertTriangle, ChevronRight, CloudOff, LayoutDashboard, RefreshCw, ScanLine, X } from "lucide-react";
+import { AlertTriangle, ChevronRight, CloudOff, LayoutDashboard, RefreshCw, ScanLine, Search, X } from "lucide-react";
 import { WorkOrderStatusBadge, PriorityText } from "@/components/badges";
 import { qrTokenOf, Scanner } from "@/components/scanner";
 import type { NewOp, OfflineWorkOrder, QueuedOp, Snapshot } from "@/lib/offline-types";
@@ -10,11 +10,15 @@ import { applyOps } from "@/lib/offline/apply";
 import { blobs, kv, newId, queue } from "@/lib/offline/idb";
 import { clearIssues, loadIssues, loadSnapshot, syncNow, type SyncIssue, type SyncOutcome } from "@/lib/offline/sync";
 import { cn } from "@/lib/utils";
+import { bucketOf, scheduledAt } from "@/lib/wo-schedule";
 import { WorkOrderView } from "./work-order-view";
+import { SearchView } from "./search-view";
 import { ThemeToggle } from "@/components/theme-toggle";
 import type { Theme } from "@/lib/theme";
+import { preloadVideoConverter } from "@/lib/video-client";
 
-export type Timer = { woId: string; startedAt: string } | null;
+/** The device timer; `mode` is missing on timers saved before on-site / remote existed (= on site). */
+export type Timer = { woId: string; startedAt: string; mode?: "ONSITE" | "REMOTE" } | null;
 type Status = "idle" | "syncing" | SyncOutcome["state"];
 
 const SYNC_EVERY_MS = 60_000;
@@ -33,6 +37,9 @@ export function FieldApp({ user, org, logo, theme }: { user: { id: string; name:
   const t = useTranslations();
   const format = useFormatter();
   const [snapshot, setSnapshot] = useState<Snapshot | null>(null);
+  // The search words while the search screen is open (#search=<words>), else null.
+  const [searchQ, setSearchQ] = useState<string | null>(null);
+  const fromSearch = useRef(false);
   const [ops, setOps] = useState<QueuedOp[]>([]);
   const [issues, setIssues] = useState<SyncIssue[]>([]);
   const [timer, setTimerState] = useState<Timer>(null);
@@ -66,6 +73,9 @@ export function FieldApp({ user, org, logo, theme }: { user: { id: string; name:
     }
   }, [user.id, reload]);
 
+  // Load the video converter now, so the service worker has it cached when there is no signal.
+  useEffect(() => void preloadVideoConverter(), []);
+
   // Open from the device first, then refresh from the server.
   useEffect(() => {
     let alive = true;
@@ -94,9 +104,17 @@ export function FieldApp({ user, org, logo, theme }: { user: { id: string; name:
     };
   }, [reload, sync, user.id]);
 
-  // #wo=<id> keeps the open work order in the URL, so the back button works.
+  // #wo=<id> keeps the open work order in the URL, so the back button works; #search=<words> the search.
   useEffect(() => {
-    const read = () => setOpenId(new URLSearchParams(location.hash.slice(1)).get("wo"));
+    let wasSearch = false;
+    const read = () => {
+      const h = new URLSearchParams(location.hash.slice(1));
+      setOpenId(h.get("wo"));
+      setSearchQ(h.get("search"));
+      // A job opened from the search goes back to the search.
+      fromSearch.current = h.has("wo") && wasSearch;
+      wasSearch = h.has("search");
+    };
     read();
     window.addEventListener("hashchange", read);
     return () => window.removeEventListener("hashchange", read);
@@ -130,6 +148,19 @@ export function FieldApp({ user, org, logo, theme }: { user: { id: string; name:
   const workOrders = useMemo(() => (snapshot ? applyOps(snapshot, ops, user.name) : []), [snapshot, ops, user.name]);
   const current = workOrders.find((w) => w.id === openId) ?? null;
   const list = assetFilter ? workOrders.filter((w) => w.asset?.id === assetFilter.id) : workOrders;
+  // To do now (overdue, today or undated), the next 30 days, and later — in this device's time zone.
+  const sections = useMemo(() => {
+    const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    const now = new Date();
+    const by = { now: [] as OfflineWorkOrder[], next30: [] as OfflineWorkOrder[], later: [] as OfflineWorkOrder[] };
+    for (const w of list) by[bucketOf({ startDate: w.startDate ?? null, dueDate: w.dueDate, status: w.status }, now, tz)].push(w);
+    // Jobs already in progress first.
+    by.now.sort((a, b) => Number(b.status === "IN_PROGRESS") - Number(a.status === "IN_PROGRESS"));
+    const at = (w: OfflineWorkOrder) => scheduledAt({ startDate: w.startDate ?? null, dueDate: w.dueDate })?.getTime() ?? 0;
+    by.next30.sort((a, b) => at(a) - at(b));
+    by.later.sort((a, b) => at(a) - at(b));
+    return (["now", "next30", "later"] as const).map((key) => ({ key, items: by[key] })).filter((s) => s.items.length > 0);
+  }, [list]);
 
   const onScan = useCallback(
     (text: string) => {
@@ -169,6 +200,9 @@ export function FieldApp({ user, org, logo, theme }: { user: { id: string; name:
               {snapshot ? t("field.lastSync", { when: format.relativeTime(new Date(snapshot.at), new Date()) }) : t("field.title")}
             </div>
           </div>
+          <button onClick={() => (location.hash = "search=")} className="rounded-md p-2.5 hover:bg-gray-100" aria-label={t("search.title")} title={t("search.title")}>
+            <Search className="size-5" />
+          </button>
           <button onClick={() => setScanning(true)} className="rounded-md p-2.5 hover:bg-gray-100" aria-label={t("scan.title")} title={t("scan.title")}>
             <ScanLine className="size-5" />
           </button>
@@ -230,12 +264,15 @@ export function FieldApp({ user, org, logo, theme }: { user: { id: string; name:
       {current ? (
         <WorkOrderView
           wo={current}
+          articles={current.villa?.id ? (snapshot?.knowledge ?? []).filter((a) => a.villaId === current.villa?.id) : []}
           members={snapshot?.members.filter((m) => m.id !== user.id) ?? []}
           timer={timer}
           setTimer={setTimer}
           enqueue={enqueue}
-          onBack={() => open(null)}
+          onBack={() => (fromSearch.current ? history.back() : open(null))}
         />
+      ) : searchQ !== null ? (
+        <SearchView initial={searchQ} onDevice={new Set(workOrders.map((w) => w.id))} onBack={() => open(null)} />
       ) : (
         <main className="px-4 py-4">
           <div className="mb-3 flex items-baseline justify-between">
@@ -264,13 +301,23 @@ export function FieldApp({ user, org, logo, theme }: { user: { id: string; name:
           ) : list.length === 0 ? (
             <p className="rounded-md border border-border bg-surface p-6 text-center text-sm text-muted">{assetFilter ? t("field.noneForAsset") : t("field.empty")}</p>
           ) : (
-            <ul className="space-y-2">
-              {list.map((w) => (
-                <li key={w.id}>
-                  <WorkOrderCard wo={w} running={timer?.woId === w.id} onOpen={() => open(w.id)} />
-                </li>
+            <div className="space-y-5">
+              {sections.map((s) => (
+                <section key={s.key}>
+                  <h2 className="mb-2 flex items-baseline justify-between text-xs font-semibold uppercase tracking-wide text-muted">
+                    {t(`field.section.${s.key}`)}
+                    <span className="font-normal normal-case">{s.items.length}</span>
+                  </h2>
+                  <ul className="space-y-2">
+                    {s.items.map((w) => (
+                      <li key={w.id}>
+                        <WorkOrderCard wo={w} running={timer?.woId === w.id} onOpen={() => open(w.id)} />
+                      </li>
+                    ))}
+                  </ul>
+                </section>
               ))}
-            </ul>
+            </div>
           )}
           <p className="mt-6 text-center text-xs text-muted">{t("field.offlineHint")}</p>
           <div className="mt-4 flex justify-center">
@@ -301,7 +348,12 @@ function WorkOrderCard({ wo, running, onOpen }: { wo: OfflineWorkOrder; running:
         </div>
         <div className="mt-1 font-medium">{wo.title}</div>
         <div className="mt-0.5 truncate text-xs text-muted">{[wo.villa?.name, wo.area, wo.asset?.name].filter(Boolean).join(" · ")}</div>
-        <div className="mt-1 flex gap-3 text-xs">
+        <div className="mt-1 flex flex-wrap gap-x-3 gap-y-0.5 text-xs">
+          {wo.startDate && (
+            <span className="text-muted">
+              {t("wo.startDate")}: {format.dateTime(new Date(wo.startDate), { dateStyle: "medium", timeStyle: "short" })}
+            </span>
+          )}
           {wo.dueDate && (
             <span className={overdue ? "font-medium text-danger" : "text-muted"}>
               {t("wo.dueDate")}: {format.dateTime(new Date(wo.dueDate), { dateStyle: "medium", timeStyle: "short" })}

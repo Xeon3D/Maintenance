@@ -7,8 +7,10 @@ import { FilterBar, Pagination } from "@/components/list-controls";
 import { EmptyState } from "@/components/empty-state";
 import { getContext } from "@/lib/context";
 import { pageOf, PAGE_SIZE, searchWhere, sp } from "@/lib/list";
+import { titled } from "@/lib/metadata";
+import { villaCountByClient } from "@/lib/villa-client";
 
-export const metadata = { title: "Clients" };
+export const generateMetadata = titled("nav.clients");
 
 export default async function ClientsPage({ searchParams }: PageProps<"/clients">) {
   const ctx = await getContext();
@@ -26,16 +28,21 @@ export default async function ClientsPage({ searchParams }: PageProps<"/clients"
   const [clients, total] = await Promise.all([
     ctx.db.client.findMany({
       where,
-      include: {
-        _count: { select: { villas: { where: { archivedAt: null } } } },
-        contacts: { where: { isPrimary: true }, take: 1 },
-      },
+      include: { contacts: { where: { isPrimary: true }, take: 1 } },
       orderBy: { name: "asc" },
       skip,
       take,
     }),
     ctx.db.client.count({ where }),
   ]);
+  // Villas the client owns or manages (the client page lists both).
+  const ids = clients.map((c) => c.id);
+  const villaCounts = villaCountByClient(
+    await ctx.db.villa.findMany({
+      where: { archivedAt: null, OR: [{ clientId: { in: ids } }, { managerId: { in: ids } }] },
+      select: { clientId: true, managerId: true },
+    }),
+  );
 
   return (
     <>
@@ -93,7 +100,7 @@ export default async function ClientsPage({ searchParams }: PageProps<"/clients"
                       <span className="text-muted">—</span>
                     )}
                   </td>
-                  <td className="text-right tabular-nums">{c._count.villas}</td>
+                  <td className="text-right tabular-nums">{villaCounts.get(c.id) ?? 0}</td>
                 </tr>
               ))}
             </tbody>

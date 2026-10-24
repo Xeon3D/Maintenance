@@ -107,8 +107,26 @@ export async function addLineAction(poId: string, _: FormResult, form: FormData)
     const text = description ?? part?.name;
     if (!text) throw new InventoryError("invalidRef");
     await ctx.db.purchaseOrderLine.create({
-      data: { purchaseOrderId: po.id, partId: part?.id ?? null, description: text, quantity, unitCost: unitCost ?? Number(part?.unitCost ?? 0) },
+      data: { purchaseOrderId: po.id, partId: part?.id ?? null, description: text, quantity, unitCost: unitCost ?? Number(part?.purchaseCost ?? 0) }, // a PO line is at the vendor's price
     });
+    revalidatePath(path(poId));
+  });
+}
+
+const lineEditSchema = z.object({
+  description: str(300),
+  quantity: z.coerce.number().finite().positive().max(1_000_000),
+  unitCost: z.coerce.number().finite().min(0).max(10_000_000),
+});
+
+/** Edits a line of a draft in place (description, quantity, unit cost). */
+export async function updateLineAction(poId: string, lineId: string, _: FormResult, form: FormData): Promise<FormResult> {
+  const parsed = parseForm(lineEditSchema, form);
+  if (parsed.error) return parsed.error;
+  return guarded(async () => {
+    const { ctx, po } = await draftPo(poId);
+    const { count } = await ctx.db.purchaseOrderLine.updateMany({ where: { id: lineId, purchaseOrderId: po.id }, data: parsed.data });
+    if (!count) throw new InventoryError("invalidRef");
     revalidatePath(path(poId));
   });
 }

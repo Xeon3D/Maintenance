@@ -7,6 +7,7 @@ import type { AppContext } from "@/lib/context";
 import { dateInput } from "@/lib/forms";
 import { saveContractAction } from "./actions";
 import { ClientVillaFields, type ClientOption } from "./client-villa-fields";
+import { DateInput } from "@/components/date-input";
 
 export async function ContractForm({ ctx, contract, defaults }: { ctx: AppContext; contract?: ServiceContract; defaults?: { clientId?: string } }) {
   const t = await getTranslations();
@@ -25,7 +26,7 @@ export async function ContractForm({ ctx, contract, defaults }: { ctx: AppContex
     id: c.id,
     name: c.name,
     owned: c.villas,
-    managed: c.managedVillas.map((v) => ({ id: v.id, name: v.name, owner: v.client.name })),
+    managed: c.managedVillas.map((v) => ({ id: v.id, name: v.name, owner: v.client?.name ?? null })),
   }));
 
   return (
@@ -46,11 +47,11 @@ export async function ContractForm({ ctx, contract, defaults }: { ctx: AppContex
           </Select>
         </Field>
         <Field label={t("contracts.startDate")}>
-          <Input name="startDate" type="date" defaultValue={dateInput(contract?.startDate ?? new Date())} required />
+          <DateInput name="startDate" defaultValue={dateInput(contract?.startDate ?? new Date())} required />
           <FieldError name="startDate" />
         </Field>
         <Field label={t("contracts.endDate")} hint={t("contracts.endDateHint")}>
-          <Input name="endDate" type="date" defaultValue={dateInput(contract?.endDate)} />
+          <DateInput name="endDate" defaultValue={dateInput(contract?.endDate)} />
           <FieldError name="endDate" />
         </Field>
       </div>
@@ -71,12 +72,68 @@ export async function ContractForm({ ctx, contract, defaults }: { ctx: AppContex
             <FieldError name="includedVisits" />
           </Field>
         </div>
+        <div className="mt-4 space-y-2 text-sm">
+          <label className="flex items-start gap-2">
+            <input type="checkbox" name="businessHoursOnly" defaultChecked={contract?.businessHoursOnly ?? false} className="mt-0.5 size-4 accent-brand" />
+            <span>
+              {t("contracts.businessHoursOnly")}
+              <span className="block text-xs text-muted">{t("contracts.businessHoursOnlyHint")}</span>
+            </span>
+          </label>
+          <label className="flex items-start gap-2">
+            <input type="checkbox" name="pauseOnHold" defaultChecked={contract?.pauseOnHold ?? true} className="mt-0.5 size-4 accent-brand" />
+            <span>
+              {t("contracts.pauseOnHold")}
+              <span className="block text-xs text-muted">{t("contracts.pauseOnHoldHint")}</span>
+            </span>
+          </label>
+        </div>
       </fieldset>
 
-      <Field label={t("contracts.monthlyFee")}>
-        <Input name="monthlyFee" type="number" min={0} step="0.01" defaultValue={contract?.monthlyFee != null ? Number(contract.monthlyFee) : ""} className="sm:max-w-48" />
-        <FieldError name="monthlyFee" />
-      </Field>
+      {ctx.can("costs.view") && (
+        <Field label={t("contracts.monthlyFee")}>
+          <Input name="monthlyFee" type="number" min={0} step="0.01" defaultValue={contract?.monthlyFee != null ? Number(contract.monthlyFee) : ""} className="sm:max-w-48" />
+          <FieldError name="monthlyFee" />
+        </Field>
+      )}
+
+      {ctx.can("costs.view") && (
+        <fieldset>
+          <legend className="mb-1 text-sm font-medium">{t("urgent.contractTitle")}</legend>
+          <p className="mb-2 text-xs text-muted">{t("urgent.contractHint")}</p>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <Field label={t("urgent.fee", { currency: ctx.organization.currency })}>
+              <Input name="urgentFee" type="number" min={0} step="0.01" defaultValue={contract?.urgentFee != null ? Number(contract.urgentFee) : ""} placeholder={String(Number(ctx.organization.urgentFee))} />
+              <FieldError name="urgentFee" />
+            </Field>
+            <Field label={t("urgent.percent")}>
+              <Input name="urgentPercent" type="number" min={0} max={500} step={1} defaultValue={contract?.urgentPercent ?? ""} placeholder={String(ctx.organization.urgentPercent)} />
+              <FieldError name="urgentPercent" />
+            </Field>
+          </div>
+        </fieldset>
+      )}
+
+      {ctx.can("costs.view") && (
+        <fieldset>
+          <legend className="mb-1 text-sm font-medium">{t("travel.contractTitle")}</legend>
+          <p className="mb-2 text-xs text-muted">{t("travel.contractHint")}</p>
+          <label className="mb-3 flex items-center gap-2 text-sm">
+            <input type="checkbox" name="travelIncluded" defaultChecked={contract?.travelIncluded ?? false} className="size-4 accent-brand" />
+            {t("travel.included")}
+          </label>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <Field label={t("travel.fee", { currency: ctx.organization.currency })}>
+              <Input name="travelFee" type="number" min={0} step="0.01" defaultValue={contract?.travelFee != null ? Number(contract.travelFee) : ""} placeholder={String(Number(ctx.organization.travelFee))} />
+              <FieldError name="travelFee" />
+            </Field>
+            <Field label={t("travel.kmRate", { currency: ctx.organization.currency })}>
+              <Input name="travelKmRate" type="number" min={0} step="0.01" defaultValue={contract?.travelKmRate != null ? Number(contract.travelKmRate) : ""} placeholder={String(Number(ctx.organization.travelKmRate))} />
+              <FieldError name="travelKmRate" />
+            </Field>
+          </div>
+        </fieldset>
+      )}
 
       <fieldset>
         <legend className="mb-1 text-sm font-medium">{t("contracts.systems")}</legend>

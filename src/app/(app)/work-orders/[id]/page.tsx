@@ -4,16 +4,25 @@ import { getFormatter, getTranslations } from "next-intl/server";
 import { AlertTriangle } from "lucide-react";
 import { Card, PageHeader } from "@/components/ui";
 import { BackLink } from "@/components/back-link";
-import { PriorityText, SlaBadge, SystemBadge, WorkOrderStatusBadge } from "@/components/badges";
-import { slaStates } from "@/lib/sla";
+import { CategoryChip, PriorityText, SlaBadge, SystemBadge, WorkOrderStatusBadge } from "@/components/badges";
+import { slaCalendar, slaStates } from "@/lib/sla";
 import { getContext } from "@/lib/context";
 import { fileUrl } from "@/lib/storage";
 import { ACTIVE_STATUSES, workOrderCosts } from "@/lib/work-orders";
+import { billedTime, timeRoundingOf } from "@/lib/billing-time";
+import { urgentApplies, urgentRuleFor } from "@/lib/urgent-surcharge";
+import { countTrips, isFar, travelOf } from "@/lib/travel-charge";
 import { cn } from "@/lib/utils";
 import { StatusBar } from "./status-bar";
 import { Checklist } from "./checklist";
 import { CommentBox, CostsPanel, Gallery, SignOff, TimeTracker, WorkOrderActions } from "./panels";
 import { PartsPanel } from "./parts-panel";
+import { Assignees } from "./assignees";
+import { AttachmentThumb } from "@/components/attachment-thumb";
+import { SendReportPanel } from "./send-report";
+import { reportRecipients } from "@/lib/report-email";
+import { villaClient } from "@/lib/villa-client";
+import { roleName, WORK_ORDER_BUILT_IN_ROLE } from "@/lib/roles";
 
 export default async function WorkOrderPage({ params }: PageProps<"/work-orders/[id]">) {
   const { id } = await params;
@@ -25,13 +34,19 @@ export default async function WorkOrderPage({ params }: PageProps<"/work-orders/
   const wo = await ctx.db.workOrder.findUnique({
     where: { id },
     include: {
-      villa: { select: { id: true, name: true, client: { select: { id: true, name: true } } } },
+      villa: { select: { id: true, name: true, distanceKm: true, client: { select: { id: true, name: true } }, manager: { select: { id: true, name: true } }, billTo: true } },
       area: { select: { name: true } },
       asset: { select: { id: true, name: true, status: true } },
       team: { select: { name: true, color: true } },
       createdBy: { select: { name: true } },
       completedBy: { select: { name: true } },
-      assignees: { select: { user: { select: { id: true, name: true } } } },
+      assignees: {
+        select: {
+          role: true,
+          jobRole: { select: { id: true, name: true } },
+          user: { select: { id: true, name: true, memberships: { where: { organizationId: ctx.organization.id }, select: { role: true, jobRole: { select: { id: true, name: true } } } } } },
+        },
+      },
       items: { orderBy: { sortOrder: "asc" }, include: { completedBy: { select: { name: true } } } },
       comments: { include: { user: { select: { name: true } }, attachments: true }, orderBy: { createdAt: "asc" } },
       statusLogs: { include: { user: { select: { name: true } } }, orderBy: { createdAt: "asc" } },
@@ -40,14 +55,15 @@ export default async function WorkOrderPage({ params }: PageProps<"/work-orders/
       parts: { include: { part: { select: { name: true, unit: true } }, stockLocation: { select: { name: true } } }, orderBy: { id: "asc" } },
       attachments: { where: { commentId: null, workOrderItemId: null }, orderBy: { createdAt: "asc" } },
       request: { select: { id: true, number: true } },
-      contract: { select: { id: true, name: true, responseTimeHours: true, resolutionTimeHours: true } },
+      contract: { select: { id: true, name: true, responseTimeHours: true, resolutionTimeHours: true, businessHoursOnly: true, pauseOnHold: true, urgentFee: true, urgentPercent: true, travelIncluded: true, travelFee: true, travelKmRate: true } },
+      categories: { select: { id: true, name: true, color: true }, orderBy: { name: "asc" } },
     },
   });
   if (!wo) notFound();
 
   const canExecute = ctx.can("workOrders.execute");
   const canUseParts = canExecute && ctx.can("inventory.use");
-  const [meters, procedures, partOptions, locations, staff] = await Promise.all([
+  const [meters, procedures, partOptions, locations, staff, jobRoles] = await Promise.all([
     wo.assetId ? ctx.db.meter.findMany({ where: { assetId: wo.assetId }, select: { id: true, name: true, unit: true }, orderBy: { name: "asc" } }) : [],
     ctx.db.procedure.findMany({ where: { archivedAt: null }, select: { id: true, name: true }, orderBy: { name: "asc" } }),
     canUseParts
@@ -72,6 +88,7 @@ export default async function WorkOrderPage({ params }: PageProps<"/work-orders/
     canExecute
       ? ctx.db.membership.findMany({ where: { active: true, role: { not: "REQUESTER" } }, select: { user: { select: { id: true, name: true } } }, orderBy: { user: { name: "asc" } } })
       : [],
+    canExecute && wo.status !== "DONE" && wo.status !== "CANCELLED" ? ctx.db.jobRole.findMany({ select: { id: true, name: true }, orderBy: { name: "asc" } }) : [],
   ]);
   // Parts come out of my van by default, else the first warehouse.
   const defaultLocationId =
@@ -83,10 +100,18 @@ export default async function WorkOrderPage({ params }: PageProps<"/work-orders/
   const overdue = !!wo.dueDate && wo.dueDate < now && ACTIVE_STATUSES.includes(wo.status);
 
   const money = (n: number) => format.number(n, { style: "currency", currency: ctx.organization.currency });
-  const costs = workOrderCosts(wo);
+  const block = timeRoundingOf(ctx.organization.timeRounding);
+  const urgentRule = urgentRuleFor(ctx.organization, wo.contract);
+  const travel = travelOf(ctx.organization, wo.contract);
+  const costs = workOrderCosts(wo, block, urgentRule, travel);
+  // Trips the contract includes: shown on the job at no charge.
+  const includedTrips = travel.rule.included ? countTrips(wo.timeEntries, travel.timeZone, travel.rule.perTechnician) : 0;
   const dt = (d: Date) => format.dateTime(d, { dateStyle: "medium", timeStyle: "short" });
-  const sla = wo.contract ? slaStates(wo, wo.contract, now) : null;
+  const reportEmail = ctx.can("workOrders.sendReport") ? await reportRecipients(ctx, wo.id) : null;
+  const sla = wo.contract ? slaStates(wo, wo.contract, now, slaCalendar(ctx.organization)) : null;
   const myRunning = wo.timeEntries.find((e) => e.userId === ctx.user.id && !e.endedAt);
+  // A new entry starts where my last one was (on site / remote); entries are newest first.
+  const myLastMode = wo.timeEntries.find((e) => e.userId === ctx.user.id)?.mode ?? "ONSITE";
 
   // Activity: comments and status changes, oldest first.
   const activity = [
@@ -96,7 +121,7 @@ export default async function WorkOrderPage({ params }: PageProps<"/work-orders/
 
   const details: [string, React.ReactNode][] = [
     [t("assets.villa"), wo.villa && <Link href={`/villas/${wo.villa.id}`} className="hover:text-brand">{wo.villa.name}</Link>],
-    [t("villas.client"), wo.villa && <Link href={`/clients/${wo.villa.client.id}`} className="hover:text-brand">{wo.villa.client.name}</Link>],
+    [t("villas.client"), wo.villa && villaClient(wo.villa) && <Link href={`/clients/${villaClient(wo.villa)!.id}`} className="hover:text-brand">{villaClient(wo.villa)!.name}</Link>],
     [t("assets.area"), wo.area?.name],
     [t("wo.asset"), wo.asset && <Link href={`/assets/${wo.asset.id}`} className="hover:text-brand">{wo.asset.name}</Link>],
     [t("wo.type"), t(`woType.${wo.type}`)],
@@ -112,13 +137,36 @@ export default async function WorkOrderPage({ params }: PageProps<"/work-orders/
     ],
     [t("wo.estimatedHours"), wo.estimatedMinutes != null && `${+(wo.estimatedMinutes / 60).toFixed(2)} h`],
     [t("wo.team"), wo.team && (<span className="inline-flex items-center gap-1.5"><span className="size-2 rounded-full" style={{ backgroundColor: wo.team.color }} />{wo.team.name}</span>)],
-    [t("wo.assignees"), wo.assignees.map((a) => a.user.name).join(", ") || <span className="text-muted">{t("wo.unassigned")}</span>],
+    [t("categories.title"), wo.categories.length > 0 && <span className="flex flex-wrap gap-1">{wo.categories.map((c) => <CategoryChip key={c.id} name={c.name} color={c.color} />)}</span>],
+    [
+      t("wo.assignees"),
+      <Assignees
+        key="assignees"
+        woId={wo.id}
+        options={[{ value: WORK_ORDER_BUILT_IN_ROLE, label: t(`roles.${WORK_ORDER_BUILT_IN_ROLE}`) }, ...jobRoles.map((r) => ({ value: r.id, label: r.name }))]}
+        assignees={wo.assignees.map((a) => {
+          const own = a.user.memberships[0];
+          const ownName = own ? roleName(own, (r) => t(`roles.${r}`)) : "";
+          // The role taken on this job, else the person's own (shown as such when it can't be taken on a job).
+          const ownValue = own?.jobRole?.id ?? (own?.role === WORK_ORDER_BUILT_IN_ROLE ? WORK_ORDER_BUILT_IN_ROLE : "");
+          return {
+            id: a.user.id,
+            name: a.user.name,
+            value: a.jobRole?.id ?? a.role ?? ownValue,
+            label: a.jobRole?.name ?? (a.role ? t(`roles.${a.role}`) : ownName),
+            ownName,
+            // Each assignee picks their own role on the job; managers set anyone's.
+            editable: canExecute && !closed && (a.user.id === ctx.user.id || ctx.can("workOrders.manage")),
+          };
+        })}
+      />,
+    ],
     [t("wo.createdBy"), `${wo.createdBy.name} · ${dt(wo.createdAt)}`],
     [t("wo.completedBy"), wo.completedBy && wo.completedAt && `${wo.completedBy.name} · ${dt(wo.completedAt)}`],
     [t("wo.fromRequest"), wo.request && `#${wo.request.number}`],
     [t("contracts.contract"), wo.contract && <Link href={`/contracts/${wo.contract.id}`} className="hover:text-brand">{wo.contract.name}</Link>],
-    [t("contracts.respondBy"), sla?.responseDue && <span className="flex flex-wrap items-center gap-1.5">{dt(sla.responseDue)} <SlaBadge state={sla.response} /></span>],
-    [t("contracts.resolveBy"), sla?.resolutionDue && <span className="flex flex-wrap items-center gap-1.5">{dt(sla.resolutionDue)} <SlaBadge state={sla.resolution} /></span>],
+    [t("contracts.respondBy"), sla && (sla.responseDue || sla.response === "paused") && <span className="flex flex-wrap items-center gap-1.5">{sla.responseDue && dt(sla.responseDue)} <SlaBadge state={sla.response} /></span>],
+    [t("contracts.resolveBy"), sla && (sla.resolutionDue || sla.resolution === "paused") && <span className="flex flex-wrap items-center gap-1.5">{sla.resolutionDue && dt(sla.resolutionDue)} <SlaBadge state={sla.resolution} /></span>],
   ];
 
   return (
@@ -197,8 +245,7 @@ export default async function WorkOrderPage({ params }: PageProps<"/work-orders/
                       <div className="mt-2 flex flex-wrap gap-2">
                         {a.c.attachments.map((f) => (
                           <a key={f.id} href={fileUrl(f.id)} target="_blank" rel="noreferrer">
-                            {/* eslint-disable-next-line @next/next/no-img-element */}
-                            <img src={fileUrl(f.id)} alt={f.filename} className="size-20 rounded-md border border-border object-cover" />
+                            <AttachmentThumb url={fileUrl(f.id)} filename={f.filename} mimeType={f.mimeType} className="size-20" />
                           </a>
                         ))}
                       </div>
@@ -232,15 +279,31 @@ export default async function WorkOrderPage({ params }: PageProps<"/work-orders/
               canExecute={canExecute && !closed}
               canDeleteAny={ctx.can("workOrders.manage")}
               runningSince={myRunning?.startedAt.toISOString() ?? null}
+              runningMode={myRunning?.mode ?? null}
+              defaultMode={myLastMode}
               entries={wo.timeEntries.map((e) => ({
                 id: e.id,
                 user: e.user.name,
                 mine: e.userId === ctx.user.id,
                 minutes: e.minutes,
                 startedAt: e.startedAt.toISOString(),
+                mode: e.mode,
                 label: format.dateTime(e.startedAt, { dateStyle: "short" }),
                 note: e.note,
               }))}
+              billed={
+                block
+                  ? {
+                      block,
+                      total: costs.billedMinutes,
+                      people: billedTime(wo.timeEntries, block).people.map((p) => ({
+                        name: wo.timeEntries.find((e) => e.userId === p.userId)?.user.name ?? "",
+                        minutes: p.minutes,
+                        billed: p.billed,
+                      })),
+                    }
+                  : null
+              }
             />
           </Card>
 
@@ -268,6 +331,7 @@ export default async function WorkOrderPage({ params }: PageProps<"/work-orders/
                 qty: `${format.number(Number(p.quantity))} ${p.part.unit}`,
                 location: p.stockLocation?.name ?? null,
                 cost: money(Number(p.quantity) * Number(p.unitCost)),
+                serials: p.serialNumbers,
               }))}
               options={partOptions.map((p) => ({
                 id: p.id,
@@ -284,15 +348,37 @@ export default async function WorkOrderPage({ params }: PageProps<"/work-orders/
             />
           </Card>
 
+          {ctx.can("costs.view") && (
           <Card className="p-5">
             <h2 className="mb-3 font-medium">{t("costs.title")}</h2>
             <CostsPanel
               woId={wo.id}
               canExecute={canExecute}
               costs={wo.otherCosts.map((c) => ({ id: c.id, description: c.description, amount: money(Number(c.amount)) }))}
-              summary={{ labor: money(costs.labor), parts: costs.parts ? money(costs.parts) : null, other: money(costs.other), total: money(costs.total) }}
+              summary={{
+                labor: money(costs.labor),
+                parts: costs.parts ? money(costs.parts) : null,
+                other: money(costs.other),
+                total: money(costs.total),
+                urgent: urgentApplies(wo.priority, urgentRule)
+                  ? { amount: money(costs.urgent), rule: [urgentRule.fee ? money(urgentRule.fee) : null, urgentRule.percent ? `${urgentRule.percent}%` : null].filter(Boolean).join(" + ") }
+                  : null,
+                travel:
+                  costs.trips > 0
+                    ? {
+                        amount: money(costs.travel),
+                        trips: costs.trips,
+                        rule: isFar(wo.villa?.distanceKm, travel.rule)
+                          ? t("travel.perKmRule", { km: format.number(wo.villa!.distanceKm!, { maximumFractionDigits: 1 }), rate: money(travel.rule.kmRate) })
+                          : t("travel.perTripRule", { amount: money(costs.perTrip) }),
+                      }
+                    : includedTrips > 0
+                      ? { amount: money(0), trips: includedTrips, rule: t("travel.includedInContract") }
+                      : null,
+              }}
             />
           </Card>
+          )}
 
           <Card className="p-5">
             <h2 className="mb-3 font-medium">{t("signoff.title")}</h2>
@@ -308,6 +394,18 @@ export default async function WorkOrderPage({ params }: PageProps<"/work-orders/
               }
             />
           </Card>
+
+          {reportEmail && (
+            <Card className="p-5">
+              <h2 className="mb-1 font-medium">{t("reportEmail.title")}</h2>
+              <p className="mb-3 text-xs text-muted">{t("reportEmail.hint")}</p>
+              <SendReportPanel
+                woId={wo.id}
+                recipients={reportEmail.recipients}
+                lastSent={reportEmail.wo.reportSentAt ? { at: dt(reportEmail.wo.reportSentAt), count: reportEmail.wo.reportSentTo.length } : null}
+              />
+            </Card>
+          )}
         </div>
       </div>
     </>

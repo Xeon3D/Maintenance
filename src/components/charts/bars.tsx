@@ -6,7 +6,7 @@ import { cn } from "@/lib/utils";
 // 2px surface gap between stacked segments, value at the tip. Categories are nominal, so one series
 // gets one colour (slot 1) — never a value ramp. Every chart sits next to a table with the same numbers.
 
-export const SERIES = ["#2a78d6", "#eb6834", "#1baf7a"] as const; // validated: light, on #ffffff
+export const SERIES = ["#2a78d6", "#eb6834", "#1baf7a", "#9b5de0", "#eda100"] as const; // mid-tone, readable on light and dark surfaces
 
 export type BarRow = { key: string; label: string; value: number; display: string; href?: string; sub?: string };
 

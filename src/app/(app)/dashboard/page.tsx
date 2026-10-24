@@ -1,13 +1,15 @@
 import Link from "next/link";
 import { getTranslations } from "next-intl/server";
-import { CircleCheck, Circle } from "lucide-react";
+import { CircleCheck, Circle, Search } from "lucide-react";
 import { Card, PageHeader } from "@/components/ui";
 import { getContext } from "@/lib/context";
 import { RecentWorkOrders } from "@/components/recent-work-orders";
+import { OnCallNow } from "@/components/on-call-calendar";
 import { ACTIVE_STATUSES } from "@/lib/work-orders";
 import { lowStockParts } from "@/lib/inventory";
+import { titled } from "@/lib/metadata";
 
-export const metadata = { title: "Dashboard" };
+export const generateMetadata = titled("nav.dashboard");
 
 export default async function DashboardPage() {
   const ctx = await getContext();
@@ -53,6 +55,20 @@ export default async function DashboardPage() {
   return (
     <>
       <PageHeader title={t("greeting", { name: ctx.user.name.split(" ")[0] })} description={t("subtitle")} />
+
+      {/* Fuzzy search over every work order and its notes (/search). */}
+      <form action="/search" role="search" className="relative mb-6">
+        <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted" aria-hidden />
+        <input
+          name="q"
+          type="search"
+          placeholder={t("searchPlaceholder")}
+          aria-label={t("searchPlaceholder")}
+          className="h-11 w-full rounded-lg border border-border bg-surface pl-9 pr-3 text-sm outline-none focus:border-brand focus:ring-2 focus:ring-brand/20"
+        />
+      </form>
+
+      <OnCallNow ctx={ctx} href="/on-call" />
 
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
         {stats.map((s) => (

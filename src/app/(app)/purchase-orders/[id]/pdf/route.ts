@@ -35,7 +35,7 @@ export async function GET(_req: Request, { params }: RouteContext<"/purchase-ord
       expected: t("po.expectedDate"),
       item: t("po.item"),
       qty: t("stock.quantity"),
-      unitCost: t("parts.unitCost"),
+      unitCost: t("po.unitPrice"),
       lineTotal: t("po.lineTotal"),
       total: t("po.total"),
       notes: t("common.notes"),

@@ -5,6 +5,7 @@ import { SystemType } from "@/generated/prisma/enums";
 import type { Part } from "@/generated/prisma/client";
 import type { AppContext } from "@/lib/context";
 import { savePartAction } from "./actions";
+import { ScanField } from "@/components/scan-field";
 
 export async function PartForm({ ctx, part, defaults }: { ctx: AppContext; part?: Part; defaults?: { vendorId?: string } }) {
   const t = await getTranslations();
@@ -24,7 +25,7 @@ export async function PartForm({ ctx, part, defaults }: { ctx: AppContext; part?
           <Input name="sku" defaultValue={part?.sku ?? ""} className="font-mono" />
         </Field>
         <Field label={t("parts.barcode")}>
-          <Input name="barcode" defaultValue={part?.barcode ?? ""} className="font-mono" />
+          <ScanField name="barcode" defaultValue={part?.barcode} className="font-mono" />
         </Field>
         <Field label={t("assets.system")}>
           <Select name="system" defaultValue={part?.system ?? ""}>
@@ -55,9 +56,13 @@ export async function PartForm({ ctx, part, defaults }: { ctx: AppContext; part?
           </datalist>
           <FieldError name="unit" />
         </Field>
-        <Field label={t("parts.unitCost")}>
+        <Field label={t("parts.unitCost")} hint={t("parts.unitCostHint")}>
           <Input name="unitCost" type="number" step="0.01" min={0} defaultValue={part ? Number(part.unitCost) : ""} placeholder="0.00" />
           <FieldError name="unitCost" />
+        </Field>
+        <Field label={t("parts.purchaseCost")} hint={t("parts.purchaseCostHint")}>
+          <Input name="purchaseCost" type="number" step="0.01" min={0} defaultValue={part ? Number(part.purchaseCost) : ""} placeholder="0.00" />
+          <FieldError name="purchaseCost" />
         </Field>
         <Field label={t("parts.minQuantity")} hint={t("parts.minQuantityHint")}>
           <Input name="minQuantity" type="number" step="any" min={0} defaultValue={part ? Number(part.minQuantity) : 0} />

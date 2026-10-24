@@ -9,7 +9,7 @@ export default async function EditWorkOrderPage({ params }: PageProps<"/work-ord
   const { id } = await params;
   const ctx = await getContext();
   if (!ctx.can("workOrders.create")) notFound();
-  const wo = await ctx.db.workOrder.findUnique({ where: { id }, include: { assignees: true } });
+  const wo = await ctx.db.workOrder.findUnique({ where: { id }, include: { assignees: true, categories: { select: { id: true } } } });
   if (!wo) notFound();
   const t = await getTranslations();
   return (
@@ -25,6 +25,7 @@ export default async function EditWorkOrderPage({ params }: PageProps<"/work-ord
             dueDate: wo.dueDate?.toISOString(),
             startDate: wo.startDate?.toISOString(),
             assigneeIds: wo.assignees.map((a) => a.userId),
+            categoryIds: wo.categories.map((c) => c.id),
           }}
         />
       </Card>

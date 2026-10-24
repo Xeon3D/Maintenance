@@ -3,30 +3,56 @@ import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { ActionForm, FieldError } from "@/components/action-form";
 import { Badge, Button, Card, Field, Input, PageHeader, Select } from "@/components/ui";
+import { PasswordInput } from "@/components/password-input";
 import { getContext } from "@/lib/context";
 import { isServerAdmin, serverAdminEnabled } from "@/lib/server-admin";
 import { DEFAULT_APP_NAME, getServerSettings } from "@/lib/server-settings";
+import { signupLockedByEnv } from "@/lib/signup";
 import { backupsAvailable, busyState, listBackups } from "@/lib/backups";
+import { backupPassword } from "@/lib/backup-crypto";
 import { checkForUpdate, updaterConfigured } from "@/lib/updates";
 import { factoryResetEnabled } from "@/lib/factory-reset";
 import { TIMEZONES } from "@/lib/timezones";
 import { SCHEDULED_KINDS } from "@/lib/backup-schedule";
 import { checkUpdatesAction, lockAction, saveGeneralAction, saveScheduleAction, unlockAction } from "./actions";
 import { BackupNowButton, BackupsTable, UpdateButton, UploadBackup } from "./panel";
+import { titled } from "@/lib/metadata";
+import { EmailForm } from "./email-form";
+import { deliveryStatus } from "@/lib/email";
+import { BackupCopiesForm } from "./backup-copies-form";
+import { copyStatus } from "@/lib/backup-copies";
+import { cloudRedirectUri } from "@/lib/cloud/oauth-paths";
+import { listOnlineUsers, ONLINE_MINUTES } from "@/lib/online-users";
+import { OnlineUsers } from "./online-users";
 
-export const metadata = { title: "Server" };
+// Results of coming back from Microsoft / Google (Settings → Server → Backup copies → Connect).
+const CLOUD_RESULTS = ["connected", "denied", "failed", "badState", "locked", "noRefresh", "noDriveScope", "missingApp"];
 
-export default async function ServerSettingsPage() {
+export const generateMetadata = titled("nav.server");
+
+export default async function ServerSettingsPage({ searchParams }: PageProps<"/settings/server">) {
+  const sp = await searchParams;
+  const cloudResult = typeof sp.cloud === "string" ? sp.cloud : null;
+  const cloudDetail = typeof sp.detail === "string" ? sp.detail.slice(0, 200) : null;
   const ctx = await getContext();
   if (!ctx.can("org.manage")) notFound();
   const t = await getTranslations();
   const header = <PageHeader title={t("server.title")} description={t("server.description")} />;
+  // This company's people only, so it needs no server password and shows whether or not the server is unlocked.
+  const onlineCard = (
+    <Card className="max-w-4xl">
+      <OnlineUsers initial={await listOnlineUsers(ctx.db)} minutes={ONLINE_MINUTES} timezone={ctx.organization.timezone} />
+    </Card>
+  );
 
   if (!serverAdminEnabled()) {
     return (
       <>
         {header}
-        <Card className="max-w-2xl p-6 text-sm text-muted">{t("server.disabled")}</Card>
+        <div className="space-y-6">
+          {onlineCard}
+          <Card className="max-w-2xl p-6 text-sm text-muted">{t("server.disabled")}</Card>
+        </div>
       </>
     );
   }
@@ -35,20 +61,24 @@ export default async function ServerSettingsPage() {
     return (
       <>
         {header}
+        <div className="space-y-6">
+        {onlineCard}
         <Card className="max-w-md p-6">
           <h2 className="mb-1 font-medium">{t("server.locked")}</h2>
           <p className="mb-4 text-sm text-muted">{t("server.lockedHint")}</p>
           <ActionForm action={unlockAction} submitLabel={t("server.unlock")}>
             <Field label={t("server.password")}>
-              <Input name="password" type="password" autoComplete="off" required autoFocus />
+              <PasswordInput name="password" autoComplete="off" required autoFocus />
             </Field>
           </ActionForm>
         </Card>
+        </div>
       </>
     );
   }
 
-  const [settings, update, backups] = await Promise.all([getServerSettings(), checkForUpdate(), listBackups()]);
+  const [settings, update, backups, mailStatus, copies] = await Promise.all([getServerSettings(), checkForUpdate(), listBackups(), deliveryStatus(), copyStatus()]);
+  const bc = settings.backupCopies.cloud;
   const s = settings.backups;
   const available = backupsAvailable();
   const busy = busyState();
@@ -79,7 +109,55 @@ export default async function ServerSettingsPage() {
               <Input name="appName" defaultValue={settings.appName ?? ""} placeholder={process.env.APP_NAME || DEFAULT_APP_NAME} maxLength={40} className="max-w-sm" />
               <FieldError name="appName" />
             </Field>
+            <label className="flex items-start gap-2 text-sm">
+              <input type="checkbox" name="showVersion" defaultChecked={settings.showVersion} className="mt-0.5 size-4 accent-[var(--brand)]" />
+              <span>
+                <span className="font-medium">{t("server.showVersion")}</span>
+                <span className="block text-xs text-muted">{t("server.showVersionHint")}</span>
+              </span>
+            </label>
+            <label className="flex items-start gap-2 text-sm">
+              <input
+                type="checkbox"
+                name="allowSignup"
+                defaultChecked={settings.allowSignup && !signupLockedByEnv()}
+                disabled={signupLockedByEnv()}
+                className="mt-0.5 size-4 accent-[var(--brand)]"
+              />
+              <span>
+                <span className="font-medium">{t("server.allowSignup")}</span>
+                <span className="block text-xs text-muted">{t(signupLockedByEnv() ? "server.allowSignupLocked" : "server.allowSignupHint")}</span>
+              </span>
+            </label>
           </ActionForm>
+        </Card>
+
+        {/* ── Who is online */}
+        {onlineCard}
+
+        {/* ── E-mail */}
+        <Card className="p-6">
+          <h2 className="mb-1 font-medium">{t("server.email.title")}</h2>
+          <p className="mb-4 text-sm text-muted">
+            {t("server.email.hint")}{" "}
+            <span className="font-medium text-foreground">
+              {mailStatus.kind === "smtp"
+                ? t("server.email.statusSmtp", { host: mailStatus.host })
+                : mailStatus.kind === "resend"
+                  ? t(mailStatus.source === "env" ? "server.email.statusResendEnv" : "server.email.statusResend")
+                  : t("server.email.statusNone")}
+            </span>
+          </p>
+          <EmailForm
+            userEmail={ctx.user.email}
+            values={{
+              provider: settings.email.provider,
+              from: settings.email.from,
+              smtp: { host: settings.email.smtp.host, port: settings.email.smtp.port, security: settings.email.smtp.security, user: settings.email.smtp.user, hasPassword: !!settings.email.smtp.passwordEnc },
+              hasResendKey: !!settings.email.resend.apiKeyEnc,
+              envResend: !!process.env.RESEND_API_KEY && !!process.env.EMAIL_FROM,
+            }}
+          />
         </Card>
 
         {/* ── Updates */}
@@ -124,9 +202,12 @@ export default async function ServerSettingsPage() {
                       </a>
                       {r.publishedAt && <span className="text-xs text-muted">{dayFmt.format(new Date(r.publishedAt))}</span>}
                     </div>
-                    {r.html ? (
-                      // Release notes as rendered and sanitized by GitHub, cleaned again in cleanReleaseHtml().
-                      <div className="release-notes text-sm" dangerouslySetInnerHTML={{ __html: r.html }} />
+                    {r.notes.length > 0 ? (
+                      <ul className="list-disc space-y-1 pl-5 text-sm">
+                        {r.notes.map((line, i) => (
+                          <li key={i}>{line}</li>
+                        ))}
+                      </ul>
                     ) : (
                       <p className="text-sm text-muted">{t("server.noNotes")}</p>
                     )}
@@ -142,6 +223,7 @@ export default async function ServerSettingsPage() {
           <div className="p-6 pb-4">
             <h2 className="mb-1 font-medium">{t("server.backups")}</h2>
             <p className="text-sm text-muted">{t("server.backupsHint")}</p>
+            <p className="mt-1 text-xs text-muted">{backupPassword() ? t("server.encryptionOn") : t("server.encryptionOff")}</p>
             {!available && <p className="mt-3 rounded-md bg-amber-50 px-3 py-2 text-sm text-amber-900">{t("server.backupsUnavailable")}</p>}
             {busy && <p className="mt-3 rounded-md bg-blue-50 px-3 py-2 text-sm text-blue-900">{t(`server.busy.${busy.op}`)}</p>}
           </div>
@@ -207,6 +289,34 @@ export default async function ServerSettingsPage() {
               timezone={s.timezone}
             />
           </div>
+        </Card>
+
+        {/* ── Backup copies (e-mail / cloud) */}
+        <Card id="backup-copies" className="scroll-mt-20 p-6">
+          <h2 className="mb-1 font-medium">{t("backupCopies.title")}</h2>
+          <p className="mb-4 text-sm text-muted">{t("backupCopies.hint")}</p>
+          {cloudResult && (
+            <p className={`mb-4 rounded-md px-3 py-2 text-sm ${cloudResult === "connected" ? "bg-green-50 text-green-800" : "bg-red-50 text-red-800"}`}>
+              {t(`backupCopies.oauth.${CLOUD_RESULTS.includes(cloudResult) ? cloudResult : "failed"}` as never)} {cloudDetail && <span className="break-all">({cloudDetail})</span>}
+            </p>
+          )}
+          <BackupCopiesForm
+            backupsEncrypted={!!backupPassword()}
+            redirectUri={await cloudRedirectUri()}
+            last={{ email: copies.email ?? null, cloud: copies.cloud ?? null }}
+            values={{
+              email: settings.backupCopies.email,
+              cloud: {
+                provider: bc.provider,
+                kinds: bc.kinds,
+                folder: bc.folder,
+                mirrorDeletes: bc.mirrorDeletes,
+                onedrive: { tenant: bc.onedrive.tenant, clientId: bc.onedrive.clientId, hasSecret: !!bc.onedrive.clientSecretEnc, siteUrl: bc.onedrive.siteUrl, account: bc.onedrive.account, connected: !!bc.onedrive.refreshTokenEnc },
+                gdrive: { clientId: bc.gdrive.clientId, hasSecret: !!bc.gdrive.clientSecretEnc, account: bc.gdrive.account, connected: !!bc.gdrive.refreshTokenEnc },
+                webdav: { url: bc.webdav.url, user: bc.webdav.user, hasPassword: !!bc.webdav.passwordEnc },
+              },
+            }}
+          />
         </Card>
 
         {factoryResetEnabled() && (

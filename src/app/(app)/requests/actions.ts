@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
-import { requirePermission } from "@/lib/context";
+import { getContext } from "@/lib/context";
 import { enumOf, optEnumOf, optId, parseForm, str, type FormResult } from "@/lib/forms";
 import { approveRequest, declineRequest, notifyRequester } from "@/lib/requests";
 import { WorkOrderError } from "@/lib/work-orders";
@@ -19,7 +19,7 @@ const approveSchema = z.object({
 });
 
 export async function approveRequestAction(id: string, _: FormResult, form: FormData): Promise<FormResult> {
-  const ctx = await requirePermission("requests.approve");
+  const ctx = await handlerOf(id);
   const parsed = parseForm(approveSchema, form);
   if (parsed.error) return parsed.error;
   let woId: string;
@@ -36,7 +36,7 @@ export async function approveRequestAction(id: string, _: FormResult, form: Form
 }
 
 export async function declineRequestAction(id: string, _: FormResult, form: FormData): Promise<FormResult> {
-  const ctx = await requirePermission("requests.approve");
+  const ctx = await handlerOf(id);
   const reason = z.string().trim().max(1000).parse(form.get("reason") ?? "") || null;
   try {
     await declineRequest(ctx.db, id, reason);
@@ -48,4 +48,13 @@ export async function declineRequestAction(id: string, _: FormResult, form: Form
   revalidatePath("/requests");
   revalidatePath(`/requests/${id}`);
   return { ok: true };
+}
+
+/** Approvers, and the members on call who got the request when it arrived. */
+async function handlerOf(id: string) {
+  const ctx = await getContext();
+  if (ctx.can("requests.approve")) return ctx;
+  const mine = await ctx.db.request.count({ where: { id, onCallUsers: { some: { id: ctx.user.id } } } });
+  if (ctx.can("internal.view") && mine === 1) return ctx;
+  throw new Error("Forbidden");
 }

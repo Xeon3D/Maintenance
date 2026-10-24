@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useTranslations } from "next-intl";
+import Link from "next/link";
 import { CheckCircle2 } from "lucide-react";
 import { FieldError, FieldErrorsProvider } from "@/components/action-form";
 import { PhotoPicker } from "@/components/photo-picker";
@@ -12,7 +13,7 @@ import { publicRequestAction, type PublicResult } from "./actions";
 
 const URGENCY = ["LOW", "MEDIUM", "HIGH", "URGENT"] as const;
 
-export function PublicRequestForm({ token }: { token: string }) {
+export function PublicRequestForm({ token, privacyHref }: { token: string; privacyHref: string }) {
   const t = useTranslations();
   const [priority, setPriority] = useState<(typeof URGENCY)[number]>("MEDIUM");
   const [photos, setPhotos] = useState<File[]>([]);
@@ -89,6 +90,12 @@ export function PublicRequestForm({ token }: { token: string }) {
               <FieldError name="email" />
             </Field>
           </div>
+          <p className="text-xs text-muted">
+            {t("privacy.qrNotice")}{" "}
+            <Link href={privacyHref} target="_blank" className="font-medium text-brand underline">
+              {t("privacy.title")}
+            </Link>
+          </p>
         </div>
         <FormError message={generic} />
         <Button className="w-full" disabled={pending}>

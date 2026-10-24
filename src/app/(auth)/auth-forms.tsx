@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useActionForm } from "@/lib/use-action-form";
 import { useTranslations } from "next-intl";
 import { Button, Card, Field, FormError, Input } from "@/components/ui";
+import { PasswordInput } from "@/components/password-input";
 import { factoryResetAction, loginAction, requestResetAction, resetPasswordAction, signupAction, type FormState } from "./actions";
 
 function useErrorText(state: FormState) {
@@ -12,7 +13,7 @@ function useErrorText(state: FormState) {
   return t.has(`auth.${state.error}`) ? t(`auth.${state.error}`) : t("common.somethingWrong");
 }
 
-export function LoginForm({ next, reset, factory, canFactoryReset }: { next?: string; reset?: boolean; factory?: boolean; canFactoryReset?: boolean }) {
+export function LoginForm({ next, reset, factory, canFactoryReset, canSignUp }: { next?: string; reset?: boolean; factory?: boolean; canFactoryReset?: boolean; canSignUp?: boolean }) {
   const t = useTranslations("auth");
   const [state, action, pending] = useActionForm(loginAction);
   const error = useErrorText(state);
@@ -21,13 +22,13 @@ export function LoginForm({ next, reset, factory, canFactoryReset }: { next?: st
       <h1 className="mb-5 text-lg font-semibold">{t("signInTitle")}</h1>
       {reset && <p className="mb-4 rounded-md bg-green-50 px-3 py-2 text-sm text-green-800">{t("resetDone")}</p>}
       {factory && <p className="mb-4 rounded-md bg-green-50 px-3 py-2 text-sm text-green-800">{t("factoryResetDone")}</p>}
-      <form onSubmit={action} className="space-y-4">
+      <form method="post" onSubmit={action} className="space-y-4">
         <input type="hidden" name="next" value={next ?? ""} />
         <Field label={t("email")}>
           <Input name="email" type="email" autoComplete="email" required autoFocus />
         </Field>
         <Field label={t("password")}>
-          <Input name="password" type="password" autoComplete="current-password" required />
+          <PasswordInput name="password" autoComplete="current-password" required />
         </Field>
         <p className="-mt-2 text-right text-xs">
           <Link href="/forgot-password" className="text-muted hover:text-brand">
@@ -39,12 +40,14 @@ export function LoginForm({ next, reset, factory, canFactoryReset }: { next?: st
           {t("signIn")}
         </Button>
       </form>
-      <p className="mt-5 text-center text-sm text-muted">
-        {t("noAccount")}{" "}
-        <Link href={next ? `/signup?next=${encodeURIComponent(next)}` : "/signup"} className="font-medium text-brand">
-          {t("signUp")}
-        </Link>
-      </p>
+      {canSignUp && (
+        <p className="mt-5 text-center text-sm text-muted">
+          {t("noAccount")}{" "}
+          <Link href={next ? `/signup?next=${encodeURIComponent(next)}` : "/signup"} className="font-medium text-brand">
+            {t("signUp")}
+          </Link>
+        </p>
+      )}
       {canFactoryReset && (
         <p className="mt-3 text-center text-xs">
           <Link href="/factory-reset" className="text-muted hover:text-danger">
@@ -66,6 +69,7 @@ export function FactoryResetForm() {
       <h1 className="mb-2 text-lg font-semibold">{t("factoryResetTitle")}</h1>
       <p className="mb-5 text-sm text-muted">{t("factoryResetBody")}</p>
       <form
+        method="post"
         onSubmit={(e) => {
           if (!confirm(t("factoryResetConfirm"))) return e.preventDefault();
           action(e);
@@ -73,7 +77,7 @@ export function FactoryResetForm() {
         className="space-y-4"
       >
         <Field label={t("factoryResetPassword")}>
-          <Input name="password" type="password" autoComplete="off" required autoFocus />
+          <PasswordInput name="password" autoComplete="off" required autoFocus />
         </Field>
         <FormError message={error} />
         <Button variant="danger" className="w-full" disabled={pending}>
@@ -97,7 +101,7 @@ export function SignupForm({ next, withCompany, email }: { next?: string; withCo
   return (
     <Card className="p-6">
       <h1 className="mb-5 text-lg font-semibold">{withCompany ? t("signUpTitle") : t("signUp")}</h1>
-      <form onSubmit={action} className="space-y-4">
+      <form method="post" onSubmit={action} className="space-y-4">
         <input type="hidden" name="next" value={next ?? ""} />
         {withCompany && (
           <Field label={t("companyName")}>
@@ -111,7 +115,7 @@ export function SignupForm({ next, withCompany, email }: { next?: string; withCo
           <Input name="email" type="email" autoComplete="email" required defaultValue={email} readOnly={!!email} />
         </Field>
         <Field label={t("password")} hint={t("passwordRule")}>
-          <Input name="password" type="password" autoComplete="new-password" minLength={8} required />
+          <PasswordInput name="password" autoComplete="new-password" minLength={8} required />
         </Field>
         <FormError message={error} />
         <Button className="w-full" disabled={pending}>
@@ -140,7 +144,7 @@ export function ForgotPasswordForm() {
       ) : (
         <>
           <p className="mb-5 text-sm text-muted">{t("forgotHint")}</p>
-          <form onSubmit={action} className="space-y-4">
+          <form method="post" onSubmit={action} className="space-y-4">
             <Field label={t("email")}>
               <Input name="email" type="email" autoComplete="email" required autoFocus />
             </Field>
@@ -168,13 +172,13 @@ export function ResetPasswordForm({ token, email }: { token: string; email: stri
     <Card className="p-6">
       <h1 className="mb-2 text-lg font-semibold">{t("resetTitle")}</h1>
       <p className="mb-5 text-sm text-muted">{email}</p>
-      <form onSubmit={action} className="space-y-4">
+      <form method="post" onSubmit={action} className="space-y-4">
         <input type="hidden" name="token" value={token} />
         <Field label={t("newPassword")} hint={t("passwordRule")}>
-          <Input name="password" type="password" autoComplete="new-password" minLength={8} required autoFocus />
+          <PasswordInput name="password" autoComplete="new-password" minLength={8} required autoFocus />
         </Field>
         <Field label={t("confirmPassword")}>
-          <Input name="confirm" type="password" autoComplete="new-password" minLength={8} required />
+          <PasswordInput name="confirm" autoComplete="new-password" minLength={8} required />
         </Field>
         <FormError message={error} />
         <Button className="w-full" disabled={pending}>

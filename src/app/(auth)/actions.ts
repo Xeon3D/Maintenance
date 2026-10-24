@@ -1,7 +1,7 @@
 "use server";
 
 import bcrypt from "bcryptjs";
-import { AuthError } from "next-auth";
+import { AuthError, CredentialsSignin } from "next-auth";
 import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { getLocale } from "next-intl/server";
@@ -10,16 +10,19 @@ import { auth, signIn, signOut } from "@/auth";
 import { prisma } from "@/lib/db/client";
 import { createOrganization } from "@/lib/org";
 import { ACTIVE_ORG_COOKIE, requireUser } from "@/lib/context";
-import { isLocale, LOCALE_COOKIE } from "@/i18n/config";
+import { appLocale, isLocale, LOCALE_COOKIE } from "@/i18n/config";
 import { isTheme, THEME_COOKIE } from "@/lib/theme";
 import { createTranslator } from "next-intl";
 import en from "../../../messages/en.json";
 import pt from "../../../messages/pt.json";
 import { appOrigin } from "@/lib/qr";
 import { getAppName } from "@/lib/server-settings";
+import { signupAllowed, signupOpen } from "@/lib/signup";
 import { emailLayout, sendEmail } from "@/lib/email";
 import { background } from "@/lib/notify";
 import { clearResetTokens, createResetToken, userForResetToken } from "@/lib/password-reset";
+import { auditUser, writeAudit } from "@/lib/audit";
+import { clearLastSeen } from "@/lib/online-users";
 import { checkFactoryResetPassword, factoryReset, factoryResetBlocked, factoryResetEnabled, recordFactoryResetFailure } from "@/lib/factory-reset";
 
 export type FormState = { error?: string } | undefined;
@@ -37,6 +40,7 @@ export async function loginAction(_: FormState, form: FormData): Promise<FormSta
       redirectTo: safeNext(form.get("next")),
     });
   } catch (e) {
+    if (e instanceof CredentialsSignin && e.code === "too_many_attempts") return { error: "tooManyAttempts" };
     if (e instanceof AuthError) return { error: "invalidCredentials" };
     throw e; // NEXT_REDIRECT on success
   }
@@ -55,16 +59,17 @@ const signupSchema = z.object({
 export async function signupAction(_: FormState, form: FormData): Promise<FormState> {
   const parsed = signupSchema.safeParse(Object.fromEntries(form));
   if (!parsed.success) return { error: "passwordRule" };
-  const { name, company, email, password } = parsed.data;
+  const { name, company, email, password, next } = parsed.data;
+  if (!(await signupAllowed({ email, company, next }))) return { error: "signupClosed" };
 
   if (await prisma.user.findUnique({ where: { email } })) return { error: "emailTaken" };
 
-  const locale = await getLocale();
+  const locale = appLocale(await getLocale());
   const user = await prisma.user.create({
-    data: { name, email, passwordHash: await bcrypt.hash(password, 12), locale: isLocale(locale) ? locale : "en" },
+    data: { name, email, passwordHash: await bcrypt.hash(password, 12), locale },
   });
   if (company) {
-    const org = await createOrganization(user.id, company, isLocale(locale) ? locale : "en");
+    const org = await createOrganization(user.id, company, locale);
     (await cookies()).set(ACTIVE_ORG_COOKIE, org.id, { path: "/", httpOnly: true, sameSite: "lax" });
   }
 
@@ -73,6 +78,7 @@ export async function signupAction(_: FormState, form: FormData): Promise<FormSt
 
 export async function createOrgAction(_: FormState, form: FormData): Promise<FormState> {
   const user = await requireUser();
+  if (!(await signupOpen())) return { error: "signupClosed" };
   const name = z.string().trim().min(1).max(100).safeParse(form.get("company"));
   if (!name.success) return { error: "somethingWrong" };
   const org = await createOrganization(user.id, name.data, isLocale(user.locale) ? user.locale : "en");
@@ -88,6 +94,7 @@ export async function requestResetAction(_: FormState, form: FormData): Promise<
   if (!email.success) return { error: "invalidEmail" };
   const user = await prisma.user.findUnique({ where: { email: email.data } });
   if (user) {
+    await auditUser(user.id, "auth.passwordResetRequested");
     const raw = await createResetToken(user.id);
     if (raw) {
       const url = `${await appOrigin()}/reset-password/${raw}`;
@@ -109,10 +116,16 @@ export async function resetPasswordAction(_: FormState, form: FormData): Promise
   if (!user) return { error: "resetExpired" };
   await prisma.user.update({ where: { id: user.id }, data: { passwordHash: await bcrypt.hash(parsed.data.password, 12) } });
   await clearResetTokens(user.id);
+  await auditUser(user.id, "auth.passwordReset");
   redirect("/login?reset=1");
 }
 
 export async function signOutAction() {
+  const session = await auth();
+  if (session?.user?.id) {
+    await auditUser(session.user.id, "auth.signOut");
+    await clearLastSeen(session.user.id);
+  }
   await signOut({ redirectTo: "/login" });
 }
 
@@ -135,6 +148,14 @@ export async function switchOrgAction(organizationId: string) {
 
 // ── Factory reset (demo/test servers; see src/lib/factory-reset.ts)
 
+/** A server-wide event with no signed-in user (the factory reset page is public). */
+async function auditEveryCompany(action: string, client: string) {
+  const ip = client === "unknown" ? null : client;
+  for (const o of await prisma.organization.findMany({ select: { id: true } })) {
+    await writeAudit({ organizationId: o.id, userId: null, action, entityType: "Server", entityId: "-", ip });
+  }
+}
+
 export async function factoryResetAction(_: FormState, form: FormData): Promise<FormState> {
   if (!factoryResetEnabled()) return { error: "somethingWrong" };
   const h = await headers();
@@ -143,10 +164,13 @@ export async function factoryResetAction(_: FormState, form: FormData): Promise<
   const password = form.get("password");
   if (typeof password !== "string" || !checkFactoryResetPassword(password)) {
     recordFactoryResetFailure(client);
+    await auditEveryCompany("server.factoryResetFailed", client);
     return { error: "wrongResetPassword" };
   }
   console.warn(`[factory-reset] requested from ${client}`);
   await factoryReset();
+  // Everything was erased: the entry goes into the recreated companies' (empty) logs.
+  await auditEveryCompany("server.factoryReset", client);
   (await cookies()).delete(ACTIVE_ORG_COOKIE);
   await signOut({ redirectTo: "/login?factory=1" }); // the signed-in user no longer exists
 }

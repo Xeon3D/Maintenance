@@ -2,6 +2,7 @@ import "server-only";
 import { randomBytes } from "node:crypto";
 import { prisma } from "@/lib/db/client";
 import type { Locale } from "@/i18n/config";
+import { DEFAULT_JOB_ROLES } from "@/lib/roles";
 
 const TRIAL_DAYS = 14;
 
@@ -16,7 +17,7 @@ function slugify(name: string) {
   return `${base || "org"}-${randomBytes(3).toString("hex")}`;
 }
 
-/** Creates an organization with `userId` as OWNER, a trial subscription and a main warehouse. */
+/** Creates an organization with `userId` as OWNER, a trial subscription, a main warehouse and the default roles. */
 export async function createOrganization(userId: string, name: string, locale: Locale) {
   return prisma.organization.create({
     data: {
@@ -24,6 +25,7 @@ export async function createOrganization(userId: string, name: string, locale: L
       slug: slugify(name),
       defaultLocale: locale,
       memberships: { create: { userId, role: "OWNER" } },
+      jobRoles: { create: DEFAULT_JOB_ROLES.map((name) => ({ name })) },
       subscription: {
         create: { status: "TRIALING", trialEndsAt: new Date(Date.now() + TRIAL_DAYS * 86_400_000) },
       },

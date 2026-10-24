@@ -89,9 +89,10 @@ export default async function PartPage({ params }: PageProps<"/parts/[id]">) {
     [t("assets.manufacturer"), part.manufacturer],
     [t("assets.model"), part.model],
     [t("parts.unitCost"), `${money(Number(part.unitCost))} / ${part.unit}`],
+    [t("parts.purchaseCost"), `${money(Number(part.purchaseCost))} / ${part.unit}`],
     [t("parts.minQuantity"), Number(part.minQuantity) > 0 ? qty(Number(part.minQuantity)) : null],
     [t("parts.vendor"), part.vendor && <Link href={`/vendors/${part.vendor.id}`} className="hover:text-brand">{part.vendor.name}</Link>],
-    [t("parts.stockValue"), money(total * Number(part.unitCost))],
+    [t("parts.stockValue"), money(total * Number(part.purchaseCost))], // stock is valued at cost
   ];
 
   return (

@@ -22,6 +22,7 @@
     "comingSoon": "Coming soon",
     "you": "you",
     "somethingWrong": "Something went wrong. Please try again.",
+    "holdToShowPassword": "Hold to show the password",
     "phone": "Phone",
     "notes": "Notes",
     "add": "Add",
@@ -46,6 +47,8 @@
     "signIn": "Sign in",
     "signUp": "Create account",
     "noAccount": "No account yet?",
+    "signupClosedTitle": "Sign-up is closed",
+    "signupClosed": "This server doesn't accept new accounts. Ask your company's administrator for an invitation.",
     "haveAccount": "Already have an account?",
     "invalidCredentials": "Invalid email or password.",
     "emailTaken": "An account with this email already exists.",
@@ -74,10 +77,12 @@
     "factoryResetConfirm": "Erase ALL data on this server and restore the demo? This cannot be undone.",
     "factoryResetDone": "The server was reset to the demo data. Sign in with owner@demo.test / demo1234.",
     "wrongResetPassword": "Wrong reset password.",
-    "tooManyAttempts": "Too many attempts. Try again in 15 minutes."
+    "tooManyAttempts": "Too many failed sign-in attempts. Wait 15 minutes and try again, or reset your password."
   },
   "onboarding": {
     "title": "Create your organization",
+    "closedTitle": "No organization yet",
+    "closed": "You're not part of any organization yet, and new ones can't be created on this server. Ask your administrator for an invitation link.",
     "description": "You're not part of any organization yet. Create one, or ask your administrator for an invitation link."
   },
   "invite": {
@@ -105,7 +110,7 @@
     "reports": "Reports",
     "settings": "Settings",
     "organization": "Organization",
-    "users": "Users",
+    "users": "Staff",
     "teams": "Teams",
     "operations": "Operations",
     "sites": "Sites & equipment",
@@ -116,39 +121,31 @@
     "field": "Field app (offline)",
     "scan": "Scan",
     "server": "Server",
-    "roles": "Roles"
+    "roles": "Roles",
+    "categories": "Categories",
+    "audit": "Audit log",
+    "search": "Search",
+    "onCall": "On call",
+    "clientUsers": "Clients"
   },
   "roles": {
-    "OWNER": "Owner",
+    "OWNER": "Super Admin",
     "ADMIN": "Administrator",
     "MANAGER": "Manager",
     "TECHNICIAN": "Technician",
     "REQUESTER": "Client (requester)",
     "VIEWER": "Viewer",
     "title": "Roles",
-    "description": "What each role can do, and what an hour of its time costs. Time logged on jobs is costed with the rate of the person's role at that moment.",
-    "builtIn": "Built-in roles",
-    "builtInHint": "Leave a rate empty if you don't track costs for that role. Rate changes apply to time logged from now on.",
-    "can": {
-      "OWNER": "Everything, including billing.",
-      "ADMIN": "Everything except billing: settings, users, approvals.",
-      "MANAGER": "Plans and assigns work, manages clients, stock and purchasing.",
-      "TECHNICIAN": "Does the work: work orders, checklists, time, parts.",
-      "VIEWER": "Observer: sees everything, changes nothing.",
-      "REQUESTER": "Client portal: their villas and requests only."
-    },
-    "notBillable": "No cost (doesn't log time)",
-    "custom": "Custom roles",
-    "customHint": "Roles of your own, such as Engineer or Electrician. Each one has its own cost per hour and the access of one of the built-in roles. Assign them in Users.",
+    "description": "What each role can do, and the price of an hour of its time. Time logged on a job is charged at the rate of the role the person has on that job.",
+    "listHint": "The roles that come with the program and the ones you create work the same way. Leave a rate empty if that role's time isn't charged (a role you created without a rate is charged at the Technician rate). Rate changes apply to time logged from now on. A new role starts with the Technician's permissions.",
+    "notBillable": "Not charged (doesn't log time)",
     "new": "New role",
     "namePlaceholder": "e.g. Engineer",
     "members": "{count, plural, =0 {No one in this role} one {# person} other {# people}}",
-    "access": "Access",
-    "accessLike": "Same access as {role}",
-    "costPerHour": "Cost per hour",
+    "costPerHour": "Price per hour",
     "delete": "Delete",
-    "deleteConfirm": "Delete the role \"{name}\"? {count, plural, =0 {} one {The # person in it keeps the same access under the built-in role.} other {The # people in it keep the same access under the built-in role.}}",
-    "customGroup": "Custom roles"
+    "deleteConfirm": "Delete the role \"{name}\"? {count, plural, =0 {} one {The # person in it becomes a Technician again.} other {The # people in it become Technicians again.}}",
+    "ACCOUNTANT": "Accountant"
   },
   "systems": {
     "ELECTRICAL": "Electrical",
@@ -176,7 +173,8 @@
     "myWorkOrders": "My open work orders",
     "overdueWorkOrders": "Overdue",
     "lowStock": "Low-stock parts",
-    "poApprovals": "POs to approve"
+    "poApprovals": "POs to approve",
+    "searchPlaceholder": "Search past work orders and technicians' notes…"
   },
   "settings": {
     "orgTitle": "Organization",
@@ -184,8 +182,8 @@
     "timezone": "Time zone",
     "currency": "Currency",
     "defaultLanguage": "Default language",
-    "usersTitle": "Users",
-    "usersDescription": "People who can sign in to this organization.",
+    "usersTitle": "Staff",
+    "usersDescription": "Your company's people, and viewers, who can sign in. Client users are under Settings → Clients.",
     "invite": "Invite user",
     "inviteSend": "Create invitation",
     "inviteLink": "We've emailed an invitation to {email}. You can also share this link directly; it expires in 7 days.",
@@ -203,7 +201,12 @@
     "addMember": "Add member",
     "specialty": "Specialty",
     "noTeams": "No teams yet.",
-    "cannotChangeOwner": "The owner's role can't be changed."
+    "cannotChangeOwner": "The Super Admin's role can't be changed.",
+    "clientUsersTitle": "Clients",
+    "clientUsersDescription": "Villa owners and property managers who sign in to the client portal.",
+    "noClientUsers": "No client users yet",
+    "villaOwner": "Owner · {count, plural, one {# villa} other {# villas}}",
+    "propertyManager": "Property manager · {count, plural, one {# villa} other {# villas}}"
   },
   "validation": {
     "invalid": "Invalid value.",
@@ -227,7 +230,13 @@
     "logoTooLarge": "The logo must be 2 MB or smaller.",
     "logoType": "Use a PNG or JPEG image.",
     "managerIsOwner": "The manager must be a different client from the owner.",
-    "roleNameTaken": "There's already a role with this name."
+    "roleNameTaken": "There's already a role with this name.",
+    "closesBeforeOpens": "Closing time must be after opening time.",
+    "badHoliday": "Use one date per line, as YYYY-MM-DD.",
+    "categoryTaken": "There's already a category with this name.",
+    "badEmails": "One or more addresses aren't valid e-mail addresses.",
+    "badFrom": "Use an address, or a name and address: Company '<'name@company.com'>'.",
+    "ownerOrManager": "Choose an owner, a property manager, or both."
   },
   "clients": {
     "description": "Villa owners, family offices and property managers you work for.",
@@ -252,7 +261,7 @@
     "description": "Every property you maintain, with its rooms and installed systems.",
     "new": "New villa",
     "empty": "No villas yet.",
-    "needClient": "Create a client first; each villa belongs to a client.",
+    "needClient": "Create a client first; each villa belongs to an owner, a property manager, or both.",
     "allClients": "All clients",
     "client": "Client",
     "owner": "Owner",
@@ -271,12 +280,21 @@
     "openMaps": "Open in Maps",
     "secrets": "Access codes",
     "manager": "Property manager / company",
-    "managerHint": "Optional. Its portal users can also see this villa and request work here. The owner's portal users only ever see the owner's own villas.",
+    "managerHint": "Its portal users can also see this villa and request work here. The owner's portal users only ever see the owner's own villas. Choose an owner, a manager, or both.",
     "noManager": "None",
     "managedBy": "Managed by {name}",
     "managedVillas": "Villas managed",
     "managedVillasHint": "Villas of other owners that this client manages. Its portal users can request work on them.",
-    "ownedBy": "Owner: {name}"
+    "ownedBy": "Owner: {name}",
+    "ownerHint": "Leave empty if the villa is only looked after by a property manager.",
+    "noOwner": "None",
+    "billTo": "Bill to",
+    "billToHint": "Who the work is billed and the service reports sent to, when the villa has both an owner and a property manager.",
+    "billed": "billed",
+    "distanceKm": "Distance from the company",
+    "distanceHint": "Road distance in km, one way. Decides the trip charge for on-site work (Settings → Organization).",
+    "distanceValue": "{km, number} km",
+    "distanceUnset": "Not set (fixed trip fee)"
   },
   "areas": {
     "title": "Floors & rooms",
@@ -436,6 +454,7 @@
     "anyone": "Anyone",
     "assignedToMe": "Assigned to me",
     "unassigned": "Unassigned",
+    "assigneeRoleOf": "Role of {name} on this job",
     "anyPriority": "Any priority",
     "anyDue": "Any due date",
     "overdueOnly": "Overdue only",
@@ -497,12 +516,13 @@
     "pf": {
       "PASS": "Pass",
       "FLAG": "Flag",
-      "FAIL": "Fail"
+      "FAIL": "Fail",
+      "NA": "N/A"
     },
     "types": {
       "HEADING": "Section heading",
       "CHECKBOX": "Checkbox",
-      "PASS_FAIL": "Pass / flag / fail",
+      "PASS_FAIL": "Pass / flag / fail / N/A",
       "TEXT": "Text",
       "NUMBER": "Number",
       "MULTIPLE_CHOICE": "Multiple choice",
@@ -522,33 +542,51 @@
     "minutes": "Minutes",
     "notePlaceholder": "Note (optional)",
     "running": "running",
-    "total": "Total"
+    "total": "Total",
+    "billed": "Billed",
+    "billedHint": "Each technician's time rounded up to blocks of {block} minutes (Settings → Organization).",
+    "billedFrom": "{billed} (logged {logged})",
+    "mode": "Where",
+    "modes": {
+      "ONSITE": "On site",
+      "REMOTE": "Remote"
+    },
+    "switchTo": "Change to {mode}"
   },
   "costs": {
-    "title": "Costs",
+    "title": "Amounts to bill",
     "labor": "Labour",
     "total": "Total",
-    "add": "Add cost",
+    "add": "Add charge",
     "descriptionPlaceholder": "e.g. Crane hire, parking",
     "parts": "Parts",
     "timeSpent": "Time spent",
     "hours": "{hours} h",
-    "other": "Other costs"
+    "other": "Other charges",
+    "timeBilled": "Time billed",
+    "urgent": "Urgent fee",
+    "travel": "Trips",
+    "trips": "{count, plural, one {# trip} other {# trips}}"
   },
   "files": {
     "title": "Photos & files",
     "add": "Add photos or files",
-    "failed": "Some files couldn't be uploaded (JPEG, PNG, WebP or PDF up to 15 MB).",
+    "failed": "Couldn't upload (photos and PDFs up to 15 MB, videos up to 1 minute).",
     "notFound": "The work order or step no longer exists.",
     "forbidden": "You're not allowed to add files here.",
     "badTarget": "The work order or step no longer exists.",
     "badType": "Unsupported file type.",
-    "tooLarge": "File too large."
+    "tooLarge": "File too large.",
+    "addMedia": "Add photos, videos or files",
+    "converting": "Preparing video {progress}%",
+    "videoTooLong": "Videos can be up to 1 minute long.",
+    "badVideo": "This video couldn't be read.",
+    "videoUnavailable": "The server can't process videos right now."
   },
   "activity": {
     "title": "Activity",
     "placeholder": "Add an update or note…",
-    "attach": "Photo",
+    "attach": "Photo or video",
     "send": "Post",
     "changedStatus": "changed status to",
     "created": "created this work order"
@@ -568,8 +606,12 @@
   },
   "report": {
     "title": "Service report",
+    "back": "Back",
     "photos": "Photos",
-    "seePhotos": "See photos"
+    "seePhotos": "See photos",
+    "service": "Service",
+    "urgentService": "Urgent",
+    "trips": "Trips"
   },
   "procedures": {
     "description": "Reusable checklists your team follows on site. Use them in work orders and preventive schedules.",
@@ -704,16 +746,12 @@
   },
   "portal": {
     "title": "Client portal",
-    "subtitle": "Report a problem and follow the work on your properties.",
     "newRequest": "Report a problem",
     "newRequestHint": "Tell us what's wrong. Photos help our technicians arrive prepared.",
     "noVillas": "Your account isn't linked to any property yet. Please contact us.",
     "yourVillas": "Your properties",
     "inProgress": "{count, plural, one {# job in progress} other {# jobs in progress}}",
     "allGood": "No open work",
-    "yourRequests": "Your requests",
-    "noRequests": "You haven't reported anything yet.",
-    "recentWork": "Recently completed",
     "report": "Report",
     "whereInHouse": "Where in the house?",
     "whichEquipment": "Which equipment?",
@@ -753,8 +791,11 @@
     "stepInProgress": "Technician on it",
     "stepDone": "Completed",
     "downloadReport": "Download service report",
-    "workHistory": "Work history",
-    "installedSystems": "Installed systems"
+    "pickVilla": "Choose a property to report a problem or see earlier requests and their reports.",
+    "pastRequests": "Earlier requests",
+    "pastRequestsHint": "What you asked for and the work done, with the service reports.",
+    "noPastRequests": "Nothing here yet.",
+    "requestNumber": "Request R{number}"
   },
   "vendors": {
     "description": "Suppliers, subcontractors and manufacturers you buy parts and equipment from.",
@@ -790,7 +831,7 @@
     "onHandLower": "on hand",
     "minQuantity": "Reorder point",
     "minQuantityHint": "Low-stock alert at or below this total. 0 = not tracked.",
-    "unitCost": "Unit cost",
+    "unitCost": "Sale price",
     "reorder": "Reorder low stock",
     "reorderConfirm": "Create draft purchase orders for {count, plural, one {# low-stock part} other {# low-stock parts}}, one per preferred vendor?",
     "reorderResult": "{created, plural, =0 {No purchase orders created.} one {# draft purchase order created.} other {# draft purchase orders created.}}",
@@ -804,14 +845,17 @@
     "vendor": "Preferred vendor",
     "openingQuantity": "Opening stock",
     "openingHint": "Optional: how many you have now.",
-    "stockValue": "Stock value",
+    "stockValue": "Stock value (at cost)",
     "photos": "Photos & datasheets",
     "onOrder": "On order",
     "compatibleAssets": "Fits these assets",
     "compatibleHint": "Link parts from an asset's page.",
     "compatibleParts": "Compatible spare parts",
     "noCompatible": "No spare parts linked to this asset yet.",
-    "pickPart": "Link a part…"
+    "pickPart": "Link a part…",
+    "unitCostHint": "What a unit is charged at on work orders.",
+    "purchaseCost": "Purchase cost",
+    "purchaseCostHint": "What a unit costs from the vendor: used on purchase orders and for the stock value. Receiving a purchase order updates it."
   },
   "stock": {
     "location": "Location",
@@ -849,7 +893,9 @@
     "sameLocation": "Choose two different locations.",
     "notEditable": "This purchase order can't be changed in its current status.",
     "overReceive": "You can't receive more than is still outstanding on a line.",
-    "noLines": "Nothing from this vendor is low on stock."
+    "noLines": "Nothing from this vendor is low on stock.",
+    "notYourVan": "You can only restock your own van.",
+    "tooManySerials": "More serial numbers than units used."
   },
   "locationType": {
     "WAREHOUSE": "Warehouse",
@@ -884,7 +930,7 @@
     "shipping": "Shipping",
     "notesHint": "Printed on the PDF sent to the vendor.",
     "prefillLowStock": "Add this vendor's low-stock parts",
-    "awaitingApproval": "Waiting for an owner or admin to approve.",
+    "awaitingApproval": "Waiting for someone who can approve purchase orders.",
     "lines": "Items",
     "noLines": "No items yet.",
     "needLines": "Add at least one item first.",
@@ -894,7 +940,7 @@
     "freeTextOption": "Free text (not a stocked part)",
     "fromVendor": "From {vendor}",
     "otherParts": "Other parts",
-    "unitCostHint": "Blank = the part's current cost.",
+    "unitCostHint": "Blank = the part's current purchase cost.",
     "received": "Received",
     "lineTotal": "Total",
     "subtotal": "Subtotal",
@@ -903,7 +949,7 @@
     "addLowStock": "Add low-stock parts",
     "lowStockAdded": "{count, plural, one {# item added.} other {# items added.}}",
     "receive": "Receive items",
-    "receiveHint": "Enter what arrived. Stocked parts are added to the chosen location and their unit cost is updated to this price.",
+    "receiveHint": "Enter what arrived. Stocked parts are added to the chosen location and their purchase cost is updated to this price (the sale price doesn't change).",
     "receiveInto": "Receive into",
     "outstanding": "{qty} outstanding",
     "noStockUpdate": "no stock update",
@@ -923,7 +969,8 @@
       "order": "Mark as ordered",
       "cancel": "Cancel order",
       "reopen": "Reopen as draft"
-    }
+    },
+    "unitPrice": "Unit price"
   },
   "poStatus": {
     "DRAFT": "Draft",
@@ -1002,7 +1049,8 @@
     "inviteCta": "Accept invitation",
     "resetSubject": "Reset your password",
     "resetBody": "Someone asked to reset the password for this account. If it was you, use the button below within an hour. If not, you can ignore this email.",
-    "resetCta": "Choose a new password"
+    "resetCta": "Choose a new password",
+    "privacy": "Privacy notice"
   },
   "notifications": {
     "title": "Notifications",
@@ -1074,7 +1122,9 @@
       "LOW_STOCK": "Parts running low",
       "PO_APPROVAL": "Purchase orders waiting for approval",
       "PO_UPDATE": "Updates on my purchase orders"
-    }
+    },
+    "appearance": "Language and appearance",
+    "language": "Language"
   },
   "contractStatus": {
     "DRAFT": "Draft",
@@ -1085,7 +1135,8 @@
   "sla": {
     "met": "Met",
     "breached": "Breached",
-    "pending": "Due"
+    "pending": "Due",
+    "paused": "Paused"
   },
   "contracts": {
     "description": "Maintenance agreements with response and resolution targets. Work orders are linked to the matching contract automatically.",
@@ -1134,10 +1185,18 @@
     "deleteConfirm": "Delete this contract? Its work orders stay, but lose the SLA link.",
     "pickClientFirst": "Choose the client first.",
     "ownedVillas": "Owned",
-    "managedVillas": "Managed for other owners"
+    "managedVillas": "Managed for other owners",
+    "businessHoursOnly": "Count business hours only",
+    "businessHoursOnlyHint": "Targets run only during the company's business hours (Settings → Organization), skipping nights, closed days and holidays.",
+    "pauseOnHold": "Pause while on hold",
+    "pauseOnHoldHint": "The clock stops while the job is on hold (e.g. waiting for the client or parts) and resumes when work continues.",
+    "slaClock": "SLA clock",
+    "clockAlways": "Around the clock",
+    "clockBusiness": "Business hours",
+    "clockPauses": "pauses on hold"
   },
   "reports": {
-    "description": "Performance, SLA, costs, technicians and equipment reliability.",
+    "description": "Performance, SLA, billing, technicians and equipment reliability.",
     "period": "Period",
     "from": "From",
     "to": "To",
@@ -1152,7 +1211,7 @@
       "overview": "Overview",
       "workOrders": "Work orders",
       "sla": "SLA",
-      "costs": "Costs",
+      "costs": "Billing",
       "technicians": "Technicians",
       "assets": "Assets"
     },
@@ -1173,8 +1232,8 @@
       "slaResponse": "Response SLA met",
       "slaResolution": "Resolution SLA met",
       "pm": "PM compliance",
-      "cost": "Total cost",
-      "costHint": "Labour, parts and other costs"
+      "cost": "Value of the work",
+      "costHint": "Labour, parts, other charges and urgent fees"
     },
     "pmSub": "{onTime} of {due} on time",
     "trendTitle": "Opened vs completed",
@@ -1216,16 +1275,16 @@
     "breachedJobs": "Breached work orders",
     "latest50": "Latest 50",
     "noBreaches": "No SLA breaches in this period.",
-    "otherCosts": "Other",
-    "costNote": "Costs of work orders opened {from} – {to}: labour at each technician's rate, parts at cost, and other costs.",
+    "otherCosts": "Other charges",
+    "costNote": "Amounts of work orders opened {from} – {to}: labour at each technician's price per hour (billed time), parts at their sale price, other charges and urgent fees.",
     "jobCount": "{count, plural, one {# work order} other {# work orders}}",
-    "costByVilla": "Cost by villa",
-    "costByClient": "Cost by client",
-    "costBySystem": "Cost by system",
-    "noCosts": "No costs recorded in this period.",
-    "feesNote": "Fees = service-contract fees for the period, pro rata. Margin = fees minus the cost of the work.",
+    "costByVilla": "Value by villa",
+    "costByClient": "Value by client",
+    "costBySystem": "Value by system",
+    "noCosts": "Nothing to bill in this period.",
+    "feesNote": "Fees = service-contract fees for the period, pro rata. Fees − work = fees minus the value of the work done.",
     "fees": "Contract fees",
-    "margin": "Margin",
+    "margin": "Fees − work",
     "techNote": "Time logged {from} – {to}. Utilisation compares logged hours with {hours} h available ({perDay} h per working day).",
     "hoursLogged": "Hours logged",
     "noTime": "No time logged in this period.",
@@ -1254,8 +1313,12 @@
       "firstResponse": "First response",
       "minutes": "Minutes logged",
       "downHours": "Hours down",
-      "degradedHours": "Hours degraded"
-    }
+      "degradedHours": "Hours degraded",
+      "billedMinutes": "Minutes billed",
+      "trips": "Trips"
+    },
+    "billedHoursCol": "Hours billed",
+    "billedHoursHint": "Hours charged: each technician's time per work order rounded up to the billing period. Utilisation uses the hours logged."
   },
   "scan": {
     "title": "Scan",
@@ -1269,7 +1332,19 @@
     "notFound": "Nothing matches “{code}”.",
     "again": "Scan",
     "scanPart": "Scan barcode",
-    "partNotFound": "No part with barcode or SKU “{code}”."
+    "partNotFound": "No part with barcode or SKU “{code}”.",
+    "titleSerial": "Read serial number",
+    "titleMac": "Read MAC address",
+    "hintSerial": "Point at the label: a barcode is read straight away. For printed text, fit it in the box and tap Read text.",
+    "hintMac": "Point at the label: a barcode is read straight away. For printed text, fit the MAC in the box and tap Read text.",
+    "readText": "Read text",
+    "ocrLoading": "Preparing the text reader (the first time it downloads about 15 MB)…",
+    "ocrReading": "Reading the label…",
+    "ocrPick": "Tap the right value:",
+    "ocrNothing": "No code found. Hold the camera closer, with the text inside the box, and try again.",
+    "ocrFailed": "The text reader couldn't start here. Type the value below.",
+    "ocrRetry": "Try again",
+    "scanField": "Read with the camera"
   },
   "field": {
     "title": "Field app",
@@ -1307,13 +1382,19 @@
     "hold": "On hold",
     "done": "Mark done",
     "logged": "{minutes, plural, =0 {No time logged} other {# min logged}}",
-    "photos": "Photos",
-    "photosHint": "Photos are kept on this device and uploaded when there's a connection.",
+    "photos": "Photos & videos",
+    "photosHint": "Photos and videos (up to 1 minute) are kept on this device and uploaded when there's a connection.",
     "takePhoto": "Take photo",
     "retake": "Retake",
     "savedOnDevice": "Saved on this device — uploads when online.",
     "signedBy": "Signed by {name}",
-    "waitingUpload": "will upload when online"
+    "waitingUpload": "will upload when online",
+    "section": {
+      "now": "To do",
+      "next30": "Next 30 days",
+      "later": "Later"
+    },
+    "takeVideo": "Record video"
   },
   "company": {
     "details": "Company details",
@@ -1354,15 +1435,29 @@
     "general": "General",
     "appName": "Software name",
     "appNameHint": "Shown on the sign-in page, in the browser tab, in the installed app and in e-mails. Leave empty for \"{default}\".",
+    "showVersion": "Show the version next to the name",
+    "showVersionHint": "Adds the installed version (on a development server, the current commit) after the software name, top left.",
+    "allowSignup": "Anyone can create an account",
+    "allowSignupHint": "Shows \"Create account\" on the sign-in page, where anyone who reaches this server can create a new company. Turn it off once your company exists: invited people can still create their accounts.",
+    "allowSignupLocked": "Turned off by ALLOW_SIGNUP=false in the server's environment.",
     "updates": "Updates",
     "currentVersion": "Installed version",
     "latestVersion": "Latest release",
     "updateAvailable": "Update available",
     "upToDate": "Up to date",
     "unknown": "Not checked yet",
-    "checkFailed": "Couldn't reach GitHub to check for updates.",
+    "checkFailed": "Couldn't reach Docker Hub to check for updates.",
     "checkedAt": "Checked {date}",
     "checkNow": "Check now",
+    "online": {
+      "title": "Who is online",
+      "hint": "People in this company who used the app in the last {minutes} minutes. Activity is recorded at most once a minute; signing out removes someone at once.",
+      "refresh": "Refresh",
+      "none": "Nobody is online right now.",
+      "name": "Name",
+      "lastSeen": "Last activity",
+      "signedIn": "Signed in"
+    },
     "updateTo": "Update to {version}",
     "preparingUpdate": "Backing up…",
     "updateConfirm": "Update to version {version}? A backup is made first, then the app restarts on the new version (about a minute).",
@@ -1423,15 +1518,912 @@
       "noUpdate": "There's no newer version to install.",
       "updaterNotConfigured": "The updater service isn't set up (see docker-compose.yml).",
       "updateInProgress": "An update is already running.",
-      "updaterError": "The updater service didn't accept the request. Check that it is running."
+      "updaterError": "The updater service didn't accept the request. Check that it is running.",
+      "encryptedNoPassword": "This backup is encrypted. Set BACKUP_PASSWORD on this server to the password it was made with.",
+      "wrongBackupPassword": "This backup can't be decrypted: it was made with a different BACKUP_PASSWORD, or the file is damaged."
     },
     "whatsNew": "What's new",
-    "noNotes": "No release notes."
+    "noNotes": "No release notes.",
+    "encrypted": "Encrypted",
+    "encryptionOn": "New backups are encrypted with BACKUP_PASSWORD (AES-256). Keep that password safe: without it they can't be restored.",
+    "encryptionOff": "Backups aren't encrypted. Set BACKUP_PASSWORD in the server environment to encrypt new ones (recommended when copies leave the server).",
+    "email": {
+      "title": "E-mail",
+      "hint": "How the app sends invitations, password resets, notifications and service reports. Now:",
+      "statusSmtp": "SMTP via {host}.",
+      "statusResend": "Resend (key saved here).",
+      "statusResendEnv": "Resend (RESEND_API_KEY in the environment).",
+      "statusNone": "not set up — e-mails aren't sent.",
+      "provider": "Send through",
+      "providers": {
+        "smtp": "SMTP account",
+        "resend": "Resend",
+        "env": "Environment variables"
+      },
+      "providerHints": {
+        "smtp": "Any mailbox: Microsoft 365, Google Workspace, your domain's mail server…",
+        "resend": "Resend's sending service, with an API key.",
+        "env": "As before: RESEND_API_KEY and EMAIL_FROM in docker-compose."
+      },
+      "from": "Sender",
+      "fromHint": "The address e-mails come from, optionally with a name: Maintenance '<'maintenance@company.com'>'. With SMTP it is usually the mailbox itself.",
+      "smtpHost": "SMTP server",
+      "smtpPort": "Port",
+      "smtpSecurity": "Security",
+      "security": {
+        "starttls": "STARTTLS (usually 587)",
+        "ssl": "SSL/TLS (usually 465)",
+        "none": "None (not recommended)"
+      },
+      "smtpUser": "Username",
+      "smtpPassword": "Password",
+      "secretHint": "Stored encrypted.",
+      "secretSaved": "Saved (encrypted). Leave empty to keep it.",
+      "clearPassword": "Remove the saved password",
+      "smtpTips": "Microsoft 365: smtp.office365.com, 587, STARTTLS; SMTP AUTH must be enabled for the mailbox. Google: smtp.gmail.com, 587, STARTTLS, with an app password. Your domain's server: see its mail settings.",
+      "resendKey": "API key",
+      "resendHint": "From resend.com → API Keys; the sender's domain must be verified there.",
+      "envActive": "RESEND_API_KEY and EMAIL_FROM are set in the environment, so e-mail goes out through Resend.",
+      "envNone": "No e-mail variables are set in the environment: e-mails aren't sent. Choose SMTP or Resend above.",
+      "testTo": "Send a test to",
+      "testHint": "Uses what is in the form, even before you save.",
+      "test": "Send test e-mail",
+      "testing": "Sending…",
+      "testSent": "Test e-mail sent to {to}. Check the inbox (and the spam folder).",
+      "testFailed": "The test failed:",
+      "testNeedsProvider": "Choose SMTP or Resend to send a test.",
+      "testSubject": "{app}: test e-mail",
+      "testBody": "This is a test message. If you are reading it, e-mail from the maintenance app is working."
+    }
   },
   "theme": {
     "label": "Appearance",
     "light": "Light",
     "dark": "Dark",
     "system": "Same as device"
+  },
+  "demo": {
+    "banner": "Public demo: don't enter real personal data. Everything here is erased at every reset."
+  },
+  "privacy": {
+    "title": "Privacy notice",
+    "qrNotice": "Your details are used only to handle this request and to contact you about it.",
+    "contactFallback": "the contact details above",
+    "yourData": "Your data",
+    "yourDataHint": "Download a copy of everything stored about you (JSON), or read how your data is used.",
+    "download": "Download my data",
+    "customNotice": "Custom privacy notice",
+    "customNoticeHint": "Plain text; leave a blank line between paragraphs. Leave empty to use the built-in notice, filled in with the company details above. It is public and linked from request forms, the client portal and e-mails.",
+    "view": "View the public notice",
+    "default": {
+      "controller": {
+        "title": "Who is responsible",
+        "body": "{company} is the controller of the personal data processed in this maintenance system. For any question about your data, contact us: {contact}."
+      },
+      "data": {
+        "title": "What we collect",
+        "body": "Contact details (name, e-mail, phone) of clients, villa contacts, staff and people who report a fault; addresses and access notes of the properties we maintain; maintenance requests, work orders, photos, client signatures and messages; for staff, time logged on jobs; and technical records such as sign-in and security logs."
+      },
+      "purposes": {
+        "title": "Why we use it",
+        "body": "To provide the maintenance services agreed with our clients (performance of a contract), to answer requests and faults reported to us, to plan and document our work, to meet legal obligations such as invoicing and record keeping, and to keep the system secure (legitimate interest)."
+      },
+      "recipients": {
+        "title": "Who receives it",
+        "body": "Only our staff who need it for their work, and service providers that host the system or deliver e-mails on our behalf under a data processing agreement. We do not sell your data or use it for advertising."
+      },
+      "retention": {
+        "title": "How long we keep it",
+        "body": "For as long as we provide services to you and afterwards for the periods required by law (for example, accounting records). Data no longer needed is deleted or anonymised."
+      },
+      "security": {
+        "title": "How we protect it",
+        "body": "Access is restricted by role, passwords are stored hashed, access codes and device credentials are encrypted and every view of them is logged, and connections are encrypted."
+      },
+      "rights": {
+        "title": "Your rights",
+        "body": "You may ask to access, correct or erase your data, to restrict or object to its processing, and to receive it in a portable format. Users can download their data from their profile. You may also complain to your data protection authority (in Portugal, the CNPD)."
+      }
+    }
+  },
+  "retention": {
+    "title": "Data retention",
+    "hint": "Older records are deleted (or, for request forms, the contact details removed) once a day. 0 keeps them forever.",
+    "notificationsDays": "Notifications (days)",
+    "auditMonths": "Security log (months)",
+    "requestersMonths": "QR requester contact details (months after the decision)",
+    "chatMonths": "Chat messages (months)"
+  },
+  "erasure": {
+    "formerUser": "Former user",
+    "formerClient": "Former client",
+    "erased": "Erased",
+    "erase": "Erase data",
+    "eraseHint": "Remove this person's name, e-mail, phone and sign-in; their work history stays, without their name.",
+    "eraseConfirm": "Erase this person's personal data? Their name, e-mail, phone, password and notifications are removed for good, and they can no longer sign in. Jobs and time they logged stay, under \"Former user\". This can't be undone.",
+    "anonymize": "Erase personal data",
+    "anonymizeHint": "Remove this client's name, contact details, tax number, notes and contacts; villas and jobs stay.",
+    "anonymizeConfirm": "Erase this client's personal data? The name, e-mail, phone, tax number, billing address, notes and all contacts are removed for good. Villas, jobs and contracts stay, under \"Former client\". This can't be undone.",
+    "deactivateFirst": "Deactivate the member first.",
+    "otherCompanies": "This person also belongs to another company, so the account can't be erased from here. Deactivating them removes their access to this company.",
+    "archiveFirst": "Archive the client first.",
+    "portalUsers": "This client still has active portal users. Deactivate and erase them first."
+  },
+  "businessHours": {
+    "title": "Business hours",
+    "hint": "Used by service contracts that count response and resolution times in business hours only. Times are in the company's time zone.",
+    "from": "opens",
+    "to": "closes",
+    "holidays": "Holidays",
+    "holidaysHint": "Days the SLA clock doesn't run, one per line (YYYY-MM-DD)."
+  },
+  "categories": {
+    "title": "Categories",
+    "description": "Labels for work orders, such as Warranty, Billable or Callout. Filter the work order list by them.",
+    "new": "New category",
+    "none": "No categories yet.",
+    "placeholder": "e.g. Warranty",
+    "color": "Colour",
+    "uses": "{n, plural, =0 {Not used} one {# work order} other {# work orders}}",
+    "deleteConfirm": "Delete this category? It is removed from its work orders; the work orders stay.",
+    "all": "All categories"
+  },
+  "dateInput": {
+    "datePlaceholder": "DD/MM/YYYY",
+    "timePlaceholder": "HH:MM",
+    "pick": "Choose a date",
+    "badDate": "Enter a valid date as DD/MM/YYYY.",
+    "badTime": "Enter a time as HH:MM (24-hour)."
+  },
+  "perms": {
+    "title": "Permissions",
+    "pageTitle": "Permissions · {role}",
+    "pageHint": "Changes apply straight away to everyone in this role.",
+    "summary": "{on} of {total} permissions",
+    "count": "{on} of {total}",
+    "fixedAllHint": "The Super Admin can always do everything; this can't be changed.",
+    "fixedClientHint": "Client accounts only see the client portal; this can't be changed.",
+    "ownerOnly": "Only the Super Admin can change permissions.",
+    "customised": "Changed",
+    "reset": "Restore defaults",
+    "resetConfirm": "Put this role back to the default permissions?",
+    "staffApp": "Use the staff app",
+    "staffAppHint": "Always on for staff roles; client accounts only see the client portal."
+  },
+  "permGroup": {
+    "admin": "Administration",
+    "work": "Work",
+    "sites": "Clients, villas and assets",
+    "supply": "Stock and purchasing",
+    "insights": "Reports",
+    "finance": "Finance"
+  },
+  "perm": {
+    "org": {
+      "manage": {
+        "label": "Company settings",
+        "hint": "Company profile, privacy, retention, business hours; with the server password, Settings → Server."
+      }
+    },
+    "users": {
+      "manage": {
+        "label": "Users and roles",
+        "hint": "Invite, deactivate and erase people; change their role; role prices."
+      }
+    },
+    "teams": {
+      "manage": {
+        "label": "Teams",
+        "hint": "Create teams and choose their members."
+      }
+    },
+    "workOrders": {
+      "create": {
+        "label": "Create work orders",
+        "hint": "Open jobs and edit the ones they created or are assigned to."
+      },
+      "execute": {
+        "label": "Carry out work",
+        "hint": "Checklists, time, comments, sign-off and status; the field app."
+      },
+      "manage": {
+        "label": "Manage all work orders",
+        "hint": "Assign, edit and delete anyone's work orders; categories."
+      },
+      "sendReport": {
+        "label": "Send service reports",
+        "hint": "E-mail the PDF service report to the client and other recipients."
+      }
+    },
+    "requests": {
+      "create": {
+        "label": "Submit requests",
+        "hint": "Report a fault or ask for work."
+      },
+      "approve": {
+        "label": "Approve requests",
+        "hint": "Turn requests into work orders, or decline them."
+      }
+    },
+    "pm": {
+      "manage": {
+        "label": "Preventive maintenance",
+        "hint": "Schedules, meters and the scheduler."
+      }
+    },
+    "procedures": {
+      "manage": {
+        "label": "Procedures",
+        "hint": "The library of reusable checklists."
+      }
+    },
+    "clients": {
+      "manage": {
+        "label": "Clients and villas",
+        "hint": "Create and edit clients, contacts, villas and areas."
+      }
+    },
+    "contracts": {
+      "manage": {
+        "label": "Service contracts",
+        "hint": "Contracts, service levels and fees."
+      }
+    },
+    "assets": {
+      "manage": {
+        "label": "Assets",
+        "hint": "Create, edit and import equipment; QR labels."
+      }
+    },
+    "secrets": {
+      "view": {
+        "label": "See access codes",
+        "hint": "Villa codes and device passwords (every view is logged)."
+      }
+    },
+    "inventory": {
+      "use": {
+        "label": "Use parts",
+        "hint": "Take parts from stock onto work orders."
+      },
+      "manage": {
+        "label": "Manage stock",
+        "hint": "Parts, stock locations, counts and transfers."
+      }
+    },
+    "vendors": {
+      "manage": {
+        "label": "Vendors",
+        "hint": "Suppliers and their contacts."
+      }
+    },
+    "purchasing": {
+      "manage": {
+        "label": "Purchase orders",
+        "hint": "Create, send and receive purchase orders."
+      },
+      "approve": {
+        "label": "Approve purchase orders",
+        "hint": "Approve or reject orders waiting for approval."
+      }
+    },
+    "reports": {
+      "view": {
+        "label": "Reports",
+        "hint": "Dashboards, SLA, billing and exports."
+      }
+    },
+    "costs": {
+      "view": {
+        "label": "See amounts",
+        "hint": "Labour, parts, urgent fees and totals on work orders and requests, the billing report, part prices and contract fees."
+      }
+    },
+    "billing": {
+      "manage": {
+        "label": "Billing",
+        "hint": "Invoicing. Reserved for the billing module and accounting integration (no screens yet)."
+      }
+    },
+    "audit": {
+      "view": {
+        "label": "Audit log",
+        "hint": "See who did what and from where: sign-ins, changes and deletions, users and permissions, server operations."
+      }
+    },
+    "knowledge": {
+      "manage": {
+        "label": "Knowledge base",
+        "hint": "Write, edit and delete villa knowledge-base articles. Everyone on the team can read them."
+      }
+    },
+    "onCall": {
+      "manage": {
+        "label": "Manage on call",
+        "hint": "Choose who is in the on-call team and give each week to someone."
+      }
+    }
+  },
+  "reportEmail": {
+    "title": "E-mail the service report",
+    "hint": "Sends the PDF service report (no amounts) to each address separately.",
+    "noDefaults": "No default recipients: add the client's e-mail, report contacts or company copies, or type addresses below.",
+    "extra": "Other addresses (one per line)",
+    "send": "Send report",
+    "sending": "Sending…",
+    "sent": "Sent.",
+    "lastSent": "Last sent {at} to {count, plural, one {# address} other {# addresses}}.",
+    "notConfigured": "E-mail isn't set up on this server (Settings → Server → E-mail), so the report can't be sent.",
+    "noRecipients": "Choose or type at least one address.",
+    "source": {
+      "client": "Client",
+      "contact": "Client contact",
+      "clientExtra": "Client copy",
+      "company": "Company copy"
+    },
+    "clientEmails": "Service report copies",
+    "clientEmailsHint": "Extra addresses offered when e-mailing this client's service reports (e.g. a family office), one per line.",
+    "contactCheckbox": "Receives service reports",
+    "contactOn": "Receives reports",
+    "contactOff": "No reports",
+    "contactToggleHint": "Whether this contact is offered when e-mailing service reports",
+    "companyTitle": "Service report copies",
+    "companyHint": "Offered as recipients whenever a service report is e-mailed, besides the client. The sender can untick them.",
+    "companyRoles": "Everyone in these roles",
+    "companyPeople": "These people",
+    "companyEmails": "These addresses",
+    "onePerLine": "One per line.",
+    "subject": "Service report #{number}: {title}",
+    "body": "Please find attached the service report for work order #{number}, \"{title}\".",
+    "bodyVilla": "Please find attached the service report for work order #{number}, \"{title}\", at {villa}.",
+    "signature": "Kind regards,\n{company}",
+    "privacy": "Privacy notice"
+  },
+  "backupCopies": {
+    "title": "Backup copies",
+    "hint": "Keep copies of backups off this server: e-mail them, and/or copy them to a cloud folder, as each backup is made.",
+    "emailTitle": "By e-mail",
+    "emailEnabled": "E-mail backups",
+    "emailTo": "Send to",
+    "emailToHint": "Up to 5 addresses, one per line. Each gets the backup file attached.",
+    "whichBackups": "Which backups",
+    "encryptedOnly": "Only send encrypted backups",
+    "encryptedOnlyHint": "A backup holds all data and the encryption keys. Unencrypted, it can be read by anyone who gets the e-mail.",
+    "notEncryptedWillSkip": "Backups on this server aren't encrypted (BACKUP_PASSWORD isn't set), so with this option only a notice is e-mailed, without the file.",
+    "notEncryptedWarning": "Backups on this server aren't encrypted: e-mailed copies can be read by anyone who gets them. Set BACKUP_PASSWORD to encrypt them.",
+    "maxMb": "Largest attachment (MB)",
+    "maxMbHint": "Bigger backups are not attached: a notice is sent instead. Most mail servers accept 20–35 MB.",
+    "testEmail": "Send test e-mail",
+    "testEmailSent": "Test sent to {to}.",
+    "cloudTitle": "To a cloud folder",
+    "providers": {
+      "off": "Off",
+      "onedrive": "OneDrive / SharePoint",
+      "gdrive": "Google Drive",
+      "webdav": "WebDAV"
+    },
+    "folder": "Folder",
+    "folderHint": "Path inside the drive, e.g. Backups/Maintenance. Created if it doesn't exist.",
+    "folderHintGdrive": "Created by the app in My Drive (with the drive.file permission, the app only sees folders it created).",
+    "mirrorDeletes": "Remove from the cloud the backups removed here",
+    "mirrorDeletesHint": "Old backups deleted by the schedule (or by hand) are deleted from the folder too, so it doesn't fill up.",
+    "onedriveSetup": "Once: in Microsoft Entra ID (portal.azure.com) → App registrations → New registration (accounts: any organisational directory and personal Microsoft accounts, or only yours), add this redirect URI (Web), then create a client secret under Certificates & secrets. Paste the Application (client) ID and the secret below, save, then Connect.",
+    "gdriveSetup": "Once: in Google Cloud Console create a project, enable the Google Drive API, configure the OAuth consent screen and publish it (in \"Testing\" the sign-in expires after 7 days), then create an OAuth client (Web application) with this redirect URI. Paste the client ID and secret below, save, then Connect.",
+    "copy": "Copy",
+    "clientId": "Client ID",
+    "clientSecret": "Client secret",
+    "tenant": "Tenant",
+    "tenantHint": "\"common\" for any account, or your directory (tenant) ID if the app is single-tenant.",
+    "siteUrl": "SharePoint site (optional)",
+    "siteUrlHint": "Leave empty to use the signed-in account's OneDrive; or a site URL to use its document library.",
+    "connect": "Connect",
+    "reconnect": "Connect again",
+    "disconnect": "Disconnect",
+    "connectedAs": "Connected as {account}.",
+    "notConnected": "Not connected yet.",
+    "saveFirst": "Fill in the client ID and secret and save, then connect.",
+    "webdavUrl": "WebDAV address",
+    "webdavUrlHint": "Nextcloud: https://server/remote.php/dav/files/USERNAME",
+    "testCloud": "Test upload",
+    "testCloudOk": "Test file uploaded to \"{folder}\", listed and removed.",
+    "lastOk": "Last copy: {name} ({at}).",
+    "lastFailed": "Last copy failed: {name} ({at})",
+    "testFailed": "The test failed:",
+    "cloudNotReady": "Choose a destination and fill it in (and connect, for OneDrive or Google Drive) first.",
+    "oauth": {
+      "connected": "Connected. Backups will be copied to the cloud folder.",
+      "denied": "The sign-in was cancelled or refused.",
+      "failed": "Connecting failed.",
+      "badState": "The sign-in link expired. Unlock Settings → Server and connect again.",
+      "locked": "Sign in to the app and connect again.",
+      "noRefresh": "The account didn't grant offline access. Connect again and accept all permissions.",
+      "noDriveScope": "Google Drive access wasn't granted. Connect again and, on Google's screen, tick the Google Drive permission (or \"Select all\").",
+      "missingApp": "Save the client ID and secret first."
+    },
+    "mail": {
+      "subject": "{app} backup: {name}",
+      "attachedEncrypted": "A backup was made: {name} ({size}). It is attached, encrypted: restoring it needs this server's BACKUP_PASSWORD.",
+      "attachedPlain": "A backup was made: {name} ({size}). It is attached. It is not encrypted: keep it somewhere safe.",
+      "tooBig": "A backup was made: {name} ({size}), but it is larger than the {max} limit for e-mail, so it isn't attached. Download it from Settings → Server.",
+      "notEncrypted": "A backup was made: {name} ({size}). It isn't attached because only encrypted backups are e-mailed and this one isn't encrypted.",
+      "testSubject": "{app}: backup e-mail test",
+      "testBody": "This is a test. Backups will be e-mailed to this address."
+    }
+  },
+  "terms": {
+    "title": "Terms of use",
+    "sections": {
+      "service": {
+        "title": "The service",
+        "body": "This maintenance system is operated by {company} to plan, carry out and document the maintenance of the properties and systems it looks after, and to let its clients report faults and follow the work done. These terms apply to everyone who signs in or uses its public pages (such as the QR request form)."
+      },
+      "accounts": {
+        "title": "Accounts",
+        "body": "Accounts are created by {company} or by invitation. Keep your password to yourself and tell us straight away if you think someone else has used your account. We may suspend or close accounts that are misused or no longer needed, for example when a contract or employment ends."
+      },
+      "use": {
+        "title": "Acceptable use",
+        "body": "Use the system only for its purpose: maintenance requests, work orders and related communication. Do not try to reach data you were not given access to, interfere with its operation or security, upload unlawful content or malware, or use it to send unsolicited messages."
+      },
+      "content": {
+        "title": "Your content",
+        "body": "Requests, photos, comments, signatures and other content you add stay yours; you allow {company} to store and use them to provide and document the service. Make sure you may share what you upload (for example, photos of other people's property). Access codes and device credentials are confidential and must not be passed on."
+      },
+      "privacy": {
+        "title": "Personal data",
+        "body": "Personal data is handled as described in the privacy notice of {company}."
+      },
+      "availability": {
+        "title": "Availability and liability",
+        "body": "We aim to keep the system available and its data backed up, but it is provided as is and may be interrupted for maintenance or by events outside our control. The maintenance services themselves are governed by the agreement between {company} and each client; to the extent the law allows, {company} is not liable for indirect losses arising from the use of, or the inability to use, the system."
+      },
+      "law": {
+        "title": "Changes, law and contact",
+        "body": "We may update these terms; the current version is always on this page, and continuing to use the system means accepting it. These terms are governed by Portuguese law. Questions: {contact}."
+      }
+    }
+  },
+  "help": {
+    "title": "Help",
+    "description": "How each area of the app works, with step-by-step guides. The ? button at the bottom of the menu opens the help for the page you're on.",
+    "searchPlaceholder": "Search the help…",
+    "results": "{count, plural, one {# result} other {# results}} for “{q}”",
+    "noResults": "Nothing found for “{q}”",
+    "noResultsHint": "Try fewer or different words, or browse the topics.",
+    "allTopics": "All help topics",
+    "openArea": "Open this area",
+    "onThisPage": "On this page",
+    "thisPage": "Help for this page",
+    "groups": {
+      "start": "Start here",
+      "operations": "Operations",
+      "sites": "Sites & equipment",
+      "supply": "Supply",
+      "insights": "Insights",
+      "settings": "Settings"
+    }
+  },
+  "audit": {
+    "description": "Who did what, when and from where. Kept for the period set in Settings → Organization → Data retention.",
+    "searchPlaceholder": "Search name, action, address…",
+    "category": "Category",
+    "allCategories": "All categories",
+    "categories": {
+      "security": "Security",
+      "users": "Users & permissions",
+      "records": "Records",
+      "server": "Server"
+    },
+    "user": "User",
+    "allUsers": "Everyone",
+    "system": "System",
+    "removedUser": "Removed user",
+    "entity": "Type",
+    "allEntities": "All types",
+    "from": "From",
+    "to": "To",
+    "when": "When",
+    "what": "What",
+    "target": "Item",
+    "ip": "Address",
+    "detailsColumn": "Details",
+    "details": "{count, plural, one {# detail} other {# details}}",
+    "empty": "Nothing logged yet.",
+    "open": "open",
+    "relations": "Linked items",
+    "hidden": "(hidden)",
+    "yes": "Yes",
+    "no": "No",
+    "verbs": {
+      "create": "Created {entity}",
+      "update": "Changed {entity}",
+      "delete": "Deleted {entity}"
+    },
+    "entities": {
+      "WorkOrder": "work order",
+      "Request": "request",
+      "Client": "client",
+      "Villa": "villa",
+      "villa": "villa",
+      "Area": "area",
+      "Asset": "asset",
+      "asset": "asset",
+      "ServiceContract": "contract",
+      "Procedure": "procedure",
+      "Category": "category",
+      "PMSchedule": "preventive schedule",
+      "Meter": "meter",
+      "Part": "part",
+      "StockLocation": "stock location",
+      "Vendor": "vendor",
+      "PurchaseOrder": "purchase order",
+      "Team": "team",
+      "JobRole": "custom role",
+      "Membership": "member",
+      "Invitation": "invitation",
+      "Attachment": "attachment",
+      "Organization": "company",
+      "User": "user",
+      "Server": "server",
+      "KnowledgeArticle": "knowledge-base article"
+    },
+    "actions": {
+      "auth": {
+        "signIn": "Signed in",
+        "signInFailed": "Sign-in failed (wrong password)",
+        "signInBlocked": "Sign-in blocked (too many attempts)",
+        "signOut": "Signed out",
+        "passwordChanged": "Changed their password",
+        "passwordChangeFailed": "Password change failed (wrong current password)",
+        "passwordResetRequested": "Asked for a password reset link",
+        "passwordReset": "Reset their password with a link",
+        "calendarLink": "Created a new calendar link"
+      },
+      "server": {
+        "unlock": "Unlocked Settings → Server",
+        "unlockFailed": "Wrong server password",
+        "unlockBlocked": "Server password blocked (too many attempts)",
+        "settings": "Changed the software name",
+        "backupSchedule": "Changed the backup schedule / automatic updates",
+        "backup": "Made a backup",
+        "backupDelete": "Deleted a backup",
+        "backupDownload": "Downloaded a backup",
+        "backupUpload": "Uploaded a backup",
+        "restore": "Started a restore",
+        "restored": "Restored a backup",
+        "update": "Started a software update",
+        "email": "Changed the e-mail settings",
+        "backupCopies": "Changed the backup copies",
+        "cloudConnect": "Connected a cloud folder",
+        "cloudDisconnect": "Disconnected a cloud folder",
+        "factoryReset": "Factory reset",
+        "factoryResetFailed": "Factory reset: wrong password"
+      },
+      "organization": {
+        "update": "Changed the company settings",
+        "logo": "Changed the company logo",
+        "roleRates": "Changed the role prices",
+        "permissions": "Changed role permissions"
+      },
+      "villa": {
+        "secrets": {
+          "view": "Viewed the villa's access codes",
+          "update": "Changed the villa's access codes"
+        }
+      },
+      "asset": {
+        "secrets": {
+          "view": "Viewed the device credentials",
+          "update": "Changed the device credentials"
+        }
+      },
+      "user": {
+        "erased": "Erased a person's data"
+      },
+      "client": {
+        "anonymized": "Anonymised a client"
+      },
+      "workOrder": {
+        "reportSent": "E-mailed the service report"
+      },
+      "stock": {
+        "transfer": "Moved stock",
+        "vanRestock": "Restocked their van"
+      }
+    },
+    "fields": {
+      "name": "Name",
+      "title": "Title",
+      "description": "Description",
+      "status": "Status",
+      "priority": "Priority",
+      "type": "Type",
+      "system": "System",
+      "role": "Role",
+      "access": "Access level",
+      "active": "Active",
+      "email": "E-mail",
+      "phone": "Phone",
+      "address": "Address",
+      "notes": "Notes",
+      "dueDate": "Due",
+      "startDate": "Start",
+      "completedAt": "Completed",
+      "villaId": "Villa",
+      "assetId": "Asset",
+      "clientId": "Client",
+      "teamId": "Team",
+      "vendorId": "Vendor",
+      "jobRoleId": "Custom role",
+      "assignees": "Assignees",
+      "categories": "Categories",
+      "items": "Checklist",
+      "lines": "Lines",
+      "permissions": "Permissions",
+      "hourlyRate": "Price per hour",
+      "unitCost": "Sale price",
+      "minQuantity": "Minimum quantity",
+      "quantity": "Quantity",
+      "sku": "SKU",
+      "barcode": "Barcode",
+      "serialNumber": "Serial number",
+      "macAddress": "MAC address",
+      "ipAddress": "IP address",
+      "firmware": "Firmware",
+      "manufacturer": "Manufacturer",
+      "model": "Model",
+      "archivedAt": "Archived",
+      "credentialsEnc": "Device credentials",
+      "accessCodesEnc": "Access codes",
+      "provider": "Provider",
+      "account": "Account",
+      "from": "From",
+      "to": "To",
+      "by": "By",
+      "count": "Records",
+      "version": "Version",
+      "removed": "Removed",
+      "cleared": "Cleared",
+      "appName": "Software name",
+      "showVersion": "Show version",
+      "allowSignup": "Public sign-up",
+      "backups": "Backup schedule",
+      "autoUpdate": "Automatic updates",
+      "roleRates": "Role prices",
+      "retention": "Data retention",
+      "businessHours": "Business hours",
+      "reportRecipients": "Report recipients",
+      "brandColor": "Brand colour",
+      "timezone": "Time zone",
+      "privacyNotice": "Privacy notice",
+      "part": "Part",
+      "warehouse": "Warehouse",
+      "van": "Van",
+      "direction": "Direction",
+      "parts": "Parts",
+      "note": "Note",
+      "timeRounding": "Time billing blocks",
+      "urgentFee": "Urgent fee (fixed)",
+      "urgentPercent": "Urgent fee (%)",
+      "purchaseCost": "Purchase cost",
+      "body": "Text",
+      "pinned": "Pinned",
+      "assets": "Assets",
+      "updatedById": "Updated by",
+      "onCallHours": "On-call hours"
+    }
+  },
+  "van": {
+    "title": "My van",
+    "description": "What's in your van, and loading parts from a warehouse or returning them.",
+    "noVan": "You don't have a van",
+    "noVanHint": "Ask whoever manages the inventory to create a van stock location (Parts → Stock locations) and assign it to you.",
+    "noWarehouse": "There is no warehouse to load from yet.",
+    "choose": "Van",
+    "open": "Open",
+    "inVanHint": "A red quantity is below the van's minimum (set on the part's page).",
+    "empty": "Nothing in this van yet.",
+    "part": "Part",
+    "inVan": "In van",
+    "min": "Minimum",
+    "restock": "Load or return",
+    "direction": "Direction",
+    "load": "Load from warehouse",
+    "unload": "Return to warehouse",
+    "fromWarehouse": "From warehouse",
+    "toWarehouse": "To warehouse",
+    "addPart": "Add a part…",
+    "nothingToAdd": "No parts available there",
+    "fillShort": "Add what's short ({count})",
+    "available": "Available: {qty} {unit}",
+    "note": "Note",
+    "notePlaceholder": "Optional, e.g. kit for the Quinta do Lago job",
+    "submitLoad": "{count, plural, =0 {Load} one {Load # part} other {Load # parts}}",
+    "submitUnload": "{count, plural, =0 {Return} one {Return # part} other {Return # parts}}",
+    "done": "{count, plural, one {# part moved.} other {# parts moved.}}",
+    "quantity": "Quantity"
+  },
+  "serials": {
+    "label": "Serial numbers",
+    "short": "S/N",
+    "placeholder": "Serial number (optional)",
+    "full": "One serial per unit",
+    "add": "Add serial number",
+    "scan": "Read serial number with the camera",
+    "remove": "Remove {serial}"
+  },
+  "timeBilling": {
+    "title": "Time billing",
+    "rounding": "Bill time in blocks of",
+    "hint": "Each technician's time on a work order is rounded up to whole blocks when it is billed: labour and the service report (e.g. 34 minutes bill as 1 hour with 30-minute blocks). The time logged is kept as it is.",
+    "none": "No rounding (minutes logged)",
+    "block": "{minutes} minutes"
+  },
+  "urgent": {
+    "title": "Urgent work orders",
+    "hint": "Work orders with Urgent priority are charged an extra fee: a fixed amount plus a percentage of their labour (leave both at 0 for none). A service contract can set its own. The service report shows \"Service: Urgent\", without amounts.",
+    "fee": "Fixed amount ({currency})",
+    "percent": "Percentage of labour (%)",
+    "contractTitle": "Urgent fee",
+    "contractHint": "Extra fee charged on this contract's urgent work orders. Leave both empty to use the company's (Settings → Organization); 0 means no fee.",
+    "none": "None",
+    "fromCompany": "{value} (company's)"
+  },
+  "calendarFeed": {
+    "title": "Calendar",
+    "hint": "See the work orders assigned to you in Google Calendar, Outlook or your phone's calendar. Subscribe to this private link (calendar apps refresh it every few hours). Anyone with the link sees your jobs, so don't share it.",
+    "create": "Create calendar link",
+    "link": "Calendar link",
+    "copy": "Copy",
+    "copied": "Copied",
+    "open": "Open in calendar app",
+    "reset": "New link",
+    "resetConfirm": "Create a new link? Calendars subscribed to the current one will stop updating."
+  },
+  "travel": {
+    "title": "Trips for on-site work",
+    "hint": "Time logged on site charges trips; remote time charges none. Villas up to the radius from the company (or without a distance) pay the fixed fee; farther ones pay the rate per km × the villa's whole distance (one way). Leave the fee and the rate at 0 to charge no trips. A service contract can include trips or set its own amounts.",
+    "fee": "Fixed fee per trip ({currency})",
+    "radius": "Radius for the fixed fee (km)",
+    "kmRate": "Beyond the radius, per km ({currency})",
+    "kmRateHint": "Charged on the villa's whole distance (one way), not just the km beyond the radius.",
+    "perTripRule": "{amount} each",
+    "perKmRule": "{km} km × {rate} each",
+    "chargedPerKm": "trips charged per km",
+    "countBy": "Charge trips",
+    "perTechnician": "One per technician per day",
+    "perWorkOrder": "One per work order per day",
+    "contractTitle": "Trips",
+    "contractHint": "Trips charged for on-site work on this contract's work orders. Leave a field empty to use the company's amount (Settings → Organization); 0 means none.",
+    "included": "Trips included in the contract (none charged)",
+    "includedInContract": "included in the contract",
+    "feeTerm": "{amount} per trip",
+    "kmTerm": "{amount} per km"
+  },
+  "search": {
+    "title": "Search",
+    "description": "Find earlier jobs by any word written on them (title, description, comments, checklist notes and time notes) and the villas' knowledge-base articles.",
+    "placeholder": "e.g. processor, condensation, PoE switch…",
+    "villa": "Villa",
+    "allVillas": "All villas",
+    "system": "System",
+    "allSystems": "All systems",
+    "hint": "Type one or more words. Upper case, accents and small typos don't matter.",
+    "none": "No work order or knowledge-base article mentions these words.",
+    "count": "{count, plural, one {# work order} other {# work orders}}",
+    "countTop": "The {count} most relevant work orders",
+    "completedOn": "Completed {date}",
+    "openedOn": "Opened {date}",
+    "moreHits": "{count, plural, one {# more note} other {# more notes}} with these words",
+    "back": "Back",
+    "searching": "Searching…",
+    "offline": "Search needs a connection. Your own jobs are still available offline.",
+    "kind": {
+      "description": "Description",
+      "request": "Client's request",
+      "comment": "Comment",
+      "itemNote": "Note on \"{step}\"",
+      "itemAnswer": "Answer to \"{step}\"",
+      "timeNote": "Time note",
+      "statusNote": "Note when moved to {status}"
+    },
+    "articles": "{count, plural, one {# knowledge-base article} other {# knowledge-base articles}}",
+    "articlesMore": "{count, plural, one {# more article} other {# more articles}}: add more words to narrow the search."
+  },
+  "knowledge": {
+    "title": "Knowledge base",
+    "description": "How this villa's systems are set up: configurations, workarounds, where things are, what to watch out for.",
+    "new": "New article",
+    "edit": "Edit article",
+    "delete": "Delete article",
+    "deleteConfirm": "Delete this article and its files? This can't be undone.",
+    "empty": "No articles yet.",
+    "emptyHint": "Write down what the next technician needs to know about this villa: how a system is set up, a fix that works, where the rack key is.",
+    "emptyAsset": "Nothing written about this asset yet.",
+    "viewAll": "View all",
+    "searchPlaceholder": "Search the articles…",
+    "allSystems": "All systems",
+    "allAssets": "All assets",
+    "noMatches": "No articles match.",
+    "found": "{count, plural, one {# article} other {# articles}}",
+    "articleTitle": "Title",
+    "titlePlaceholder": "e.g. KNX: resetting the IP router",
+    "system": "System",
+    "general": "General",
+    "body": "Text",
+    "formatHint": "# heading · **bold** · *italic* · `code` · - list · 1. steps · > note · ``` code block ``` · [text](https://…) · ![description](image address)",
+    "assets": "Assets",
+    "assetsHint": "The article also shows on these assets' pages, and first in jobs on them.",
+    "pin": "Pin to the top",
+    "pinHint": "Pinned articles are listed first, here and on the villa page.",
+    "pinned": "Pinned",
+    "files": "Files",
+    "noText": "No text.",
+    "created": "Written {when}",
+    "createdBy": "Written by {name}, {when}",
+    "updated": "Updated {when}",
+    "updatedBy": "Updated by {name}, {when}",
+    "filesOnline": "{count, plural, one {# file} other {# files}} (needs a connection)",
+    "editor": {
+      "visual": "Visual",
+      "markdown": "Markdown",
+      "toolbar": "Formatting",
+      "bold": "Bold (Ctrl+B)",
+      "italic": "Italic (Ctrl+I)",
+      "code": "Code (Ctrl+E)",
+      "heading": "Heading",
+      "subheading": "Subheading",
+      "smallHeading": "Small heading",
+      "bulletList": "Bulleted list",
+      "orderedList": "Numbered steps",
+      "note": "Note",
+      "codeBlock": "Code block",
+      "link": "Link",
+      "image": "Insert image",
+      "divider": "Divider",
+      "undo": "Undo (Ctrl+Z)",
+      "redo": "Redo (Ctrl+Y)",
+      "linkAddress": "Link address",
+      "applyLink": "Apply",
+      "removeLink": "Remove link",
+      "close": "Close",
+      "uploading": "Uploading image…",
+      "visualHint": "Markdown still works as you type: # heading, **bold**, *italic*, `code`, - list, 1. steps, > note, ``` code block. You can also paste or drop images."
+    }
+  },
+  "onCall": {
+    "description": "Choose the on-call team and who is on call each week. Whoever is on call receives new client requests in the on-call hours (Settings → Company); with several people, those in the team for the request's system, or all of them when none is.",
+    "thisWeek": "On call this week ({from} – {to})",
+    "you": "you",
+    "nobodyNow": "Nobody is on call this week: new requests go only to those who approve requests.",
+    "today": "This month",
+    "weekShort": "Wk",
+    "onCall": "On call",
+    "weekNumber": "Week {n}",
+    "leftTeam": "{name} (left the team)",
+    "nobody": "Nobody",
+    "team": "On-call team",
+    "teamHint": "Tick who can be on call. Each week can have one or more of them. Clients and viewers can't take part.",
+    "inTeam": "{name} is in the on-call team",
+    "removeConfirm": "Remove {name} from the on-call team? Their weeks from this week on become free.",
+    "requestOnCall": "On call when it arrived",
+    "viewDescription": "Who is on call each week. Whoever is on call receives new client requests in the on-call hours and can approve or decline them.",
+    "seeCalendar": "See full calendar",
+    "youToo": "including you",
+    "removeFromWeek": "Take {name} off this week",
+    "add": "Add",
+    "addTo": "Add someone on call for {range}"
+  },
+  "onCallHours": {
+    "title": "On-call hours",
+    "hint": "When whoever is on call receives new client requests (Settings → Staff → On call). Outside these hours, requests go only to those who approve requests, as usual.",
+    "always": "At any time",
+    "hours": "Only in these hours",
+    "nextDayHint": "An end at or before the start runs into the next day: 18:00–02:00 ends at 2 a.m. the next day, 02:00–02:00 lasts 24 hours.",
+    "from": "from",
+    "to": "to",
+    "nextDay": "until the next day",
+    "allDay": "24 hours",
+    "holidays": "Company holidays (from business hours): all day"
   }
 }

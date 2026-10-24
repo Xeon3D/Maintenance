@@ -1,12 +1,14 @@
 "use server";
 
 import bcrypt from "bcryptjs";
+import { randomBytes } from "node:crypto";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { requireUser } from "@/lib/context";
 import { prisma } from "@/lib/db/client";
 import { optStr, parseForm, str, type FormResult } from "@/lib/forms";
 import { clearResetTokens } from "@/lib/password-reset";
+import { auditUser } from "@/lib/audit";
 import { sendPush } from "@/lib/push";
 import { NOTIFICATION_TYPES, type Channels, type NotificationType } from "@/lib/notification-types";
 
@@ -32,10 +34,12 @@ export async function changePasswordAction(_: FormResult, form: FormData): Promi
   const parsed = parseForm(passwordSchema, form);
   if (parsed.error) return parsed.error;
   if (user.passwordHash && !(await bcrypt.compare(parsed.data.current, user.passwordHash))) {
+    await auditUser(user.id, "auth.passwordChangeFailed");
     return { error: "validation", fieldErrors: { current: "wrongPassword" } };
   }
   await prisma.user.update({ where: { id: user.id }, data: { passwordHash: await bcrypt.hash(parsed.data.password, 12) } });
   await clearResetTokens(user.id);
+  await auditUser(user.id, "auth.passwordChanged");
   return { ok: true };
 }
 
@@ -77,4 +81,15 @@ export async function testPushAction(title: string, body: string) {
   const user = await requireUser();
   await sendPush(user.id, { title: title.slice(0, 100), body: body.slice(0, 200), url: "/", tag: "test" });
   return { ok: true };
+}
+
+/**
+ * Creates (or replaces) the secret link of the personal calendar feed. Replacing it cuts off every calendar app
+ * subscribed to the old one.
+ */
+export async function calendarLinkAction() {
+  const user = await requireUser();
+  await prisma.user.update({ where: { id: user.id }, data: { calendarToken: randomBytes(24).toString("base64url") } });
+  await auditUser(user.id, "auth.calendarLink");
+  revalidatePath("/settings/profile");
 }

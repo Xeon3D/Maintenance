@@ -11,6 +11,7 @@ import { decryptField, encryptField } from "@/lib/crypto";
 
 const kindSchema = z.enum(["villa", "asset"]);
 type Kind = z.infer<typeof kindSchema>;
+const ENTITY: Record<Kind, string> = { villa: "Villa", asset: "Asset" };
 
 export async function revealSecretAction(kind: Kind, id: string): Promise<string> {
   kindSchema.parse(kind);
@@ -20,7 +21,7 @@ export async function revealSecretAction(kind: Kind, id: string): Promise<string
       ? await ctx.db.villa.findUnique({ where: { id }, select: { secretsEnc: true } }).then((r) => r?.secretsEnc)
       : await ctx.db.asset.findUnique({ where: { id }, select: { credentialsEnc: true } }).then((r) => r?.credentialsEnc);
   if (row === undefined) throw new Error("Not found");
-  await audit(ctx, `${kind}.secrets.view`, kind, id);
+  await audit(ctx, `${kind}.secrets.view`, ENTITY[kind], id);
   return row ? decryptField(row) : "";
 }
 
@@ -31,6 +32,6 @@ export async function saveSecretAction(kind: Kind, id: string, value: string) {
   const enc = clean ? encryptField(clean) : null;
   if (kind === "villa") await ctx.db.villa.update({ where: { id }, data: { secretsEnc: enc } });
   else await ctx.db.asset.update({ where: { id }, data: { credentialsEnc: enc } });
-  await audit(ctx, `${kind}.secrets.update`, kind, id, { cleared: !clean });
+  await audit(ctx, `${kind}.secrets.update`, ENTITY[kind], id, { cleared: !clean });
   revalidatePath(kind === "villa" ? `/villas/${id}` : `/assets/${id}`);
 }

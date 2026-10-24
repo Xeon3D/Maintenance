@@ -8,6 +8,7 @@ import { requirePermission } from "@/lib/context";
 import { enumOf } from "@/lib/forms";
 import { localizeTemplate, PROCEDURE_TEMPLATES } from "@/lib/procedure-templates";
 import { ChecklistItemType, SystemType } from "@/generated/prisma/enums";
+import { appLocale } from "@/i18n/config";
 
 const itemSchema = z.object({
   type: enumOf(ChecklistItemType),
@@ -77,7 +78,7 @@ export async function duplicateProcedureAction(id: string) {
 
 export async function installTemplatesAction(keys: string[]) {
   const ctx = await requirePermission("procedures.manage");
-  const locale = (await getLocale()) === "pt" ? "pt" : "en";
+  const locale = appLocale(await getLocale());
   const chosen = PROCEDURE_TEMPLATES.filter((t) => keys.includes(t.key));
   for (const tpl of chosen) {
     const { items, ...data } = localizeTemplate(tpl, locale);

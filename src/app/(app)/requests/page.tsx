@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getFormatter, getTranslations } from "next-intl/server";
-import { Camera } from "lucide-react";
+import { Camera, PhoneCall } from "lucide-react";
 import { Card, PageHeader, Select, Table } from "@/components/ui";
 import { FilterBar, Pagination } from "@/components/list-controls";
 import { EmptyState } from "@/components/empty-state";
@@ -12,8 +12,9 @@ import { pageOf, PAGE_SIZE, sp } from "@/lib/list";
 import { cn } from "@/lib/utils";
 import { RequestStatus } from "@/generated/prisma/enums";
 import type { Prisma } from "@/generated/prisma/client";
+import { titled } from "@/lib/metadata";
 
-export const metadata = { title: "Requests" };
+export const generateMetadata = titled("nav.requests");
 
 export default async function RequestsPage({ searchParams }: PageProps<"/requests">) {
   const ctx = await getContext();
@@ -46,6 +47,7 @@ export default async function RequestsPage({ searchParams }: PageProps<"/request
         villa: { select: { name: true } },
         asset: { select: { name: true } },
         requester: { select: { name: true } },
+        onCallUsers: { select: { name: true }, orderBy: { name: "asc" } },
         _count: { select: { attachments: true } },
       },
       orderBy: [{ createdAt: "desc" }],
@@ -122,6 +124,12 @@ export default async function RequestsPage({ searchParams }: PageProps<"/request
                         <span className="inline-flex items-center gap-0.5 text-xs text-muted">
                           <Camera className="size-3.5" />
                           {r._count.attachments}
+                        </span>
+                      )}
+                      {r.onCallUsers.length > 0 && (
+                        <span className="inline-flex items-center gap-0.5 text-xs text-muted" title={t("onCall.requestOnCall")}>
+                          <PhoneCall className="size-3.5" />
+                          {r.onCallUsers.map((u) => u.name).join(", ")}
                         </span>
                       )}
                     </div>

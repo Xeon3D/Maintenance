@@ -7,8 +7,9 @@ import { BackLink } from "@/components/back-link";
 import { ConfirmIconButton } from "@/components/confirm-button";
 import { SlaBadge, SystemBadge, WorkOrderStatusBadge } from "@/components/badges";
 import { getContext } from "@/lib/context";
-import { compliance, contractYear, slaStates } from "@/lib/sla";
+import { compliance, contractYear, SLA_STATUS_LOGS, slaCalendar, slaStates } from "@/lib/sla";
 import { cn } from "@/lib/utils";
+import { urgentRuleFor, type UrgentRule } from "@/lib/urgent-surcharge";
 import { deleteContractAction } from "../actions";
 import { ContractStatusBadge } from "../status-badge";
 
@@ -33,7 +34,7 @@ export default async function ContractPage({ params }: PageProps<"/contracts/[id
   const [recent, visits, linkedTotal] = await Promise.all([
     ctx.db.workOrder.findMany({
       where: { contractId: id },
-      select: { id: true, number: true, title: true, status: true, system: true, createdAt: true, firstResponseAt: true, completedAt: true, villa: { select: { name: true } } },
+      select: { id: true, number: true, title: true, status: true, system: true, createdAt: true, firstResponseAt: true, completedAt: true, villa: { select: { name: true } }, statusLogs: SLA_STATUS_LOGS },
       orderBy: { createdAt: "desc" },
       take: 200,
     }),
@@ -41,12 +42,28 @@ export default async function ContractPage({ params }: PageProps<"/contracts/[id
     ctx.db.workOrder.count({ where: { contractId: id } }),
   ]);
 
-  const judged = recent.map((w) => ({ w, s: slaStates(w, contract, now) }));
+  const calendar = slaCalendar(ctx.organization);
+  const judged = recent.map((w) => ({ w, s: slaStates(w, contract, now, calendar) }));
   const inWindow = judged.filter((x) => x.w.createdAt >= since);
   const response = compliance(inWindow.map((x) => x.s.response));
   const resolution = compliance(inWindow.map((x) => x.s.resolution));
   const pct = (p: number | null) => (p === null ? "—" : format.number(p, { style: "percent" }));
   const date = (d: Date) => format.dateTime(d, { dateStyle: "medium", timeZone: "UTC" });
+  /** "50 € + 20%" for urgent work orders; marked as the company's when the contract doesn't set its own. */
+  const urgentText = (rule: UrgentRule, own: boolean) => {
+    const value =
+      [rule.fee ? format.number(rule.fee, { style: "currency", currency: ctx.organization.currency }) : null, rule.percent ? `${rule.percent}%` : null].filter(Boolean).join(" + ") ||
+      t("urgent.none");
+    return own ? value : t("urgent.fromCompany", { value });
+  };
+  /** "Included", or "30 € per trip · 0.40 € per km", each marked as the company's when the contract doesn't set it. */
+  const travelText = () => {
+    if (contract.travelIncluded) return t("travel.included");
+    const cur = (n: unknown) => format.number(Number(n), { style: "currency", currency: ctx.organization.currency });
+    const fee = t("travel.feeTerm", { amount: cur(contract.travelFee ?? ctx.organization.travelFee) });
+    const km = t("travel.kmTerm", { amount: cur(contract.travelKmRate ?? ctx.organization.travelKmRate) });
+    return [contract.travelFee != null ? fee : t("urgent.fromCompany", { value: fee }), contract.travelKmRate != null ? km : t("urgent.fromCompany", { value: km })].join(" · ");
+  };
   const dt = (d: Date) => format.dateTime(d, { dateStyle: "short", timeStyle: "short" });
   const canManage = ctx.can("contracts.manage");
 
@@ -56,8 +73,15 @@ export default async function ContractPage({ params }: PageProps<"/contracts/[id
     [t("contracts.period"), `${date(contract.startDate)} – ${contract.endDate ? date(contract.endDate) : t("contracts.openEnded")}`],
     [t("contracts.responseHours"), contract.responseTimeHours != null ? t("contracts.hours", { n: contract.responseTimeHours }) : "—"],
     [t("contracts.resolutionHours"), contract.resolutionTimeHours != null ? t("contracts.hours", { n: contract.resolutionTimeHours }) : "—"],
+    [t("contracts.slaClock"), [contract.businessHoursOnly ? t("contracts.clockBusiness") : t("contracts.clockAlways"), contract.pauseOnHold && t("contracts.clockPauses")].filter(Boolean).join(" · ")],
     [t("contracts.includedVisits"), contract.includedVisits ?? "—"],
-    [t("contracts.monthlyFee"), contract.monthlyFee != null ? format.number(Number(contract.monthlyFee), { style: "currency", currency: ctx.organization.currency }) : "—"],
+    ...(ctx.can("costs.view")
+      ? ([
+          [t("contracts.monthlyFee"), contract.monthlyFee != null ? format.number(Number(contract.monthlyFee), { style: "currency", currency: ctx.organization.currency }) : "—"],
+          [t("urgent.contractTitle"), urgentText(urgentRuleFor(ctx.organization, contract), contract.urgentFee != null || contract.urgentPercent != null)],
+          [t("travel.contractTitle"), travelText()],
+        ] as [string, React.ReactNode][])
+      : []),
     [
       t("contracts.systems"),
       contract.systems.length ? (

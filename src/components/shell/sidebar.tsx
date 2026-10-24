@@ -17,6 +17,8 @@ import {
   Gauge,
   House,
   Inbox,
+  Contact,
+  PhoneCall,
   LayoutDashboard,
   ListChecks,
   LogOut,
@@ -24,6 +26,8 @@ import {
   MessagesSquare,
   Package,
   ScanLine,
+  ScrollText,
+  Search,
   Server,
   ShoppingCart,
   Smartphone,
@@ -32,12 +36,10 @@ import {
   UserRound,
   Users,
   UsersRound,
+  Tags,
   X,
   type LucideIcon,
 } from "lucide-react";
-import { LocaleSwitcher } from "@/components/locale-switcher";
-import { ThemeToggle } from "@/components/theme-toggle";
-import type { Theme } from "@/lib/theme";
 import { signOutAction, switchOrgAction } from "@/app/(auth)/actions";
 import { cn } from "@/lib/utils";
 import type { NavGroup } from "./nav";
@@ -53,11 +55,14 @@ const ICONS: Record<string, LucideIcon> = {
   Gauge,
   House,
   Inbox,
+  Contact,
+  PhoneCall,
   LayoutDashboard,
   ListChecks,
   MessagesSquare,
   Package,
   ScanLine,
+  Search,
   ShoppingCart,
   Smartphone,
   Truck,
@@ -65,12 +70,14 @@ const ICONS: Record<string, LucideIcon> = {
   UserRound,
   Users,
   UsersRound,
+  Tags,
+  ScrollText,
   Server,
 };
 
 type Props = {
   appName: string;
-  theme: Theme;
+  version?: string | null; // release version or dev commit, when Settings → Server asks for it
   groups: NavGroup[]; // already filtered by permission/readiness on the server
   user: { name: string; email: string; role: string }; // role: display name (custom role or translated built-in)
   org: { id: string; name: string; logo: string | null };
@@ -78,7 +85,7 @@ type Props = {
   unreadNotifications: number;
 };
 
-export function Sidebar({ appName, theme, groups, user, org, orgs, unreadNotifications }: Props) {
+export function Sidebar({ appName, version, groups, user, org, orgs, unreadNotifications }: Props) {
   const t = useTranslations();
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
@@ -99,7 +106,10 @@ export function Sidebar({ appName, theme, groups, user, org, orgs, unreadNotific
               <img src={org.logo} alt="" className="size-9 shrink-0 rounded-md border border-border bg-white object-contain p-0.5" />
             )}
             <span className="min-w-0">
-              <span className="block text-xs font-semibold uppercase tracking-wide text-brand">{appName}</span>
+              <span className="block text-xs font-semibold uppercase tracking-wide text-brand">
+                {appName}
+                {version && <span className="ml-1.5 font-mono font-normal normal-case tracking-normal text-muted">{version}</span>}
+              </span>
               <span className="block truncate text-sm font-medium">{org.name}</span>
             </span>
           </span>
@@ -158,11 +168,7 @@ export function Sidebar({ appName, theme, groups, user, org, orgs, unreadNotific
         ))}
       </nav>
 
-      <div className="space-y-3 border-t border-border p-3">
-        <div className="flex items-center justify-between gap-2">
-          <LocaleSwitcher />
-          <ThemeToggle initial={theme} />
-        </div>
+      <div className="border-t border-border p-3">
         <div className="flex items-center justify-between gap-2 px-1">
           <Link href="/settings/profile" onClick={() => setOpen(false)} className="min-w-0 flex-1 rounded-md hover:text-brand">
             <div className="truncate text-sm font-medium">{user.name}</div>
@@ -191,6 +197,9 @@ export function Sidebar({ appName, theme, groups, user, org, orgs, unreadNotific
           <img src={org.logo} alt="" className="size-7 rounded bg-white object-contain" />
         )}
         <span className="flex-1 truncate font-medium">{org.name}</span>
+        <Link href="/search" aria-label={t("nav.search")} className="rounded-md p-2 text-muted hover:bg-gray-100">
+          <Search className="size-4" />
+        </Link>
         <Link href="/scan" aria-label={t("nav.scan")} className="rounded-md p-2 text-muted hover:bg-gray-100">
           <ScanLine className="size-4" />
         </Link>

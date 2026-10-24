@@ -14,7 +14,7 @@ import { PO_RECEIVABLE, poActions, poTotals, remainingQty } from "@/lib/inventor
 import { cn } from "@/lib/utils";
 import { addLineAction, deleteLineAction, deletePoAttachmentAction, receiveAction } from "../actions";
 import { PoForm } from "../po-form";
-import { AddLowStockButton, PoWorkflow } from "./controls";
+import { AddLowStockButton, DraftLineRow, PoWorkflow } from "./controls";
 
 export default async function PurchaseOrderPage({ params }: PageProps<"/purchase-orders/[id]">) {
   const { id } = await params;
@@ -55,7 +55,7 @@ export default async function PurchaseOrderPage({ params }: PageProps<"/purchase
     draft
       ? ctx.db.part.findMany({
           where: { archivedAt: null },
-          select: { id: true, name: true, sku: true, vendorId: true, unitCost: true },
+          select: { id: true, name: true, sku: true, vendorId: true, purchaseCost: true },
           orderBy: { name: "asc" },
           take: 1000,
         })
@@ -67,7 +67,7 @@ export default async function PurchaseOrderPage({ params }: PageProps<"/purchase
   const partOption = (p: (typeof parts)[number]) => (
     <option key={p.id} value={p.id}>
       {p.name}
-      {p.sku ? ` (${p.sku})` : ""} · {money(Number(p.unitCost))}
+      {p.sku ? ` (${p.sku})` : ""} · {money(Number(p.purchaseCost))}
     </option>
   );
   const openLines = po.lines.filter((l) => remainingQty(l) > 0);
@@ -133,13 +133,24 @@ export default async function PurchaseOrderPage({ params }: PageProps<"/purchase
                     <th>{t("po.item")}</th>
                     <th className="text-right">{t("stock.quantity")}</th>
                     {!draft && <th className="text-right">{t("po.received")}</th>}
-                    <th className="text-right">{t("parts.unitCost")}</th>
+                    <th className="text-right">{t("po.unitPrice")}</th>
                     <th className="text-right">{t("po.lineTotal")}</th>
                     {draft && <th />}
                   </tr>
                 </thead>
                 <tbody>
                   {po.lines.map((l) => {
+                    if (draft) {
+                      return (
+                        <DraftLineRow
+                          key={l.id}
+                          poId={po.id}
+                          line={{ id: l.id, description: l.description, quantity: Number(l.quantity), unitCost: Number(l.unitCost), unit: l.part?.unit ?? null, sku: l.part?.sku ?? null, partHref: l.part ? `/parts/${l.part.id}` : null }}
+                          display={{ quantity: format.number(Number(l.quantity)), unitCost: money(Number(l.unitCost)), total: money(Number(l.quantity) * Number(l.unitCost)) }}
+                          remove={<ConfirmIconButton action={deleteLineAction.bind(null, po.id, l.id)} />}
+                        />
+                      );
+                    }
                     const rec = Number(l.receivedQuantity);
                     const full = remainingQty(l) === 0;
                     return (
@@ -216,7 +227,7 @@ export default async function PurchaseOrderPage({ params }: PageProps<"/purchase
                       <Input name="quantity" type="number" step="any" min={0} required defaultValue={1} />
                       <FieldError name="quantity" />
                     </Field>
-                    <Field label={t("parts.unitCost")} hint={t("po.unitCostHint")}>
+                    <Field label={t("po.unitPrice")} hint={t("po.unitCostHint")}>
                       <Input name="unitCost" type="number" step="0.01" min={0} />
                       <FieldError name="unitCost" />
                     </Field>

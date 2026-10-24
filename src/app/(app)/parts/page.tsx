@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getFormatter, getTranslations } from "next-intl/server";
-import { Download, Plus, Warehouse } from "lucide-react";
+import { Download, Plus, Truck, Warehouse } from "lucide-react";
 import { Button, Card, PageHeader, Select, Table } from "@/components/ui";
 import { FilterBar, Pagination } from "@/components/list-controls";
 import { EmptyState } from "@/components/empty-state";
@@ -12,8 +12,9 @@ import { lowStockParts } from "@/lib/inventory";
 import { isLowStock, onHand } from "@/lib/inventory-math";
 import { SystemType } from "@/generated/prisma/enums";
 import { ReorderButton } from "./reorder-button";
+import { titled } from "@/lib/metadata";
 
-export const metadata = { title: "Parts & inventory" };
+export const generateMetadata = titled("nav.parts");
 
 export default async function PartsPage({ searchParams }: PageProps<"/parts">) {
   const ctx = await getContext();
@@ -70,6 +71,14 @@ export default async function PartsPage({ searchParams }: PageProps<"/parts">) {
                 CSV
               </Button>
             </a>
+            {ctx.can("inventory.use") && (
+              <Link href="/parts/van">
+                <Button variant="secondary">
+                  <Truck className="size-4" />
+                  {t("van.title")}
+                </Button>
+              </Link>
+            )}
             <Link href="/parts/locations">
               <Button variant="secondary">
                 <Warehouse className="size-4" />

@@ -3,11 +3,14 @@ import type { StockMovementType } from "@/generated/prisma/enums";
 import { nextNumber, type TenantDb } from "@/lib/db/tenant";
 import type { WoCtx } from "@/lib/work-orders";
 import { membersWith, notify } from "@/lib/notify";
+import { audit } from "@/lib/audit";
 import { isLowStock, onHand, PO_OPEN_STATUSES, PO_RECEIVABLE, remainingQty, reorderQuantity, roundQty, statusAfterReceipt } from "@/lib/inventory-math";
 
 export class InventoryError extends Error {
   constructor(
-    public code: "insufficientStock" | "invalidRef" | "invalidQuantity" | "sameLocation" | "notEditable" | "overReceive" | "noLines",
+    public code: "insufficientStock" | "invalidRef" | "invalidQuantity" | "sameLocation" | "notEditable" | "overReceive" | "noLines" | "notYourVan" | "tooManySerials",
+    /** e.g. the part that ran short */
+    public detail?: string,
   ) {
     super(code);
   }
@@ -104,6 +107,63 @@ export async function transferStock(ctx: WoCtx, partId: string, fromId: string, 
   }));
 }
 
+export type RestockLine = { partId: string; quantity: number };
+
+/**
+ * A technician loading parts from a warehouse into their own van ("load"), or taking them back ("unload").
+ * Every line moves or none does (the first part short of stock is named in the error). Anyone who manages
+ * inventory may do it for any van. Logged as stock movements and in the audit log.
+ */
+export async function restockVan(
+  ctx: WoCtx,
+  opts: { vanId: string; warehouseId: string; direction: "load" | "unload"; lines: RestockLine[]; note?: string | null; anyVan: boolean },
+) {
+  const van = await activeLocation(ctx, opts.vanId);
+  const warehouse = await activeLocation(ctx, opts.warehouseId);
+  if (van.type !== "VAN" || warehouse.type !== "WAREHOUSE") throw new InventoryError("invalidRef");
+  if (!opts.anyVan && van.userId !== ctx.user.id) throw new InventoryError("notYourVan");
+
+  const qty = new Map<string, number>();
+  for (const l of opts.lines) qty.set(l.partId, roundQty((qty.get(l.partId) ?? 0) + positive(l.quantity)));
+  if (qty.size === 0) throw new InventoryError("noLines");
+  const parts = await ctx.db.part.findMany({ where: { id: { in: [...qty.keys()] }, archivedAt: null }, select: { id: true, name: true, unit: true } });
+  if (parts.length !== qty.size) throw new InventoryError("invalidRef");
+
+  const [fromId, toId] = opts.direction === "load" ? [warehouse.id, van.id] : [van.id, warehouse.id];
+  const before = await Promise.all(parts.map((p) => stockState(ctx, p.id)));
+  await ctx.db.$transaction(async (tx) => {
+    for (const p of parts) {
+      const q = qty.get(p.id)!;
+      try {
+        await move(tx, ctx, { partId: p.id, locationId: fromId, delta: -q, type: "TRANSFER_OUT", note: opts.note });
+      } catch (e) {
+        if (e instanceof InventoryError && e.code === "insufficientStock") throw new InventoryError("insufficientStock", p.name);
+        throw e;
+      }
+      await move(tx, ctx, { partId: p.id, locationId: toId, delta: q, type: "TRANSFER_IN", note: opts.note });
+    }
+  });
+  // Loading a van can tip the warehouse under its reorder point.
+  for (const [i, p] of parts.entries()) {
+    const after = await stockState(ctx, p.id);
+    const was = before[i];
+    if (!was || !after || isLowStock(was) || !isLowStock(after)) continue;
+    await notify(ctx, await membersWith(ctx.db, "inventory.manage"), {
+      type: "LOW_STOCK",
+      data: { part: after.name, qty: onHand(after.stock), unit: after.unit },
+      link: `/parts/${after.id}`,
+    });
+  }
+  await audit(ctx, "stock.vanRestock", "StockLocation", van.id, {
+    label: van.name,
+    direction: opts.direction,
+    warehouse: warehouse.name,
+    parts: parts.map((p) => `${qty.get(p.id)} ${p.unit} × ${p.name}`).join("; "),
+    ...(opts.note ? { note: opts.note } : {}),
+  });
+  return { moved: parts.length };
+}
+
 /** Per-location reorder point (null clears the override). */
 export async function setLocationMin(ctx: WoCtx, partId: string, locationId: string, min: number | null) {
   if (min != null && (!Number.isFinite(min) || min < 0)) throw new InventoryError("invalidQuantity");
@@ -140,16 +200,24 @@ async function watchLowStock(ctx: WoCtx, partId: string, change: () => Promise<u
 
 // ── Work orders
 
-/** Takes parts out of a location for a work order, at the part's current unit cost. */
-export async function consumePart(ctx: WoCtx, workOrderId: string, partId: string, locationId: string, quantity: number) {
+/** Serial numbers as entered: trimmed, without blanks or repeats; at most one per unit used. */
+export function cleanSerials(serials: string[], quantity: number) {
+  const out = [...new Set(serials.map((s) => s.trim().slice(0, 80)).filter(Boolean))];
+  if (out.length > Math.ceil(quantity)) throw new InventoryError("tooManySerials");
+  return out;
+}
+
+/** Takes parts out of a location for a work order, at the part's current unit cost (with the units' serial numbers). */
+export async function consumePart(ctx: WoCtx, workOrderId: string, partId: string, locationId: string, quantity: number, serials: string[] = []) {
   const q = positive(quantity);
+  const serialNumbers = cleanSerials(serials, q);
   const wo = await ctx.db.workOrder.findUnique({ where: { id: workOrderId }, select: { id: true } });
   if (!wo) throw new InventoryError("invalidRef");
   const part = await activePart(ctx, partId);
   await activeLocation(ctx, locationId);
   await watchLowStock(ctx, partId, () => ctx.db.$transaction(async (tx) => {
     await move(tx, ctx, { partId, locationId, delta: -q, type: "CONSUMPTION", unitCost: Number(part.unitCost), workOrderId });
-    await tx.workOrderPart.create({ data: { workOrderId, partId, stockLocationId: locationId, quantity: q, unitCost: part.unitCost } });
+    await tx.workOrderPart.create({ data: { workOrderId, partId, stockLocationId: locationId, quantity: q, unitCost: part.unitCost, serialNumbers } });
   }));
 }
 
@@ -209,7 +277,8 @@ export async function receivePurchaseOrder(ctx: WoCtx, poId: string, receipts: {
       line.receivedQuantity = line.receivedQuantity.add(q);
       if (line.partId && locationId) {
         await move(tx, ctx, { partId: line.partId, locationId, delta: q, type: "RECEIPT", unitCost: Number(line.unitCost), purchaseOrderId: po.id });
-        await tx.part.update({ where: { id: line.partId, organizationId: ctx.organization.id }, data: { unitCost: line.unitCost } });
+        // The vendor's price becomes the part's purchase cost; its sale price (what work orders charge) is left alone.
+        await tx.part.update({ where: { id: line.partId, organizationId: ctx.organization.id }, data: { purchaseCost: line.unitCost } });
       }
     }
     await tx.purchaseOrder.update({
@@ -238,6 +307,7 @@ export async function lowStockParts(db: TenantDb) {
       id: true,
       name: true,
       unitCost: true,
+      purchaseCost: true,
       minQuantity: true,
       vendorId: true,
       stock: { where: { location: { archivedAt: null } }, select: { quantity: true, minQuantity: true } },
@@ -282,7 +352,7 @@ export async function createLowStockPurchaseOrders(ctx: WoCtx) {
         shipToLocationId,
         createdById: ctx.user.id,
         lines: {
-          create: vLines.map((l) => ({ partId: l.part.id, description: l.part.name, quantity: l.quantity, unitCost: l.part.unitCost })),
+          create: vLines.map((l) => ({ partId: l.part.id, description: l.part.name, quantity: l.quantity, unitCost: l.part.purchaseCost })),
         },
       },
     });
@@ -300,7 +370,7 @@ export async function addLowStockLines(ctx: WoCtx, poId: string) {
   const lines = (await reorderLines(ctx.db, (p) => p.vendorId === po.vendorId)).filter((l) => !present.has(l.part.id));
   if (lines.length === 0) throw new InventoryError("noLines");
   await ctx.db.purchaseOrderLine.createMany({
-    data: lines.map((l) => ({ purchaseOrderId: po.id, partId: l.part.id, description: l.part.name, quantity: l.quantity, unitCost: l.part.unitCost })),
+    data: lines.map((l) => ({ purchaseOrderId: po.id, partId: l.part.id, description: l.part.name, quantity: l.quantity, unitCost: l.part.purchaseCost })),
   });
   return lines.length;
 }

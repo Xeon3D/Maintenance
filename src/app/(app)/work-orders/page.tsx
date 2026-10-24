@@ -5,7 +5,7 @@ import { CalendarDays, Columns3, List, Plus } from "lucide-react";
 import { Button, Card, PageHeader, Select, Table } from "@/components/ui";
 import { FilterBar, Pagination } from "@/components/list-controls";
 import { EmptyState } from "@/components/empty-state";
-import { PriorityText, SystemBadge, WorkOrderStatusBadge } from "@/components/badges";
+import { CategoryChip, PriorityText, SystemBadge, WorkOrderStatusBadge } from "@/components/badges";
 import { getContext } from "@/lib/context";
 import { pageOf, PAGE_SIZE, sp } from "@/lib/list";
 import { ACTIVE_STATUSES } from "@/lib/work-orders";
@@ -14,13 +14,15 @@ import { Priority, SystemType, WorkOrderStatus } from "@/generated/prisma/enums"
 import { woFilter, WO_ORDER } from "./filter";
 import { BoardView } from "./board";
 import { CalendarView } from "./calendar";
+import { titled } from "@/lib/metadata";
 
-export const metadata = { title: "Work orders" };
+export const generateMetadata = titled("nav.workOrders");
 
 const WO_LIST_INCLUDE = {
   villa: { select: { id: true, name: true } },
   asset: { select: { id: true, name: true } },
   assignees: { select: { user: { select: { id: true, name: true } } } },
+  categories: { select: { id: true, name: true, color: true }, orderBy: { name: "asc" } },
 } as const;
 
 export default async function WorkOrdersPage({ searchParams }: PageProps<"/work-orders">) {
@@ -28,17 +30,21 @@ export default async function WorkOrdersPage({ searchParams }: PageProps<"/work-
   if (!ctx.can("internal.view")) notFound();
   const t = await getTranslations();
   const format = await getFormatter();
-  const params = await searchParams;
-  const view = sp(params, "view") ?? "list";
+  const raw = await searchParams;
+  const view = sp(raw, "view") ?? "list";
+  // The calendar opens on the technician's own jobs; managers see everyone's. "all" keeps an explicit "anyone".
+  const mineByDefault = view === "calendar" && !ctx.can("workOrders.manage");
+  const params = !sp(raw, "assignee") && mineByDefault ? { ...raw, assignee: "me" } : raw;
   const now = new Date();
 
-  const [villas, members] = await Promise.all([
+  const [villas, members, categories] = await Promise.all([
     ctx.db.villa.findMany({ where: { archivedAt: null }, select: { id: true, name: true }, orderBy: { name: "asc" } }),
     ctx.db.membership.findMany({ where: { active: true, role: { not: "REQUESTER" } }, select: { user: { select: { id: true, name: true } } } }),
+    ctx.db.category.findMany({ select: { id: true, name: true }, orderBy: { name: "asc" } }),
   ]);
 
   const viewHref = (v: string) => {
-    const q = new URLSearchParams(Object.entries(params).filter(([k, val]) => typeof val === "string" && k !== "view" && k !== "page") as [string, string][]);
+    const q = new URLSearchParams(Object.entries(raw).filter(([k, val]) => typeof val === "string" && k !== "view" && k !== "page") as [string, string][]);
     if (v !== "list") q.set("view", v);
     return `/work-orders${q.size ? `?${q}` : ""}`;
   };
@@ -107,6 +113,9 @@ export default async function WorkOrdersPage({ searchParams }: PageProps<"/work-
                         <div className="mt-0.5 flex flex-wrap items-center gap-2">
                           {w.system && <SystemBadge system={w.system} />}
                           <PriorityText priority={w.priority} />
+                          {w.categories.map((c) => (
+                            <CategoryChip key={c.id} name={c.name} color={c.color} />
+                          ))}
                         </div>
                       </td>
                       <td>
@@ -180,8 +189,8 @@ export default async function WorkOrdersPage({ searchParams }: PageProps<"/work-
             <option value="all">{t("wo.statusAll")}</option>
           </Select>
         )}
-        <Select name="assignee" defaultValue={sp(params, "assignee") ?? ""}>
-          <option value="">{t("wo.anyone")}</option>
+        <Select name="assignee" defaultValue={sp(params, "assignee") ?? "all"}>
+          <option value="all">{t("wo.anyone")}</option>
           <option value="me">{t("wo.assignedToMe")}</option>
           <option value="unassigned">{t("wo.unassigned")}</option>
           {members
@@ -217,6 +226,16 @@ export default async function WorkOrdersPage({ searchParams }: PageProps<"/work-
             </option>
           ))}
         </Select>
+        {categories.length > 0 && (
+          <Select name="category" defaultValue={sp(params, "category") ?? ""}>
+            <option value="">{t("categories.all")}</option>
+            {categories.map((c) => (
+              <option key={c.id} value={c.id}>
+                {c.name}
+              </option>
+            ))}
+          </Select>
+        )}
         <Select name="overdue" defaultValue={sp(params, "overdue") ?? ""}>
           <option value="">{t("wo.anyDue")}</option>
           <option value="1">{t("wo.overdueOnly")}</option>
