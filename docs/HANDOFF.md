@@ -90,7 +90,7 @@ restart `next dev` after adding a file. `npx playwright install --with-deps chro
   - `VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`, `VAPID_SUBJECT`: web push (generated 2026-09-28; rotating
     them invalidates every browser subscription). Without them push is simply off.
   - E-mail delivery is chosen in **Settings → Server → E-mail** (`lib/email-settings.ts`, stored in server-settings.json,
-    secrets via `encryptField`): SMTP (nodemailer **8.x**: next-auth's peer range) or Resend; "env" falls back to:
+    secrets via `encryptField`): SMTP (nodemailer **10.x**; next-auth's optional peer range stops at 8, so `overrides` in package.json points it at ours — next-auth doesn't send mail itself) or Resend; "env" falls back to:
   - `RESEND_API_KEY` + `EMAIL_FROM` (commented out): real email via Resend's HTTP API. Without them,
     dev writes each email to `.mail/*.html` (gitignored) and production logs a warning.
 - **Prisma:** `prisma@latest` resolves to an 8.0 RC. **Keep `prisma` and `@prisma/client` pinned to 7.x.**

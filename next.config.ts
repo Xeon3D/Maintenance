@@ -44,6 +44,9 @@ const nextConfig: NextConfig = {
   // Rendered server-side only (PDF service reports).
   serverExternalPackages: ["@react-pdf/renderer"],
   poweredByHeader: false,
+  // The app doesn't use next/image; this turns the /_next/image optimizer endpoint off (it answers 404),
+  // so its unauthenticated attack surface isn't exposed.
+  images: { unoptimized: true },
   async headers() {
     return [
       { source: "/:path*", headers: securityHeaders },
