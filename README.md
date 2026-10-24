@@ -1,4 +1,4 @@
-# VillaOps CMMS
+# Domusly CMMS
 
 Maintenance management SaaS for integrators of high-end villa systems: electrical, automation,
 network, security & CCTV, A/V and lighting. See [docs/ROADMAP.md](docs/ROADMAP.md).
@@ -38,7 +38,7 @@ On first start the container applies database migrations and generates `AUTH_SEC
 Owners and admins see *Settings → Server*; it asks for the server password (unlocked for 30 minutes),
 because it acts on the whole installation rather than one company:
 
-- **Software name** — replaces "VillaOps" on the sign-in page, browser tab, installed app and e-mails.
+- **Software name** — replaces "Domusly" on the sign-in page, browser tab, installed app and e-mails.
 - **E-mail** — how invitations, password resets, notifications and service reports are sent: an **SMTP account**
   (Microsoft 365, Google Workspace, the domain's mail server…) or **Resend** (API key), with a *Send test e-mail*
   button. Passwords and keys are stored encrypted. Left on *Environment variables*, `RESEND_API_KEY`/`EMAIL_FROM` are used.

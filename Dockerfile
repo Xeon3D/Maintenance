@@ -1,4 +1,4 @@
-# VillaOps CMMS — production image (Next.js standalone server + Prisma migrations).
+# Domusly CMMS — production image (Next.js standalone server + Prisma migrations).
 # Build: docker build -t maintenance .   Run: see docker-compose.yml
 
 FROM node:24-trixie-slim AS base

@@ -2,6 +2,7 @@ import { getTranslations } from "next-intl/server";
 import { prisma } from "@/lib/db/client";
 import { buildCalendar, eventTimes, type IcsEvent } from "@/lib/ics";
 import { appOrigin } from "@/lib/qr";
+import { getAppName } from "@/lib/server-settings";
 
 // Personal calendar feed: /api/calendar/<token>.ics, subscribed to in Google Calendar, Outlook or Apple Calendar.
 // The secret token in the URL is the only credential (calendar apps can't sign in); the user can replace it from
@@ -54,7 +55,7 @@ export async function GET(_req: Request, { params }: RouteContext<"/api/calendar
     const place = w.villa && [w.villa.name, w.villa.address, w.villa.city].filter(Boolean).join(", ");
     const link = `${origin}/work-orders/${w.id}`;
     events.push({
-      uid: `wo-${w.id}@villaops`,
+      uid: `wo-${w.id}@villaops`, // the pre-Domusly name, kept so subscribed calendars don't duplicate events
       ...slot,
       summary: `${w.status === "DONE" ? "✓ " : ""}#${w.number} ${w.title}${w.villa ? ` — ${w.villa.name}` : ""}`,
       location: place,
@@ -73,7 +74,7 @@ export async function GET(_req: Request, { params }: RouteContext<"/api/calendar
   }
 
   const org = wos[0]?.organization.name;
-  return new Response(buildCalendar({ name: `${org ?? "VillaOps"} — ${user.name}`, events }), {
+  return new Response(buildCalendar({ name: `${org ?? (await getAppName())} — ${user.name}`, events }), {
     headers: {
       "Content-Type": "text/calendar; charset=utf-8",
       "Content-Disposition": 'inline; filename="work-orders.ics"',

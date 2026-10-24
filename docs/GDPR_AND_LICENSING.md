@@ -116,7 +116,7 @@ of employee data) is relevant to time tracking. Nothing in the app is covered by
 | Parameter | Suggestion |
 |---|---|
 | Licensor | Your company's legal name |
-| Licensed Work | "Maintenance (VillaOps CMMS)", the version, and "© 2026 <company>" |
+| Licensed Work | "Maintenance (Domusly CMMS)", the version, and "© 2026 <company>" |
 | Additional Use Grant | *"You may make production use of the Licensed Work to manage your own organisation's maintenance operations, provided you do not offer it to third parties as a hosted, managed or white-labelled service, or sell it."* |
 | Change Date | Four years after each release (e.g. 2030-09-29 for 0.3.0), updated on every release |
 | Change License | Apache License 2.0 (or GPL-2.0-or-later) |

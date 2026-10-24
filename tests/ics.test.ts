@@ -11,7 +11,7 @@ describe("iCalendar feed", () => {
 
   it("writes a subscribable calendar with UTC times", () => {
     const ics = buildCalendar({
-      name: "VillaOps — Rui",
+      name: "Domusly — Rui",
       now: new Date("2026-10-15T10:00:00Z"),
       events: [
         { uid: "wo-1@app", start: new Date("2026-10-20T09:00:00Z"), end: new Date("2026-10-20T11:30:00Z"), summary: "#1 Router, offline", location: "Villa 7", url: "https://app/work-orders/1" },

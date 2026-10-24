@@ -41,7 +41,7 @@ export function buildCalendar(opts: { name: string; events: IcsEvent[]; now?: Da
   const lines = [
     "BEGIN:VCALENDAR",
     "VERSION:2.0",
-    "PRODID:-//VillaOps//Work orders//EN",
+    "PRODID:-//Domusly//Work orders//EN",
     "CALSCALE:GREGORIAN",
     "METHOD:PUBLISH",
     `X-WR-CALNAME:${icsText(opts.name)}`,

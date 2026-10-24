@@ -1,6 +1,6 @@
-# Integrating VillaOps with Odoo — feasibility report
+# Integrating Domusly with Odoo — feasibility report
 
-Prepared 2026-09-29. Scope: VillaOps as built through phase 9 (see `docs/HANDOFF.md`). Odoo facts are
+Prepared 2026-09-29. Scope: Domusly as built through phase 9 (see `docs/HANDOFF.md`). Odoo facts are
 from Odoo's documentation and other public sources, listed at the end. Anything marked **(verify)**
 should be confirmed against your Odoo version, plan and contract before you rely on it.
 
@@ -10,13 +10,13 @@ should be confirmed against your Odoo version, plan and contract before you rely
 
 **Integration is feasible and worthwhile. Do it in small steps, and start with invoicing.**
 
-- **Each system keeps what it's good at.** VillaOps stays the operational system: villas, equipment,
+- **Each system keeps what it's good at.** Domusly stays the operational system: villas, equipment,
   work orders, preventive maintenance, checklists, SLAs, the field app and the client portal. Odoo
   stays the business system: customers' fiscal data, quotes, **invoicing**, accounting, and optionally
   purchasing and stock valuation.
 - **The most valuable first link is completed work → draft invoice in Odoo.** In Portugal, invoices
   must come from AT-certified software. Odoo's Portuguese localisation provides the certified
-  signature, ATCUD and SAF-T, so VillaOps should **never** issue fiscal documents itself. It should
+  signature, ATCUD and SAF-T, so Domusly should **never** issue fiscal documents itself. It should
   hand Odoo everything needed to bill a job: client, hours, parts and extras.
 - **The deciding factor is your Odoo hosting plan.** Odoo Online only allows API access on the
   **Custom** plan. Standard and One App Free block it completely. Odoo.sh and self-hosted
@@ -36,19 +36,19 @@ should be confirmed against your Odoo version, plan and contract before you rely
 Two systems editing the same record is how integrations go wrong. Every entity needs **one owner**;
 the other system gets a read-only copy.
 
-| Entity | VillaOps today | Odoo equivalent | Recommended owner | Direction |
+| Entity | Domusly today | Odoo equivalent | Recommended owner | Direction |
 |---|---|---|---|---|
-| Clients (billing entity, VAT no., address) | `Client` | `res.partner` (company) | **Odoo** | Odoo → VillaOps |
-| Client contacts | `ClientContact` | `res.partner` (child contacts) | Odoo | Odoo → VillaOps |
-| Villas, areas, equipment | `Villa`, `Area`, `Asset` | No real equivalent (see §7) | **VillaOps** | Villa can be pushed as a delivery address / analytic account |
-| Work orders, checklists, photos, sign-off | `WorkOrder` + children | (Field Service tasks, if licensed) | **VillaOps** | Summary pushed on completion |
-| Billable result of a job | cost breakdown in `workOrderCosts()` | `account.move` (draft customer invoice) or `sale.order` | **Odoo** | VillaOps → Odoo |
-| Labour time | `TimeEntry` | `account.analytic.line` (timesheets) | VillaOps records it | VillaOps → Odoo (optional, phase C) |
-| Service contracts: SLA terms | `ServiceContract` | — | VillaOps | — |
+| Clients (billing entity, VAT no., address) | `Client` | `res.partner` (company) | **Odoo** | Odoo → Domusly |
+| Client contacts | `ClientContact` | `res.partner` (child contacts) | Odoo | Odoo → Domusly |
+| Villas, areas, equipment | `Villa`, `Area`, `Asset` | No real equivalent (see §7) | **Domusly** | Villa can be pushed as a delivery address / analytic account |
+| Work orders, checklists, photos, sign-off | `WorkOrder` + children | (Field Service tasks, if licensed) | **Domusly** | Summary pushed on completion |
+| Billable result of a job | cost breakdown in `workOrderCosts()` | `account.move` (draft customer invoice) or `sale.order` | **Odoo** | Domusly → Odoo |
+| Labour time | `TimeEntry` | `account.analytic.line` (timesheets) | Domusly records it | Domusly → Odoo (optional, phase C) |
+| Service contracts: SLA terms | `ServiceContract` | — | Domusly | — |
 | Service contracts: monthly fee billing | `ServiceContract.monthlyFee` | Subscriptions (Enterprise) / recurring invoices | **Odoo** | Link only (store the Odoo subscription id) |
-| Parts catalogue | `Part` | `product.product` (storable) | Odoo, **if** you run inventory there | Odoo → VillaOps (phase B) |
+| Parts catalogue | `Part` | `product.product` (storable) | Odoo, **if** you run inventory there | Odoo → Domusly (phase B) |
 | Stock per location / vans | `PartStock`, `StockLocation` | `stock.quant`, `stock.location` (vans as locations) | One of them — see §5 | Phase B |
-| Vendors | `Vendor` | `res.partner` (supplier) | Odoo | Odoo → VillaOps |
+| Vendors | `Vendor` | `res.partner` (supplier) | Odoo | Odoo → Domusly |
 | Purchase orders | `PurchaseOrder` | `purchase.order` | Odoo (it also receives the vendor bill) | Phase B |
 | Staff | `User`/`Membership` | `res.users` / `hr.employee` | Each keeps its own | Match by email |
 
@@ -75,17 +75,17 @@ the other system gets a read-only copy.
 **Webhooks out of Odoo**
 - Automation rules have a "Send Webhook Notification" action (since Odoo 17). It POSTs selected
   fields of a record to a URL when it's created or changed.
-- This is how Odoo can tell VillaOps "customer X changed" without VillaOps polling.
+- This is how Odoo can tell Domusly "customer X changed" without Domusly polling.
 
 **Webhooks into Odoo**
 - Automation rules can have an "On webhook" trigger. Odoo generates a URL and can run code on the
   payload.
-- Usable, but a real API call from VillaOps is easier to secure and debug. We don't recommend
+- Usable, but a real API call from Domusly is easier to secure and debug. We don't recommend
   relying on it.
 
 **Limits**
 - Odoo's acceptable-use guidance for its cloud is roughly **one call per second, no parallel calls**.
-  VillaOps must queue and pace its calls. This is fine for a single company's volumes (dozens of
+  Domusly must queue and pace its calls. This is fine for a single company's volumes (dozens of
   jobs a day, not thousands).
 - Upgrades are mandatory on Odoo Online, and fields sometimes get renamed between versions (e.g.
   `groups_id` → `group_ids` in 19.0). Keep the Odoo-specific code in one place and test before
@@ -100,29 +100,29 @@ the other system gets a read-only copy.
 | **Self-hosted** (Community or Enterprise) | Yes | Yes | No plan gate; limits are your own server's. You run upgrades and backups. |
 
 If you're on Odoo Online **Standard**, the choice is between upgrading to Custom and exchanging
-**CSV files** (VillaOps already exports work orders, costs, assets and parts; Odoo imports CSV).
+**CSV files** (Domusly already exports work orders, costs, assets and parts; Odoo imports CSV).
 CSV works for a monthly billing run, but it's manual and error-prone.
 
 ---
 
 ## 4. Phase A — customers and invoicing (recommended first)
 
-**Goal:** a job finished in VillaOps becomes a **draft** invoice in Odoo. Your accountant checks it and
+**Goal:** a job finished in Domusly becomes a **draft** invoice in Odoo. Your accountant checks it and
 confirms it; Odoo assigns the certified number, ATCUD and QR code.
 
 ### Flow
 
-1. **Customers:** link each VillaOps `Client` to an Odoo `res.partner`. Do this once, by matching VAT
+1. **Customers:** link each Domusly `Client` to an Odoo `res.partner`. Do this once, by matching VAT
    number or name, in a small "Link to Odoo" screen. After that, Odoo is the source of truth:
-   - an Odoo webhook on partner changes updates VillaOps;
+   - an Odoo webhook on partner changes updates Domusly;
    - a nightly job re-checks everything.
 
-   New clients are created in Odoo first. VillaOps can offer "create from Odoo partner".
+   New clients are created in Odoo first. Domusly can offer "create from Odoo partner".
 2. **Ready to invoice:** when a WO is Done, and signed where required, it appears in a new
-   **"To invoice"** list in VillaOps.
+   **"To invoice"** list in Domusly.
    - Jobs covered by a contract (included visits, SLA work) can be marked non-billable.
    - A manager confirms what to bill.
-3. **Push:** VillaOps creates the draft in Odoo, either an `account.move` customer invoice or a
+3. **Push:** Domusly creates the draft in Odoo, either an `account.move` customer invoice or a
    `sale.order` if you prefer to invoice from sales orders. It contains:
    - **Customer:** the client's partner. The villa can be the delivery address.
    - **Labour:** hours per technician (or in total) × a *sale* rate, on a "Labour" service product.
@@ -130,14 +130,14 @@ confirms it; Odoo assigns the certified number, ATCUD and QR code.
    - **Extras:** "other costs" (crane hire, parking…) on a generic service product.
    - **Narration:** WO number and title, the villa, and a link back to the WO.
    - **Analytic account per villa** (optional), so profitability per villa is visible in Odoo.
-4. **Status back:** VillaOps stores the Odoo invoice id and shows "Invoiced — FT 2026/123" on the WO.
+4. **Status back:** Domusly stores the Odoo invoice id and shows "Invoiced — FT 2026/123" on the WO.
    A webhook or nightly check picks up when the invoice is posted or cancelled.
-5. **Service report:** the VillaOps PDF stays a *technical* report, not a fiscal document. It can
+5. **Service report:** the Domusly PDF stays a *technical* report, not a fiscal document. It can
    be attached to the Odoo invoice.
 
-### Gaps to close in VillaOps first
+### Gaps to close in Domusly first
 
-VillaOps currently records **costs** only. It knows nothing about selling prices or what's billable.
+Domusly currently records **costs** only. It knows nothing about selling prices or what's billable.
 
 - **Sale price for labour:** today `Membership.hourlyRate` is a cost rate. Add a billable rate per
   role/technician, or per contract (contract clients often get a discounted rate).
@@ -145,9 +145,9 @@ VillaOps currently records **costs** only. It knows nothing about selling prices
   product/pricelist once parts are linked (phase B).
 - **Billable flag and approval:** per WO and per cost line, plus a "To invoice" queue.
 - **Taxes:** leave VAT entirely to Odoo, via the taxes on each product and fiscal positions. Don't
-  compute VAT in VillaOps.
+  compute VAT in Domusly.
 
-### Technical design (inside VillaOps)
+### Technical design (inside Domusly)
 
 - **Settings → Odoo** (owner/admin):
   - Odoo URL, database name, company.
@@ -155,8 +155,8 @@ VillaOps currently records **costs** only. It knows nothing about selling prices
   - A "Test connection" button.
 - **`src/lib/odoo/client.ts`:** a small client for JSON-2. Keep an XML-RPC fallback only if you're
   on Odoo ≤ 18. It paces calls to about 1 per second, retries with back-off, and logs every call.
-- **`OdooLink` table:** VillaOps id ↔ Odoo model + id, plus sync time and status. VillaOps also
-  writes Odoo external IDs (`ir.model.data`, e.g. `villaops.workorder_<id>`), so a retried push
+- **`OdooLink` table:** Domusly id ↔ Odoo model + id, plus sync time and status. Domusly also
+  writes Odoo external IDs (`ir.model.data`, e.g. `domusly.workorder_<id>`), so a retried push
   updates the same draft instead of creating a duplicate.
 - **Outbox:** pushes go into a queue table and are sent by the existing background job runner (the
   same mechanism as the PM scheduler). A slow or offline Odoo never blocks technicians.
@@ -169,22 +169,22 @@ VillaOps currently records **costs** only. It knows nothing about selling prices
 
 ## 5. Phase B — parts, stock, vendors and purchasing (only if you run inventory in Odoo)
 
-VillaOps now has a full inventory module: parts, warehouse and vans, stock movements, vendors and
+Domusly now has a full inventory module: parts, warehouse and vans, stock movements, vendors and
 purchase orders with receiving. Odoo has the same, plus stock **valuation** and **vendor bills**
 flowing into accounting. Running both as masters doesn't work, so pick one of these:
 
 **Option B1 — Odoo owns inventory and purchasing (recommended if accounting wants stock valuation):**
-- Parts (`product.product`), vendors and prices come from Odoo. VillaOps keeps a synced read-only copy.
-- VillaOps's vans become Odoo stock locations (`WH/Stock/Van Rui`, …).
-- When a technician logs a part on a WO, VillaOps sends a consumption to Odoo, as a stock move or a
-  line on the job's delivery. Odoo's stock level is authoritative, and VillaOps shows it.
-- Purchase orders are created and received in Odoo. VillaOps's purchase-order screens become
+- Parts (`product.product`), vendors and prices come from Odoo. Domusly keeps a synced read-only copy.
+- Domusly's vans become Odoo stock locations (`WH/Stock/Van Rui`, …).
+- When a technician logs a part on a WO, Domusly sends a consumption to Odoo, as a stock move or a
+  line on the job's delivery. Odoo's stock level is authoritative, and Domusly shows it.
+- Purchase orders are created and received in Odoo. Domusly's purchase-order screens become
   read-only links, or are switched off. The "Reorder low stock" button can create a draft Odoo PO
   instead.
 - Complication: using parts while offline. The field app deliberately doesn't do it today, so no
   change is needed there.
 
-**Option B2 — VillaOps owns operational stock; Odoo only sees money:**
+**Option B2 — Domusly owns operational stock; Odoo only sees money:**
 - Keep everything as it is. Push parts used on invoiced jobs as invoice lines (phase A).
 - Optionally push a monthly stock valuation or consumption summary.
 - Much simpler, but Odoo's stock and purchasing stay unused, and vendor bills are entered by hand
@@ -195,12 +195,12 @@ flowing into accounting. Running both as masters doesn't work, so pick one of th
 ## 6. Phase C — contracts and time (optional)
 
 - **Contract fees:** bill monthly fees from Odoo, with Subscriptions (Enterprise) or recurring
-  invoices. VillaOps keeps the SLA terms and stores the Odoo subscription id on the
+  invoices. Domusly keeps the SLA terms and stores the Odoo subscription id on the
   `ServiceContract`, so the reports' "contract fees vs cost" margin can use real invoiced amounts.
 - **Timesheets:** push `TimeEntry` rows to Odoo as `account.analytic.line`, against a project or
   analytic account per client or villa. This is useful if Odoo handles payroll inputs or if you
   analyse profitability there. Match technicians to Odoo employees by email.
-- **Reporting:** keep operational reports in VillaOps and financial reports in Odoo. Don't
+- **Reporting:** keep operational reports in Domusly and financial reports in Odoo. Don't
   duplicate either.
 
 ---
@@ -215,7 +215,7 @@ A fair question, worth a short comparison before you commit, since Odoo has **Fi
 - Field Service worksheets with signatures on Odoo's mobile app.
 - Maintenance requests with preventive schedules and MTBF/MTTR.
 
-**Where VillaOps fits your business better, as built**
+**Where Domusly fits your business better, as built**
 - **The model is built around client-owned villas:** the client → villa → area → equipment
   hierarchy, with QR labels on client equipment. Odoo Maintenance is built around your *own*
   equipment.
@@ -229,7 +229,7 @@ A fair question, worth a short comparison before you commit, since Odoo has **Fi
 
 Rebuilding these in Odoo means Studio customisation or custom modules. That in turn means Odoo.sh or
 self-hosting, and upgrade work every year. **(Verify)** against a current Odoo demo if you want to
-be sure. Our assessment: keep VillaOps for operations and integrate for money.
+be sure. Our assessment: keep Domusly for operations and integrate for money.
 
 ---
 
@@ -262,7 +262,7 @@ Phase A total is about **2–2½ weeks** including testing against an Odoo test 
 | XML-RPC removal (Online 21.1 / Odoo 22) | Build on JSON-2 if you're on 19+. Otherwise isolate the protocol so switching is a single file. |
 | Rate limit (≈1 call/s on Odoo's cloud) | Queue plus pacing, batch reads with `search_read`, webhooks instead of polling. |
 | API key expires | Show key expiry on the settings screen and warn owners 2 weeks ahead (a notification type exists). |
-| Fiscal compliance (PT) | VillaOps never numbers or issues invoices; drafts only, confirmed in Odoo. |
+| Fiscal compliance (PT) | Domusly never numbers or issues invoices; drafts only, confirmed in Odoo. |
 | Personal data in two systems (GDPR) | Sync only what's needed (billing identity, contacts). Keep villa codes and device credentials out of Odoo entirely. |
 | Multi-company in Odoo | Store the company id in settings and always filter by it. |
 
@@ -275,7 +275,7 @@ Phase A total is about **2–2½ weeks** including testing against an Odoo test 
    Invoice per job, or a monthly invoice per client grouping all jobs?
 3. **Billing rules:** what's included in contracts vs chargeable? Labour sale rates (flat, per
    technician, per contract)? Parts markup?
-4. **Inventory:** option B1 (Odoo owns stock and purchasing) or B2 (VillaOps keeps it, Odoo sees
+4. **Inventory:** option B1 (Odoo owns stock and purchasing) or B2 (Domusly keeps it, Odoo sees
    money only)?
 5. **Contract fees:** are they already billed from Odoo (Subscriptions / recurring invoices)?
 6. **Who is the Odoo contact** (admin or partner) to create the integration user and test database?
