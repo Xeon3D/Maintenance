@@ -1,4 +1,4 @@
-# Handoff — VillaOps CMMS
+# Handoff — Domusly CMMS
 
 State as of **2026-09-29**, phase 9 of 10 done (see `git log` for the commit). Read this, then
 `CLAUDE.md` (conventions) and `docs/ROADMAP.md` (phase list), before touching code. Phase 10 (billing/SaaS) is
@@ -12,7 +12,7 @@ on every `vX.Y.Z` tag (it was built by hand with Docker Desktop up to v0.3.0). S
 The user runs it on a ZimaOS server behind Nginx Proxy Manager as an **open public demo** (nothing
 locked down, by choice) with a password-protected **factory reset**. 0.2.0 added **Settings → Server**
 (software name, one-click updates, scheduled backups with restore); see "Docker & releases" and
-"Server administration" in §3. "VillaOps" is now only the *default* software name (server setting).
+"Server administration" in §3. "Domusly" is now only the *default* software name (server setting).
 
 ---
 
@@ -25,7 +25,9 @@ and lighting. The user chose, and does not want re-litigated:
 - **Stack:** Next.js 16 + Postgres (Neon) + Prisma 7 + Auth.js v5. **Not** Supabase.
 - **Languages:** English + **European** Portuguese (pt-PT wording: "palavra-passe", "equipa", "utilizador").
 - **Scope:** everything, delivered in the 10 roadmap phases; each phase ends tested and committed.
-- **"VillaOps" is only the default software name**; the owner sets the real one in Settings → Server.
+- **"Domusly" (formerly "Domusly") is only the default software name**; the owner sets the real one in Settings → Server.
+  Internal keys keep the old name so existing installs keep working: the `io.villaops.release-notes` image annotation,
+  the offline IndexedDB `villaops-field` and the calendar event UIDs `wo-<id>@villaops`.
 
 ### Working rhythm the user has accepted
 1. Build a whole phase, including translations, tests and browser verification.
@@ -572,8 +574,8 @@ markers), Message, VerificationToken (password reset).
 - PDFs share `src/components/pdf/letterhead.tsx` (`PdfHeader`/`PdfFooter`, data from
   `src/lib/letterhead.ts`); emails get the logo and colour through `emailLayout({logo, color})`.
 - Demo org now has example details and a generated logo (set during testing).
-- The *product* name ("VillaOps", `common.appName`) is still a placeholder, separate from the
-  company name.
+- The *product* name was a placeholder ("Domusly") until 2026-10-24; it is now **Domusly**, the default
+  software name (`DEFAULT_APP_NAME`), separate from the company name.
 
 ### Phase 9 — Offline field app (✅ done; notes for later)
 - **`/m`** (outside the `(app)` layout; technicians and anyone with `workOrders.execute`): one client

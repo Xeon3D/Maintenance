@@ -1,4 +1,4 @@
-# VillaOps CMMS ("Maintenance") — app + PostgreSQL + updater.
+# Domusly CMMS ("Maintenance") — app + PostgreSQL + updater.
 # ZimaOS: App Store → Custom install → Import this file. Put Nginx Proxy Manager in front of port 3000
 # (enable Websockets support and "Force SSL"), then set APP_URL to the public https address.
 name: maintenance

@@ -35,7 +35,7 @@ export async function POST(req: Request) {
   const denied = await denyTarget(ctx, target.data);
   if (denied) return NextResponse.json({ error: denied.error }, { status: denied.status });
 
-  const dir = await mkdtemp(path.join(os.tmpdir(), "villaops-video-"));
+  const dir = await mkdtemp(path.join(os.tmpdir(), "domusly-video-"));
   try {
     const input = path.join(dir, "input");
     let received = 0;

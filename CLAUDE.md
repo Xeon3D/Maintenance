@@ -1,6 +1,6 @@
 @AGENTS.md
 
-# VillaOps CMMS — project conventions
+# Domusly CMMS — project conventions
 
 Multi-tenant CMMS for villa systems integrators. Roadmap: `docs/ROADMAP.md`.
 **Continuing the work? Read `docs/HANDOFF.md` first** (status, environment gotchas, verification techniques, next-phase plans).

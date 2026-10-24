@@ -8,7 +8,7 @@ import { DEFAULT_BACKUP_COPIES, normalizeBackupCopies, type BackupCopies } from 
 // Server-wide settings (not per company): software name and version label, public sign-up, backup schedule, automatic updates, e-mail delivery.
 // Kept in a JSON file in DATA_DIR so they survive a factory reset and a database restore.
 
-export const DEFAULT_APP_NAME = "VillaOps";
+export const DEFAULT_APP_NAME = "Domusly";
 
 export type ServerSettings = {
   appName: string | null;

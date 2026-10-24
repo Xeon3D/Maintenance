@@ -5,7 +5,7 @@
 //  queue  — changes waiting to sync ({ id, userId, seq, op })
 //  blobs  — photos and signatures captured offline, until uploaded
 
-const DB = "villaops-field";
+const DB = "villaops-field"; // the pre-Domusly name, kept so devices don't lose changes waiting to sync
 const VERSION = 1;
 
 let dbPromise: Promise<IDBDatabase> | null = null;

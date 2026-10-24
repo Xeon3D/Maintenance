@@ -12,7 +12,7 @@ const signIn = vi.fn();
 
 vi.mock("server-only", () => ({}));
 vi.mock("@/lib/db/client", () => ({ prisma }));
-vi.mock("@/lib/server-settings", () => ({ getServerSettings: async () => settings, getAppName: async () => "VillaOps" }));
+vi.mock("@/lib/server-settings", () => ({ getServerSettings: async () => settings, getAppName: async () => "Domusly" }));
 vi.mock("@/auth", () => ({ auth: vi.fn(), signIn, signOut: vi.fn() }));
 vi.mock("next-auth", () => ({ AuthError: class extends Error {}, CredentialsSignin: class extends Error {} }));
 vi.mock("next/headers", () => ({ cookies: async () => ({ set: vi.fn(), delete: vi.fn() }), headers: async () => new Headers() }));

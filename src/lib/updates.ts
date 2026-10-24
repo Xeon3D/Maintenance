@@ -11,7 +11,7 @@ import { dataDir } from "@/lib/server-settings";
 const IMAGE = () => process.env.APP_IMAGE || "xeon3d/maintenance";
 const CHECK_TTL = 6 * 3_600_000;
 /** Index annotation that release.yml puts on each image: base64 of a JSON array of release-note lines. */
-export const NOTES_ANNOTATION = "io.villaops.release-notes";
+export const NOTES_ANNOTATION = "io.villaops.release-notes"; // pre-Domusly name, read by installed servers: keep
 /** Notes are read for at most this many newer versions (each read is a registry pull request). */
 const MAX_NOTES = 5;
 
