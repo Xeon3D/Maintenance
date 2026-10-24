@@ -6,7 +6,7 @@ name: maintenance
 services:
   app:
     # "latest" lets Settings → Server install new versions with one click (through the updater below).
-    image: malvesdc/maintenance:latest
+    image: xeon3d/maintenance:latest
     restart: unless-stopped
     depends_on:
       db:

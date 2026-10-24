@@ -5,9 +5,7 @@ network, security & CCTV, A/V and lighting. See [docs/ROADMAP.md](docs/ROADMAP.m
 
 ## Install with Docker (ZimaOS, any Docker host)
 
-The image is published as [`malvesdc/maintenance`](https://hub.docker.com/r/malvesdc/maintenance) (linux/amd64).
-Up to 0.3.0 it was `xeon3d/maintenance`: on those servers change the compose `image:` line to
-`malvesdc/maintenance:latest` once, then update (see "Updating from 0.3.0" below).
+The image is published as [`xeon3d/maintenance`](https://hub.docker.com/r/xeon3d/maintenance) (linux/amd64).
 [`docker-compose.yml`](docker-compose.yml) runs it with PostgreSQL and an updater:
 
 1. **ZimaOS:** App Store → *Custom Install* → *Import* and paste `docker-compose.yml`
@@ -45,10 +43,10 @@ because it acts on the whole installation rather than one company:
   (Microsoft 365, Google Workspace, the domain's mail server…) or **Resend** (API key), with a *Send test e-mail*
   button. Passwords and keys are stored encrypted. Left on *Environment variables*, `RESEND_API_KEY`/`EMAIL_FROM` are used.
 - **Updates** — shows the installed and latest version (from the version tags of the
-  [`malvesdc/maintenance`](https://hub.docker.com/r/malvesdc/maintenance/tags) image on Docker Hub, with each
+  [`xeon3d/maintenance`](https://hub.docker.com/r/xeon3d/maintenance/tags) image on Docker Hub, with each
   version's notes; `APP_IMAGE` overrides the image). *Update to x.y.z*
   makes a backup, then asks the `updater` service ([Watchtower](https://github.com/nicholas-fedor/watchtower))
-  to pull `malvesdc/maintenance:latest` and recreate only the app container; database changes are applied
+  to pull `xeon3d/maintenance:latest` and recreate only the app container; database changes are applied
   as it starts. *Install updates automatically* does the same every day at the backup hour.
   The updater never updates on its own and only touches the labelled app container.
 - **Backups** — hourly / daily / monthly schedules, each keeping its last *N*; *Back up now*; download,
@@ -75,10 +73,9 @@ the check reads Docker Hub.
 
 ### Updating from 0.3.0
 
-From 0.3.1 the image is `malvesdc/maintenance`, so a
-0.3.0 server is moved over once by hand. In the app's compose (ZimaOS: the app's settings), change
-`image: xeon3d/maintenance:latest` to `image: malvesdc/maintenance:latest` and save (or run `docker compose pull`
-and `docker compose up -d`). The data stays where it is; from then on, updates come from Settings → Server.
+A 0.3.0 server already uses the `xeon3d/maintenance` image, so its compose stays as it is. Its update check
+doesn't read Docker Hub yet, so update it once by hand (`docker compose pull` and `docker compose up -d`; on
+ZimaOS, the app's *Update*/*Rebuild*). The data stays where it is; from then on, updates come from Settings → Server.
 
 ### Updating from 0.1.0
 
@@ -154,7 +151,7 @@ Releases are built and published by GitHub Actions (`.github/workflows/release.y
 
 1. Bump `version` in `package.json` and `package-lock.json` (`npm version 0.4.0 --no-git-tag-version`), commit, merge to `main`.
 2. Tag and push: `git tag v0.4.0 && git push origin v0.4.0`.
-3. The workflow runs the checks, pushes `malvesdc/maintenance:0.4.0` and `:latest` to Docker Hub (the new version tag
+3. The workflow runs the checks, pushes `xeon3d/maintenance:0.4.0` and `:latest` to Docker Hub (the new version tag
    is what installed servers see as "update available" in Settings → Server, with the release notes attached to the
    image), and then creates the GitHub release with the same notes.
 
