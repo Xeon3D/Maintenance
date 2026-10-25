@@ -28,6 +28,9 @@ The image is published as [`xeon3d/maintenance`](https://hub.docker.com/r/xeon3d
    Exploits*; on the SSL tab request a Let's Encrypt certificate with *Force SSL* (the offline app,
    camera scanning and push notifications need https). For uploading large backups, add
    `client_max_body_size 0;` under *Advanced*.
+   Sign-in limits and the audit log take the visitor's address from the `X-Forwarded-For` entry the proxy adds.
+   If another proxy sits in front of Nginx Proxy Manager (e.g. Cloudflare), set `TRUSTED_PROXY_HOPS: "2"`.
+   Don't expose port 3000 to the internet directly: without the proxy, visitors could forge that address.
 
 On first start the container applies database migrations and generates `AUTH_SECRET`,
 `FIELD_ENCRYPTION_KEY`, `CRON_SECRET` and web-push keys into `/data/secrets.env`

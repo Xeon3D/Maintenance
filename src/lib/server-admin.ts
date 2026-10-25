@@ -3,6 +3,7 @@ import { createHmac, timingSafeEqual } from "node:crypto";
 import { cookies, headers } from "next/headers";
 import { requirePermission } from "@/lib/context";
 import { AttemptLimiter, samePassword } from "@/lib/attempt-limit";
+import { clientAddressFrom } from "@/lib/client-address";
 
 // Server administration (software name, updates, backups) acts on the whole server, not one company,
 // so company roles aren't enough: anyone can create a company on an open demo. It also needs the
@@ -18,8 +19,7 @@ export const serverAdminEnabled = () => !!password();
 const sign = (payload: string) => createHmac("sha256", `server-admin:${process.env.AUTH_SECRET}`).update(payload).digest("base64url");
 
 export async function clientAddress() {
-  const h = await headers();
-  return h.get("x-forwarded-for")?.split(",")[0]?.trim() || h.get("x-real-ip") || "unknown";
+  return clientAddressFrom(await headers()) ?? "unknown";
 }
 
 /** Checks the password and, if right, sets the unlock cookie for this user. */

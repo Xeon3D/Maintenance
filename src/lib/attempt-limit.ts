@@ -4,6 +4,7 @@ import { createHash, timingSafeEqual } from "node:crypto";
 
 export class AttemptLimiter {
   private failures = new Map<string, number[]>();
+  private lastSweep = 0;
   constructor(
     private perClient = 5,
     private global = 30,
@@ -11,9 +12,16 @@ export class AttemptLimiter {
   ) {}
 
   private recent(key: string, now: number) {
-    const list = (this.failures.get(key) ?? []).filter((t) => now - t < this.windowMs);
-    this.failures.set(key, list);
-    return list;
+    return (this.failures.get(key) ?? []).filter((t) => now - t < this.windowMs);
+  }
+
+  /** Keys are chosen by clients (addresses, e-mails), so expired ones are dropped once per window. */
+  private sweep(now: number) {
+    if (now - this.lastSweep < this.windowMs) return;
+    this.lastSweep = now;
+    for (const [key, list] of this.failures) {
+      if (!list.some((t) => now - t < this.windowMs)) this.failures.delete(key);
+    }
   }
 
   blocked(client: string, now = Date.now()) {
@@ -21,8 +29,13 @@ export class AttemptLimiter {
   }
 
   fail(client: string, now = Date.now()) {
-    this.recent(client, now).push(now);
-    this.recent("*", now).push(now);
+    this.sweep(now);
+    for (const key of [client, "*"]) this.failures.set(key, [...this.recent(key, now), now]);
+  }
+
+  /** Number of keys held (for tests). */
+  get size() {
+    return this.failures.size;
   }
 
   /** Forgets one client's failures (e.g. after a successful sign-in). */

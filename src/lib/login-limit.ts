@@ -1,4 +1,5 @@
 import { AttemptLimiter } from "@/lib/attempt-limit";
+import { clientAddressFrom } from "@/lib/client-address";
 
 // Brute-force protection for sign-in (GDPR art. 32). Two independent limits over 15 minutes:
 // failures per account (any address) and per client address (any account). No global cap, so an
@@ -28,7 +29,7 @@ export function resetLoginLimits() {
   perAddress.reset();
 }
 
-/** First address in X-Forwarded-For (set by the reverse proxy), else X-Real-IP. */
+/** The client's address as our reverse proxy saw it (lib/client-address.ts). */
 export function addressFrom(headers: Headers) {
-  return headers.get("x-forwarded-for")?.split(",")[0]?.trim() || headers.get("x-real-ip") || "unknown";
+  return clientAddressFrom(headers) ?? "unknown";
 }

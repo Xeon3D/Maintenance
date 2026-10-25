@@ -22,6 +22,7 @@ import { emailLayout, sendEmail } from "@/lib/email";
 import { background } from "@/lib/notify";
 import { clearResetTokens, createResetToken, userForResetToken } from "@/lib/password-reset";
 import { auditUser, writeAudit } from "@/lib/audit";
+import { clientAddressFrom } from "@/lib/client-address";
 import { clearLastSeen } from "@/lib/online-users";
 import { checkFactoryResetPassword, factoryReset, factoryResetBlocked, factoryResetEnabled, recordFactoryResetFailure } from "@/lib/factory-reset";
 
@@ -158,8 +159,7 @@ async function auditEveryCompany(action: string, client: string) {
 
 export async function factoryResetAction(_: FormState, form: FormData): Promise<FormState> {
   if (!factoryResetEnabled()) return { error: "somethingWrong" };
-  const h = await headers();
-  const client = h.get("x-forwarded-for")?.split(",")[0]?.trim() || h.get("x-real-ip") || "unknown";
+  const client = clientAddressFrom(await headers()) ?? "unknown";
   if (factoryResetBlocked(client)) return { error: "tooManyAttempts" };
   const password = form.get("password");
   if (typeof password !== "string" || !checkFactoryResetPassword(password)) {
