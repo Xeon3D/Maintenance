@@ -48,9 +48,15 @@ jobs:
           fi
           echo "version=$version" >> "$GITHUB_OUTPUT"
 
+      - name: Node version from the Dockerfile # the image's Node, as in ci.yml
+        id: node
+        run: |
+          v=$(sed -nE 's/^FROM node:([0-9.]+)-.* AS base$/\1/p' Dockerfile)
+          test -n "$v"
+          echo "version=$v" >> "$GITHUB_OUTPUT"
       - uses: actions/setup-node@v7
         with:
-          node-version: 24.22.1 # the Node in the released Docker image
+          node-version: ${{ steps.node.outputs.version }}
           cache: npm
       - run: npm ci
       - run: npx next typegen

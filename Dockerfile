@@ -1,7 +1,7 @@
 # Domusly CMMS — production image (Next.js standalone server + Prisma migrations).
 # Build: docker build -t maintenance .   Run: see docker-compose.yml
 
-FROM node:24-trixie-slim AS base
+FROM node:24.22.1-trixie-slim AS base
 # Debian security updates (openssl, util-linux, perl…) on every build; the release workflow skips the cache here.
 RUN apt-get update && apt-get upgrade -y && apt-get install -y --no-install-recommends openssl ca-certificates && rm -rf /var/lib/apt/lists/*
 WORKDIR /app

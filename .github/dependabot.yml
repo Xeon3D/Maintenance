@@ -1,0 +1,42 @@
+# Weekly update PRs. Security fixes come as their own PRs as soon as an advisory is published
+# (enable "Dependabot security updates" under Settings → Code security).
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+    open-pull-requests-limit: 5
+    groups:
+      # One PR for the minor/patch updates of everything, so a week's updates arrive together.
+      minor-and-patch:
+        update-types: [minor, patch]
+    ignore:
+      # Prisma stays on 7.x (docs/HANDOFF.md); the Dockerfile's migrator stage pins the same version.
+      - dependency-name: "prisma"
+        update-types: [version-update:semver-major]
+      - dependency-name: "@prisma/*"
+        update-types: [version-update:semver-major]
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+    groups:
+      actions:
+        patterns: ["*"]
+
+  # The Dockerfile's node base image; CI reads its Node version from there (ci.yml, release.yml).
+  - package-ecosystem: docker
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+    ignore:
+      # Node majors and Debian releases are moved deliberately.
+      - dependency-name: "node"
+        update-types: [version-update:semver-major]
+      - dependency-name: "debian"
+        update-types: [version-update:semver-major]

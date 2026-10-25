@@ -13,7 +13,11 @@ export default defineConfig({
   reporter: process.env.CI ? [["github"], ["list"]] : "list",
   timeout: 60_000,
   use: { baseURL, trace: "retain-on-failure", locale: "en-GB" },
-  projects: [{ name: "chromium", use: { ...devices["Desktop Chrome"] } }],
+  projects: [
+    { name: "chromium", use: { ...devices["Desktop Chrome"] }, testIgnore: "tenancy.spec.ts" },
+    // Adds a second company to the shared database, so it runs once everything else has.
+    { name: "multi-company", use: { ...devices["Desktop Chrome"] }, testMatch: "tenancy.spec.ts", dependencies: ["chromium"] },
+  ],
   webServer: process.env.E2E_BASE_URL
     ? undefined
     : { command: "npx next start -p 3100", url: `${baseURL}/login`, reuseExistingServer: !process.env.CI, timeout: 120_000 },

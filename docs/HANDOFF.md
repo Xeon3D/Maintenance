@@ -5,10 +5,11 @@ State as of **2026-09-29**, phase 9 of 10 done (see `git log` for the commit). R
 **on hold**: the app runs for one company for now. Next candidate work: the Odoo integration in
 `docs/ODOO_INTEGRATION.md` (waiting on the decisions in its §10).
 
-**Repository:** `malves-dc/Maintenance` since 2026-10-14 (a fork of the original `Xeon3D/Maintenance`, which has the
-v0.1.0–v0.3.0 releases, recreated here). Docker Hub image `malvesdc/maintenance` (up to v0.3.0 it was `xeon3d/maintenance`), published by `.github/workflows/release.yml`
-on every `vX.Y.Z` tag (it was built by hand with Docker Desktop up to v0.3.0). Servers on v0.3.0 or older run
-`xeon3d/maintenance` and check `Xeon3D/Maintenance`: change their compose `image:` to `malvesdc/maintenance:latest` once.
+**Repository:** `Xeon3D/Maintenance` (public) again since 2026-10-24, from v0.4.16. From 2026-10-14 to v0.4.15 the work
+happened in the fork `malves-dc/Maintenance` (private by then) with the image `malvesdc/maintenance`. The Docker Hub image
+is `xeon3d/maintenance`, published by `.github/workflows/release.yml` on every `vX.Y.Z` tag (built by hand up to v0.3.0;
+0.4.16 is the first 0.4.x there). Servers still on `malvesdc/maintenance` must change their compose `image:` to
+`xeon3d/maintenance:latest` once; servers on 0.4.12 or older update once by hand (README).
 The user runs it on a ZimaOS server behind Nginx Proxy Manager as an **open public demo** (nothing
 locked down, by choice) with a password-protected **factory reset**. 0.2.0 added **Settings → Server**
 (software name, one-click updates, scheduled backups with restore); see "Docker & releases" and
@@ -33,8 +34,8 @@ and lighting. The user chose, and does not want re-litigated:
 1. Build a whole phase, including translations, tests and browser verification.
 2. Run `typecheck`, `lint` and `test`, then verify in the preview browser (details in §6).
 3. Commit at the end of the phase (the message style is in `git log`), ending with the
-   `Co-Authored-By: Claude …` trailer. The repo-local git identity is `Marcos Alves <malves@diniscoelho.pt>`
-   (since 2026-10-14; older commits are `xeon4`).
+   `Co-Authored-By: Claude …` trailer. The repo-local git identity is `Marcos Alves <Xeon3D@users.noreply.github.com>`
+   (in the fork it was `malves@diniscoelho.pt`; older commits are `xeon4`).
 4. Send a short summary covering: what's new, what was tested, what was fixed along the way,
    and things to know. Then ask whether to continue with the next phase.
 
@@ -96,13 +97,14 @@ restart `next dev` after adding a file. `npx playwright install --with-deps chro
   - `RESEND_API_KEY` + `EMAIL_FROM` (commented out): real email via Resend's HTTP API. Without them,
     dev writes each email to `.mail/*.html` (gitignored) and production logs a warning.
 - **Prisma:** `prisma@latest` resolves to an 8.0 RC. **Keep `prisma` and `@prisma/client` pinned to 7.x.**
-- `prisma init` added agent-skill folders (`.agents/`, `.claude/skills/prisma-*`, `.windsurf/`,
-  `skills-lock.json`). These are harmless reference docs and are committed.
+- `prisma init` added Prisma agent skills (reference docs) for several tools; only the Claude Code copy,
+  `.claude/skills/prisma-*`, is kept (the `.agents/` and `.windsurf/` copies and `skills-lock.json` were removed 2026-10-25).
 - `FACTORY_RESET_PASSWORD` is set in the local `.env` (value given by the user in chat). **It must never
   be committed or printed**: the repo is public. The ZimaOS server has its own copy in the compose env.
 
 ### Docker & releases
-- `next.config.ts` has `output: "standalone"`. `Dockerfile` (node:24-trixie-slim, multi-stage; `apt-get upgrade` in the
+- `next.config.ts` has `output: "standalone"`. `Dockerfile` (`node:24.22.1-trixie-slim`, multi-stage; CI and release.yml read their Node version from that line, and
+  Dependabot bumps it; `apt-get upgrade` in the
   base stage, which the release workflow rebuilds without cache; npm/npx/corepack/yarn removed from the runtime image;
   `ffmpeg`/`ffprobe` built from the ffmpeg.org source in an `ffmpeg` stage with only libx264 + libdav1d, pinned by
   `FFMPEG_VERSION`/`FFMPEG_SHA256`, which Docker Scout does not track; the weekly `ffmpeg-check.yml` workflow fails
@@ -124,8 +126,13 @@ restart `next dev` after adding a file. `npx playwright install --with-deps chro
 - Release: bump `version` in `package.json` (+ lock file; it is the app's version and what the update check
   compares), merge, then push a `vX.Y.Z` tag. `release.yml` checks the tag matches, runs the checks, pushes
   `:<v>` and `:latest` (amd64 only: ZimaOS is x86-64) with the release notes as an index annotation, then creates
-  the GitHub release. The `:<v>` tag on Docker Hub is what installed servers see as "update available" (the GitHub
-  repository is private), and the updater pulls `:latest`. Secrets: `DOCKERHUB_USERNAME`, `DOCKERHUB_TOKEN`.
+  the GitHub release. The `:<v>` tag on Docker Hub is what installed servers see as "update available" (it reads Docker Hub,
+  not GitHub), and the updater pulls `:latest`. Secrets: `DOCKERHUB_USERNAME`, `DOCKERHUB_TOKEN`.
+- Dependencies: `.github/dependabot.yml` opens weekly PRs (npm minor/patch grouped; Prisma majors, Node majors and
+  Debian majors held back), and the CI `check` job fails on a high/critical `npm audit --omit=dev` advisory.
+- Client address (rate limits, audit log): `lib/client-address.ts` takes the `X-Forwarded-For` entry added by our proxy,
+  counted from the right (`TRUSTED_PROXY_HOPS`, default 1; 2 with Cloudflare in front of Nginx Proxy Manager). The
+  left-most entries are whatever the client sent; never read them.
 
 ### Server administration (Settings → Server, v0.2.0)
 - Gate: `src/lib/server-admin.ts`. Needs `org.manage` **and** the server password (`SERVER_ADMIN_PASSWORD`,
