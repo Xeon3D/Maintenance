@@ -21,7 +21,13 @@ export async function POST(req: Request) {
   const ext = ALLOWED[file.type];
   if (!ext) return NextResponse.json({ error: "badType" }, { status: 415 });
 
-  const target = targetSchema.safeParse(JSON.parse(String(form.get("target") ?? "{}")));
+  let rawTarget: unknown;
+  try {
+    rawTarget = JSON.parse(String(form.get("target") ?? "{}"));
+  } catch {
+    rawTarget = null;
+  }
+  const target = targetSchema.safeParse(rawTarget);
   if (!target.success) return NextResponse.json({ error: "badTarget" }, { status: 400 });
   const denied = await denyTarget(ctx, target.data);
   if (denied) return NextResponse.json({ error: denied.error }, { status: denied.status });

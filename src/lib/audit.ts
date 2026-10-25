@@ -1,6 +1,7 @@
 import "server-only";
 import { headers } from "next/headers";
 import { prisma } from "@/lib/db/client";
+import { clientAddressFrom } from "@/lib/client-address";
 import type { Prisma } from "@/generated/prisma/client";
 
 // Audit log. Two sources:
@@ -15,8 +16,7 @@ type Ctx = { organization: { id: string }; user: { id: string } };
 /** The client's address as seen through the reverse proxy; null outside a request. */
 export async function requestIp(): Promise<string | null> {
   try {
-    const h = await headers();
-    return h.get("x-forwarded-for")?.split(",")[0]?.trim() || h.get("x-real-ip") || null;
+    return clientAddressFrom(await headers());
   } catch {
     return null;
   }
