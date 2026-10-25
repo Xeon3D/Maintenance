@@ -9,11 +9,19 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
+      # The Node of the Docker image (its base stage), so there's one place to change; Dependabot bumps it there.
+      - name: Node version from the Dockerfile
+        id: node
+        run: |
+          v=$(sed -nE 's/^FROM node:([0-9.]+)-.* AS base$/\1/p' Dockerfile)
+          test -n "$v"
+          echo "version=$v" >> "$GITHUB_OUTPUT"
       - uses: actions/setup-node@v7
         with:
-          node-version: 24.22.1 # the Node in the released Docker image
+          node-version: ${{ steps.node.outputs.version }}
           cache: npm
       - run: npm ci
+      - run: npm audit --omit=dev --audit-level=high # what ships in the image; Dependabot covers the rest
       - run: npx next typegen # route types (PageProps etc.) are generated, not committed
       - run: npm run typecheck
       - run: npm run lint
@@ -40,9 +48,15 @@ jobs:
       UPLOAD_DIR: ./uploads
     steps:
       - uses: actions/checkout@v7
+      - name: Node version from the Dockerfile
+        id: node
+        run: |
+          v=$(sed -nE 's/^FROM node:([0-9.]+)-.* AS base$/\1/p' Dockerfile)
+          test -n "$v"
+          echo "version=$v" >> "$GITHUB_OUTPUT"
       - uses: actions/setup-node@v7
         with:
-          node-version: 24.22.1 # the Node in the released Docker image
+          node-version: ${{ steps.node.outputs.version }}
           cache: npm
       - run: npm ci
       - run: npx prisma migrate deploy
